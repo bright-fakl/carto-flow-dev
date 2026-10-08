@@ -76,7 +76,7 @@
 <dl class="meta-list">
 <dt>Status</dt><dd><span class="status done">reviewed</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/41">https://github.com/bright-fakl/carto-flow/pull/41</a></dd>
-<dt>Date</dt><dd>2026-09-22</dd>
+<dt>Created</dt><dd>2026-09-22</dd>
 <dt>Inputs</dt><dd>US states (bundled census, Population, ESRI:102008); Europe and Africa from load_world by pop_est; a 6x6 unit grid with uniform and mildly varying values.</dd>
 </dl>
 <p class="desc">Investigation, no code change. Symbol coverage under the default size_normalization=&quot;max&quot; is exactly mean(value)/max(value) of the sizing column — 0.168 for US states by Population. The neighbour tangency force then contracts the layout to the configuration where those small circles touch, which is about sqrt(coverage) of the map&#x27;s linear size. Both effects are by design; neither is specific to packing.</p>

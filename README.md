@@ -67,11 +67,13 @@ investigation workspace is easy to miss.
 
    `title` and `description` are required; `pr`, `issue` (the GitHub issue the
    change addresses, e.g. `74` or `74, 75`), `url`, `status`, `branch`,
-   `base`, `date`, `before`, `after`, and `inputs` are optional and rendered
+   `base`, `date`, `updated`, `before`, `after`, and `inputs` are optional and rendered
    in a definition list on the page.  Pages are listed newest first, by `date`
-   where given and by directory mtime otherwise.  Write `date` as
-   `YYYY-MM-DD HH:MM` (local time): without the time, pages from the same day
-   sort by PR number and the index shows no time.
+   where given and by directory mtime otherwise.  Write `date`
+   (the creation time) and `updated` (the last time the figures were
+   regenerated) as `YYYY-MM-DD HH:MM`, local time: without the time, pages from
+   the same day sort by PR number. The closed time is not written by hand; it
+   is the merge or close time of the PR on GitHub.
 
    Review status is taken from the PR's GitHub state unless `status:` says
    otherwise. Values: `needs review`, `deferred`, `reviewed`, `merged`,

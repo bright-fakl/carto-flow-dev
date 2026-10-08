@@ -78,7 +78,8 @@
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/34">https://github.com/bright-fakl/carto-flow/pull/34</a></dd>
 <dt>Branch</dt><dd>fix/mosaic-ring-swapback-reach</dd>
 <dt>Base</dt><dd>main</dd>
-<dt>Date</dt><dd>2026-09-20</dd>
+<dt>Created</dt><dd>2026-09-20</dd>
+<dt>Closed</dt><dd>2026-09-20 22:22</dd>
 <dt>Before</dt><dd>main @ 9c664f9</dd>
 <dt>After</dt><dd>fix/mosaic-ring-swapback-reach @ 825aee8</dd>
 <dt>Inputs</dt><dd>US states (bundled census, tile_count ~ Population, 154 tiles), congressional districts (bundled, 1 tile each), congressional districts with group_by=&quot;State Name&quot;, and the bundled world dataset (Natural Earth, Mollweide ESRI:54009, tile_count ~ pop_est, 600-tile budget) -- each with morph=True and morph=False. The world configuration is NOT deterministic across separate process runs (confirmed, root cause not identified -- see STATUS.md); its figures and numbers below are one run each, generated with PYTHONHASHSEED=0 pinned only for internal consistency across this PR&#x27;s own regenerations, not as a fix. States/districts/districts_group_by were stable across every run in this investigation.</dd>
