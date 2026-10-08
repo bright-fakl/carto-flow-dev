@@ -35,13 +35,16 @@ jobs:
       - name: Rebuild the index
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 carto-flow/scripts/build_visual_checks_index.py --root .
+        run: |
+          cp carto-flow/scripts/build_visual_checks_index.py "$RUNNER_TEMP/build.py"
+          rm -rf carto-flow
+          python3 "$RUNNER_TEMP/build.py" --root .
 
       - name: Commit and publish if anything changed
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git add -A -- . ':!carto-flow'
+          git add -A
           if git diff --cached --quiet; then
             echo "Index is up to date."
             exit 0
