@@ -14,7 +14,11 @@ the PR description, so evidence kept only in the description or inside an
 investigation workspace is easy to miss.
 
 - For a PR page, set `pr`, `title`, `description` and `url` in the header
-  (the builder itself only requires `title` and `description`).
+  (the builder itself only requires `title` and `description`), and `issue`
+  when the PR addresses a GitHub issue.
+- Before the PR exists, leave out `pr` and `url` (do not write `TBD`; it
+  warns) and set `branch`. Add both and rename the directory to
+  `pr<N>-<slug>` once the PR is open.
 - A change that can alter cartogram output (algorithm, solver, repair,
   option defaults, data resolution) needs side-by-side before/after figures
   on the standard inputs (US states, congressional districts), so the
@@ -22,6 +26,13 @@ investigation workspace is easy to miss.
 - A change with nothing to show (bit-identical output, housekeeping, error
   messages) still gets a page. It says so and gives the written evidence,
   for example the test results or the checked outputs that are unchanged.
+- A page with figures also contains the script that produced them,
+  `make_figures.py`, so the figures can be regenerated and checked against
+  later code. It runs from a carto-flow checkout with
+  `uv run python make_figures.py`, uses bundled data only, writes the PNGs next
+  to itself and starts with a comment saying what it produces. Name the
+  commit it ran against in `after` (`branch @ <sha>`). Do not commit caches or
+  downloaded data; the page says how to get them instead.
 - Investigation workspaces (directories without a `pr`) may hold the
   underlying figures. The PR page then points at the panels that justify it.
 - Do not write `status: needs review` in a new page. That is already the
@@ -43,20 +54,24 @@ investigation workspace is easy to miss.
    pr: 27
    title: Fix coverage_simplify tolerance units in raster Voronoi cells
    description: One-line what changed and what to look for in the figures.
+   issue: 26
    url: https://github.com/bright-fakl/carto-flow/pull/27
    branch: fix/voronoi-smoothing-tolerance
    base: fix/voronoi-cell-extraction
-   date: 2026-09-18
+   date: 2026-09-18 14:30
    before: origin/fix/voronoi-cell-extraction
    after: fix/voronoi-smoothing-tolerance @ <sha>
    inputs: districts (bundled, simplify 5000 m, min_island 50000), states (bundled)
    ---
    ```
 
-   `title` and `description` are required; `pr`, `url`, `status`, `branch`,
+   `title` and `description` are required; `pr`, `issue` (the GitHub issue the
+   change addresses, e.g. `74` or `74, 75`), `url`, `status`, `branch`,
    `base`, `date`, `before`, `after`, and `inputs` are optional and rendered
    in a definition list on the page.  Pages are listed newest first, by `date`
-   where given and by directory mtime otherwise.
+   where given and by directory mtime otherwise.  Write `date` as
+   `YYYY-MM-DD HH:MM` (local time): without the time, pages from the same day
+   sort by PR number and the index shows no time.
 
    Review status is taken from the PR's GitHub state unless `status:` says
    otherwise. Values: `needs review`, `deferred`, `reviewed`, `merged`,
