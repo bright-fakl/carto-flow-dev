@@ -1,0 +1,31 @@
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[main] world_b800_morph1   37.3s fp=ba7120159c505530
+[main] world_b800_morph0   23.7s fp=54f434ebfcdb3b13
+[main] districts_b0_morph1   10.9s fp=72cd3f2aa88537ba
+[main] districts_b0_morph0    9.3s fp=b34667996c9cfeed
+[main] states_b0_morph1    3.4s fp=1c55ddfe3283dc0c
+[main] states_b0_morph0    9.8s fp=2878b87f73a17d9b
+On branch perf/contiguity-path-reachability-precheck
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/carto_flow/geo_utils/contiguity.py
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	africa.py
+	norm.py
+	prof.py
+	wtime.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (ce9ca02aea1dc933b62a963b8fda23e25a718410)
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[patched] world_b800_morph1   23.5s fp=ba7120159c505530
+[patched] world_b800_morph0   34.5s fp=54f434ebfcdb3b13
+[patched] districts_b0_morph1   10.4s fp=72cd3f2aa88537ba
+[patched] districts_b0_morph0    9.7s fp=b34667996c9cfeed
+[patched] states_b0_morph1    3.5s fp=1c55ddfe3283dc0c
+[patched] states_b0_morph0    2.8s fp=2878b87f73a17d9b

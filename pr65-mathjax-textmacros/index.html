@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #65: Load the MathJax textmacros extension so underscores render in equation identifiers</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #65: Load the MathJax textmacros extension so underscores render in equation identifiers</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/65">https://github.com/bright-fakl/carto-flow/pull/65</a></dd>
+<dt>Branch</dt><dd>fix/mathjax-textmacros</dd>
+<dt>Base</dt><dd>origin/main @ 0e49fff</dd>
+<dt>Date</dt><dd>2026-09-26 15:10</dd>
+<dt>Before</dt><dd>origin/main @ 0e49fff</dd>
+<dt>After</dt><dd>fix/mathjax-textmacros</dd>
+<dt>Inputs</dt><dd>the 12 equations in docs/explanations/ containing \_ inside \text{...}, rendered with mathjax-full 3 tex-svg at the site&#x27;s package set</dd>
+</dl>
+<p class="desc">Twelve equations across five explanation pages rendered option names with a visible backslash - &quot;tile\_size&quot; instead of &quot;tile_size&quot;. The bundled tex-svg build omits the textmacros extension, without which the body of \text{...} is taken verbatim. One config line fixes all of them; no equation source changes.</p>
+<h2>The bug</h2>
+<p><code>docs/javascripts/mathjax-config.js</code> configured MathJax but never loaded the <code>textmacros</code> extension, and the <code>tex-svg.js</code> CDN build does not bundle it. Its default package set is <code>base</code>, <code>ams</code>, <code>newcommand</code>, <code>noundefined</code>, <code>configmacros</code>, <code>require</code> and <code>autoload</code>.</p>
+<p>Without <code>textmacros</code>, the body of <code>\text{...}</code> is taken verbatim, so the <code>\_</code> in <code>\text{tile\_size}</code> typesets as two glyphs - a backslash and an underscore - rather than as one underscore. In ordinary math mode <code>\_</code> is defined by <code>base</code> and works, which is why only identifiers wrapped in <code>\text{...}</code> are affected.</p>
+<p>The source markup was correct throughout. <code>\_</code> is the right way to write a literal underscore inside <code>\text{...}</code>, and every one of the 12 occurrences is an identifier name - <code>transfer_ratio</code>, <code>bfs_hops</code>, <code>convergence_tolerance</code>, <code>tile_size</code>, <code>area_cv</code> - not a subscript.</p>
+<h2>Why the fix is in the config and not the equations</h2>
+<p>Four candidates were rendered through <code>mathjax-full</code> at the site&#x27;s package set:</p>
+<table>
+<tr><th>candidate</th><th>result</th></tr>
+<tr><td><code>\text{tile\_size}</code> (current source), default packages</td><td><code>tile\_size</code> - the bug</td></tr>
+<tr><td><code>\text{tile\_size}</code> **+ textmacros**</td><td><code>tile_size</code> - correct</td></tr>
+<tr><td><code>\text{tile_size}</code> (drop the backslash)</td><td>**TeX error**, renders nothing</td></tr>
+<tr><td><code>\texttt{tile\_size}</code></td><td><code>tile\_size</code> - still wrong, <code>\texttt</code> is also text mode</td></tr>
+<tr><td><code>\mathrm{tile\_size}</code></td><td><code>tile_size</code> - correct, but needs 12 source edits</td></tr>
+</table>
+<p>Loading <code>textmacros</code> fixes all 12 with one config change and leaves the markup alone. Dropping the backslash - the obvious reading of &quot;these should be underscores&quot; - is the one option that makes things strictly worse: inside <code>\text{...}</code> a bare <code>_</code> is a syntax error, so those equations would stop rendering entirely.</p>
+<h2>Scope</h2>
+<p><code>\_</code> appears 43 times in <code>docs/explanations/</code>. Only the 19 inside <code>\text{...}</code> in math were mis-rendering, spread over the 12 equations above. The other 24 are Markdown escapes in prose and link text - <code>layouts/flow/\_\_init\_\_.py</code>, <code>go\_cart</code> - which render as plain underscores and are untouched.</p>
+<p>A search across every <code>.md</code> and <code>.ipynb</code> under <code>docs/</code> for the shape an intended subscript would take - <code>\_</code> followed by a single character, as in <code>a\_i</code> for a subscript i - returns nothing. No equation in the documentation wanted a subscript here.</p>
+<h2>The regression this introduced, and its fix</h2>
+<p>Loading <code>textmacros</code> makes <code>\text{...}</code> parse its body as real text mode instead of taking it verbatim. That is the point of the extension, but it also means a *bare* underscore inside <code>\text{...}</code> stops being harmless and becomes a TeX error, <code>&#x27;_&#x27; allowed only in math mode</code>. Two equations had one:</p>
+<table>
+<tr><th>file</th><th>equation</th></tr>
+<tr><td><code>symbol-cartogram-flow-density-layout.md:66</code></td><td><code>\Delta t = \text{dt_factor} \cdot \ldots</code></td></tr>
+<tr><td><code>symbol-cartogram-circle-packing.md:389</code></td><td><code>\text{EMA}(\text{drift_rate} &lt; 0) &lt; 0.5</code></td></tr>
+</table>
+<p>Before the extension these two looked correct and the other twelve looked broken, because verbatim mode prints whatever it is given. Escaping both to <code>\_</code> makes all fourteen consistent, and the escaped form renders correctly with or without <code>textmacros</code>, so the source is right independently of the config.</p>
+<p>Both were found by scanning for the pattern rather than by waiting for reports: one had been reported, the scan found the second before it was.</p>
+<h2>Verification</h2>
+<ul><li>Every equation in <code>docs/</code> - 336 of them across 16 files - rendered through</li></ul>
+<p><code>mathjax-full</code> 3 at the site&#x27;s package set. Results:</p>
+<table>
+<tr><th>config</th><th>source</th><th>outcome</th></tr>
+<tr><td>no textmacros</td><td>original</td><td>0 errors, but 12 equations display <code>\_</code></td></tr>
+<tr><td>textmacros</td><td>original</td><td>**2 errors** - the regression above</td></tr>
+<tr><td>textmacros</td><td>fixed</td><td>**0 errors, 0 mis-rendered**</td></tr>
+<tr><td>no textmacros</td><td>fixed</td><td>0 errors - the source fix is backward compatible</td></tr>
+</table>
+<ul><li>Rendered every affected equation through <code>mathjax-full</code> 3 with the exact</li></ul>
+<p>package set <code>tex-svg.js</code> ships, before and after. The figures above are those renders, not mockups.</p>
+<ul><li><code>https://cdn.jsdelivr.net/npm/mathjax@3/es5/input/tex/extensions/textmacros.js</code></li></ul>
+<p>returns 200 (16 KB), so the loader path resolves against the same CDN that already serves <code>tex-svg.js</code>.</p>
+<ul><li><code>make check</code> clean.</li></ul>
+<h2>Note on a separate config smell, not changed here</h2>
+<p><code>inlineMath</code> still lists <code>[&#x27;$&#x27;,&#x27;$&#x27;]</code> and <code>displayMath</code> <code>[&#x27;$$&#x27;,&#x27;$$&#x27;]</code>, but <code>pymdownx.arithmatex</code> runs in <code>generic: true</code> mode and has already rewritten every <code>$...$</code> into <code>\(...\)</code> before MathJax sees the page. Leaving the dollar delimiters active means a literal <code>$</code> in prose can open a spurious math region. Nothing in the current documentation triggers it, and it is unrelated to this bug, so it is left alone rather than folded into a rendering fix.</p>
+<div class="figure">
+<img src="after-bare-underscore-fixes.png" alt="The two equations that had a *bare* underscore inside \text{...}. Loading textmacros turned those from harmless into a TeX error, and escaping them to \_ fixes both. Shown after the fix; before it, each rendered as the red message &quot;&#x27;_&#x27; allowed only in math mode&quot;.">
+<p class="caption">The two equations that had a *bare* underscore inside \text{...}. Loading textmacros turned those from harmless into a TeX error, and escaping them to \_ fixes both. Shown after the fix; before it, each rendered as the red message &quot;&#x27;_&#x27; allowed only in math mode&quot;.</p>
+</div><div class="figure">
+<img src="before-after-all-equations.png" alt="Every affected equation, rendered both ways. Left column is the site&#x27;s current package set, right column is the same set plus textmacros. Twelve equations across circle-packing, flow-density-layout, grid-layout, mosaic-layout and voronoi-cartogram-algorithm.">
+<p class="caption">Every affected equation, rendered both ways. Left column is the site&#x27;s current package set, right column is the same set plus textmacros. Twelve equations across circle-packing, flow-density-layout, grid-layout, mosaic-layout and voronoi-cartogram-algorithm.</p>
+</div><div class="figure">
+<img src="before-after-tile-size-equation.png" alt="The equation this was reported against, under &quot;Analytical estimate&quot; in the mosaic layout page. Before: &quot;tile\_size&quot; and &quot;ref\_size&quot; with a visible backslash. After: &quot;tile_size&quot; and &quot;ref_size&quot;.">
+<p class="caption">The equation this was reported against, under &quot;Analytical estimate&quot; in the mosaic layout page. Before: &quot;tile\_size&quot; and &quot;ref\_size&quot; with a visible backslash. After: &quot;tile_size&quot; and &quot;ref_size&quot;.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

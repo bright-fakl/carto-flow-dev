@@ -1,0 +1,76 @@
+[
+  {
+    "case": "fixture",
+    "split": [],
+    "n_split": 0,
+    "wall_s": 0.06
+  },
+  {
+    "case": "states",
+    "split": [],
+    "n_split": 0,
+    "wall_s": 2.04
+  },
+  {
+    "case": "districts_group_by",
+    "split": [],
+    "n_split": 0,
+    "wall_s": 5.36
+  },
+  {
+    "case": "swapback",
+    "ring_used": 5,
+    "ring_owners": [
+      "Florida",
+      "Louisiana",
+      "Maine",
+      "Michigan",
+      "Washington"
+    ],
+    "n_unassigned_core": 5,
+    "n_enclosed_holes": 0,
+    "metric_n_unassigned_core_tiles": null,
+    "n_greatlakes_empty": 4
+  },
+  {
+    "case": "counts",
+    "rows": [
+      {
+        "name": "3x3 fixture",
+        "ring_used": 0,
+        "empty_core": 1,
+        "split_regions": 0,
+        "split_groups": 0,
+        "regions_correct": "9/9",
+        "wall_s": 0.06
+      },
+      {
+        "name": "US states",
+        "ring_used": 5,
+        "empty_core": 5,
+        "split_regions": 0,
+        "split_groups": 0,
+        "regions_correct": "49/49",
+        "wall_s": 1.53
+      },
+      {
+        "name": "Districts",
+        "ring_used": 17,
+        "empty_core": 21,
+        "split_regions": 0,
+        "split_groups": 0,
+        "regions_correct": "432/432",
+        "wall_s": 5.3
+      },
+      {
+        "name": "Districts + group_by",
+        "ring_used": 18,
+        "empty_core": 22,
+        "split_regions": 0,
+        "split_groups": 0,
+        "regions_correct": "432/432",
+        "wall_s": 5.41
+      }
+    ]
+  }
+]

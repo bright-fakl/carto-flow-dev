@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #24: Fix degenerate Voronoi cells (adjacency, line clips, area-equaliser runaway)</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #24: Fix degenerate Voronoi cells (adjacency, line clips, area-equaliser runaway)</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/24">https://github.com/bright-fakl/carto-flow/pull/24</a></dd>
+<dt>Branch</dt><dd>fix/voronoi-degenerate-cells</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-18</dd>
+<dt>Before</dt><dd>origin/main</dd>
+<dt>After</dt><dd>fix/voronoi-degenerate-cells @ 8c0a1d6</dd>
+<dt>Inputs</dt><dd>congressional districts (group_by=State Name, R=32..256), states (R=300)</dd>
+</dl>
+<p class="desc">Four independent fixes for Voronoi cells degrading to a Point, covering adjacency detection, non-polygonal clip results, and an area-equalisation offset that could strand a seed with an empty power cell.</p>
+<h1>PR24 (Voronoi degenerate cells) — before vs after</h1>
+<table>
+<tr><th>Case</th><th>Before (main)</th><th>After (PR)</th></tr>
+<tr><td>Districts R=64</td><td>degenerate_cells=3, mean_err=45.45%</td><td>degenerate_cells=2, mean_err=45.30%</td></tr>
+<tr><td>Districts R=128</td><td>degenerate_cells=1, mean_err=38.65%</td><td>degenerate_cells=1, mean_err=38.69%</td></tr>
+<tr><td>Districts R=256</td><td>degenerate_cells=0, mean_err=37.14%</td><td>degenerate_cells=0, mean_err=37.14%</td></tr>
+<tr><td>States R=300</td><td>degenerate=0, mean_err=5.00%, max_err=32.97%</td><td>degenerate=0, mean_err=5.00%, max_err=32.97%</td></tr>
+</table>
+<h2>Resolution sweep (congressional districts, group_by=State Name)</h2>
+<table>
+<tr><th>Resolution</th><th>Before (main)</th><th>After (PR)</th></tr>
+<tr><td>32</td><td>n_degenerate=87, mean_err=69.54%</td><td>n_degenerate=46, mean_err=62.66%</td></tr>
+<tr><td>48</td><td>n_degenerate=23, mean_err=48.94%</td><td>n_degenerate=9, mean_err=48.81%</td></tr>
+<tr><td>64</td><td>n_degenerate=3, mean_err=45.45%</td><td>n_degenerate=2, mean_err=45.30%</td></tr>
+<tr><td>128</td><td>n_degenerate=1, mean_err=38.65%</td><td>n_degenerate=1, mean_err=38.69%</td></tr>
+<tr><td>256</td><td>n_degenerate=0, mean_err=37.14%</td><td>n_degenerate=0, mean_err=37.14%</td></tr>
+</table>
+<div class="figure">
+<img src="districts_r128.png" alt="Congressional districts at R=128: degenerate cells unchanged at 1, mean area error 38.65% to 38.69%.">
+<p class="caption">Congressional districts at R=128: degenerate cells unchanged at 1, mean area error 38.65% to 38.69%.</p>
+</div><div class="figure">
+<img src="districts_r256.png" alt="Congressional districts at R=256: no degenerate cells before or after, mean area error unchanged at 37.14%.">
+<p class="caption">Congressional districts at R=256: no degenerate cells before or after, mean area error unchanged at 37.14%.</p>
+</div><div class="figure">
+<img src="districts_r64.png" alt="Congressional districts at R=64: degenerate cells drop from 3 to 2, mean area error 45.45% to 45.30%.">
+<p class="caption">Congressional districts at R=64: degenerate cells drop from 3 to 2, mean area error 45.45% to 45.30%.</p>
+</div><div class="figure">
+<img src="resolution_sweep.png" alt="Degenerate cell count and mean area error across R=32..256, before vs after.">
+<p class="caption">Degenerate cell count and mean area error across R=32..256, before vs after.</p>
+</div><div class="figure">
+<img src="states_r300.png" alt="US states at R=300: no degenerate cells before or after, mean/max area error unchanged.">
+<p class="caption">US states at R=300: no degenerate cells before or after, mean/max area error unchanged.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

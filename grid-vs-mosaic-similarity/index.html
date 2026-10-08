@@ -1,0 +1,543 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grid vs mosaic layout — uniform achieved-fidelity measurement</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Grid vs mosaic layout — uniform achieved-fidelity measurement</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">reviewed</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Branch</dt><dd>(none — measurement workspace, no library source changed)</dd>
+<dt>Base</dt><dd>origin/main @ 0e917a8</dd>
+<dt>Date</dt><dd>2026-09-21</dd>
+<dt>Inputs</dt><dd>states_uniform (49 US states, no size/tile_count/group_by — one tile per region; hexagon and square), states (same 49 states, tile_count=&quot;tiles&quot; = round(pop share x 150) -&gt; 154 tiles), districts (432 congressional districts, group_by=&quot;State Name&quot;)</dd>
+</dl>
+<p class="desc">Both layouts measured with one external metric module on three inputs, primary case one tile per region (the gallery/preset case), plus an area-based silhouette metric and sweeps of both grid&#x27;s four cost weights and mosaic&#x27;s HungarianOptions. Measurement only, no recommendation.</p>
+<p><code>pr:</code> and <code>url:</code> are intentionally absent — this is not a PR review page. The index builder prints a &quot;missing required metadata key&quot; warning for each and still builds the page.</p>
+<h2>What this is</h2>
+<p>A measurement harness, not a decision. Every number below is computed externally from <code>LayoutResult</code> + the input GeoDataFrame by one module (<code>metrics.py</code>), so grid and mosaic are scored by identical code. Neither layout&#x27;s own <code>AlgorithmMetrics.algorithm</code> payload (<code>GridMetrics</code>, <code>MosaicMetrics</code>) is read by the metrics.</p>
+<p>Files:</p>
+<ul><li><code>metrics.py</code> — the metric module (layout-agnostic).</li><li><code>run.py</code> — runner; appends one JSON object per run to <code>results.jsonl</code></li></ul>
+<p>as each run finishes. <code>--only uniform|comparison|sweep|sweep_uniform|mosaic_sweep|placements</code>.</p>
+<ul><li><code>figures.py</code> — the comparison and grid-sweep PNGs.</li><li><code>silhouette_backfill.py</code> — recomputes the silhouette (both references) and</li></ul>
+<p>the morphed-centroid displacement for the comparison runs from <code>placements/*.pkl</code>, without re-running any layout. Merged into <code>results.jsonl</code>.</p>
+<ul><li><code>figures_round2.py</code> — the silhouette and mosaic-sweep figures.</li><li><code>interior_bonus_check.py</code> / <code>figures_ibcheck.py</code> — the section 6 gating</li></ul>
+<p>grid and its figure.</p>
+<ul><li><code>results.jsonl</code> — raw results, 238 runs: 12 comparison runs, 54 grid weight</li></ul>
+<p>sweep runs, 8 extra mosaic repeats, 90 mosaic knob sweep runs at morph=True 18 mosaic morph=False probes, and 56 <code>interior_bonus</code> gating-check runs. One JSON object per line, keyed by <code>name</code>.</p>
+<ul><li><code>placements/*.pkl</code> — assigned tile polygons + lattice adjacency for figures.</li></ul>
+<p>Re-run:</p>
+<p>``<code> PYTHONPATH=&lt;checkout of origin/main&gt;/src uv run python visual_checks/grid-vs-mosaic-similarity/run.py PYTHONPATH=&lt;checkout of origin/main&gt;/src uv run python visual_checks/grid-vs-mosaic-similarity/figures.py PYTHONPATH=&lt;checkout of origin/main&gt;/src uv run python visual_checks/grid-vs-mosaic-similarity/figures_round2.py PYTHONPATH=&lt;checkout of origin/main&gt;/src uv run python visual_checks/grid-vs-mosaic-similarity/interior_bonus_check.py PYTHONPATH=&lt;checkout of origin/main&gt;/src uv run python visual_checks/grid-vs-mosaic-similarity/figures_ibcheck.py </code>``</p>
+<h2>Metric definitions</h2>
+<p>Both layouts carry a <code>TilingResult</code> and an <code>assignments</code> array but index it differently (<code>GridLayoutResult.assignments[i]</code> = tile for *item* i; <code>MosaicLayoutResult.assignments[j]</code> = the j-th *assigned tile*). Both reduce to a list of <code>(tile index, region index)</code> pairs; that is all the metrics read. &quot;Block centroid&quot; of a region = mean of the centres of its assigned tiles. &quot;Tile adjacency&quot; is always <code>TilingResult.adjacency</code> (edge adjacency), never a geometric touch test.</p>
+<table>
+<tr><th>Axis</th><th>Grid weight it corresponds to</th><th>Definition</th></tr>
+<tr><td>Displacement</td><td><code>origin_weight</code></td><td>Distance from each region&#x27;s original centroid to its block centroid. Median / p90, raw and in tile-size units.</td></tr>
+<tr><td>Adjacency preservation</td><td><code>neighbor_weight</code></td><td>Over the input region-adjacency pairs (<code>compute_adjacency</code>, BINARY): fraction where some tile of A is lattice-edge-adjacent to some tile of B. For the rest, min BFS hop distance between the two tile sets over the whole lattice (empty tiles traversable).</td></tr>
+<tr><td>Direction preservation</td><td><code>topology_weight</code></td><td>For each input adjacent pair, signed angle between the original centroid-to-centroid vector and the block-centroid-to-block-centroid vector. Median absolute deviation, p90, fraction &gt; 90 degrees.</td></tr>
+<tr><td>Spread</td><td><code>compactness</code></td><td>Occupied-lattice bbox width/height in tile units, its aspect ratio divided by the input bbox aspect, bbox fill fraction; plus **combinatorial** Polsby-Popper per region on the tile adjacency graph: <code>P_edges = sum over tiles (sides - same-region neighbours)</code>, <code>PP = 4*pi*(n_tiles*A_tile)/(P_edges*L_edge)^2</code>. No polygon unioning anywhere.</td></tr>
+<tr><td>Integrity</td><td>—</td><td>Regions receiving exactly their requested tile count; non-contiguous regions (tile set not one block); split groups (raw, and adjusted for input components a group unavoidably straddles); unassigned core tiles; enclosed unassigned tiles (unassigned cell with every lattice neighbour assigned).</td></tr>
+</table>
+<p>Core tiles are computed uniformly: a lattice tile whose intersection with the union of the **original** input geometries is at least 10 % of its area. See caveats.</p>
+<p>---</p>
+<h1>1. PRIMARY CASE — one tile per region (<code>states_uniform</code>)</h1>
+<p><code>load_us_census(population=True)</code> with no <code>size</code>, no <code>tile_count</code>, no <code>group_by</code>. 49 states, 49 tiles. This is <code>docs/examples/plot_symbol_cartogram.py</code> and exactly what <code>tile_map_cartogram</code> (hexagon) and <code>demers_cartogram</code> (square) produce — both presets call <code>GridBasedLayout</code> with uniform symbol size.</p>
+<h2>Which axes carry information at 1:1</h2>
+<p>At one tile per region a region&#x27;s &quot;block&quot; is a single tile, so several metrics collapse to constants. Do **not** read a constant column as agreement between the layouts.</p>
+<table>
+<tr><th>Axis</th><th>Informative at 1:1?</th></tr>
+<tr><td>Displacement (median, p90)</td><td>**yes**</td></tr>
+<tr><td>Adjacency preservation (fraction kept)</td><td>**yes**</td></tr>
+<tr><td>Direction preservation (median deviation, fraction reversed)</td><td>**yes**</td></tr>
+<tr><td>Spread — occupied bbox in tiles, aspect vs input, fill fraction</td><td>**yes**</td></tr>
+<tr><td>Wall clock</td><td>**yes**</td></tr>
+<tr><td>Combinatorial Polsby-Popper</td><td>**no** — a single tile always scores the same: 0.907 for a hexagon, 0.785 for a square. Constant across every run in this section.</td></tr>
+<tr><td>Non-contiguous regions</td><td>**no** — trivially 0 for every run; a one-tile set is always connected.</td></tr>
+<tr><td>Regions receiving their requested tile count</td><td>**no** — 49/49 everywhere; every solver hands out exactly one tile per region by construction.</td></tr>
+<tr><td>Enclosed unassigned tiles</td><td>**weakly** — 0 in every run here, so it separates nothing on this input.</td></tr>
+<tr><td>Unassigned core tiles</td><td>**not comparable** — see caveats.</td></tr>
+</table>
+<h2>What mosaic is and is not doing here</h2>
+<p>At one tile per region, mosaic&#x27;s calibration has nothing to size against beyond &quot;49 core tiles&quot;, its slot-expanded Hungarian degenerates to an ordinary 49-region assignment, its connectivity repair has no multi-tile block that could break, and its ring swap-back has no ring to swap back. This case therefore measures **mosaic&#x27;s assignment core (optionally preceded by a flow morph) against grid&#x27;s tuned four-term cost function, with mosaic&#x27;s repair machinery idle**. It is not a test of the machinery that mosaic was built for.</p>
+<h2>Hexagon tiling</h2>
+<p>Fidelity — distances in tile-size units; raw metres in <code>results.jsonl</code>.</p>
+<table>
+<tr><th>run</th><th>s</th><th>tile size</th><th>lattice</th><th>assigned</th><th>disp med</th><th>disp p90</th><th>adj kept</th><th>broken pairs</th><th>dir med deg</th><th>dir p90 deg</th><th>dir &gt;90</th><th>aspect/input</th><th>bbox fill</th><th>bbox w x h (tiles)</th></tr>
+<tr><td>grid</td><td>1.5</td><td>247588</td><td>149</td><td>49</td><td>**1.22**</td><td>**2.19**</td><td>**0.789**</td><td>23/109</td><td>**23.6**</td><td>58.4</td><td>**0.000**</td><td>0.76</td><td>0.641</td><td>14.7 x 13.5</td></tr>
+<tr><td>mosaic morph=True</td><td>1.3</td><td>285095</td><td>182</td><td>49</td><td>1.56</td><td>2.38</td><td>0.697</td><td>33/109</td><td>26.1</td><td>86.5</td><td>0.092</td><td>0.97</td><td>0.824</td><td>14.7 x 10.5</td></tr>
+<tr><td>mosaic morph=False</td><td>0.7</td><td>286410</td><td>168</td><td>49</td><td>2.25</td><td>4.32</td><td>0.596</td><td>44/109</td><td>29.0</td><td>80.1</td><td>0.064</td><td>0.97</td><td>0.824</td><td>14.7 x 10.5</td></tr>
+</table>
+<p>Constant / non-separating on this input: Polsby-Popper 0.907 for all three; non-contiguous regions 0 for all three; exact tile count 49/49 for all three; enclosed unassigned tiles 0 for all three. Unassigned core tiles were 19/63 (grid), 5/48 (mosaic morph=True), 0/49 (mosaic morph=False) — but see the caveat; grid&#x27;s number reflects its deliberately oversized lattice.</p>
+<p>Grid leads on every informative fidelity axis. The largest gaps are adjacency preservation (0.789 vs 0.697 vs 0.596) and reversed direction pairs (grid reverses **none** of the 109 input adjacencies by more than 90 degrees; mosaic morph=True reverses 9.2 %). Displacement median is 1.22 vs 1.56 vs 2.25 tiles.</p>
+<p>The spread numbers go the other way and should be read carefully: grid&#x27;s occupied footprint is taller and looser (14.7 x 13.5 tiles, fill 0.641, aspect 0.76 of the input aspect) while mosaic&#x27;s is squatter and denser (14.7 x 10.5, fill 0.824, aspect 0.97). In the figure this is visible as grid keeping the Florida and Maine spurs and the empty interior west, and mosaic packing into a denser blob. Whether &quot;keeps the silhouette&quot; or &quot;packs tightly&quot; is better is a design call, not something this measures.</p>
+<h2>Square tiling (the <code>demers_cartogram</code> shape)</h2>
+<p>Mosaic **does** accept <code>tiling=&quot;square&quot;</code> — no workaround needed.</p>
+<table>
+<tr><th>run</th><th>s</th><th>tile size</th><th>lattice</th><th>assigned</th><th>disp med</th><th>disp p90</th><th>adj kept</th><th>broken pairs</th><th>dir med deg</th><th>dir p90 deg</th><th>dir &gt;90</th><th>aspect/input</th><th>bbox fill</th></tr>
+<tr><td>grid</td><td>1.6</td><td>399076</td><td>150</td><td>49</td><td>**0.76**</td><td>**1.27**</td><td>**0.606**</td><td>43/109</td><td>**18.1**</td><td>57.7</td><td>0.028</td><td>0.89</td><td>0.778</td></tr>
+<tr><td>mosaic morph=True</td><td>0.8</td><td>437809</td><td>208</td><td>49</td><td>0.88</td><td>1.70</td><td>0.450</td><td>60/109</td><td>32.3</td><td>86.5</td><td>0.092</td><td>0.89</td><td>0.778</td></tr>
+<tr><td>mosaic morph=False</td><td>0.8</td><td>456359</td><td>192</td><td>49</td><td>1.52</td><td>2.17</td><td>0.486</td><td>56/109</td><td>22.6</td><td>84.4</td><td>0.092</td><td>1.15</td><td>0.817</td></tr>
+</table>
+<p>Polsby-Popper is the single-square constant 0.785 for all three; the other degenerate columns behave as in the hexagon table.</p>
+<p>The adjacency gap is wider on squares than on hexagons (0.606 vs 0.450, a 26 % relative drop, against 0.789 vs 0.697 = 12 % on hexagons). A square lattice offers 4 edge-neighbours instead of 6, so there is less room to place a region beside all of its geographic neighbours, and the two solvers diverge more.</p>
+<h2>Weight sweep at 1:1 (grid, <code>states_uniform</code>, hexagon)</h2>
+<p>Each knob varied with the other three at their defaults (<code>origin_weight=0.5, neighbor_weight=0.5, topology_weight=0.5, compactness=0.1</code>). Bold = the knob&#x27;s own achieved metric. Polsby-Popper is omitted from these tables: it is the constant 0.907 in all 27 runs.</p>
+<h3><code>origin_weight</code> -&gt; displacement</h3>
+<table>
+<tr><th>value</th><th>**disp med**</th><th>**disp p90**</th><th>adj kept</th><th>dir med deg</th><th>dir &gt;90</th><th>aspect/input</th><th>bbox fill</th></tr>
+<tr><td>0</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>0.5 (default)</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>1</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>2</td><td>1.24</td><td>2.09</td><td>0.752</td><td>22.5</td><td>0.018</td><td>1.00</td><td>0.612</td></tr>
+<tr><td>5</td><td>1.00</td><td>2.57</td><td>0.743</td><td>26.5</td><td>0.009</td><td>1.05</td><td>0.583</td></tr>
+<tr><td>20</td><td>1.02</td><td>2.00</td><td>0.743</td><td>21.0</td><td>0.018</td><td>1.00</td><td>0.612</td></tr>
+<tr><td>100</td><td>0.98</td><td>2.07</td><td>0.752</td><td>18.9</td><td>0.037</td><td>1.03</td><td>0.778</td></tr>
+</table>
+<p>**0, 0.5 and 1 produce the identical assignment** — every metric matches to the last digit. The default therefore does exactly what 0 does on this input. Real movement starts at 2 and the total range of the median is 0.98-1.24 tiles. Note <code>assign_to_grid_hungarian</code> bootstraps its first <code>linear_sum_assignment</code> with <code>init_origin_w = max(origin_weight, 1.0)</code> and then runs up to 10 refinement passes, so the <code>origin_weight=0</code> run still starts from a purely origin-driven assignment; its 1.22 should be read as &quot;origin attraction removed from refinement only&quot;.</p>
+<h3><code>neighbor_weight</code> -&gt; adjacency preservation</h3>
+<table>
+<tr><th>value</th><th>disp med</th><th>disp p90</th><th>**adj kept**</th><th>dir med deg</th><th>dir &gt;90</th><th>aspect/input</th><th>bbox fill</th></tr>
+<tr><td>0</td><td>1.21</td><td>2.19</td><td>0.550</td><td>15.9</td><td>0.028</td><td>0.95</td><td>0.645</td></tr>
+<tr><td>0.01</td><td>1.21</td><td>1.98</td><td>0.725</td><td>20.6</td><td>0.009</td><td>0.85</td><td>0.721</td></tr>
+<tr><td>0.05</td><td>1.22</td><td>2.17</td><td>0.743</td><td>20.8</td><td>0.000</td><td>0.90</td><td>0.681</td></tr>
+<tr><td>0.1</td><td>1.30</td><td>2.05</td><td>0.780</td><td>21.9</td><td>0.009</td><td>0.80</td><td>0.605</td></tr>
+<tr><td>0.2</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>0.5 (default)</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>1</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>2</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>5</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>20</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+</table>
+<p>The saturation seen on the 154-tile case appears here too, at a **different threshold**: everything from 0.2 upward is one identical assignment. So the 0.5 default sits inside a plateau at 1:1 as well — but at 1:1 the plateau is also the maximum achieved (0.789), whereas on the 154-tile case the peak (0.817) was at 0.1, *below* the plateau. The saturation point is therefore input-dependent (&gt;=0.2 here, &gt;=0.5 at 154 tiles) and whether the default lands on the best value is luck, not tuning that holds across inputs. This is the biggest single-knob effect in either sweep: 0.550 -&gt; 0.789.</p>
+<h3><code>topology_weight</code> -&gt; direction preservation</h3>
+<table>
+<tr><th>value</th><th>disp med</th><th>disp p90</th><th>adj kept</th><th>**dir med deg**</th><th>**dir &gt;90**</th><th>aspect/input</th><th>bbox fill</th></tr>
+<tr><td>0</td><td>1.22</td><td>2.19</td><td>0.798</td><td>22.5</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>0.5 (default)</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.000</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>1</td><td>1.30</td><td>2.19</td><td>0.771</td><td>24.2</td><td>0.009</td><td>0.90</td><td>0.681</td></tr>
+<tr><td>2</td><td>1.23</td><td>2.23</td><td>0.743</td><td>23.6</td><td>0.037</td><td>0.90</td><td>0.681</td></tr>
+<tr><td>5</td><td>1.22</td><td>2.17</td><td>0.743</td><td>20.8</td><td>0.000</td><td>0.90</td><td>0.681</td></tr>
+</table>
+<p>**Non-monotonic and inverted over most of its range**: raising <code>topology_weight</code> from 0 to 2 makes the median angular deviation *worse* (22.5 -&gt; 24.2 degrees) and the reversal fraction worse (0.000 -&gt; 0.037), before both recover at 5. On this input the knob does not deliver monotone control of the axis it is named for. It does cost adjacency preservation monotonically (0.798 -&gt; 0.743).</p>
+<h3><code>compactness</code> -&gt; spread</h3>
+<table>
+<tr><th>value</th><th>disp med</th><th>disp p90</th><th>adj kept</th><th>dir med deg</th><th>**aspect/input**</th><th>**bbox fill**</th></tr>
+<tr><td>0</td><td>1.05</td><td>2.13</td><td>0.752</td><td>19.4</td><td>1.10</td><td>0.557</td></tr>
+<tr><td>0.1 (default)</td><td>1.22</td><td>2.19</td><td>0.789</td><td>23.6</td><td>0.76</td><td>0.641</td></tr>
+<tr><td>0.5</td><td>1.50</td><td>2.35</td><td>0.780</td><td>20.6</td><td>0.95</td><td>0.645</td></tr>
+<tr><td>1</td><td>1.62</td><td>3.07</td><td>0.817</td><td>22.3</td><td>0.95</td><td>0.645</td></tr>
+<tr><td>2</td><td>2.08</td><td>3.14</td><td>0.761</td><td>18.9</td><td>0.90</td><td>0.681</td></tr>
+</table>
+<p>Monotone and substantial on displacement (1.05 -&gt; 2.08 tiles, i.e. the knob costs what it is supposed to cost), and monotone on bbox fill (0.557 -&gt; 0.681). But its headline spread metric, aspect ratio, is **non-monotonic and the default is the extreme**: 1.10 at 0, then 0.76 at the 0.1 default, then back up to 0.95/0.95/0.90. The default squeezes the footprint harder than <code>compactness=2</code> does. I do not have an explanation for that and did not investigate it.</p>
+<h3>Cross-knob observation at 1:1</h3>
+<p>27 sweep runs produce only 16 distinct outcomes. Eleven separate configurations — <code>origin_weight</code> in {0, 0.5, 1}, <code>neighbor_weight</code> in {0.2, 0.5, 1, 2, 5, 20}, <code>topology_weight=0.5</code>, <code>compactness=0.1</code> — all land on one and the same assignment. At 1:1 the default configuration is a large attractor: three of the four knobs have to be pushed off their defaults before anything changes at all.</p>
+<p>---</p>
+<h1>2. MULTI-TILE VARIANT — 154 tiles via <code>tile_count</code> (<code>states</code>)</h1>
+<p>Same 49 states, <code>tiles = max(1, round(Population/sum * 150))</code>, hexagon.</p>
+<table>
+<tr><th>run</th><th>s</th><th>tile size</th><th>lattice</th><th>assigned</th><th>disp med</th><th>disp p90</th><th>adj kept</th><th>dir med deg</th><th>dir p90 deg</th><th>dir &gt;90</th><th>PP mean</th><th>aspect/input</th></tr>
+<tr><td>grid</td><td>4.6</td><td>139658</td><td>437</td><td>154</td><td>2.43</td><td>4.63</td><td>0.780</td><td>32.1</td><td>85.3</td><td>0.083</td><td>0.606</td><td>1.13</td></tr>
+<tr><td>mosaic morph=True</td><td>2.8</td><td>152407</td><td>494</td><td>154</td><td>2.58</td><td>4.01</td><td>0.706</td><td>17.1</td><td>60.1</td><td>0.037</td><td>0.695</td><td>0.94</td></tr>
+<tr><td>mosaic morph=False</td><td>1.0</td><td>151407</td><td>470</td><td>154</td><td>4.28</td><td>6.32</td><td>0.670</td><td>24.8</td><td>64.3</td><td>0.055</td><td>0.686</td><td>1.02</td></tr>
+</table>
+<table>
+<tr><th>run</th><th>exact tile count</th><th>non-contiguous</th><th>unassigned core / core</th><th>enclosed</th></tr>
+<tr><td>grid</td><td>49/49</td><td>**21**</td><td>51 / 182</td><td>0</td></tr>
+<tr><td>mosaic morph=True</td><td>49/49</td><td>**0**</td><td>18 / 153</td><td>0</td></tr>
+<tr><td>mosaic morph=False</td><td>49/49</td><td>**0**</td><td>3 / 153</td><td>0</td></tr>
+</table>
+<p>With more than one tile per region, Polsby-Popper and non-contiguity become informative — and they separate the layouts sharply. Grid leaves 21 of 49 states as disconnected tile blocks (with its defaults <code>fill_holes=True, fix_islands=True</code>); mosaic leaves none. Direction preservation also flips relative to the 1:1 case: here mosaic morph=True is clearly better (17.1 vs 32.1 degrees) where at 1:1 grid was better. The multi-tile case is where mosaic&#x27;s repair machinery is actually doing work.</p>
+<h2>Weight sweep at 154 tiles</h2>
+<p>Same protocol. Full per-value tables are in <code>results.jsonl</code> and <code>grid_weight_sweep_states154.png</code>; the summary of each knob&#x27;s own axis:</p>
+<table>
+<tr><th>knob</th><th>its own metric, range over the sweep</th><th>note</th></tr>
+<tr><td><code>origin_weight</code> (0 -&gt; 100)</td><td>disp median 2.43 -&gt; 2.05 -&gt; 2.21, non-monotonic; p90 5.22 -&gt; 3.34 monotone</td><td>tail control only</td></tr>
+<tr><td><code>neighbor_weight</code> (0 -&gt; 20)</td><td>adj kept 0.642 -&gt; **0.817 at 0.1** -&gt; 0.780 frozen from 0.5 up</td><td>peak below the default; saturates &gt;=0.5</td></tr>
+<tr><td><code>topology_weight</code> (0 -&gt; 5)</td><td>dir median 32.1 -&gt; 25.8, no change between 0 and the 0.5 default</td><td>shallow, monotone here (unlike at 1:1)</td></tr>
+<tr><td><code>compactness</code> (0 -&gt; 2)</td><td>aspect/input 1.13 -&gt; 0.67 monotone; PP mean 0.613 -&gt; 0.582</td><td>the one knob with clear authority on this input</td></tr>
+</table>
+<p>27 runs, 18 distinct outcomes. <code>origin_weight=1</code> ties <code>topology_weight=1</code>, and <code>origin_weight=5</code> ties <code>compactness=0</code>.</p>
+<p>---</p>
+<h1>3. GROUPED VARIANT — 432 districts, <code>group_by=&quot;State Name&quot;</code></h1>
+<table>
+<tr><th>run</th><th>s</th><th>tile size</th><th>lattice</th><th>assigned</th><th>disp med</th><th>disp p90</th><th>adj kept</th><th>dir med deg</th><th>dir p90 deg</th><th>dir &gt;90</th><th>aspect/input</th></tr>
+<tr><td>grid</td><td>**108.2**</td><td>83384</td><td>1125</td><td>432</td><td>4.23</td><td>6.53</td><td>0.612</td><td>27.9</td><td>78.6</td><td>0.076</td><td>1.02</td></tr>
+<tr><td>mosaic morph=True</td><td>3.9</td><td>88353</td><td>1248</td><td>432</td><td>4.59</td><td>8.95</td><td>0.477</td><td>29.2</td><td>97.8</td><td>0.123</td><td>0.97</td></tr>
+<tr><td>mosaic morph=False</td><td>3.4</td><td>87619</td><td>1178</td><td>432</td><td>7.40</td><td>11.97</td><td>0.470</td><td>37.4</td><td>104.7</td><td>0.133</td><td>1.04</td></tr>
+</table>
+<table>
+<tr><th>run</th><th>exact tile count</th><th>non-contiguous</th><th>split groups raw</th><th>split adj.</th><th>unassigned core / core</th><th>enclosed</th></tr>
+<tr><td>grid</td><td>432/432</td><td>0</td><td>**8**</td><td>**8**</td><td>116 / 480</td><td>0</td></tr>
+<tr><td>mosaic morph=True</td><td>432/432</td><td>0</td><td>**0**</td><td>**0**</td><td>51 / 431</td><td>0</td></tr>
+<tr><td>mosaic morph=False</td><td>432/432</td><td>0</td><td>**0**</td><td>**0**</td><td>13 / 442</td><td>0</td></tr>
+</table>
+<p>This input is also 1:1 (one tile per district), so Polsby-Popper is the constant 0.907 and non-contiguity is trivially 0 here too.</p>
+<h2>The <code>group_by</code> asymmetry (verified in code)</h2>
+<p><code>prepare_layout_data</code> sets <code>source_indices</code> **only** inside the <code>if tile_count is not None:</code> branch (<code>layouts/data_prep.py</code>, the <code># 5. tile_count expansion</code> block). With <code>group_by</code> the user grouping lands in <code>group_ids</code> / <code>group_ids_G</code> and <code>source_indices</code> stays <code>None</code>.</p>
+<p><code>GridBasedLayout.compute</code> branches on <code>if data.source_indices is not None:</code>. With <code>group_by</code> it therefore takes the <code>else</code> branch — the plain N-level Hungarian over all 432 districts — and the only place <code>group_ids</code> appears in <code>layouts/grid/__init__.py</code> is <code>group_ids=data.group_ids</code> when constructing the result. Grid never reads <code>group_ids_G</code> and makes no attempt to keep a state&#x27;s districts together. <code>MosaicLayout.compute</code> reads <code>data.group_ids_G</code> and passes it to its group constraint and to <code>_count_split_units</code>.</p>
+<p>So grid&#x27;s 8 split groups are **not a defect of grid**: they measure a feature grid does not have. The fidelity numbers are still comparable between the two, but mosaic is solving a strictly harder problem on this input, which is relevant when reading its lower adjacency-preservation figure.</p>
+<p>---</p>
+<p>---</p>
+<h1>4. SILHOUETTE — does the tilegram still look like the map?</h1>
+<p>The spread metrics in sections 1-3 (bounding box, aspect, fill) cannot see a ragged outline or a scattered outlier, and on the districts case they lean slightly the wrong way (grid aspect/input 1.02 vs mosaic 0.97, fill 0.590 vs 0.621). The user&#x27;s reading of <code>districts_grid_vs_mosaic.png</code> was that grid&#x27;s tilegram is less constrained and resembles the US less. That is silhouette fidelity, and it was a genuine blind spot in the metric set.</p>
+<h2>Definition</h2>
+<p>Area-based only. No perimeter measure is taken on the unioned footprint: unioning tiles leaves hairline internal edges whose perimeter is not reproducible, and any Polsby-Popper-style measure would square that noise.</p>
+<p>Let <code>A</code> be the union of the occupied tile polygons and <code>B</code> a reference footprint. Reported raw (no transform):</p>
+<ul><li><code>area_ratio_raw</code> = area(A) / area(B)</li><li><code>frac_input_covered_raw</code> = area(A n B) / area(B)</li><li><code>frac_footprint_on_input_raw</code> = area(A n B) / area(A)</li><li><code>frac_tile_centres_inside</code> = fraction of occupied tile centres inside <code>B</code></li></ul>
+<p>**The alignment, and why it is fair.** The raw numbers conflate shape with the fact that the two layouts choose different tile sizes, so one tilegram can cover 33 % more ground than the other before any shape question is asked. The aligned numbers remove exactly that confound and nothing else: <code>A</code> is scaled about its own centroid by <code>sqrt(area(B)/area(A))</code> so the two areas are equal, then translated so the two centroids coincide. **Uniform scale and translation only — no rotation, no shear, no per-part fitting.** A footprint that is the wrong shape cannot be transformed into the right one by this, and the transform is chosen without reference to either layout, so it cannot favour one. What is left is silhouette fidelity:</p>
+<ul><li><code>iou_aligned</code> = area(A&#x27; n B) / area(A&#x27; u B)</li><li><code>symdiff_norm_aligned</code> = area(A&#x27; symdiff B) / area(B)</li><li><code>frac_input_covered_aligned</code> = area(A&#x27; n B) / area(B)</li></ul>
+<h2>The two references — which number uses which</h2>
+<p>Mosaic with <code>morph=True</code> builds <code>working_union</code> from the **morphed** geometries (<code>mosaic/__init__.py</code> step 1) and tiles against that. The morphed footprint is the layout&#x27;s own target, not the US outline. So every run is measured against both:</p>
+<table>
+<tr><th>key in <code>results.jsonl</code></th><th>reference</th><th>use</th></tr>
+<tr><td><code>silhouette_vs_original</code></td><td>the **ORIGINAL** input union, for every run including mosaic morph=True</td><td>**the cross-layout headline.** Grid has no morph and never sees anything else, so this is the only common reference; it is also the one that matches the visual criterion &quot;does it still look like the US&quot;.</td></tr>
+<tr><td><code>silhouette_vs_working</code></td><td>the footprint the layout actually tiled against — the morphed union for mosaic morph=True, the original union otherwise</td><td>internal fidelity: &quot;did the layout cover what it was asked to cover&quot;. **NOT comparable across layouts** — the runs aim at different shapes. Used below only to explain differences, never to rank layouts.</td></tr>
+</table>
+<p><code>silhouette_working_is_original: true</code> marks the runs where the two are the same object (grid, and mosaic morph=False).</p>
+<p>The morphed reference is not stored on the result, so <code>run.py</code> reproduces it by re-running <code>morph_geometries</code> with the same arguments the layout uses (<code>MorphOptions(n_iter=100, show_progress=False)</code>, values = counts). The reproduction is exact: the backfilled IoU for <code>states_uniform__mosaic_morph__rep0</code> matches the inline one to three decimals.</p>
+<h2>Headline: IoU vs the ORIGINAL map</h2>
+<table>
+<tr><th>input</th><th>grid</th><th>mosaic morph=True</th><th>mosaic morph=False</th></tr>
+<tr><td>states_uniform (hexagon)</td><td>0.609</td><td>**0.713**</td><td>**0.819**</td></tr>
+<tr><td>states_uniform (square)</td><td>**0.673**</td><td>0.659</td><td>**0.786**</td></tr>
+<tr><td>states, 154 tiles</td><td>0.667</td><td>0.675</td><td>**0.800**</td></tr>
+<tr><td>districts</td><td>0.616</td><td>**0.697**</td><td>**0.855**</td></tr>
+</table>
+<p>**The silhouette metric corroborates the visual reading.** On districts — the figure the user looked at — grid scores 0.616 against mosaic&#x27;s 0.697, and <code>silhouette_footprints.png</code> shows why: grid&#x27;s outline has scattered protrusions and interior bays, mosaic&#x27;s follows the coast. The bounding-box metrics missed this entirely and pointed the other way.</p>
+<p>Mosaic leads on three of the four groups. The square case is the exception (grid 0.673 vs mosaic 0.659), consistent with the square lattice being harder for mosaic generally.</p>
+<p>Grid&#x27;s tile-size rule makes <code>area_ratio_raw</code> exactly 1.000 in every grid run: its total symbol area matches the total input area by construction. Mosaic&#x27;s is 1.10-1.34, so mosaic covers more ground than the map. That is why the raw and aligned numbers disagree in direction: on <code>states_uniform</code>, <code>frac_footprint_on_input_raw</code> is 0.759 for grid against 0.718 for mosaic (grid&#x27;s footprint is the right size but the wrong shape), while aligned IoU is 0.609 against 0.713 (mosaic&#x27;s is the right shape but too big). Both are reported; neither is the whole story on its own.</p>
+<h2>The two references diverge, exactly as expected</h2>
+<table>
+<tr><th>run</th><th>IoU vs ORIGINAL</th><th>IoU vs its OWN working footprint</th></tr>
+<tr><td>states_uniform mosaic morph=True</td><td>0.713</td><td>**0.823**</td></tr>
+<tr><td>states, 154 tiles mosaic morph=True</td><td>0.675</td><td>**0.851**</td></tr>
+<tr><td>districts mosaic morph=True</td><td>0.697</td><td>**0.875**</td></tr>
+<tr><td>every grid run, every mosaic morph=False run</td><td>(same object)</td><td>(same object)</td></tr>
+</table>
+<p>Read this as: **mosaic covers its own target faithfully, and the target is what departs from the map.** With no <code>size</code> column the morph targets roughly equal area per region, so Texas shrinks and Rhode Island grows and the morphed footprint is materially different from the US outline. Mosaic morph=True is not failing to hit what it aims at; it is aiming somewhere else. This is also why mosaic morph=False has the best silhouette of any run in the table while having the worst displacement — the two pull against each other.</p>
+<h2>Secondary displacement, from the morphed centroids</h2>
+<p>The headline displacement stays measured from the **original** centroids for every run, as before. For morph=True runs a secondary number measured from the **morphed** centroids separates &quot;the assignment moved the region&quot; from &quot;the morph moved the region&quot;:</p>
+<table>
+<tr><th>run</th><th>disp median vs ORIGINAL centroids</th><th>vs MORPHED centroids</th></tr>
+<tr><td>states_uniform mosaic morph=True</td><td>1.56</td><td>1.10</td></tr>
+<tr><td>states, 154 tiles mosaic morph=True</td><td>2.58</td><td>0.98</td></tr>
+<tr><td>districts mosaic morph=True</td><td>4.59</td><td>2.10</td></tr>
+</table>
+<p>The assignment itself moves regions much less than the headline suggests: at 1:1 the morphed-centroid median is 70 % of the original-centroid one, at 154 tiles 38 %, on districts 46 %. So roughly 30 %, 62 % and 54 % of mosaic&#x27;s measured displacement on those inputs is the morph rather than the assignment. Grid has no morph, so its headline number is entirely assignment — which is part of why the headline comparison flatters grid on this axis.</p>
+<h2>Does the silhouette respond to grid&#x27;s knobs?</h2>
+<p>IoU vs original across the grid weight sweeps:</p>
+<table>
+<tr><th>knob</th><th>states_uniform range</th><th>states (154 tiles) range</th></tr>
+<tr><td><code>origin_weight</code></td><td>0.524 - 0.678</td><td>0.662 - 0.709</td></tr>
+<tr><td><code>neighbor_weight</code></td><td>0.561 - 0.691</td><td>0.596 - 0.718</td></tr>
+<tr><td><code>topology_weight</code></td><td>0.581 - 0.633</td><td>0.667 - 0.714</td></tr>
+<tr><td><code>compactness</code></td><td>0.592 - 0.644</td><td>0.644 - 0.690</td></tr>
+</table>
+<p>Grid&#x27;s best silhouette anywhere in either sweep is 0.691 at 1:1 and 0.718 at 154 tiles — both below mosaic morph=False and, at 1:1, below mosaic morph=True&#x27;s flat 0.713. No grid setting tested reaches mosaic&#x27;s silhouette at 1:1. <code>compactness</code>, the knob one might expect to control this, moves it least.</p>
+<p>---</p>
+<h1>5. MOSAIC KNOB SWEEP — <code>HungarianOptions</code></h1>
+<p>Mosaic&#x27;s own cost knobs had never been swept. 90 runs at morph=True (30 settings x 3 inputs) plus 18 morph=False probes. Defaults: <code>distance_weight=1.0, interior_bonus=0.5, neighbor_weight=0.3, neighbor_bfs=False</code>.</p>
+<h2>Does any mosaic setting close the 1:1 gap against grid?</h2>
+<p>**It narrows substantially on three axes and does not close on any.**</p>
+<table>
+<tr><th>axis at states_uniform</th><th>grid</th><th>mosaic default</th><th>best mosaic found</th><th>setting</th><th>gap closed</th></tr>
+<tr><td>adjacency preserved</td><td>0.789</td><td>0.697</td><td>**0.761**</td><td><code>interior_bonus=0.25</code></td><td>~70 %</td></tr>
+<tr><td>displacement median (tiles)</td><td>1.22</td><td>1.56</td><td>**1.34**</td><td><code>interior_bonus=0.25</code></td><td>~65 %</td></tr>
+<tr><td>direction reversed &gt;90 deg</td><td>0.000</td><td>0.092</td><td>**0.018**</td><td><code>interior_bonus=0.25</code></td><td>~80 %</td></tr>
+<tr><td>direction median (deg)</td><td>23.6</td><td>26.1</td><td>**24.8**</td><td><code>distance_weight=4.0</code></td><td>~50 %, and not at the same setting</td></tr>
+<tr><td>silhouette IoU vs original</td><td>0.609</td><td>0.713</td><td>0.713 (all settings)</td><td>any</td><td>mosaic already ahead</td></tr>
+</table>
+<p>Next best after <code>interior_bonus=0.25</code> are <code>neighbor_weight=0.2</code> and <code>distance_weight=2.0</code>, both at adjacency 0.716.</p>
+<p>No single setting is best on all axes, and the direction axis is the one that moves least — consistent with mosaic having no direction/topology term at all. Whether that term is worth adding is not something this measurement decides.</p>
+<h2>REFUTED: <code>neighbor_bfs=True</code> is not the explanation</h2>
+<p>The hypothesis going in was that mosaic&#x27;s Euclidean-to-pool-centroid neighbour term, rather than grid&#x27;s BFS-hop term, explained the 1:1 adjacency gap, and that <code>neighbor_bfs=True</code> would close it. **The data refutes this.**</p>
+<table>
+<tr><th>input</th><th>adjacency, <code>neighbor_bfs=False</code> (default)</th><th><code>neighbor_bfs=True</code></th><th>direction median</th><th>reversed &gt;90</th></tr>
+<tr><td>states_uniform</td><td>0.697</td><td>**0.679 (worse)**</td><td>26.1 -&gt; 27.5 (worse)</td><td>0.092 -&gt; **0.037 (better)**</td></tr>
+<tr><td>states, 154 tiles</td><td>0.706</td><td>**0.725 (better)**</td><td>17.1 -&gt; 16.2 (better)</td><td>0.037 -&gt; 0.028 (better)</td></tr>
+<tr><td>districts</td><td>0.477</td><td>**0.463 (worse)**</td><td>29.2 -&gt; 31.0 (worse)</td><td>0.123 -&gt; **0.092 (better)**</td></tr>
+</table>
+<p>At the case it was supposed to fix it makes adjacency *worse*. It helps only on the 154-tile case. Its one consistent effect across all three inputs is fewer &gt;90-degree reversals. The effect is input-dependent in sign, which is itself the finding: this is not a setting that can be turned on globally on the strength of one case.</p>
+<p>One exception worth recording: at **morph=False on the 154-tile case**, <code>neighbor_bfs=True</code> gives adjacency 0.807 with **zero** reversals — the best adjacency of any mosaic run anywhere in this study, better than grid&#x27;s 0.780 on that input. It does not generalise to the other two inputs or to morph=True.</p>
+<h2><code>interior_bonus=0.25</code> — best at 1:1, and it regresses the other two</h2>
+<p><code>interior_bonus</code> was mapped to grid&#x27;s <code>compactness</code> in the brief; it turns out to be mosaic&#x27;s most authoritative knob, mirroring grid&#x27;s finding that <code>compactness</code> had the most authority. But the value that wins at 1:1 is not the value that wins elsewhere. Checked against the cases where mosaic currently leads grid:</p>
+<table>
+<tr><th>input</th><th>metric</th><th>default (0.5)</th><th>**0.25**</th><th>2.0</th></tr>
+<tr><td>states_uniform</td><td>adjacency</td><td>0.697</td><td>**0.761**</td><td>0.725</td></tr>
+<tr><td></td><td>displacement med</td><td>1.56</td><td>**1.34**</td><td>1.53</td></tr>
+<tr><td></td><td>direction med</td><td>26.1</td><td>26.0</td><td>28.3 (worse)</td></tr>
+<tr><td>states, 154 tiles</td><td>adjacency</td><td>0.706</td><td>**0.688 (worse)**</td><td>**0.798**</td></tr>
+<tr><td></td><td>displacement med</td><td>2.58</td><td>**2.70 (worse)**</td><td>**2.10**</td></tr>
+<tr><td></td><td>direction med</td><td>17.1</td><td>**18.6 (worse)**</td><td>17.1</td></tr>
+<tr><td>districts</td><td>adjacency</td><td>0.477</td><td>0.494</td><td>**0.527**</td></tr>
+<tr><td></td><td>displacement med</td><td>4.59</td><td>**4.87 (worse)**</td><td>**4.52**</td></tr>
+<tr><td></td><td>direction med</td><td>29.2</td><td>**34.0 (much worse)**</td><td>**25.9**</td></tr>
+<tr><td></td><td>**split groups**</td><td>**0**</td><td>**1 (REGRESSION)**</td><td>**0**</td></tr>
+</table>
+<p>**<code>interior_bonus=0.25</code> is not an improvement.** It wins at 1:1 and regresses the 154-tile case on all three fidelity axes, and on districts it breaks a state into two blocks — a hard integrity regression in precisely the axis where mosaic currently leads grid 0 to 8. Reporting a 1:1 win for it in isolation would have been misleading.</p>
+<p><code>interior_bonus=2.0</code> is the only setting tested that improves all three inputs relative to the default without any integrity regression: at 154 tiles it reaches adjacency 0.798, above grid&#x27;s 0.780, with displacement 2.10 (grid 2.43) and zero non-contiguous regions; on districts it improves every fidelity axis and keeps 0 split groups. At 1:1 it improves adjacency (0.725) and reversals (0.064) but makes direction worse (28.3). It is a measurement, not a recommendation, and it was found on three inputs.</p>
+<h2>Do mosaic&#x27;s knobs show grid&#x27;s dead-zone / saturation pathology?</h2>
+<p>Partly, and with a different failure mode.</p>
+<ul><li>**<code>neighbor_weight</code> does not saturate — it actively degrades.** Grid&#x27;s</li></ul>
+<p>neighbour term froze above a threshold; mosaic&#x27;s gets worse past ~0.3. At 1:1, adjacency falls 0.697 -&gt; 0.596 and direction rises 26.1 -&gt; 37.0 going from 0.3 to 5.0; on districts it introduces a split group at 5.0. The useful band is roughly 0.1-0.3 and the default sits in it.</p>
+<ul><li>**A true dead zone appears when <code>neighbor_bfs=True</code>.** With BFS on, at 1:1</li></ul>
+<p>the values 0.0, 0.05, 0.1, 0.2 and 0.3 give byte-identical assignments, and 1.0, 2.0 and 5.0 give another single identical assignment. That is grid&#x27;s pathology exactly.</p>
+<ul><li>**<code>distance_weight</code> 0.5 and 1.0 are identical at 1:1** — another small dead</li></ul>
+<p>zone straddling the default.</p>
+<ul><li>**The silhouette is completely inert to every mosaic knob at 1:1** on the</li></ul>
+<p>hexagon tiling: IoU vs original is 0.713 for all 30 settings. (Section 6 shows this is hexagon-specific — on a square tiling at 1:1 <code>interior_bonus</code> does move the footprint.) At 1:1 the calibrated tile set is fixed and the cost function only permutes which region owns which tile, so the footprint cannot change. It does vary on the multi-tile cases (0.648-0.691 on 154 tiles, 0.680-0.713 on districts).</p>
+<h2>Is <code>distance_weight</code>&#x27;s own docstring advice borne out?</h2>
+<p>The docstring says &quot;Fix at 1.0 and tune *outside_penalty* relative to it.&quot; **Not borne out as stated.** <code>distance_weight=2.0</code> beats 1.0 on adjacency on all three inputs:</p>
+<table>
+<tr><th>input</th><th>0.25</th><th>0.5</th><th>**1.0 (default)**</th><th>2.0</th><th>4.0</th></tr>
+<tr><td>states_uniform adjacency</td><td>0.615</td><td>0.697</td><td>0.697</td><td>**0.716**</td><td>0.679</td></tr>
+<tr><td>states adjacency</td><td>0.789</td><td>0.771</td><td>0.706</td><td>**0.771**</td><td>0.550</td></tr>
+<tr><td>districts adjacency</td><td>0.475</td><td>0.467</td><td>0.477</td><td>**0.504**</td><td>0.493</td></tr>
+</table>
+<p>On the 154-tile case 2.0 also gives direction 15.1 degrees and **zero** reversals against the default&#x27;s 17.1 and 0.037. The advice is directionally sound only in that 4.0 is clearly bad (154-tile adjacency collapses to 0.550 and direction to 28.3) — so there is a usable band of roughly 1-2 with degradation beyond it, rather than a single correct value of 1.0. Note the sweep held <code>outside_penalty</code> at its default throughout, so this tests the &quot;fix at 1.0&quot; half of the advice and not the &quot;tune outside_penalty relative to it&quot; half.</p>
+<h2>Settings that help one input and hurt another</h2>
+<table>
+<tr><th>setting</th><th>helps</th><th>hurts</th></tr>
+<tr><td><code>interior_bonus=0.25</code></td><td>states_uniform (adjacency 0.697-&gt;0.761, displacement 1.56-&gt;1.34)</td><td>states 154 (all three fidelity axes); districts (displacement, direction, and +1 split group)</td></tr>
+<tr><td><code>neighbor_bfs=True</code></td><td>states 154 (adjacency 0.706-&gt;0.725, direction 17.1-&gt;16.2)</td><td>states_uniform (adjacency 0.697-&gt;0.679); districts (adjacency 0.477-&gt;0.463, direction 29.2-&gt;31.0)</td></tr>
+<tr><td><code>neighbor_weight=0.2</code></td><td>states_uniform (adjacency 0.697-&gt;0.716); districts (0.477-&gt;0.490)</td><td>nothing measured at morph=True, but at morph=False on 154 tiles it creates a non-contiguous region</td></tr>
+<tr><td><code>distance_weight=0.25</code></td><td>states 154 adjacency (0.706-&gt;0.789)</td><td>states_uniform adjacency (0.697-&gt;0.615); districts +1 split group</td></tr>
+<tr><td><code>interior_bonus=2.0</code></td><td>all three</td><td>direction at 1:1 only (26.1-&gt;28.3)</td></tr>
+</table>
+<h2>morph=False probes</h2>
+<p>Six settings re-checked at morph=False on all three inputs (18 runs). The ranking of settings is **not** preserved across the morph switch:</p>
+<table>
+<tr><th>input</th><th>best adjacency at morph=True</th><th>best adjacency at morph=False</th></tr>
+<tr><td>states_uniform</td><td><code>interior_bonus=0.25</code> (0.761)</td><td><code>interior_bonus=0.25</code> / <code>neighbor_weight=0.2</code> (0.615)</td></tr>
+<tr><td>states, 154 tiles</td><td><code>interior_bonus=2.0</code> (0.798)</td><td>**<code>neighbor_bfs=True</code> (0.807)**</td></tr>
+<tr><td>districts</td><td><code>interior_bonus=2.0</code> (0.527)</td><td><code>interior_bonus=2.0</code> (0.485)</td></tr>
+</table>
+<p>At 1:1 every morph=False setting lands far below every morph=True setting on adjacency (0.523-0.615 against 0.569-0.761), so the morph is doing most of the work there. <code>interior_bonus=2.0</code>, the best morph=True setting overall, is the *worst* morph=False setting at 1:1 (adjacency 0.523). Any setting chosen at morph=True should not be assumed to transfer.</p>
+<p>---</p>
+<h1>6. GATING CHECK — <code>interior_bonus</code> default 0.5 -&gt; 2.0</h1>
+<p>Section 5 found <code>interior_bonus=2.0</code> improving adjacency, displacement and direction across the multi-tile and districts cases at morph=True, while at one tile per region with morph=False it was the worst value probed (adjacency 0.523). <code>morph</code> is a user-facing option, so that combination is what this check exists to resolve.</p>
+<p>**Design.** One uniform grid: 4 input/tiling combinations x {morph=True, morph=False} x 7 values (0, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0) = **56 runs**, so both morph settings are compared over identical values. Records carry the <code>ibcheck__</code> prefix; the earlier partial probes were left in place and **reproduce exactly** (e.g. <code>states_uniform</code> morph=False: 0.25 -&gt; 0.615, 0.5 -&gt; 0.596, 2.0 -&gt; 0.523 in both passes).</p>
+<h2>Integrity screen first</h2>
+<p>Per the brief, any value that introduces a split group or a non-contiguous region **anywhere** in the eight panels is disqualified regardless of its fidelity numbers. Every run kept its exact tile count and produced zero enclosed holes, so those two axes separate nothing here.</p>
+<table>
+<tr><th>value</th><th>integrity across all 8 panels</th></tr>
+<tr><td>0</td><td>**FAIL** — states154 morph=F: 1 non-contiguous; districts morph=T: 1 split group; districts morph=F: 1 split group</td></tr>
+<tr><td>0.25</td><td>**FAIL** — districts morph=T: 1 split group; districts morph=F: 1 split group</td></tr>
+<tr><td>**0.5 (current default)**</td><td>**CLEAN**</td></tr>
+<tr><td>1.0</td><td>**FAIL** — districts morph=F: 1 split group</td></tr>
+<tr><td>**2.0 (proposed)**</td><td>**CLEAN**</td></tr>
+<tr><td>4.0</td><td>**FAIL** — states154 morph=F: 1 non-contiguous; districts morph=F: 1 split group</td></tr>
+<tr><td>8.0</td><td>**FAIL** — districts morph=F: 2 split groups</td></tr>
+</table>
+<p>**Only 0.5 and 2.0 survive.** This is the sharpest result of the check, and it is worth noting what it rules out: 8.0 has the best fidelity of any value in several panels (<code>states_uniform</code> hexagon morph=True adjacency 0.771, the best of the seven; morph=False adjacency 0.642, also the best; states154 morph=False adjacency 0.734) and is disqualified purely on integrity — two split groups on districts morph=False. That is exactly the axis where mosaic&#x27;s advantage over grid lives (0 split groups against grid&#x27;s 8), so the screen is doing real work rather than being a formality.</p>
+<p>Note also that five of the seven values fail somewhere, and every failure but one occurs on **districts** or at **morph=False**. Testing this knob on the 1:1 morph=True case alone would have shown a clean sweep and missed all of it.</p>
+<h2>0.5 vs 2.0, head to head over the eight panels</h2>
+<p>Sign convention: positive means 2.0 is better than 0.5 on that axis.</p>
+<table>
+<tr><th>input</th><th>morph</th><th>adjacency</th><th>displacement</th><th>direction</th><th>reversed &gt;90</th><th>verdict</th></tr>
+<tr><td>states, 1 tile/region (hex)</td><td>True</td><td>+0.028</td><td>+0.04</td><td>−2.3</td><td>+0.028</td><td>**2.0**</td></tr>
+<tr><td>states, 1 tile/region (hex)</td><td>**False**</td><td>**−0.073**</td><td>+0.01</td><td>**−5.2**</td><td>**−0.055**</td><td>**0.5**</td></tr>
+<tr><td>states, 1 tile/region (square)</td><td>True</td><td>+0.009</td><td>+0.13</td><td>+7.5</td><td>+0.018</td><td>**2.0**</td></tr>
+<tr><td>states, 1 tile/region (square)</td><td>**False**</td><td>**−0.018**</td><td>−0.06</td><td>**−7.6**</td><td>**−0.028**</td><td>**0.5**</td></tr>
+<tr><td>states, 154 tiles</td><td>True</td><td>+0.092</td><td>+0.48</td><td>0.0</td><td>+0.028</td><td>**2.0**</td></tr>
+<tr><td>states, 154 tiles</td><td>False</td><td>+0.028</td><td>+0.35</td><td>−0.6</td><td>+0.028</td><td>**2.0**</td></tr>
+<tr><td>districts</td><td>True</td><td>+0.050</td><td>+0.07</td><td>+3.3</td><td>+0.043</td><td>**2.0**</td></tr>
+<tr><td>districts</td><td>False</td><td>+0.016</td><td>+0.11</td><td>+3.4</td><td>0.000</td><td>**2.0**</td></tr>
+</table>
+<p>**2.0 wins 6 of 8 panels and loses 2.** The two losses are not scattered: they are exactly the **one-tile-per-region morph=False** panels, and they occur on **both** tilings. That is a reproducible signature rather than noise. On hexagon the regression is substantial — adjacency 0.596 -&gt; 0.523 (−12 % relative), reversed pairs 0.064 -&gt; 0.119 (nearly doubled), direction 29.0 -&gt; 34.2 degrees.</p>
+<h2>Opposite-direction ranking — the flag the brief asked for</h2>
+<p>At **one tile per region, morph=True and morph=False rank 0.5 and 2.0 in opposite directions, on both tilings**:</p>
+<table>
+<tr><th>panel</th><th>best of {0.5, 2.0} on adjacency</th></tr>
+<tr><td>1 tile/region hexagon, morph=True</td><td>2.0 (0.725 vs 0.697)</td></tr>
+<tr><td>1 tile/region hexagon, morph=False</td><td>**0.5 (0.596 vs 0.523)**</td></tr>
+<tr><td>1 tile/region square, morph=True</td><td>2.0 (0.459 vs 0.450)</td></tr>
+<tr><td>1 tile/region square, morph=False</td><td>**0.5 (0.486 vs 0.468)**</td></tr>
+<tr><td>154 tiles, both morph settings</td><td>2.0</td></tr>
+<tr><td>districts, both morph settings</td><td>2.0</td></tr>
+</table>
+<p>The multi-tile and grouped cases do **not** show this inversion: there 2.0 is better under both morph settings. The conflict is confined to the one-tile-per-region case — which is also the case the <code>tile_map_cartogram</code> and <code>demers_cartogram</code> presets produce.</p>
+<h2>Is a single value defensible?</h2>
+<p>What the data supports, stated without a recommendation:</p>
+<ul><li>**The integrity screen admits only two candidates, 0.5 and 2.0.** Any</li></ul>
+<p>answer other than these two would have to accept a split group or a non-contiguous region on some input tested here.</p>
+<ul><li>**Neither candidate is best everywhere.** 2.0 is better on 6 of 8 panels</li></ul>
+<p>including every multi-tile and grouped panel under both morph settings; 0.5 is better on the 2 one-tile-per-region morph=False panels.</p>
+<ul><li>**So 0.5 is not &quot;right for neither&quot;.** It is the better of the two</li></ul>
+<p>precisely on one-tile-per-region + morph=False, and the worse of the two on the other six panels. The trade is real and it is between those two values, not against some unmeasured third option — the obvious third options (1.0, 4.0, 8.0) are all disqualified on integrity.</p>
+<ul><li>**A single value serves both morph settings on the multi-tile and grouped</li></ul>
+<p>inputs** (2.0, cleanly). It does not on the one-tile-per-region input, where the two morph settings disagree.</p>
+<ul><li>**The knob is strongly non-monotonic**, so interpolating between tested</li></ul>
+<p>values is not safe. On <code>states_uniform</code> hexagon morph=True, adjacency runs 0.651, 0.761, 0.697, **0.569**, 0.725, 0.716, 0.771 across the seven values — 1.0 is a deep trough between two peaks. Any value picked by reading a single curve is fitting noise unless it is validated across inputs and both morph settings, which is what this grid does.</p>
+<p>Whether that trade is worth taking, and for which value, is the user&#x27;s call. Nothing here settles it.</p>
+<h2>Incidental correction to a section 5 claim</h2>
+<p>Section 5 reported that the silhouette is &quot;completely inert to every mosaic knob at 1:1&quot;. This grid shows that is **hexagon-specific**. On the square tiling at one tile per region, <code>interior_bonus</code> does move the footprint: IoU vs original runs 0.635, 0.656, 0.659, 0.666, 0.666, 0.701, 0.701 at morph=True (and 0.784 -&gt; 0.801 at morph=False). On hexagon it is flat at 0.713 (morph=True) and 0.819 (morph=False) for all seven values. So the calibrated tile set is fixed at 1:1 on hexagon but not on square.</p>
+<h1>Determinism (mosaic, <code>morph=True</code>)</h1>
+<p>Three repeats per configuration, four configurations (<code>states_uniform</code> hexagon, <code>states_uniform</code> square, <code>states</code>, <code>districts</code>). In all four, the full metric dictionary is identical across all three repeats — same tile size, same lattice size, same assignment-derived numbers to every digit. The known ~1e-16 flow-morph run-to-run noise did not change any measured outcome. This is four configurations on one machine; it is evidence of stability, not a proof. No cause is attributed.</p>
+<h1>Wall clock</h1>
+<table>
+<tr><th>run</th><th>seconds</th></tr>
+<tr><td>states_uniform grid (hex / square)</td><td>1.5 / 1.6</td></tr>
+<tr><td>states_uniform mosaic morph=True (hex)</td><td>1.3 / 0.83 / 0.85 (first includes numba JIT)</td></tr>
+<tr><td>states_uniform mosaic morph=True (square)</td><td>0.81 / 0.80 / 0.81</td></tr>
+<tr><td>states_uniform mosaic morph=False (hex / square)</td><td>0.66 / 0.78</td></tr>
+<tr><td>states (154 tiles) grid</td><td>4.6</td></tr>
+<tr><td>states mosaic morph=True</td><td>2.8 / 1.3 / 1.3</td></tr>
+<tr><td>states mosaic morph=False</td><td>1.0</td></tr>
+<tr><td>districts grid</td><td>**108.2**</td></tr>
+<tr><td>districts mosaic morph=True</td><td>3.9 / 3.9 / 4.0</td></tr>
+<tr><td>districts mosaic morph=False</td><td>3.4</td></tr>
+</table>
+<p>At 49 regions the two are within a factor of ~2. At 432 regions grid is ~27x slower: <code>assign_to_grid_hungarian</code>&#x27;s refinement is a Python double loop over all region pairs, repeated for up to 10 passes.</p>
+<h1>Confounds and caveats</h1>
+<ul><li>**Different tile geometry for the same input.** Grid sizes its lattice from</li></ul>
+<p>the largest symbol and inflates the bounds to a 2x tile-area surplus; mosaic calibrates tile size so the core tile count matches the tile budget. On <code>states_uniform</code> hexagon that is 247588 vs 285095 (mosaic tiles ~15 % larger) and 149 vs 182 lattice cells. All length metrics are reported in tile-size units for this reason; the raw metres are in <code>results.jsonl</code>.</p>
+<ul><li>**Same tiling family within every comparison** (hexagon with hexagon,</li></ul>
+<p>square with square), so the combinatorial Polsby-Popper constants are comparable within a table.</p>
+<ul><li>**Unassigned core tiles are not really comparable.** The count uses the</li></ul>
+<p>union of the *original* geometries for both layouts. Mosaic&#x27;s own definition uses the study union it actually solved against — the *morphed* union when <code>morph=True</code> — and its lattice is calibrated so the core count matches the budget. Grid has no notion of a core and deliberately works on an oversized lattice, so its 19/63 and 116/480 measure &quot;grid&#x27;s lattice is bigger than the map&quot;, not a failure. Compare morph=True vs morph=False within mosaic only.</p>
+<ul><li>**Degeneracy at one tile per region** is spelled out in the table at the top</li></ul>
+<p>of section 1 and applies to the districts case as well. Constant columns (Polsby-Popper, non-contiguity, exact tile count, enclosed holes) are reported as constants, not as agreement.</p>
+<ul><li>**Polsby-Popper medians are quantised** on the 154-tile case because tile</li></ul>
+<p>counts per state are small integers; the mean is what the tables report.</p>
+<ul><li>BFS hop distance for broken adjacency pairs traverses the whole lattice</li></ul>
+<p>including unassigned cells. Grid&#x27;s larger empty lattice therefore does not penalise it. The median broken-pair distance is 2 hops in every single run across all cases, so this sub-metric separates nothing; only the p90 and max vary (grid max 3 vs mosaic morph=False max 4-5).</p>
+<h1>Not measured / could not measure</h1>
+<ul><li>**Grid under <code>group_by</code> with grouping honoured** — no such mode exists.</li><li>**A direct translation of grid&#x27;s weights into mosaic&#x27;s** — section 5 sweeps</li></ul>
+<p>mosaic&#x27;s own knobs, which is not the same thing. <code>topology_weight</code> in particular has no mosaic counterpart, so the direction axis was never exercised from mosaic&#x27;s side at all.</p>
+<ul><li>**<code>outside_penalty</code>, <code>extra_tile_rings</code>, <code>min_overlap_frac</code>, <code>spacing</code>,</li></ul>
+<p><code>max_connectivity_iters</code>, <code>swap_repair_passes</code>, <code>ring_swapback_max_hops</code>** — left at defaults. In particular the <code>distance_weight</code> finding tests only the &quot;fix at 1.0&quot; half of that docstring&#x27;s advice, not the &quot;tune outside_penalty relative to it&quot; half.</p>
+<ul><li>**<code>interior_bonus</code> on inputs beyond these four panels** — the gating check</li></ul>
+<p>covers US states at 1:1 (hexagon and square), US states at 154 tiles and US districts. A value clean on all four may still fail on an input with islands, a zero-value column or a non-US geography, none of which were tested.</p>
+<ul><li>**<code>interior_bonus</code> interactions** — the gating grid varied it alone, with</li></ul>
+<p>the other three <code>HungarianOptions</code> knobs at defaults. A different <code>neighbor_weight</code> or <code>distance_weight</code> could move which value is best.</p>
+<ul><li>**Values between the tested ones** — the knob is strongly non-monotonic, so</li></ul>
+<p>the grid does not bound behaviour between 0.5 and 2.0, or above 8.0.</p>
+<ul><li>**Joint / multi-knob mosaic tuning** — only <code>neighbor_bfs</code> x</li></ul>
+<p><code>neighbor_weight</code> was crossed. No search over combinations, so a better joint setting than any reported here may exist.</p>
+<ul><li>**Silhouette for mosaic morph=True reps 1 and 2** — only rep 0 saved a</li></ul>
+<p>placement pickle. The repeat check found all metrics identical across reps, so these are expected to match, but they were not computed.</p>
+<ul><li>**Silhouette on the districts grid weight sweep** — grid was not swept on</li></ul>
+<p>the districts input at all (108 s per run).</p>
+<ul><li>**Grid&#x27;s <code>fill_holes</code> / <code>fix_islands</code> / <code>grid_size=&quot;auto&quot;</code>** left at</li></ul>
+<p>defaults and not swept, so their share of grid&#x27;s results is not separated out.</p>
+<ul><li>**Why <code>compactness=0.1</code> squeezes the footprint harder than <code>compactness=2</code>**</li></ul>
+<p>at 1:1 — observed, not investigated.</p>
+<ul><li>**Why the silhouette is completely inert to mosaic&#x27;s knobs at 1:1** — the</li></ul>
+<p>fixed calibrated tile set is the obvious explanation and is consistent with the multi-tile cases varying, but it was not confirmed by inspecting the selected tile sets directly.</p>
+<ul><li>**Any perimeter-based shape measure on the unioned footprint** —</li></ul>
+<p>deliberately not computed; hairline internal edges from unioning make it unreproducible.</p>
+<ul><li>**<code>spacing</code>** — both layouts were run at their own defaults (grid 0.05,</li></ul>
+<p>mosaic 0.0). This affects rendered symbol size, not tile assignment, so it does not enter any metric here, but the figures are not pixel-comparable on gap width.</p>
+<ul><li>**Inputs beyond these three.** No non-US input, no multi-component input</li></ul>
+<p>with islands, no zero-value sizing column, no <code>pre_scale=True</code>.</p>
+<ul><li>**Tilings beyond hexagon and square**, and square only on the primary case.</li><li>**Visual quality judgements** — nothing here measures whether an arrangement</li></ul>
+<p>reads as the United States to a person.</p>
+<ul><li>**Repeat variance for grid and for mosaic <code>morph=False</code>** — only</li></ul>
+<p><code>morph=True</code> was repeated, on the assumption the others are deterministic; that assumption was not tested.</p>
+<h1>Surprises</h1>
+<p>1. **At 1:1, three of grid&#x27;s four knobs do nothing at their defaults.** <code>origin_weight</code> 0, 0.5 and 1 are the same assignment; <code>neighbor_weight</code> 0.2 through 20 are the same assignment; <code>topology_weight</code> 0 and 0.5 differ only slightly. Eleven of the 27 sweep configurations land on one identical outcome. 2. **<code>topology_weight</code> is non-monotonic and inverted at 1:1** — raising it from 0 to 2 makes both direction metrics worse before they recover at 5. 3. **<code>neighbor_weight</code>&#x27;s saturation threshold moves with the input** (&gt;=0.2 at 1:1, &gt;=0.5 at 154 tiles) and its best value on the 154-tile case (0.1) is *below* the default. 4. **Which layout wins on direction flips between the cases.** At 1:1 grid reverses none of the 109 adjacencies and mosaic reverses 9.2 %; at 154 tiles mosaic&#x27;s median angular deviation is nearly half grid&#x27;s. 5. **Grid leaves 21 of 49 states non-contiguous at 154 tiles** with hole filling and island fixing on; mosaic leaves none. Mostly single stray tiles in the figure. 6. **The square lattice widens the adjacency gap** between the layouts (0.606 vs 0.450) relative to hexagons (0.789 vs 0.697). 7. **Mosaic <code>morph=False</code> is not a small perturbation of <code>morph=True</code>** in any case: displacement roughly doubles while its integrity numbers stay perfect. 8. **Grid is ~27x slower at 432 regions** but within 2x at 49. 9. **The bounding-box spread metrics were pointing the wrong way.** On districts they slightly favoured grid (aspect/input 1.02 vs 0.97, fill 0.590 vs 0.621) while the area-based silhouette puts grid clearly behind (IoU 0.616 vs 0.697), matching what the figure shows. A metric set can agree with itself and still miss the thing a person notices first. 10. **<code>neighbor_bfs=True</code> does not fix the 1:1 adjacency gap** — it makes it slightly worse, and its sign flips across inputs. 11. **<code>interior_bonus</code>, not the neighbour term, is mosaic&#x27;s most authoritative knob** — and the value that wins at 1:1 breaks a state into two blocks on districts. 12. **Mosaic&#x27;s silhouette is identical across all 30 knob settings at 1:1** (IoU 0.713) while grid&#x27;s varies from 0.524 to 0.691 across its sweep. 13. **<code>distance_weight=2.0</code> beats the documented &quot;fix at 1.0&quot; on all three inputs** on adjacency preservation. 14. **Five of seven <code>interior_bonus</code> values fail the integrity screen**, and every failure but one is on districts or at morph=False. The value with the best fidelity in several panels (8.0) is disqualified by two split groups on districts morph=False. 15. **<code>interior_bonus</code> ranks 0.5 and 2.0 in opposite directions depending on <code>morph</code>, but only at one tile per region** — and on both tilings, so it is a reproducible signature rather than noise. The multi-tile and grouped cases prefer 2.0 under both morph settings. 16. **<code>interior_bonus</code> is strongly non-monotonic** — on states_uniform hexagon morph=True its adjacency curve is 0.651, 0.761, 0.697, 0.569, 0.725, 0.716, 0.771, with a deep trough at 1.0 between two peaks.</p>
+<div class="figure">
+<img src="districts_grid_vs_mosaic.png" alt="Grouped variant: US congressional districts coloured by state. Red outlines mark districts belonging to a state whose tiles form more than one block. Grid does not read the grouping at all.">
+<p class="caption">Grouped variant: US congressional districts coloured by state. Red outlines mark districts belonging to a state whose tiles form more than one block. Grid does not read the grouping at all.</p>
+</div><div class="figure">
+<img src="grid_weight_sweep_states154.png" alt="The same four-knob sweep on the 154-tile states case, for comparison with the one-tile-per-region sweep.">
+<p class="caption">The same four-knob sweep on the 154-tile states case, for comparison with the one-tile-per-region sweep.</p>
+</div><div class="figure">
+<img src="grid_weight_sweep_uniform.png" alt="Grid&#x27;s four weights swept one at a time on the one-tile-per-region case, others held at defaults. Red panel = the achieved metric that knob is supposed to control. The flat Polsby-Popper column is the degeneracy, drawn rather than hidden. x is symlog.">
+<p class="caption">Grid&#x27;s four weights swept one at a time on the one-tile-per-region case, others held at defaults. Red panel = the achieved metric that knob is supposed to control. The flat Polsby-Popper column is the degeneracy, drawn rather than hidden. x is symlog.</p>
+</div><div class="figure">
+<img src="interior_bonus_check.png" alt="Gating check for changing mosaic&#x27;s interior_bonus default from 0.5 to 2.0. Four input/tiling combinations x seven values, morph=True (solid red) and morph=False (dashed blue) as separate series. Grey dotted line = current default 0.5, green dotted = proposed 2.0. A black X marks a run that introduced a split group or a non-contiguous region.">
+<p class="caption">Gating check for changing mosaic&#x27;s interior_bonus default from 0.5 to 2.0. Four input/tiling combinations x seven values, morph=True (solid red) and morph=False (dashed blue) as separate series. Grey dotted line = current default 0.5, green dotted = proposed 2.0. A black X marks a run that introduced a split group or a non-contiguous region.</p>
+</div><div class="figure">
+<img src="mosaic_knob_sweep.png" alt="Mosaic&#x27;s HungarianOptions swept one knob at a time at morph=True, on all three inputs. Solid lines are mosaic; the dotted horizontal line in each panel is grid&#x27;s value on the same input, so the vertical gap to it is what tuning would have to close.">
+<p class="caption">Mosaic&#x27;s HungarianOptions swept one knob at a time at morph=True, on all three inputs. Solid lines are mosaic; the dotted horizontal line in each panel is grid&#x27;s value on the same input, so the vertical gap to it is what tuning would have to close.</p>
+</div><div class="figure">
+<img src="silhouette_footprints.png" alt="Silhouette against the ORIGINAL map. Blue is the input union; red is the occupied tile footprint after area-matching and centroid-alignment. Grid&#x27;s outline is visibly ragged on the districts row, with scattered protrusions; mosaic&#x27;s is smooth. This is the figure that corroborates the visual reading.">
+<p class="caption">Silhouette against the ORIGINAL map. Blue is the input union; red is the occupied tile footprint after area-matching and centroid-alignment. Grid&#x27;s outline is visibly ragged on the districts row, with scattered protrusions; mosaic&#x27;s is smooth. This is the figure that corroborates the visual reading.</p>
+</div><div class="figure">
+<img src="silhouette_summary.png" alt="IoU for all four comparison groups under both references. Left panel (vs the original input union) is the cross-layout-comparable headline. Right panel (vs each layout&#x27;s own working footprint) is internal fidelity and is NOT comparable across layouts.">
+<p class="caption">IoU for all four comparison groups under both references. Left panel (vs the original input union) is the cross-layout-comparable headline. Right panel (vs each layout&#x27;s own working footprint) is internal fidelity and is NOT comparable across layouts.</p>
+</div><div class="figure">
+<img src="states_grid_vs_mosaic.png" alt="Multi-tile variant: 154 tiles via tile_count. Red outlines mark tiles of regions whose tile block is not edge-connected in the lattice.">
+<p class="caption">Multi-tile variant: 154 tiles via tile_count. Red outlines mark tiles of regions whose tile block is not edge-connected in the lattice.</p>
+</div><div class="figure">
+<img src="states_uniform_grid_vs_mosaic.png" alt="PRIMARY CASE. US states, one tile per region, hexagon tiling — the gallery example and the tile_map_cartogram preset. grid (defaults) vs mosaic(morph=True) vs mosaic(morph=False). One colour per state, consistent across panels. No red marks: at one tile per region no region can be non-contiguous.">
+<p class="caption">PRIMARY CASE. US states, one tile per region, hexagon tiling — the gallery example and the tile_map_cartogram preset. grid (defaults) vs mosaic(morph=True) vs mosaic(morph=False). One colour per state, consistent across panels. No red marks: at one tile per region no region can be non-contiguous.</p>
+</div><div class="figure">
+<img src="states_uniform_square_grid_vs_mosaic.png" alt="Same input, square tiling — the demers_cartogram shape. Mosaic accepts a square tiling.">
+<p class="caption">Same input, square tiling — the demers_cartogram shape. Mosaic accepts a square tiling.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

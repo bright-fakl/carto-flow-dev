@@ -1,0 +1,8 @@
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+wrote /home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/norm_world_morph1.png
+wrote /home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/norm_world_morph0.png
+wrote /home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/norm_districts_morph0.png
+wrote /home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/norm_states_morph0.png

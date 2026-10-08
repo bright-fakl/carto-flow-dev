@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #47: Warn about unplaced mosaic regions, add min_one_tile_per_region</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #47: Warn about unplaced mosaic regions, add min_one_tile_per_region</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/47">https://github.com/bright-fakl/carto-flow/pull/47</a></dd>
+<dt>Branch</dt><dd>feat/mosaic-min-one-tile</dd>
+<dt>Base</dt><dd>fix/mosaic-component-pool-overlap</dd>
+<dt>Date</dt><dd>2026-09-23</dd>
+<dt>Before</dt><dd>fix/mosaic-component-pool-overlap @ bd2e76e (this PR&#x27;s own parent, so the numbers isolate this change)</dd>
+<dt>After</dt><dd>feat/mosaic-min-one-tile @ e5343e4</dd>
+<dt>Inputs</dt><dd>world countries (Natural Earth, Mollweide ESRI:54009) at 384 nominal / 460 actual and 800 nominal / 848 actual tiles, africa, world mainland only, US states, congressional districts grouped by State Name</dd>
+</dl>
+<p class="desc">Regions on a land mass smaller than one tile get no symbol and vanish silently; this reports them by name and adds an off-by-default option that places them without costing any other region a tile.</p>
+<p>**Stacked on #46.** Review that first; this branch contains it, and the before column below is #46&#x27;s output, not main&#x27;s.</p>
+<h2>The problem</h2>
+<p>A region only draws tiles from the pool of its own geographic component. A component whose every covering lattice cell falls below <code>min_overlap_frac</code> — a land mass smaller than about a tenth of a tile — wins no tile at all, so its pool is empty, the Hungarian solve is skipped, and its regions get no symbol. They simply do not appear on the map, and nothing is said about it.</p>
+<p>At world 384 nominal / 460 actual with morph=True that is the **Bahamas** (best overlap 0.034 of a tile) and **Trinidad and Tobago** (0.009). At morph=False it is thirteen regions: Fiji, Bahamas, Falkland Is., Fr. S. Antarctic Lands, Puerto Rico, Jamaica, Vanuatu, New Caledonia, Solomon Is., Taiwan, N. Cyprus, Cyprus and Trinidad and Tobago.</p>
+<p>The tile *count* already asks for these regions: a caller building <code>tile_count</code> with <code>max(1, round(...))</code> has requested one tile each. The layout fails to place them.</p>
+<h2>What changes</h2>
+<p>**A warning, always.** Whenever any region ends up with no tile the layout warns, names the regions (up to ten, then a count) and gives the concrete ways out. It fires whether or not the option is set — with the option set it drops the option from the list of remedies.</p>
+<p>``<code> 2 region(s) received no tile and are missing from the mosaic: Bahamas, Trinidad and Tobago. Each sits on a land mass no tile overlaps by min_overlap_frac, so its geographic component has no tiles to assign. To place them, set min_one_tile_per_region=True to place them on the nearest free cells, raise the tile budget so each of them covers more of a tile, or lower min_overlap_frac. </code>``</p>
+<p>**<code>min_one_tile_per_region: bool = False</code>**, a new <code>MosaicLayoutOptions</code> field. A component short of tiles is given the cells that overlap it most, enough to cover its requested count. Cells come from outside the calibrated core, or from a component whose pool holds more tiles than it needs — never one that would leave another region short. The search widens in three steps until enough cells are available, so a component in a crowded archipelago still finds them.</p>
+<p>**Off by default.** A region below one tile&#x27;s worth of area is drawn at a full tile either way, which overstates it against every other region on the map. Whether that trade is right depends on what the map is for, so it is the caller&#x27;s decision, not a silent default. The option also means the mosaic holds more tiles than the calibrated core does, since the seeded cells sit outside it.</p>
+<h2>The naive guarantee is NOT free — corrected finding</h2>
+<p>An earlier reading of this problem was that the guarantee costs nothing, because the shortfall is per-component pool emptiness rather than a global tile shortage. **That was wrong, and the probe that settled it is worth stating.**</p>
+<p>For every region with no symbol, the cell overlapping its geometry most was located and checked against the final assignment:</p>
+<table>
+<tr><th>input</th><th>regions with no symbol</th><th>best-overlapping cell free</th><th>best-overlapping cell already owned</th></tr>
+<tr><td>world 384 / 460, morph=True</td><td>2</td><td>0</td><td>**2**</td></tr>
+<tr><td>world 384 / 460, morph=False</td><td>13</td><td>6</td><td>**7**</td></tr>
+</table>
+<p>So a first draft that only ever took *unclaimed* cells still left Jamaica, N. Cyprus and Cyprus unplaced at morph=False: every cell near them already belonged to another component. The shipped version additionally draws on components whose pool holds **more** tiles than their regions request, so the surplus absorbs the loss and nobody&#x27;s count changes. Across all four world configurations, requested and placed totals then match exactly.</p>
+<p>Two further points the probe settled:</p>
+<ul><li>**Always achievable?** Practically yes, and the failure mode is geometric rather than</li></ul>
+<p>combinatorial. Two regions on one sub-tile land mass — N. Cyprus and Cyprus share a component — simply need two cells, and the search widens until it finds them. What cannot be guaranteed is that the cell is *near* the region: in a crowded archipelago the nearest available cell may be a sea cell some distance away. The option guarantees a symbol, not a well-placed one.</p>
+<ul><li>**Interaction with component splitting: total.** The guarantee has to run as a</li></ul>
+<p>pool-seeding step before the empty-pool skip, and a seeded cell has to be excluded from every other component&#x27;s pool — which is only meaningful once pools are disjoint. That is why this PR is stacked on #46.</p>
+<ul><li>**Interaction with calibration:** it breaks the <code>len(core_set) == target_count</code> invariant.</li></ul>
+<p>Seeded cells sit outside the calibrated core, so the mosaic holds more tiles than the core does. That shows up as a symbol protruding into the sea, which is the correct appearance for a country that is genuinely there.</p>
+<h2>Effect</h2>
+<table>
+<tr><th>input</th><th>off: short / zero</th><th>on: short / zero</th><th>off: non-contiguous</th><th>on: non-contiguous</th><th>option changes the result</th></tr>
+<tr><td>world 384 / 460, morph=True</td><td>2 / 2</td><td>**0 / 0**</td><td>2</td><td>2</td><td>yes</td></tr>
+<tr><td>world 384 / 460, morph=False</td><td>13 / 13</td><td>**0 / 0**</td><td>3</td><td>1</td><td>yes</td></tr>
+<tr><td>world 800 / 848, morph=True</td><td>3 / 3</td><td>**0 / 0**</td><td>3</td><td>3</td><td>yes</td></tr>
+<tr><td>world 800 / 848, morph=False</td><td>11 / 11</td><td>**0 / 0**</td><td>3</td><td>4</td><td>yes</td></tr>
+<tr><td>africa 150 / 159, both morph settings</td><td>0 / 0</td><td>0 / 0</td><td>0</td><td>0</td><td>**no — bit-identical**</td></tr>
+<tr><td>world mainland only 384 / 446, both morph settings</td><td>0 / 0</td><td>0 / 0</td><td>1 / 5</td><td>1 / 5</td><td>**no — bit-identical**</td></tr>
+<tr><td>US states, both morph settings</td><td>0 / 0</td><td>0 / 0</td><td>0</td><td>0</td><td>**no — bit-identical**</td></tr>
+<tr><td>congressional districts, both morph settings</td><td>0 / 0</td><td>0 / 0</td><td>0</td><td>0</td><td>**no — bit-identical**</td></tr>
+</table>
+<p>Every region is placed on all four world configurations and no region gives up a tile. The option is **inert** — byte-identical placement and tile size — on every input that had no unplaced region to begin with, which is what default-off should mean in practice. Split groups are zero throughout. Runtime is unchanged within noise everywhere.</p>
+<h2>Verification</h2>
+<p><code>make check</code> clean, full suite 635 passed, including three new tests: the warning fires and names the region; the option places it without any other region losing a tile; the option is inert when every region already has tiles.</p>
+<h2>One thing the figures show that this PR does not fix</h2>
+<p>At morph=False on world the mosaic places symbols very far from their regions — the tile nearest Jamaica carries Senegal, the tile nearest Cyprus carries India, median displacement 3398 km. That is a separate problem in <code>_build_cost_matrix</code> and is out of scope here. It is written up in <code>visual_checks/mosaic-world-islands/summary.md</code> and evaluated in <code>visual_checks/mosaic-distance-normalisation/</code>.</p>
+<div class="figure">
+<img src="m1_world_b384_morph0.png" alt="the same input at morph=False, where thirteen regions go missing by default.">
+<p class="caption">the same input at morph=False, where thirteen regions go missing by default.</p>
+</div><div class="figure">
+<img src="m1_world_b384_morph1.png" alt="world, 384 nominal / 460 actual tiles, morph=True. min_one_tile_per_region=False (the default) above, True below. Regions with no symbol are red.">
+<p class="caption">world, 384 nominal / 460 actual tiles, morph=True. min_one_tile_per_region=False (the default) above, True below. Regions with no symbol are red.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

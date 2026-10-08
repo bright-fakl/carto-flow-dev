@@ -1,0 +1,22 @@
+states=49 tiles=154 districts=432
+[run] states_uniform__grid
+[done] states_uniform__grid in 1.5s
+[run] states_uniform__mosaic_morph__rep0
+[done] states_uniform__mosaic_morph__rep0 in 1.3s
+[run] states_uniform__mosaic_morph__rep1
+[done] states_uniform__mosaic_morph__rep1 in 0.8s
+[run] states_uniform__mosaic_morph__rep2
+[done] states_uniform__mosaic_morph__rep2 in 0.9s
+[run] states_uniform__mosaic_nomorph
+[done] states_uniform__mosaic_nomorph in 0.7s
+[run] states_uniform_sq__grid
+[done] states_uniform_sq__grid in 1.6s
+[run] states_uniform_sq__mosaic_morph__rep0
+[done] states_uniform_sq__mosaic_morph__rep0 in 0.8s
+[run] states_uniform_sq__mosaic_morph__rep1
+[done] states_uniform_sq__mosaic_morph__rep1 in 0.8s
+[run] states_uniform_sq__mosaic_morph__rep2
+[done] states_uniform_sq__mosaic_morph__rep2 in 0.8s
+[run] states_uniform_sq__mosaic_nomorph
+[done] states_uniform_sq__mosaic_nomorph in 0.8s
+[all done]

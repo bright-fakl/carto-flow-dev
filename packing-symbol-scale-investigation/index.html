@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Why packed circles cover only a small part of the map</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Why packed circles cover only a small part of the map</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">reviewed</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/41">https://github.com/bright-fakl/carto-flow/pull/41</a></dd>
+<dt>Date</dt><dd>2026-09-22</dd>
+<dt>Inputs</dt><dd>US states (bundled census, Population, ESRI:102008); Europe and Africa from load_world by pop_est; a 6x6 unit grid with uniform and mildly varying values.</dd>
+</dl>
+<p class="desc">Investigation, no code change. Symbol coverage under the default size_normalization=&quot;max&quot; is exactly mean(value)/max(value) of the sizing column — 0.168 for US states by Population. The neighbour tangency force then contracts the layout to the configuration where those small circles touch, which is about sqrt(coverage) of the map&#x27;s linear size. Both effects are by design; neither is specific to packing.</p>
+<h2>Coverage</h2>
+<p>Under <code>size_normalization=&quot;max&quot;</code> the largest symbol is given an area equal to the mean geometry area, so with the default <code>sqrt</code> scale the total symbol area works out to <code>total_geometry_area x mean(value) / max(value)</code> exactly. US states by Population: <code>mean/max = 0.1683</code>, measured coverage <code>0.1672</code>. Europe by <code>pop_est</code>: <code>0.1324</code> predicted, <code>0.1315</code> measured. Africa: <code>0.1275</code> and <code>0.1266</code>. With a uniform sizing column the ratio is 1 and coverage is 0.994.</p>
+<p><code>size_normalization=&quot;total&quot;</code> sets the total symbol area equal to the total geometry area instead: coverage 0.994 on every input.</p>
+<p>The residual 0.6% is the rendered circle being a 32-gon.</p>
+<h2>Contraction</h2>
+<p>The neighbour tangency force pulls adjacent symbols until they touch. With circles at 16.7% of the map&#x27;s area, the touching configuration is about <code>sqrt(0.167) = 0.41</code> of the map&#x27;s linear size. Measured bounding box is 0.51 x 0.58 of the input, a little looser than 0.41 because circles cannot tile perfectly. Setting <code>neighbor_weight=0</code> gives 0.87 x 0.77 and cuts median displacement from 0.165 to 0.045; <code>compactness=0</code> and <code>origin_weight=0</code> barely move either number, and removing origin attraction makes displacement worse, so it is a restoring force rather than a cause.</p>
+<p>The contraction is radial, not directional: the symbol cluster&#x27;s own centroid moves only 0.03 of the characteristic map length. The far-western states move most simply because they are furthest from the centre of contraction.</p>
+<div class="figure">
+<img src="packing_scale_panels.png" alt="Four packings of US states by Population. Top left is the default. Top right is the same run with size_normalization=&quot;total&quot;. Bottom left removes the neighbour tangency force. Bottom right is stage 1 only (overlap resolution, before any contraction).">
+<p class="caption">Four packings of US states by Population. Top left is the default. Top right is the same run with size_normalization=&quot;total&quot;. Bottom left removes the neighbour tangency force. Bottom right is stage 1 only (overlap resolution, before any contraction).</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

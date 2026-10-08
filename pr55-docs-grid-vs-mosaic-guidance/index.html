@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #55: Document when to use the grid layout versus the mosaic layout</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #55: Document when to use the grid layout versus the mosaic layout</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/55">https://github.com/bright-fakl/carto-flow/pull/55</a></dd>
+<dt>Branch</dt><dd>docs/grid-vs-mosaic-guidance</dd>
+<dt>Base</dt><dd>origin/main @ 3a637b1</dd>
+<dt>Date</dt><dd>2026-09-24 14:00</dd>
+<dt>Before</dt><dd>(docs only — no library source changed)</dd>
+<dt>After</dt><dd>docs/grid-vs-mosaic-guidance @ 59a4be8</dd>
+<dt>Inputs</dt><dd>US states (49, bundled, hexagon) one tile per region; the same states with tile_count = round(population share x 150) = 154 tiles; US states grouped by Region; US congressional districts (432) for the timing and group_by checks</dd>
+</dl>
+<p class="desc">New how-to that runs both tile-lattice layouts on the same inputs and scores them with one external metric set; this page records the measurements the guidance rests on, including which numbers from the earlier grid-vs-mosaic study still hold on current main.</p>
+<h2>What changed</h2>
+<p>Docs only.</p>
+<ul><li>**New** <code>docs/how-to/choose-grid-or-mosaic-layout.ipynb</code>, registered in <code>mkdocs.yml</code></li></ul>
+<p>and <code>docs/how-to/index.md</code>.</p>
+<ul><li>**Corrected** the &quot;Choosing a layout for tile-count maps&quot; cell in</li></ul>
+<p><code>docs/how-to/tile-count-maps.ipynb</code>.</p>
+<ul><li>**Cross-links** added to <code>docs/explanations/symbol-cartogram-grid-layout.md</code> and</li></ul>
+<p><code>docs/explanations/symbol-cartogram-mosaic-layout.md</code>, behavior only.</p>
+<h2>Where the page lives, and why</h2>
+<p><code>docs/explanations/</code> explains algorithms and implementation only — no result tables, no decision history. The guidance is evidence-backed, so the evidence had to go somewhere the rule allows. <code>docs/how-to/voronoi_cartogram/choose-backend.ipynb</code> is the existing precedent: a decision guide, with live timings, a side-by-side figure and a recommendation table. The new page follows it exactly.</p>
+<p>The tension is resolved by splitting the two registers rather than by weakening either:</p>
+<ul><li>the **how-to** performs the measurement in front of the reader and prints the table,</li></ul>
+<p>so the numbers are current and reproducible rather than quoted from a study;</p>
+<ul><li>the **explanation pages** state the same findings as behavior — &quot;each requested tile</li></ul>
+<p>is a separate item and no term in the cost matrix ties the items of one region together&quot; — with no number, no table, and no reference to this or any PR.</p>
+<h2>Measurements the guidance rests on</h2>
+<p>All re-run on <code>main</code> @ 3a637b1 (not taken from the earlier study), with the same metric definitions: adjacency = fraction of input neighbor pairs still lattice-adjacent; displacement = median centroid-to-block-center distance in tile widths; reversed = fraction of neighbor pairs whose direction turned more than 90 degrees; scattered = regions whose tiles are not one edge-connected block; silhouette = IoU of the occupied tile footprint against the original map outline after equal-area scaling and centroid alignment.</p>
+<h3>One tile per region, 49 US states, hexagon</h3>
+<table>
+<tr><th>layout</th><th>adjacency</th><th>displacement</th><th>reversed</th><th>scattered</th><th>silhouette</th><th>seconds</th></tr>
+<tr><td>grid</td><td>**0.789**</td><td>**1.22**</td><td>**0.000**</td><td>0</td><td>0.609</td><td>1.7</td></tr>
+<tr><td>mosaic</td><td>0.725</td><td>1.53</td><td>0.064</td><td>0</td><td>**0.713**</td><td>1.4</td></tr>
+</table>
+<p>Direction median: grid 23.6 degrees, mosaic 28.3.</p>
+<h3>154 tiles via <code>tile_count</code>, same 49 states</h3>
+<table>
+<tr><th>layout</th><th>adjacency</th><th>displacement</th><th>reversed</th><th>scattered</th><th>silhouette</th><th>seconds</th></tr>
+<tr><td>grid</td><td>0.780</td><td>2.43</td><td>0.083</td><td>**21**</td><td>0.667</td><td>4.6</td></tr>
+<tr><td>mosaic</td><td>**0.798**</td><td>**2.10**</td><td>**0.009**</td><td>**0**</td><td>**0.687**</td><td>**1.2**</td></tr>
+</table>
+<h3><code>group_by</code></h3>
+<p><code>GridBasedLayout</code> raises <code>ValueError</code> (&quot;does not support group_by: it would ignore the grouping ... Layouts that honor group_by: centroid, flow_density, mosaic, packing&quot;). <code>MosaicLayout.supports_group_by = True</code> and constrains a group&#x27;s tiles to one block.</p>
+<h3>Scaling</h3>
+<p>432 congressional districts, one tile per district, no <code>group_by</code> (grid cannot take it): grid **113.3 s**, mosaic 4.4 s — a factor of ~26.</p>
+<h2>Where the brief&#x27;s headline findings held, and where they moved</h2>
+<p>The brief&#x27;s numbers come from <code>visual_checks/grid-vs-mosaic-similarity/</code>, measured at <code>origin/main</code> @ 0e917a8. Three PRs merged since then move some of them. Checked one by one:</p>
+<table>
+<tr><th>claim in the brief</th><th>on current main</th><th>verdict</th></tr>
+<tr><td>1:1 displacement 1.22 (grid) vs 1.56 (mosaic)</td><td>1.22 vs **1.53**</td><td>holds; mosaic marginally better</td></tr>
+<tr><td>1:1 adjacency 0.789 vs 0.697</td><td>0.789 vs **0.725**</td><td>holds; the gap narrowed</td></tr>
+<tr><td>1:1 direction 23.6 vs 26.1 degrees</td><td>23.6 vs **28.3**</td><td>holds; mosaic slightly worse now</td></tr>
+<tr><td>grid reverses none of the 109 input adjacencies, mosaic 9.2 %</td><td>grid 0.000, mosaic **6.4 %**</td><td>holds</td></tr>
+<tr><td>at 154 tiles grid leaves 21 of 49 states scattered, mosaic 0</td><td>21 and 0, exactly</td><td>holds</td></tr>
+<tr><td>on districts grid splits 8 state groups, mosaic 0</td><td>not re-measured — grid now raises on <code>group_by</code>, so the comparison no longer exists</td><td>superseded</td></tr>
+<tr><td>grid ~27x slower on districts (108 s vs 3.9 s)</td><td>113.3 s vs 4.4 s, ~26x</td><td>holds</td></tr>
+<tr><td>silhouette: US states 1:1, 0.71 mosaic vs 0.61 grid</td><td>0.713 vs 0.609</td><td>holds</td></tr>
+<tr><td>silhouette: districts 0.70 vs 0.62</td><td>not re-measured (113 s per grid run)</td><td>not checked</td></tr>
+<tr><td>bounding-box metrics point the other way, so write from silhouette</td><td>followed — the guide reports silhouette IoU and no bbox metric</td><td>applied</td></tr>
+<tr><td><code>group_by</code> is the sharpest divider; grid raises</td><td>confirmed in <code>layouts/base.py::check_group_by_support</code> and the missing <code>supports_group_by</code> on <code>GridBasedLayout</code></td><td>holds</td></tr>
+</table>
+<p>**The one place the study is now out of date in substance**: the brief says mosaic loses the per-region axes and wins only contiguity, grouping and silhouette. At 154 tiles that is no longer true — mosaic now leads adjacency (0.798 vs 0.780), displacement (2.10 vs 2.43) and reversals (0.009 vs 0.083) as well. The cause is visible in the study itself: section 6 found <code>interior_bonus=2.0</code> better than 0.5 on every multi-tile and grouped panel, and 2.0 is the current default. The study&#x27;s multi-tile mosaic row (adjacency 0.706) was measured at 0.5. The guide is written to the current behavior, so it says mosaic overtakes grid on the per-region columns once regions span several tiles, rather than repeating the study&#x27;s ordering.</p>
+<p>Mosaic&#x27;s disjoint component pools also show up at 1:1: adjacency 0.697 in the study against 0.725 here, on the same input and the same default settings.</p>
+<h2>Verification</h2>
+<ul><li><code>make check</code>: clean (pre-commit, mypy on 80 files, deptry).</li><li><code>make test</code>: 710 passed.</li><li><code>uv run mkdocs build -s</code>, run alone with <code>docs/generated/</code> and <code>site/</code> cleared:</li></ul>
+<p>built in 417.79 s, 26 of 26 gallery files executed. The first attempt died in mkdocs-gallery&#x27;s <code>write_computation_times</code> with the known <code>OverflowError</code>; a clean rerun succeeded. The built page was checked for its three figures and its tables.</p>
+<ul><li>Every code cell in the new notebook executes; the tables above are its output.</li></ul>
+<div class="figure">
+<img src="group_by_mosaic.png" alt="mosaic with group_by=&quot;Region&quot;: four contiguous regional blocks. Grid raises on this input rather than placing symbols as if the grouping were absent, so there is no grid panel to show.">
+<p class="caption">mosaic with group_by=&quot;Region&quot;: four contiguous regional blocks. Grid raises on this input rather than placing symbols as if the grouping were absent, so there is no grid panel to show.</p>
+</div><div class="figure">
+<img src="one_tile_per_region.png" alt="One tile per state, grid vs mosaic, same axis limits, state abbreviations labeled. Grid&#x27;s arrangement reads more accurately state by state; mosaic&#x27;s footprint reads more accurately as the United States. This is the figure the &quot;per-region fidelity vs silhouette&quot; sentence in the guide is written from.">
+<p class="caption">One tile per state, grid vs mosaic, same axis limits, state abbreviations labeled. Grid&#x27;s arrangement reads more accurately state by state; mosaic&#x27;s footprint reads more accurately as the United States. This is the figure the &quot;per-region fidelity vs silhouette&quot; sentence in the guide is written from.</p>
+</div><div class="figure">
+<img src="tile_count_154.png" alt="154 tiles via tile_count, one color per state, tiles of a scattered state outlined in red. Grid leaves 21 of 49 states in more than one block; mosaic leaves none.">
+<p class="caption">154 tiles via tile_count, one color per state, tiles of a scattered state outlined in red. Grid leaves 21 of 49 states in more than one block; mosaic leaves none.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

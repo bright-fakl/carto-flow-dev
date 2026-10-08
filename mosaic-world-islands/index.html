@@ -1,0 +1,230 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Why the mosaic layout drops regions on world countries, and why its contiguity repair is slow</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Why the mosaic layout drops regions on world countries, and why its contiguity repair is slow</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">reviewed</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Branch</dt><dd>perf/contiguity-path-reachability-precheck, fix/mosaic-component-pool-overlap, feat/mosaic-min-one-tile, refactor/mosaic-honest-hungarian-defaults</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-23</dd>
+<dt>Before</dt><dd>origin/main @ a095187 (investigation) and @ 8b197eb (before/after measurements)</dd>
+<dt>After</dt><dd>the four branches above</dd>
+<dt>Inputs</dt><dd>africa (Natural Earth, Mollweide ESRI:54009), world countries (same), world mainland only, US states, congressional districts grouped by State Name</dd>
+</dl>
+<p class="desc">Two independent mechanisms lose a region&#x27;s tiles on multi-landmass inputs, a 99.5%-wasted path enumeration explains the repair cost, and both are fixed bit-identically or with evidence.</p>
+<h2>A note on tile budgets</h2>
+<p>Every world budget below is written <code>nominal / actual</code>. The fixture builds tile counts as <code>max(1, round(pop / pop.sum() * budget))</code>, and because 140 of 176 countries hold less than half a tile&#x27;s worth of population, the <code>max(1, ...)</code> floor raises the requested total well above the nominal figure: nominal 300 requests 384 tiles, 384 requests 460, 800 requests 848, 1500 requests 1527. Earlier write-ups of this input quote only the nominal number and understate the tile count by up to 28%. Nothing in the library is wrong here — <code>tile_count</code> is a caller-supplied column, so the rounding convention is the caller&#x27;s.</p>
+<h2>What was asked, and the headline</h2>
+<p>Why does the mosaic layout leave regions without a symbol on world countries, is it the islands, and why does the contiguity repair take tens of seconds?</p>
+<p>**It is the islands, but not in the way it looks.** Two independent mechanisms lose tiles, and at <code>morph=True</code> the regions that actually lose them are mostly *mainland* countries — Germany, Belgium, both Koreas, Bhutan, Timor-Leste. The islands are the ones taking their tiles. The earlier framing of this investigation, that the failures were island states losing out, is right only at <code>morph=False</code>, where the other mechanism dominates.</p>
+<h2>The three-input control</h2>
+<table>
+<tr><th>input</th><th>budget nominal / actual</th><th>morph</th><th>regions short</th><th>regions with no symbol</th></tr>
+<tr><td>africa (51 countries, 2 components)</td><td>150 / 159 and 300 / 306</td><td>both</td><td>0</td><td>0</td></tr>
+<tr><td>world (176 countries, 24 components)</td><td>384 / 460</td><td>True</td><td>8</td><td>6</td></tr>
+<tr><td>world</td><td>384 / 460</td><td>False</td><td>18</td><td>14</td></tr>
+<tr><td>world</td><td>800 / 848</td><td>True</td><td>6</td><td>3</td></tr>
+<tr><td>world</td><td>1500 / 1527</td><td>True</td><td>6</td><td>2</td></tr>
+<tr><td>**world mainland only (150 countries, 1 component)**</td><td>384 / 446, 800 / 831, 1500 / 1511</td><td>both</td><td>**0**</td><td>**0**</td></tr>
+</table>
+<p>&quot;Mainland only&quot; keeps the countries in the **largest connected component of the land-adjacency graph** and drops the rest. On this input that component holds 150 of 176 countries — all of Afro-Eurasia *and* the Americas, which are linked to Europe because Natural Earth&#x27;s France polygon includes French Guiana, bordering Brazil and Suriname. The 26 dropped countries form the other 23 components: Australia, Japan, Cuba, the UK+Ireland pair, the Philippines, Fiji and so on.</p>
+<p>Dropping them makes the input perfectly clean at every budget and both morph settings. Tile loss is entirely a multi-component phenomenon.</p>
+<h2>Mechanism 1 — a component with an empty tile pool</h2>
+<p>Each core tile is assigned to exactly one geographic component. A region on a land mass that no lattice cell overlaps by <code>min_overlap_frac</code> (default 0.1) wins no core tile, its component&#x27;s pool is empty, and the per-component loop skips it outright:</p>
+<p>``<code>python if not pool_c or int(counts_c.sum()) == 0: continue          # the region&#x27;s tile is lost here, silently </code>``</p>
+<p><code>extra_tile_rings</code> cannot rescue it: the expansion grows *from* the pool, and growing an empty set gives an empty set.</p>
+<p>At world 384 / 460, <code>morph=True</code>: **Bahamas** (best overlap 0.034 of a tile) and **Trinidad and Tobago** (0.009). At <code>morph=False</code>: thirteen regions — Fiji, Bahamas, Falkland Is., Fr. S. Antarctic Lands, Puerto Rico, Jamaica, Vanuatu, New Caledonia, Solomon Is., Taiwan, N. Cyprus, Cyprus, Trinidad and Tobago.</p>
+<h2>Mechanism 2 — one component overwriting another&#x27;s tiles</h2>
+<p>Component pools **overlap**, because <code>extra_tile_rings</code> expanded each component&#x27;s pool independently and an island&#x27;s ring reaches across the water into the mainland&#x27;s *core* tiles. Both components then solve over those tiles and both place a symbol; the write-back assigns unconditionally, so whichever component is enumerated last silently wins:</p>
+<p>``<code>python for t in pool_c: local_g = int(assignment_c[t]) if local_g &gt;= 0: assignment[t] = int(geom_indices_arr[local_g]) </code>``</p>
+<p>All eight overwrites at world 384 / 460, <code>morph=True</code>:</p>
+<table>
+<tr><th>tile</th><th>assigned by</th><th>overwritten by</th></tr>
+<tr><td>1666</td><td>Belgium (component 1)</td><td>United Kingdom (component 12)</td></tr>
+<tr><td>1667</td><td>Germany (component 1)</td><td>United Kingdom (component 12)</td></tr>
+<tr><td>1732</td><td>Germany (component 1)</td><td>United Kingdom (component 12)</td></tr>
+<tr><td>574</td><td>Timor-Leste (component 1)</td><td>Australia (component 16)</td></tr>
+<tr><td>1490</td><td>Bhutan (component 1)</td><td>Japan (component 21)</td></tr>
+<tr><td>1491</td><td>South Korea (component 1)</td><td>Japan (component 21)</td></tr>
+<tr><td>1621</td><td>North Korea (component 1)</td><td>Japan (component 21)</td></tr>
+<tr><td>1622</td><td>South Korea (component 1)</td><td>Japan (component 21)</td></tr>
+</table>
+<p>**Per-region verdict at 384 / 460, <code>morph=True</code>.** Bahamas and Trinidad and Tobago fail by mechanism 1. Timor-Leste, North Korea, Bhutan and Belgium lose their only tile to mechanism 2; South Korea (3 → 1) and Germany (4 → 2) lose two each. They do not all fail the same way.</p>
+<p>Candidates eliminated by measurement: the rectangular <code>linear_sum_assignment</code> never starved a component (pool ≥ demand everywhere measured), and the component-splitting logic allocates correctly — it is the write-back that loses the tiles.</p>
+<h2>Mechanism 3 — the contiguity repair, and why it was slow</h2>
+<p><code>repair_contiguity</code>&#x27;s <code>_enumerate_paths</code> is a heap over **paths**, not nodes. It keeps no visited set, so a node is re-expanded once per prefix that reaches it, and the search ends only when enough candidates have been yielded **or the heap empties**. When nothing reaches the destination, &quot;the heap empties&quot; means enumerating every simple path of up to ten nodes — about 1.3e5 heap operations to establish that one satellite cannot be repaired at all, repeated once per satellite and once per pass.</p>
+<p>On the captured world 800 / 848 call at the default ten passes: **11,807,758 heap operations, of which 11,745,176 (99.5%) are inside the 80 calls that yield nothing** — and a plain node BFS proves all 80 unreachable in linear time. Cost is exactly linear in <code>max_passes</code> (1.48M pops per pass, constant), because every pass redoes the identical hopeless enumeration.</p>
+<p>Scaling: cost ≈ (unrepairable satellites) × (simple paths within ten hops, a lattice constant) × <code>max_passes</code>. Tile count and region count enter only through the satellite count. **The number of components is the driver** — a satellite is unreachable precisely when a region&#x27;s tiles are split across a sea gap, so this mechanism has the same root cause as the other two. World mainland only, at 1511 tiles and one component, is cheap; world at 848 tiles and 24 components is not.</p>
+<h2>What <code>swap_repair_passes</code> and <code>ring_swapback_max_hops</code> cost and buy</h2>
+<p>Full tables in <code>tables.md</code>. In brief, at world 800 / 848:</p>
+<ul><li><code>swap_repair_passes</code> at <code>morph=True</code> runs 8.8 s with 16 non-contiguous regions at 0 and</li></ul>
+<p>38.3 s with 6 at the default 10, and **never saturates** — every value has a distinct fingerprint. At <code>morph=False</code> it saturates at 2 (values 2, 3, 5 and 10 share one fingerprint) yet still costs 7.5 s more at 10 than at 2. On districts it is runtime-flat at ~4 s and takes split groups from 12 to 0.</p>
+<ul><li><code>ring_swapback_max_hops</code> costs ~6 s at <code>morph=True</code> and ~10 s at <code>morph=False</code> for the</li></ul>
+<p>default 16 over 0, and buys a monotonic fall in empty core tiles (135 → 32, 142 → 81). On districts it is runtime-flat and takes split groups from 2 to 0 by hop 2.</p>
+<p>Neither default was changed. The right answer for <code>swap_repair_passes</code> is the pre-check, not a lower cap, and every <code>ring_swapback_max_hops</code> value gives a distinct result while 32 re-introduces a defect on districts.</p>
+<h2>A separate problem this investigation exposed: <code>_build_cost_matrix</code></h2>
+<p>Not fixed, not in scope, recorded so it can be picked up.</p>
+<p><code>_build_cost_matrix</code> normalises the **squared** centroid distance by the **global maximum** squared distance:</p>
+<p>``<code>python dist_matrix = dx**2 + dy**2 max_dist = dist_matrix.max() or 1.0 dist_norm = dist_matrix / max_dist </code>``</p>
+<p>On a world-extent input in Mollweide the maximum squared distance is about 1.6e15, so a 9000 km displacement scores <code>(9.1e6)² / 1.6e15 ≈ 0.05</code>, against an <code>interior_bonus</code> worth up to **2.0**. The distance term is worth about 2.5% of the connectivity term at full range. The assignment is effectively distance-blind at continental scale.</p>
+<p>Measured displacement between each placed tile and the centroid of the region owning it, on world 384 / 460:</p>
+<table>
+<tr><th>morph</th><th>median</th><th>90th percentile</th><th>maximum</th></tr>
+<tr><td>False</td><td>3398 km</td><td>6627 km</td><td>9106 km</td></tr>
+<tr><td>True</td><td>2113 km</td><td>4152 km</td><td>8108 km</td></tr>
+</table>
+<p>At <code>morph=False</code> the tile nearest Jamaica carries **Senegal**; the tile nearest Puerto Rico carries **Mali**; the tile nearest Cyprus carries **India**. Denmark&#x27;s tile sits in northern Canada. This is not a small fidelity loss, it is a scrambled map, and it is why the &quot;which region owns the cell an island needs&quot; question below is currently arbitrary.</p>
+<p>It connects directly to <code>interior_bonus</code>, whose default was recently raised to 2.0: the higher that value, the wider the range over which distance stops mattering. Nothing here argues for reverting it — the diagnosis is the normalisation, not the bonus.</p>
+<h2>Fixes</h2>
+<p>Four separate PRs so each can be reviewed and reverted alone.</p>
+<p>**Contiguity pre-check** (<code>perf/contiguity-path-reachability-precheck</code>, #44). A node-level BFS in front of the path enumeration. A shortest walk is a simple path, so &quot;no destination reachable within <code>max_len</code> nodes&quot; is exactly when the enumeration yields nothing — the early return is equivalent by construction. The repair call goes from 30.5 s to 0.23 s with an array-identical permutation; end-to-end 1.0x to 2.7x depending on how much of a run the repair was consuming. Bit-identical on world, districts and states at both morph settings.</p>
+<p>**Disjoint component pools** (<code>fix/mosaic-component-pool-overlap</code>, #46). Rings are grown from all components at once, so every tile is owned by exactly one component: core tiles by the existing partition, ring tiles by whichever component reaches them in the fewest lattice steps. Pools are disjoint by construction, the write-back cannot conflict, and the outcome no longer depends on component enumeration order — which is what made this latent. A guard at the write would have stopped the corruption while leaving all three of those problems in place. Recovers exactly the six mechanism-2 victims at world 384 / 460 <code>morph=True</code>, and India, China, Vietnam, Bangladesh, Ukraine and Hungary at 800 / 848 <code>morph=False</code>. Bit-identical on states, districts and world-mainland-only, which have nothing to disentangle.</p>
+<p>**<code>min_one_tile_per_region</code> plus an always-on warning** (<code>feat/mosaic-min-one-tile</code>, #47). The warning fires whenever any region ends up with no tile, whether or not the option is set, names the regions and gives the remedies. The option gives a short component the cells overlapping it most, taken from outside the calibrated core or from a component holding more than it needs, so no other region is left short. Off by default: a region below one tile&#x27;s worth of area is drawn at a full tile either way, which overstates it against everything else on the map. With it on, all four world configurations place every requested tile; it is byte-identical on every input that had nothing missing to begin with.</p>
+<p>**Honest defaults** (<code>refactor/mosaic-honest-hungarian-defaults</code>, #48). <code>max_connectivity_iters</code> 15 → 5 (the most passes ever run is four) and <code>disconnected_penalty_mult</code> → <code>penalize_disconnected: bool</code> (every value from 1.0 to 50.0 is indistinguishable; only zero differs). Both verified bit-identical over 40 Hungarian solves using the same-process technique from <code>mosaic-inert-verify</code>, which is the only way to see past the <code>morph=True</code> run-to-run noise.</p>
+<h2>Feasibility of the one-tile guarantee, in full</h2>
+<p>The question was whether it is always achievable and what it costs.</p>
+<p>*Is the best cell free?* Not generally. At world 384 / 460 <code>morph=True</code> both missing regions&#x27; best-overlapping cells are already core tiles of another component — Bahamas&#x27; best cell belongs to Cuba&#x27;s component, Trinidad&#x27;s to a cell the solver gave Senegal. At <code>morph=False</code>, 6 of 13 best cells are free and 7 are taken. So a naive &quot;give it its best cell&quot; would take a tile from somebody.</p>
+<p>*What it costs the region that gives one up:* nothing, as implemented. Cells are only taken from a component whose pool holds **more** tiles than its regions request, so the surplus absorbs the loss and no region&#x27;s count changes. Across all four world configurations, requested and placed totals match exactly with the option on.</p>
+<p>*Is it always achievable?* Practically yes, and the failure mode is geometric rather than combinatorial. Two regions on one sub-tile land mass (Cyprus and N. Cyprus, which share a component) simply need two cells, and the search widens until it finds them. What cannot be guaranteed is that the cell is *near* the region: in a crowded archipelago the nearest available cell may be a sea cell some distance away. The honest statement is that the option guarantees a symbol, not a well-placed one — and on world at <code>morph=False</code> that caveat is currently swamped by the <code>_build_cost_matrix</code> displacement above.</p>
+<p>*Interaction with component splitting:* total. The guarantee has to run as a pool-seeding step before the empty-pool skip, and a seeded cell has to be excluded from every other component&#x27;s pool — which is only meaningful once pools are disjoint. That is why #47 is stacked on #46.</p>
+<p>*Interaction with calibration:* it breaks the <code>len(core_set) == target_count</code> invariant. Seeded cells sit outside the calibrated core, so the mosaic holds more tiles than the core does. That is visible as a symbol protruding into the sea, which is the correct appearance for a country that is genuinely there.</p>
+<h2>Scripts</h2>
+<p><code>wi_inputs.py</code> (the three inputs), <code>diagnose.py</code> and <code>trace_loss.py</code> (stage-by-stage tile loss), <code>run_all.py</code> (diag / metrics / knob sweeps, JSONL written incrementally), <code>capture_repair.py</code> and <code>analyze_repair.py</code> (the contiguity instrumentation), <code>repair_probe.py</code> (instrumented and pre-checked copies of <code>repair_contiguity</code>), <code>taskc_probe.py</code> (one-tile feasibility), <code>verify_identical.py</code>, <code>time_it.py</code>, <code>pr4_same_proc.py</code>, <code>figures.py</code>, <code>pr2_figures.py</code>, <code>pr3_figures.py</code>.</p>
+<p>Raw records: <code>results.jsonl</code>, <code>repair_analysis.jsonl</code>, <code>taskc_probe.jsonl</code>, <code>timing_*.json</code>, <code>verify_*.json</code>.</p>
+<div class="figure">
+<img src="africa_b150_morph0.png" alt="africa_b150_morph0.png">
+<p class="caption">africa_b150_morph0.png</p>
+</div><div class="figure">
+<img src="africa_b150_morph1.png" alt="africa_b150_morph1.png">
+<p class="caption">africa_b150_morph1.png</p>
+</div><div class="figure">
+<img src="africa_b300_morph0.png" alt="africa_b300_morph0.png">
+<p class="caption">africa_b300_morph0.png</p>
+</div><div class="figure">
+<img src="africa_b300_morph1.png" alt="africa_b300_morph1.png">
+<p class="caption">africa_b300_morph1.png</p>
+</div><div class="figure">
+<img src="fig_africa_b150.png" alt="africa, the clean control: no region loses a tile at either morph setting">
+<p class="caption">africa, the clean control: no region loses a tile at either morph setting</p>
+</div><div class="figure">
+<img src="fig_world_b384.png" alt="world: red regions receive no symbol at all, amber ones are short">
+<p class="caption">world: red regions receive no symbol at all, amber ones are short</p>
+</div><div class="figure">
+<img src="fig_world_mainland_b384.png" alt="world with every island land mass dropped: completely clean">
+<p class="caption">world with every island land mass dropped: completely clean</p>
+</div><div class="figure">
+<img src="m1_world_b384_morph0.png" alt="the same at morph=False">
+<p class="caption">the same at morph=False</p>
+</div><div class="figure">
+<img src="m1_world_b384_morph1.png" alt="min_one_tile_per_region, off (default) above and on below">
+<p class="caption">min_one_tile_per_region, off (default) above and on below</p>
+</div><div class="figure">
+<img src="m2_world_b384_morph0.png" alt="the same at morph=False">
+<p class="caption">the same at morph=False</p>
+</div><div class="figure">
+<img src="m2_world_b384_morph1.png" alt="cross-component overwrite, before and after the fix">
+<p class="caption">cross-component overwrite, before and after the fix</p>
+</div><div class="figure">
+<img src="m2_world_b800_morph1.png" alt="the same at a larger tile budget">
+<p class="caption">the same at a larger tile budget</p>
+</div><div class="figure">
+<img src="world_b1500_morph1.png" alt="world_b1500_morph1.png">
+<p class="caption">world_b1500_morph1.png</p>
+</div><div class="figure">
+<img src="world_b384_morph0.png" alt="world_b384_morph0.png">
+<p class="caption">world_b384_morph0.png</p>
+</div><div class="figure">
+<img src="world_b384_morph1.png" alt="world_b384_morph1.png">
+<p class="caption">world_b384_morph1.png</p>
+</div><div class="figure">
+<img src="world_b800_morph1.png" alt="world_b800_morph1.png">
+<p class="caption">world_b800_morph1.png</p>
+</div><div class="figure">
+<img src="world_mainland_b1500_morph1.png" alt="world_mainland_b1500_morph1.png">
+<p class="caption">world_mainland_b1500_morph1.png</p>
+</div><div class="figure">
+<img src="world_mainland_b384_morph0.png" alt="world_mainland_b384_morph0.png">
+<p class="caption">world_mainland_b384_morph0.png</p>
+</div><div class="figure">
+<img src="world_mainland_b384_morph1.png" alt="world_mainland_b384_morph1.png">
+<p class="caption">world_mainland_b384_morph1.png</p>
+</div><div class="figure">
+<img src="world_mainland_b800_morph1.png" alt="world_mainland_b800_morph1.png">
+<p class="caption">world_mainland_b800_morph1.png</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

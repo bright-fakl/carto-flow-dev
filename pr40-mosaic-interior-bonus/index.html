@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #40: Raise mosaic interior_bonus default to 2.0</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #40: Raise mosaic interior_bonus default to 2.0</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/40">https://github.com/bright-fakl/carto-flow/pull/40</a></dd>
+<dt>Branch</dt><dd>feat/mosaic-interior-bonus-default</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-22</dd>
+<dt>Before</dt><dd>interior_bonus=0.5 (previous default)</dd>
+<dt>After</dt><dd>interior_bonus=2.0 (new default)</dd>
+<dt>Inputs</dt><dd>US states 1 tile/region (hexagon and square), US states 154 tiles via tile_count, US congressional districts grouped by State Name</dd>
+</dl>
+<p class="desc">Tighter per-region tile blocks. Better on 6 of 8 measured panels, worse on the two one-tile-per-region morph=False panels.</p>
+<h2>What changed</h2>
+<p><code>HungarianOptions.interior_bonus</code>: 0.5 -&gt; 2.0. The connectivity bonus is subtracted from a tile&#x27;s cost in proportion to how many of its lattice neighbours are also in the pool, so raising it makes each region claim a tighter, rounder block and pushes the leftover surplus to the periphery.</p>
+<p>Both sides of every figure come from the same source tree with <code>interior_bonus</code> passed explicitly, so the only difference between any two panels is the value.</p>
+<h2>What to look for</h2>
+<ul><li>**Figures 02 and 03 are the cost of this change**, not an aside. On one</li></ul>
+<p>symbol per region with <code>morph=False</code> the new default places symbols worse: fewer geographic neighbours end up adjacent, and more pairs end up on opposite sides of each other than before. It shows on both tilings, so it is a property of the change rather than of the hexagon lattice.</p>
+<ul><li>**Figures 01, 04 and 05 are the benefit.** The gain is largest where a</li></ul>
+<p>region owns several tiles (04) or where a group must stay whole (05) — exactly what the bonus acts on.</p>
+<ul><li>No panel in this set gains or loses a split group or a non-contiguous</li></ul>
+<p>region; all five are 0/0 on both sides. The differences here are all fidelity, not integrity.</p>
+<h2>Measured numbers</h2>
+<p>Eight panels: four input/tiling combinations x <code>morph</code> in {True, False}. Positive = the new default is better on that axis.</p>
+<table>
+<tr><th>input</th><th>morph</th><th>adjacency</th><th>displacement</th><th>direction</th><th>reversed &gt;90</th><th>better</th></tr>
+<tr><td>1 tile/region, hexagon</td><td>True</td><td>+0.028</td><td>+0.04</td><td>−2.3</td><td>+0.028</td><td>**2.0**</td></tr>
+<tr><td>1 tile/region, hexagon</td><td>**False**</td><td>**−0.073**</td><td>+0.01</td><td>**−5.2**</td><td>**−0.055**</td><td>**0.5**</td></tr>
+<tr><td>1 tile/region, square</td><td>True</td><td>+0.009</td><td>+0.13</td><td>+7.5</td><td>+0.018</td><td>**2.0**</td></tr>
+<tr><td>1 tile/region, square</td><td>**False**</td><td>**−0.018**</td><td>−0.06</td><td>**−7.6**</td><td>**−0.028**</td><td>**0.5**</td></tr>
+<tr><td>154 tiles</td><td>True</td><td>+0.092</td><td>+0.48</td><td>0.0</td><td>+0.028</td><td>**2.0**</td></tr>
+<tr><td>154 tiles</td><td>False</td><td>+0.028</td><td>+0.35</td><td>−0.6</td><td>+0.028</td><td>**2.0**</td></tr>
+<tr><td>districts, group_by</td><td>True</td><td>+0.050</td><td>+0.07</td><td>+3.3</td><td>+0.043</td><td>**2.0**</td></tr>
+<tr><td>districts, group_by</td><td>False</td><td>+0.016</td><td>+0.11</td><td>+3.4</td><td>0.000</td><td>**2.0**</td></tr>
+</table>
+<p>The two losses are both the one-tile-per-region <code>morph=False</code> panels. A user on that combination should pass <code>interior_bonus=0.5</code> explicitly to keep the previous behaviour.</p>
+<h2>Why not some other value</h2>
+<p>A seven-value sweep (0, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0) over the same eight panels found that 0, 0.25, 1.0, 4.0 and 8.0 each introduce a split group or a non-contiguous region on at least one panel. Only 0.5 and 2.0 are clean everywhere. 8.0 had the best fidelity numbers in several panels and is ruled out on integrity alone — two split groups on districts with <code>morph=False</code>.</p>
+<p>The knob is strongly non-monotonic: on one tile per region with hexagons and <code>morph=True</code> its adjacency curve runs 0.651, 0.761, 0.697, 0.569, 0.725, 0.716, 0.771 across those seven values, with a deep trough at 1.0 between two peaks. Values between the tested ones are not bounded by them.</p>
+<h2>Two effects outside this figure set</h2>
+<p>Found through an existing test fixture at a tile count the sweep did not cover — US states at ~300 tiles, shipped 16-hop swap-back reach:</p>
+<ul><li><code>morph=True</code>: 1 enclosed unassigned tile where 0.5 left none, while</li></ul>
+<p>stranded core tiles drop from 4 to 3.</p>
+<ul><li><code>morph=False</code>: stranded core tiles rise from 9 to 11, no enclosed holes</li></ul>
+<p>either way.</p>
+<p>Neither is a split group or a non-contiguous region, so neither breaks the topology guarantee, but both are regressions on a related axis.</p>
+<h2>Not covered here</h2>
+<p>Only US inputs, only hexagon and square tilings, only these tile counts. <code>interior_bonus</code> was varied alone with the other three <code>HungarianOptions</code> cost weights at their defaults; a different <code>neighbor_weight</code> or <code>distance_weight</code> could move which value is best. Inputs with islands, a zero-value sizing column, or non-US geography were not tested.</p>
+<div class="figure">
+<img src="01_uniform_hex_morphTrue.png" alt="IMPROVED. One tile per region, hexagon, morph=True. Adjacency preserved 0.697 -&gt; 0.725, reversed &gt;90 deg 0.092 -&gt; 0.064.">
+<p class="caption">IMPROVED. One tile per region, hexagon, morph=True. Adjacency preserved 0.697 -&gt; 0.725, reversed &gt;90 deg 0.092 -&gt; 0.064.</p>
+</div><div class="figure">
+<img src="02_uniform_hex_morphFalse_REGRESSION.png" alt="REGRESSION. One tile per region, hexagon, morph=False. This is the case that gets worse. Adjacency preserved 0.596 -&gt; 0.523, reversed &gt;90 deg 0.064 -&gt; 0.119, direction 29.0 -&gt; 34.2 deg.">
+<p class="caption">REGRESSION. One tile per region, hexagon, morph=False. This is the case that gets worse. Adjacency preserved 0.596 -&gt; 0.523, reversed &gt;90 deg 0.064 -&gt; 0.119, direction 29.0 -&gt; 34.2 deg.</p>
+</div><div class="figure">
+<img src="03_uniform_square_morphFalse_REGRESSION.png" alt="REGRESSION. Same case on a square tiling, so the regression is not a hexagon artefact. Adjacency preserved 0.486 -&gt; 0.468, reversed &gt;90 deg 0.092 -&gt; 0.119, direction 22.6 -&gt; 30.2 deg.">
+<p class="caption">REGRESSION. Same case on a square tiling, so the regression is not a hexagon artefact. Adjacency preserved 0.486 -&gt; 0.468, reversed &gt;90 deg 0.092 -&gt; 0.119, direction 22.6 -&gt; 30.2 deg.</p>
+</div><div class="figure">
+<img src="04_states154_morphTrue.png" alt="IMPROVED, and the largest gain measured. 154 tiles via tile_count, morph=True. Adjacency preserved 0.706 -&gt; 0.798, displacement median 2.58 -&gt; 2.10 tiles, reversed &gt;90 deg 0.037 -&gt; 0.009.">
+<p class="caption">IMPROVED, and the largest gain measured. 154 tiles via tile_count, morph=True. Adjacency preserved 0.706 -&gt; 0.798, displacement median 2.58 -&gt; 2.10 tiles, reversed &gt;90 deg 0.037 -&gt; 0.009.</p>
+</div><div class="figure">
+<img src="05_districts_groupby_morphTrue.png" alt="IMPROVED. 432 districts grouped by state, morph=True, coloured by state. Adjacency preserved 0.477 -&gt; 0.527, direction 29.2 -&gt; 25.9 deg, displacement 4.59 -&gt; 4.52 tiles.">
+<p class="caption">IMPROVED. 432 districts grouped by state, morph=True, coloured by state. Adjacency preserved 0.477 -&gt; 0.527, direction 29.2 -&gt; 25.9 deg, displacement 4.59 -&gt; 4.52 tiles.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

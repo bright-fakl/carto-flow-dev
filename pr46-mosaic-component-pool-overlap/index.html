@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #46: Keep mosaic component tile pools disjoint</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #46: Keep mosaic component tile pools disjoint</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/46">https://github.com/bright-fakl/carto-flow/pull/46</a></dd>
+<dt>Branch</dt><dd>fix/mosaic-component-pool-overlap</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-23</dd>
+<dt>Before</dt><dd>origin/main @ 8b197eb</dd>
+<dt>After</dt><dd>fix/mosaic-component-pool-overlap @ bd2e76e</dd>
+<dt>Inputs</dt><dd>world countries (Natural Earth, Mollweide ESRI:54009) at 384 nominal / 460 actual and 800 nominal / 848 actual tiles, africa, world mainland only, US states, congressional districts grouped by State Name</dd>
+</dl>
+<p class="desc">An island component&#x27;s extra tile rings reached across water into a mainland component&#x27;s core tiles, and the last component solved silently overwrote the other&#x27;s symbols; six regions at world 384/460 lose tiles to this.</p>
+<p>Tile budgets are written <code>nominal / actual</code>. The fixture builds counts with <code>max(1, round(pop / pop.sum() * budget))</code>, and because 140 of 176 countries hold less than half a tile&#x27;s worth of population the floor raises the requested total well above the nominal figure: nominal 384 requests 460 tiles, nominal 800 requests 848.</p>
+<h2>The bug</h2>
+<p>Every core tile is assigned to exactly one geographic component. The <code>extra_tile_rings</code> expansion then grew each component&#x27;s pool **independently**, from its own core set, so a component separated from another by less than <code>extra_tile_rings</code> tile widths — an island off a coast — reached across the water and took the mainland&#x27;s **core** tiles into its own pool. Both components solved over those tiles and both placed a symbol on them, and the per-component write-back assigns unconditionally:</p>
+<p>``<code>python for t in pool_c: local_g = int(assignment_c[t]) if local_g &gt;= 0: assignment[t] = int(geom_indices_arr[local_g]) </code>``</p>
+<p>so whichever component happened to be enumerated last silently overwrote the other&#x27;s tile. Each tile lost that way is a region left short of its requested count, with no error and no warning, and which region loses depends on component enumeration order.</p>
+<p>All eight overwrites at world 384 / 460, morph=True:</p>
+<table>
+<tr><th>tile</th><th>assigned by</th><th>overwritten by</th></tr>
+<tr><td>1666</td><td>Belgium (component 1)</td><td>United Kingdom (component 12)</td></tr>
+<tr><td>1667</td><td>Germany (component 1)</td><td>United Kingdom (component 12)</td></tr>
+<tr><td>1732</td><td>Germany (component 1)</td><td>United Kingdom (component 12)</td></tr>
+<tr><td>574</td><td>Timor-Leste (component 1)</td><td>Australia (component 16)</td></tr>
+<tr><td>1490</td><td>Bhutan (component 1)</td><td>Japan (component 21)</td></tr>
+<tr><td>1491</td><td>South Korea (component 1)</td><td>Japan (component 21)</td></tr>
+<tr><td>1621</td><td>North Korea (component 1)</td><td>Japan (component 21)</td></tr>
+<tr><td>1622</td><td>South Korea (component 1)</td><td>Japan (component 21)</td></tr>
+</table>
+<p>The islands are not the regions that lose tiles. They are the ones taking them.</p>
+<h2>The fix</h2>
+<p>Grow the rings from all components at once rather than component by component. A tile is owned by exactly one component throughout: core tiles by the existing partition, ring tiles by the component that reaches them in the fewest lattice steps, ties going to the component whose union centroid is nearest — the rule the partition already uses for a tile that touches no component at all.</p>
+<p>Pools are then disjoint by construction, the write-back cannot conflict, and the result no longer depends on component order. A first-come-first-served guard at the write would have stopped the corruption too, but it would have left the pools overlapping, left one component&#x27;s solver optimising over tiles it is not allowed to have, and left the outcome dependent on enumeration order — which is what made this latent in the first place.</p>
+<h2>Six regions recovered</h2>
+<p>At world 384 / 460, morph=True the six regions that regain their tiles are exactly the six victims in the table above:</p>
+<p>**Timor-Leste, North Korea, South Korea, Bhutan, Germany, Belgium.**</p>
+<p>Short falls 8 → 2. The two that remain, Bahamas and Trinidad and Tobago, fail for an unrelated reason: their component wins no core tile at all because their area never reaches <code>min_overlap_frac</code> of any tile (best overlap 0.034 and 0.009), so the pool is empty and the component is skipped. That is handled separately in #47.</p>
+<p>At world 800 / 848, morph=False the regions recovered are **India, China, Vietnam, Bangladesh, Ukraine and Hungary** — mainland countries, not islands.</p>
+<h2>Before and after, all inputs</h2>
+<table>
+<tr><th>input</th><th>regions short</th><th>zero tiles</th><th>non-contiguous</th><th>split groups</th><th>unassigned core</th><th>enclosed holes</th><th>seconds</th><th>result changed</th></tr>
+<tr><td>world 384 / 460, morph=True</td><td>**8 → 2**</td><td>6 → 2</td><td>1 → 2</td><td>0 → 0</td><td>25 → 28</td><td>4 → 1</td><td>3.7 → 4.7</td><td>yes</td></tr>
+<tr><td>world 384 / 460, morph=False</td><td>**18 → 13**</td><td>14 → 13</td><td>3 → 3</td><td>0 → 0</td><td>55 → 41</td><td>1 → 0</td><td>14.2 → 6.8</td><td>yes</td></tr>
+<tr><td>world 800 / 848, morph=True</td><td>**6 → 3**</td><td>3 → 3</td><td>6 → 3</td><td>0 → 0</td><td>32 → 41</td><td>6 → 7</td><td>**46.7 → 11.6**</td><td>yes</td></tr>
+<tr><td>world 800 / 848, morph=False</td><td>**17 → 11**</td><td>12 → 11</td><td>4 → 3</td><td>0 → 0</td><td>81 → 68</td><td>0 → 0</td><td>19.7 → 13.1</td><td>yes</td></tr>
+<tr><td>africa 150 / 159 and 300 / 306, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>5-8 → 5-9</td><td>0 → 0</td><td>unchanged</td><td>yes</td></tr>
+<tr><td>world mainland only, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>unchanged</td><td>0 → 0</td><td>unchanged</td><td>unchanged</td><td>unchanged</td><td>**no**</td></tr>
+<tr><td>US states, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>unchanged</td><td>0 → 0</td><td>unchanged</td><td>**no**</td></tr>
+<tr><td>congressional districts, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>unchanged</td><td>0 → 0</td><td>unchanged</td><td>**no**</td></tr>
+</table>
+<h3>Bit-identical inputs</h3>
+<p>**US states, congressional districts and world-mainland-only are byte-identical before and after**, at both morph settings — same per-region tile centroids, same tile size. They have a single geographic component, or none close enough to contend, so there is nothing to make disjoint. Africa&#x27;s fingerprint moves because Madagascar is a second component; its integrity metrics are unchanged and only the count of empty core tiles shifts by one or two either way.</p>
+<h3>Integrity</h3>
+<p>No split groups anywhere, before or after. Non-contiguous regions improve on three of the four world configurations and regress by one on world 384 / 460 morph=True. Empty core tiles move in both directions: they rise where the fix returns a tile to a mainland region that then sits closer to its own land, and fall where an island stops borrowing mainland tiles.</p>
+<h3>Runtime</h3>
+<p>Falls substantially on world — 46.7 s → 11.6 s at 800 / 848 morph=True — because fewer regions end up split across the sea, which is what the contiguity repair spends its time on.</p>
+<h2>Verification</h2>
+<p><code>make check</code> clean, full suite 632 passed. Raw records and the scripts behind these numbers are in <code>visual_checks/mosaic-world-islands/</code> (<code>results.jsonl</code>, <code>run_all.py</code>, <code>trace_loss.py</code>, <code>pr2_figures.py</code>).</p>
+<div class="figure">
+<img src="m2_world_b384_morph0.png" alt="the same input at morph=False.">
+<p class="caption">the same input at morph=False.</p>
+</div><div class="figure">
+<img src="m2_world_b384_morph1.png" alt="world, 384 nominal / 460 actual tiles, morph=True. Before above, after below. Red regions receive no symbol, amber ones are short, both labelled got/wanted.">
+<p class="caption">world, 384 nominal / 460 actual tiles, morph=True. Before above, after below. Red regions receive no symbol, amber ones are short, both labelled got/wanted.</p>
+</div><div class="figure">
+<img src="m2_world_b800_morph1.png" alt="world, 800 nominal / 848 actual tiles, morph=True.">
+<p class="caption">world, 800 nominal / 848 actual tiles, morph=True.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

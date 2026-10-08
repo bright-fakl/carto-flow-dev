@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #30: Close mosaic splits with a post-ring chain-swap repair</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #30: Close mosaic splits with a post-ring chain-swap repair</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/30">https://github.com/bright-fakl/carto-flow/pull/30</a></dd>
+<dt>Branch</dt><dd>feat/mosaic-chain-swap-repair</dd>
+<dt>Base</dt><dd>fix/mosaic-repair-objective</dd>
+<dt>Date</dt><dd>2026-09-19</dd>
+<dt>Before</dt><dd>fix/mosaic-repair-objective @ 76cc3ca</dd>
+<dt>After</dt><dd>feat/mosaic-chain-swap-repair @ f22c96c</dd>
+<dt>Inputs</dt><dd>3x3 synthetic fixture (hexagon, morph=False), US states (bundled, tile_count ~ Population, ~154 tiles), congressional districts (bundled, 1 tile each), congressional districts with group_by=&quot;State Name&quot;</dd>
+</dl>
+<p class="desc">The swap repair ran before MosaicLayout&#x27;s extra-ring swap-back, which is itself a strong repair, so most of its work was wasted or undone. Moving it after the ring step, keeping only the contiguity stage and guarding it with an accept-if-better test takes all four measured cases to zero split regions and groups.</p>
+<h2>What to look for</h2>
+<p>Tiles are coloured one colour per region (<code>tab20</code> + <code>tab20b</code> + <code>tab20c</code>); districts are coloured by their state. A region whose tiles form more than one block is outlined in black, hatched, and labelled. Same inputs, same seeds, same axis limits on both sides; the only difference is the branch.</p>
+<p>In <code>districts_group_by_before_after.png</code> the left panel has fourteen hatched states, several badly scattered (California, Florida, Virginia). The right panel has none, and the map is not visibly more distorted for it — states remain compact blobs in roughly their real positions.</p>
+<p><code>holes_before_after.png</code> is the check that the extra-ring swap-back still does its job. The two panels are pixel-identical because the repair only permutes *which geometry owns* each already-occupied tile; it never changes the set of occupied tiles, so it cannot open a hole.</p>
+<h2>Numbers</h2>
+<table>
+<tr><th>Case</th><th>Regions correct</th><th>Non-contiguous regions</th><th>Split groups</th><th>Wall time</th></tr>
+<tr><td>3x3 synthetic fixture</td><td>9/9 - 9/9</td><td>2 - **0**</td><td>-</td><td>0.06 s - 0.06 s</td></tr>
+<tr><td>US states (154 tiles)</td><td>49/49 - 49/49</td><td>2 - **0**</td><td>-</td><td>2.02 s - 1.61 s</td></tr>
+<tr><td>Districts (1 tile each)</td><td>432/432 - 432/432</td><td>0 - 0</td><td>-</td><td>5.23 s - 5.34 s</td></tr>
+<tr><td>Districts + <code>group_by</code></td><td>432/432 - 432/432</td><td>0 - 0</td><td>14 - **0**</td><td>5.27 s - 5.42 s</td></tr>
+</table>
+<p>(Each cell reads &quot;before - after&quot;.) No metric regresses on any case. Wall time is unchanged within noise; on plain districts the repair finds nothing to do and moves zero tiles.</p>
+<p>Geographic disturbance, measured as the shift of each region&#x27;s tile-centroid in tile widths:</p>
+<table>
+<tr><th>Case</th><th>Regions moved</th><th>Mean shift</th><th>Max shift</th></tr>
+<tr><td>3x3 fixture</td><td>4 of 9</td><td>0.18</td><td>0.58</td></tr>
+<tr><td>US states</td><td>6 of 49</td><td>0.08</td><td>0.87</td></tr>
+<tr><td>Districts</td><td>0 of 432</td><td>0</td><td>0</td></tr>
+<tr><td>Districts + <code>group_by</code></td><td>71 of 432</td><td>0.45</td><td>9.17</td></tr>
+</table>
+<p>The single 9.17-tile shift on grouped districts is inherent to the move, not damage: a chain swap rotates ownership along a path, so the stranded district travels the whole chain back to its own state while every district it passes shifts by one tile. Mean shift stays under half a tile.</p>
+<h2>Why the old placement was wrong</h2>
+<p>The repair used to run inside <code>solve_assignment</code>, i.e. *before* <code>MosaicLayout</code>&#x27;s extra-ring swap-back. Measuring split counts on both sides of that step shows the ring swap-back is itself a strong repair:</p>
+<table>
+<tr><th>Case</th><th>splits before ring step</th><th>after ring step</th></tr>
+<tr><td>US states</td><td>10</td><td>2</td></tr>
+<tr><td>3x3 fixture</td><td>6</td><td>2</td></tr>
+<tr><td>Districts + <code>group_by</code></td><td>19 groups</td><td>14 groups</td></tr>
+</table>
+<p>So the old placement spent its chain swaps on satellites the ring step would have reconnected anyway, and then had part of that work mutated by it. Run before the ring step it took grouped districts from 14 to 9; run after, from 14 to 0.</p>
+<h2>Per-stage attribution (why only the contiguity stage survives)</h2>
+<p><code>repair_group_assignment</code> ran three stages. Measured in isolation at <code>swap_repair_passes=10</code>, in the old pre-ring position:</p>
+<table>
+<tr><th>Stage</th><th>Effect on splits</th><th>Tiles moved (districts)</th><th>Cost</th></tr>
+<tr><td>1 contiguity</td><td>grouped districts 14 → 9</td><td>0</td><td>—</td></tr>
+<tr><td>2 adjacency</td><td>none on any case</td><td>91 of 432, max 6.9 tile widths</td><td>+4 s</td></tr>
+<tr><td>3 compactness</td><td>none on any case</td><td>grouped districts 48 → 79 moved</td><td>—</td></tr>
+</table>
+<p>Stage 2 is the churn: it moved a fifth of all districts up to seven tile widths for no topology gain at all, and it is also the only stage that runs in the single-tile non-grouped mode where there was nothing to gain. Stage 3 added further movement with no gain. Only stage 1 is kept.</p>
+<h2>Michigan — a possible over-correction, not a win</h2>
+<p>Of the two US states split on the base branch, the two are not equivalent:</p>
+<ul><li>**Washington** is a single-part geometry. Its split was a genuine artifact and closing it is</li></ul>
+<p>a real repair.</p>
+<ul><li>**Michigan** is genuinely two-part: 111 polygons, of which two exceed 5% of area at 70.9%</li></ul>
+<p>and 28.3%. Its tiles being in two blocks either side of the strait is arguably the *correct* outcome, and this branch closes it anyway.</p>
+<p><code>michigan_before_after.png</code> shows the change: one tile moves one position west so the lower tile joins the upper chain. It is a mild over-correction, and it is caused by the *metric*, not by the repair being reckless — multi-part geometries are not modelled anywhere in the pipeline. <code>components_from_adjacency</code> works on a graph whose nodes are whole geometries, so a MultiPolygon is one node and its internal disconnection is invisible; in <code>tile_count</code> mode each geometry is its own group and is therefore required to form one connected block regardless of its real geography. A consequence that predates this branch: <code>converged</code> can never be True on any input containing a genuinely multi-part region.</p>
+<p>By contrast, none of the 14 grouped-district failures are geographically legitimate: checking state-by-state component counts over the district polygons finds **zero** states whose districts span disconnected geography, and the pipeline already splits groups at component boundaries. All 14 were real failures and closing all 14 is a clean win.</p>
+<p>Deciding how multi-part geometries should be modelled (explode into effective sub-regions? how are tile counts apportioned across parts? what area threshold, given 24 of 49 states have only negligible extra islands?) is a design change and is deliberately **not** made here.</p>
+<div class="figure">
+<img src="districts_group_by_after.png" alt="Districts + group_by, this branch.">
+<p class="caption">Districts + group_by, this branch.</p>
+</div><div class="figure">
+<img src="districts_group_by_before.png" alt="Districts + group_by, base branch.">
+<p class="caption">Districts + group_by, base branch.</p>
+</div><div class="figure">
+<img src="districts_group_by_before_after.png" alt="Districts grouped by state, the hardest case: 14 of 48 split before, 0 after. Split states are outlined, hatched and labelled.">
+<p class="caption">Districts grouped by state, the hardest case: 14 of 48 split before, 0 after. Split states are outlined, hatched and labelled.</p>
+</div><div class="figure">
+<img src="fixture_after.png" alt="fixture_after.png">
+<p class="caption">fixture_after.png</p>
+</div><div class="figure">
+<img src="fixture_before.png" alt="fixture_before.png">
+<p class="caption">fixture_before.png</p>
+</div><div class="figure">
+<img src="fixture_before_after.png" alt="3x3 synthetic fixture: 2 of 9 split before, 0 after. This case was a strict xfail in the test suite and is now a real test.">
+<p class="caption">3x3 synthetic fixture: 2 of 9 split before, 0 after. This case was a strict xfail in the test suite and is now a real test.</p>
+</div><div class="figure">
+<img src="holes_after.png" alt="holes_after.png">
+<p class="caption">holes_after.png</p>
+</div><div class="figure">
+<img src="holes_before.png" alt="holes_before.png">
+<p class="caption">holes_before.png</p>
+</div><div class="figure">
+<img src="holes_before_after.png" alt="Centre-hole check on US states. The occupied tile footprint is identical before and after, with 0 enclosed unassigned core tiles in both; the 5 unassigned core tiles sit on the Great Lakes edge and are not enclosed.">
+<p class="caption">Centre-hole check on US states. The occupied tile footprint is identical before and after, with 0 enclosed unassigned core tiles in both; the 5 unassigned core tiles sit on the Great Lakes edge and are not enclosed.</p>
+</div><div class="figure">
+<img src="michigan_after.png" alt="michigan_after.png">
+<p class="caption">michigan_after.png</p>
+</div><div class="figure">
+<img src="michigan_before.png" alt="michigan_before.png">
+<p class="caption">michigan_before.png</p>
+</div><div class="figure">
+<img src="michigan_before_after.png" alt="Michigan zoom. Possible over-correction, not a win: Michigan is genuinely two-part (70.9% / 28.3% of area), so its split may be the correct outcome. See &quot;Michigan&quot; below.">
+<p class="caption">Michigan zoom. Possible over-correction, not a win: Michigan is genuinely two-part (70.9% / 28.3% of area), so its split may be the correct outcome. See &quot;Michigan&quot; below.</p>
+</div><div class="figure">
+<img src="states_after.png" alt="US states, this branch.">
+<p class="caption">US states, this branch.</p>
+</div><div class="figure">
+<img src="states_before.png" alt="US states, base branch.">
+<p class="caption">US states, base branch.</p>
+</div><div class="figure">
+<img src="states_before_after.png" alt="US states: 2 of 49 split before (Washington, Michigan), 0 after.">
+<p class="caption">US states: 2 of 49 split before (Washington, Michigan), 0 after.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

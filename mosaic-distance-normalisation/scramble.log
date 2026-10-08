@@ -1,0 +1,40 @@
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+
+=== world morph=False squared ===
+  Jamaica                nearest tile -> Venezuela              (  265 km); its own 0 tile(s) nearest at none placed
+  Cyprus                 nearest tile -> India                  (  194 km); its own 0 tile(s) nearest at none placed
+  Puerto Rico            nearest tile -> Dominican Rep.         (  273 km); its own 0 tile(s) nearest at none placed
+  Denmark                nearest tile -> United Kingdom         (  267 km); its own 1 tile(s) nearest at 8438 km
+  Bahamas                nearest tile -> Cuba                   (  354 km); its own 0 tile(s) nearest at none placed
+  Trinidad and Tobago    nearest tile -> Mali                   (  106 km); its own 0 tile(s) nearest at none placed
+  Iceland                nearest tile -> Iceland                (  306 km); its own 1 tile(s) nearest at 306 km
+
+=== world morph=False linear ===
+  Jamaica                nearest tile -> Cuba                   (  265 km); its own 0 tile(s) nearest at none placed
+  Cyprus                 nearest tile -> India                  (  194 km); its own 0 tile(s) nearest at none placed
+  Puerto Rico            nearest tile -> Dominican Rep.         (  273 km); its own 0 tile(s) nearest at none placed
+  Denmark                nearest tile -> United Kingdom         (  267 km); its own 1 tile(s) nearest at 9106 km
+  Bahamas                nearest tile -> Haiti                  (  354 km); its own 0 tile(s) nearest at none placed
+  Trinidad and Tobago    nearest tile -> Venezuela              (  573 km); its own 0 tile(s) nearest at none placed
+  Iceland                nearest tile -> Iceland                (  306 km); its own 1 tile(s) nearest at 306 km
+
+=== world morph=True squared ===
+  Jamaica                nearest tile -> Suriname               (  260 km); its own 1 tile(s) nearest at 1627 km
+  Cyprus                 nearest tile -> Iraq                   (  283 km); its own 1 tile(s) nearest at 1288 km
+  Puerto Rico            nearest tile -> Puerto Rico            (  110 km); its own 1 tile(s) nearest at 110 km
+  Denmark                nearest tile -> Hungary                (  102 km); its own 1 tile(s) nearest at 2354 km
+  Bahamas                nearest tile -> Haiti                  (  308 km); its own 0 tile(s) nearest at none placed
+  Trinidad and Tobago    nearest tile -> Guinea-Bissau          (  544 km); its own 0 tile(s) nearest at none placed
+  Iceland                nearest tile -> United Kingdom         (  359 km); its own 1 tile(s) nearest at 1578 km
+
+=== world morph=True linear ===
+  Jamaica                nearest tile -> Dominican Rep.         (  260 km); its own 1 tile(s) nearest at 429 km
+  Cyprus                 nearest tile -> Iraq                   (  283 km); its own 1 tile(s) nearest at 1856 km
+  Puerto Rico            nearest tile -> Puerto Rico            (  110 km); its own 1 tile(s) nearest at 110 km
+  Denmark                nearest tile -> Serbia                 (  102 km); its own 1 tile(s) nearest at 2354 km
+  Bahamas                nearest tile -> Belize                 (  399 km); its own 0 tile(s) nearest at none placed
+  Trinidad and Tobago    nearest tile -> Guyana                 (  867 km); its own 0 tile(s) nearest at none placed
+  Iceland                nearest tile -> Germany                (  359 km); its own 1 tile(s) nearest at 1578 km

@@ -1,0 +1,62 @@
+states=49 tiles=154 districts=432
+[run] states__grid
+[done] states__grid in 4.6s
+[run] states__mosaic_morph__rep0
+[done] states__mosaic_morph__rep0 in 2.8s
+[run] states__mosaic_morph__rep1
+[done] states__mosaic_morph__rep1 in 1.3s
+[run] states__mosaic_morph__rep2
+[done] states__mosaic_morph__rep2 in 1.3s
+[run] states__mosaic_nomorph
+[done] states__mosaic_nomorph in 1.0s
+[run] districts__grid
+[done] districts__grid in 108.2s
+[run] districts__mosaic_morph__rep0
+[done] districts__mosaic_morph__rep0 in 3.9s
+[run] districts__mosaic_morph__rep1
+[done] districts__mosaic_morph__rep1 in 3.9s
+[run] districts__mosaic_morph__rep2
+[done] districts__mosaic_morph__rep2 in 4.0s
+[run] districts__mosaic_nomorph
+[done] districts__mosaic_nomorph in 3.4s
+[run] sweep__origin_weight__0.0
+[done] sweep__origin_weight__0.0 in 4.4s
+[run] sweep__origin_weight__0.5
+[done] sweep__origin_weight__0.5 in 4.4s
+[run] sweep__origin_weight__1.0
+[done] sweep__origin_weight__1.0 in 4.4s
+[run] sweep__origin_weight__2.0
+[done] sweep__origin_weight__2.0 in 4.4s
+[run] sweep__origin_weight__5.0
+[done] sweep__origin_weight__5.0 in 4.4s
+[run] sweep__neighbor_weight__0.0
+[done] sweep__neighbor_weight__0.0 in 3.9s
+[run] sweep__neighbor_weight__0.5
+[done] sweep__neighbor_weight__0.5 in 4.4s
+[run] sweep__neighbor_weight__1.0
+[done] sweep__neighbor_weight__1.0 in 4.4s
+[run] sweep__neighbor_weight__2.0
+[done] sweep__neighbor_weight__2.0 in 4.5s
+[run] sweep__neighbor_weight__5.0
+[done] sweep__neighbor_weight__5.0 in 4.5s
+[run] sweep__topology_weight__0.0
+[done] sweep__topology_weight__0.0 in 0.7s
+[run] sweep__topology_weight__0.5
+[done] sweep__topology_weight__0.5 in 4.5s
+[run] sweep__topology_weight__1.0
+[done] sweep__topology_weight__1.0 in 4.5s
+[run] sweep__topology_weight__2.0
+[done] sweep__topology_weight__2.0 in 4.4s
+[run] sweep__topology_weight__5.0
+[done] sweep__topology_weight__5.0 in 4.4s
+[run] sweep__compactness__0.0
+[done] sweep__compactness__0.0 in 4.4s
+[run] sweep__compactness__0.1
+[done] sweep__compactness__0.1 in 4.4s
+[run] sweep__compactness__0.5
+[done] sweep__compactness__0.5 in 4.4s
+[run] sweep__compactness__1.0
+[done] sweep__compactness__1.0 in 4.4s
+[run] sweep__compactness__2.0
+[done] sweep__compactness__2.0 in 4.5s
+[all done]

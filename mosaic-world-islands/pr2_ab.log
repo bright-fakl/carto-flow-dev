@@ -1,0 +1,60 @@
+Saved working directory and index state On fix/mosaic-component-pool-overlap: m2
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] before:africa_b150_morph1 1.5s fp=04cab5f82e7b6607 short=0 zero=0 noncontig=0 split=0 unasgn=8 encl=0
+[done] before:africa_b150_morph0 0.2s fp=f1ac5262eec3c340 short=0 zero=0 noncontig=0 split=0 unasgn=5 encl=0
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] before:africa_b300_morph1 0.6s fp=6b42884e8d43666a short=0 zero=0 noncontig=0 split=0 unasgn=8 encl=0
+[done] before:africa_b300_morph0 0.7s fp=76276df1db6c2b2a short=0 zero=0 noncontig=0 split=0 unasgn=7 encl=0
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] before:world_b384_morph1 3.7s fp=5d5b09e25df79a92 short=8 zero=6 noncontig=1 split=0 unasgn=25 encl=4
+[done] before:world_b384_morph0 14.2s fp=8db30e8a5bfbd603 short=18 zero=14 noncontig=3 split=0 unasgn=55 encl=1
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (242810.8 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] before:world_mainland_b384_morph1 2.1s fp=82e725f62e525070 short=0 zero=0 noncontig=1 split=0 unasgn=13 encl=3
+[done] before:world_mainland_b384_morph0 3.8s fp=778ff42942aa959b short=0 zero=0 noncontig=5 split=0 unasgn=23 encl=1
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] before:world_b800_morph1 46.7s fp=ba7120159c505530 short=6 zero=3 noncontig=6 split=0 unasgn=32 encl=6
+[done] before:world_b800_morph0 19.7s fp=54f434ebfcdb3b13 short=17 zero=12 noncontig=4 split=0 unasgn=81 encl=0
+[done] before:states_b0_morph1 2.0s fp=1c55ddfe3283dc0c short=0 zero=0 noncontig=0 split=0 unasgn=2 encl=0
+[done] before:states_b0_morph0 4.4s fp=2878b87f73a17d9b short=0 zero=0 noncontig=0 split=0 unasgn=3 encl=0
+[done] before:districts_b0_morph1 4.5s fp=72cd3f2aa88537ba short=0 zero=0 noncontig=0 split=0 unasgn=10 encl=0
+[done] before:districts_b0_morph0 3.6s fp=b34667996c9cfeed short=0 zero=0 noncontig=0 split=0 unasgn=14 encl=0
+On branch fix/mosaic-component-pool-overlap
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (20e6bff5b411f5a0cf42b942037ffee8483dfb41)
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] after:africa_b150_morph1 1.5s fp=079022c81a0a77a7 short=0 zero=0 noncontig=0 split=0 unasgn=7 encl=0
+[done] after:africa_b150_morph0 0.2s fp=4c778e8cfe2d82dc short=0 zero=0 noncontig=0 split=0 unasgn=5 encl=0
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] after:africa_b300_morph1 0.7s fp=09bc43578886450b short=0 zero=0 noncontig=0 split=0 unasgn=9 encl=0
+[done] after:africa_b300_morph0 0.5s fp=40de98ddbc287cd8 short=0 zero=0 noncontig=0 split=0 unasgn=9 encl=0
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] after:world_b384_morph1 4.7s fp=134b3c3f8b924a3d short=2 zero=2 noncontig=2 split=0 unasgn=28 encl=1
+[done] after:world_b384_morph0 6.8s fp=8fcf41008f06061e short=13 zero=13 noncontig=3 split=0 unasgn=41 encl=0
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (242810.8 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] after:world_mainland_b384_morph1 2.0s fp=82e725f62e525070 short=0 zero=0 noncontig=1 split=0 unasgn=13 encl=3
+[done] after:world_mainland_b384_morph0 3.6s fp=778ff42942aa959b short=0 zero=0 noncontig=5 split=0 unasgn=23 encl=1
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] after:world_b800_morph1 11.6s fp=81601d1dfe70797e short=3 zero=3 noncontig=3 split=0 unasgn=41 encl=7
+[done] after:world_b800_morph0 13.1s fp=0b531e982fc255de short=11 zero=11 noncontig=3 split=0 unasgn=68 encl=0
+[done] after:states_b0_morph1 1.9s fp=1c55ddfe3283dc0c short=0 zero=0 noncontig=0 split=0 unasgn=2 encl=0
+[done] after:states_b0_morph0 4.2s fp=2878b87f73a17d9b short=0 zero=0 noncontig=0 split=0 unasgn=3 encl=0
+[done] after:districts_b0_morph1 4.2s fp=72cd3f2aa88537ba short=0 zero=0 noncontig=0 split=0 unasgn=10 encl=0
+[done] after:districts_b0_morph0 3.7s fp=b34667996c9cfeed short=0 zero=0 noncontig=0 split=0 unasgn=14 encl=0
+ALLDONE

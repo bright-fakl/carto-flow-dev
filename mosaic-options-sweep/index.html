@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mosaic option sweep - which HungarianOptions / MosaicLayoutOptions fields measurably change results</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Mosaic option sweep - which HungarianOptions / MosaicLayoutOptions fields measurably change results</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">reviewed</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Branch</dt><dd>(measurement only - no source changes)</dd>
+<dt>Base</dt><dd>origin/main @ a095187</dd>
+<dt>Date</dt><dd>2026-09-22</dd>
+<dt>Inputs</dt><dd>states_uniform (49 US states, 1 tile each, hexagon), states_uniform_sq (same, square), states (49 states, 154 tiles via tile_count), districts (432 congressional districts, group_by=&quot;State Name&quot;), world (176 Natural Earth countries in Mollweide, 384 tiles via pop_est, Antarctica and zero-population rows dropped)</dd>
+</dl>
+<p class="desc">670 runs sweeping 11 never-measured (or partly measured) mosaic options over four inputs including a non-US one, at morph=True and morph=False, scored with the grid-vs-mosaic metric set plus an integrity screen.</p>
+<h2>What was run</h2>
+<p>670 runs, 0 errors. Every run is scored by <code>grid-vs-mosaic-similarity/metrics.py</code>, imported unchanged, so the numbers are directly comparable with that workspace (combinatorial Polsby-Popper on the tile adjacency graph; area-based silhouette only). Raw records: <code>results.jsonl</code> (written incrementally, one line per run); full per-value tables: <code>tables.md</code>; scripts: <code>run.py</code>, <code>inputs.py</code>, <code>analyze.py</code>, <code>tables.py</code>, <code>digest.py</code>, <code>spacing_check.py</code>.</p>
+<p>Each run also records a **fingerprint**: a hash of (tiles owned by each region, tile size). Two values with the same fingerprint produced byte-identical placements - this is the dead-zone test, and it is what most of the &quot;inert&quot; verdicts below rest on.</p>
+<p>11 parameters x (4 to 7 values each, always including the disabled / 0 end where the field allows it) x 5 inputs x {morph=True, morph=False}, plus a 3x5 <code>distance_weight</code> x <code>outside_penalty</code> grid.</p>
+<h3>The non-US input</h3>
+<p><code>carto_flow.data.load_world()</code> in Mollweide (equal-area), Antarctica and zero-population rows dropped, 176 countries, 384 tiles allocated by population. Chosen because its structure is what the US inputs do not have: many single-tile island states, several genuinely disconnected components, region areas spanning four orders of magnitude, and a population-to-area relation that is far more extreme than any US one. It needed one input fix - Mollweide reprojection produces self-intersecting rings, so geometries are passed through <code>shapely.make_valid().buffer(0)</code> before use, otherwise the study-union build raises a GEOS side-location conflict.</p>
+<h3>Baseline integrity, for reference</h3>
+<p>All defaults, per input. Columns: non-contiguous regions / split groups / unassigned core tiles / enclosed unassigned tiles / tiles short.</p>
+<table>
+<tr><th>input</th><th>morph</th><th>noncontig</th><th>split</th><th>unassigned core</th><th>enclosed</th><th>short</th></tr>
+<tr><td>states_uniform</td><td>True</td><td>0</td><td>0</td><td>5</td><td>0</td><td>0</td></tr>
+<tr><td>states_uniform</td><td>False</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>states_uniform_sq</td><td>True</td><td>0</td><td>0</td><td>10</td><td>0</td><td>0</td></tr>
+<tr><td>states_uniform_sq</td><td>False</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>states</td><td>True</td><td>0</td><td>0</td><td>19</td><td>0</td><td>0</td></tr>
+<tr><td>states</td><td>False</td><td>0</td><td>0</td><td>3</td><td>0</td><td>0</td></tr>
+<tr><td>districts</td><td>True</td><td>0</td><td>0</td><td>54</td><td>0</td><td>0</td></tr>
+<tr><td>districts</td><td>False</td><td>0</td><td>0</td><td>14</td><td>0</td><td>0</td></tr>
+<tr><td>**world**</td><td>True</td><td>0</td><td>0</td><td>96</td><td>5</td><td>**11**</td></tr>
+<tr><td>**world**</td><td>False</td><td>**2**</td><td>0</td><td>34</td><td>1</td><td>**18**</td></tr>
+</table>
+<p>The world baseline is not clean at defaults: at morph=False two regions are already non-contiguous, and at both morph settings 11-18 requested tiles are never placed. No US input shows either defect at defaults. Every world verdict below is therefore relative to an already-defective starting point.</p>
+<h2>Verdicts</h2>
+<table>
+<tr><th>parameter</th><th>verdict</th></tr>
+<tr><td><code>outside_penalty</code></td><td>**measurably changes results** - every value a distinct placement on all 10 input x morph combos; **pathological**: sign flip across inputs, and on districts/morph=False every non-default value is disqualified</td></tr>
+<tr><td><code>distance_weight</code> x <code>outside_penalty</code> (joint)</td><td>**measurably changes results**; **pathological**: not scale-free - equal-ratio pairs never agree (0/32)</td></tr>
+<tr><td><code>max_connectivity_iters</code></td><td>**measurably changes results only at morph=False**; **pathological**: inert at morph=True on all 5 inputs, saturated at 2, default 15</td></tr>
+<tr><td><code>disconnected_penalty_mult</code></td><td>**pathological**: effectively binary (0 vs anything), and inert on 8 of 10 combos</td></tr>
+<tr><td><code>gap_bridge_mult</code></td><td>**inert** - byte-identical results for 0.0 / 1.0 / 2.0 / 5.0 / 20.0 on all 10 combos</td></tr>
+<tr><td><code>disconnected_score_weight</code></td><td>**inert** - byte-identical results for 0 / 1 / 10 / 100 / 1000 on all 10 combos</td></tr>
+<tr><td><code>swap_repair_passes</code></td><td>**measurably changes results** (integrity only); **pathological**: saturated at 2-5, default 10</td></tr>
+<tr><td><code>ring_swapback_max_hops</code></td><td>**measurably changes results**; **pathological**: sign flip across inputs, default above the fidelity optimum on states_uniform, and 32 re-introduces a defect on districts</td></tr>
+<tr><td><code>extra_tile_rings</code></td><td>**measurably changes results**; **pathological**: non-monotone, 0 starves the pool, &gt;=2 breaks integrity on every input, runtime up to 7x</td></tr>
+<tr><td><code>min_overlap_frac</code></td><td>**measurably changes results**; **pathological**: non-monotone with the fidelity optimum disqualified on integrity</td></tr>
+<tr><td><code>spacing</code></td><td>**inert** with respect to layout - identical assignment, identical tile size, identical every metric; it only scales the drawn symbol</td></tr>
+<tr><td><code>tile_size</code> (override)</td><td>**measurably changes results**; never cleanly better than calibration - every improvement in the sweep came with an integrity defect</td></tr>
+</table>
+<h2>Integrity screen: disqualifications</h2>
+<p>Any value introducing a split group, a non-contiguous region, or a region short of tiles, relative to that input&#x27;s own baseline.</p>
+<table>
+<tr><th>parameter</th><th>disqualified values</th></tr>
+<tr><td><code>outside_penalty</code></td><td>states/morph=False: 10.0 (2 noncontig). districts/morph=True: 4.0. **districts/morph=False: 0.0, 0.25, 0.5, 2.0, 4.0, 10.0 - i.e. every non-default value** (1-2 split groups each). world/morph=True: 2.0, 4.0, 10.0. world/morph=False: 4.0, 10.0 (3 noncontig each)</td></tr>
+<tr><td><code>distance_weight</code> x <code>outside_penalty</code></td><td>districts/morph=True: 5 of 14 cells. districts/morph=False: 10 of 14. world/morph=True: 7 of 14. world/morph=False: 7 of 14. <code>distance_weight != 1.0</code> is disqualified far more often than it is not</td></tr>
+<tr><td><code>max_connectivity_iters</code></td><td>states/morph=False: 1 (2 noncontig). districts/morph=False: 0 and 1 (1 split group)</td></tr>
+<tr><td><code>disconnected_penalty_mult</code></td><td>none</td></tr>
+<tr><td><code>gap_bridge_mult</code></td><td>none</td></tr>
+<tr><td><code>disconnected_score_weight</code></td><td>none</td></tr>
+<tr><td><code>swap_repair_passes</code></td><td>states/morph=False: 0 (5 noncontig), 1 (4), 2 (3). districts/morph=True: 0 (8 split groups), 1 (1). districts/morph=False: 0 (12 split groups), 1 (4), 2 (3), 5 (2). world/morph=True: 0 (4 noncontig), 1 (1). world/morph=False: 0 (5), 1 (4), 2 (3)</td></tr>
+<tr><td><code>ring_swapback_max_hops</code></td><td>districts/morph=True: 0, 1. districts/morph=False: 0 **and 32** (1 split group). world/morph=True: 0, 1, 2. world/morph=False: 0 (4 noncontig)</td></tr>
+<tr><td><code>extra_tile_rings</code></td><td>states/morph=True: 2, 3, 5. states/morph=False: 0 (1 tile short), 3 (4 noncontig). districts/morph=True: 3, 5. districts/morph=False: 0, 2, 3, 5. world/morph=True: 0, 2, 3, 5. world/morph=False: 0, 2, 3, 5. **Only the default 1 is clean on all five inputs**</td></tr>
+<tr><td><code>min_overlap_frac</code></td><td>states/morph=True: 0.75. districts/morph=True: 0.02, 0.5, 0.75, 1.0. districts/morph=False: 0.25, 0.5, 0.75, 1.0. world (both): 0.02 (morph=True), 0.25, 0.5, 0.75, 1.0</td></tr>
+<tr><td><code>tile_size</code></td><td>states: x1.25 (1 tile short). districts/morph=True: x0.9, x1.25 (57 short). districts/morph=False: x0.8, x0.9, x1.1, x1.25 (62 short). world/morph=True: x0.8, x0.9, x1.1, x1.25. world/morph=False: x1.1, x1.25</td></tr>
+</table>
+<p>The pattern from the previous round repeats: **the values with the best fidelity numbers are repeatedly the disqualified ones.** Examples in this sweep:</p>
+<ul><li><code>min_overlap_frac</code> = 0.5 on districts/morph=False gives the best silhouette IoU</li></ul>
+<p>of the whole curve (0.926 vs 0.857 at the default) and the best IoU on world too (0.656 vs 0.542) - and introduces split groups on both.</p>
+<ul><li><code>tile_size</code> x1.25 on districts/morph=False cuts median displacement from 7.29</li></ul>
+<p>to 4.22 tiles and raises adjacency from 0.485 to 0.560 - by leaving 62 requested tiles unplaced.</p>
+<ul><li><code>extra_tile_rings</code> = 5 on districts/morph=False halves displacement</li></ul>
+<p>(7.29 -&gt; 4.62) while producing 6 split groups and collapsing IoU to 0.561.</p>
+<h2>Per-parameter detail</h2>
+<h3>outside_penalty (default 1.0, never measured before)</h3>
+<p>Live on every input: all seven values give distinct fingerprints in 9 of 10 combos (the exception is states_uniform_sq/morph=True, where {0.0, 0.25, 0.5} collapse into one group and {1.0, 2.0} into another - a small dead zone straddling the default).</p>
+<p>Effect is large and directional for adjacency: on world/morph=True adjacency kept falls monotonically 0.631 -&gt; 0.482 from <code>outside_penalty</code> 0 to 10, and on districts/morph=True 0.552 -&gt; 0.434. Displacement is the opposite story on the US inputs, where the default 1.0 is a local minimum (states/morph=True: 2.56, 2.63, 2.56, **2.10**, 2.58, 2.58, 2.70) - a one-point trough, the same shape that made <code>interior_bonus</code> unsafe to interpolate.</p>
+<p>**Sign flip across inputs.** On world/morph=True, 0.0 is better than the default on *both* headline axes (displacement 3.30 vs 3.85, adjacency 0.631 vs 0.544). On states/morph=True, 0.0 is worse on displacement (2.56 vs 2.10) and better on adjacency. A single recommended direction cannot be stated.</p>
+<p>**Integrity.** On districts/morph=False, the default 1.0 is the only value that does not split a group. On world, everything at or above 2.0 adds a non-contiguous region.</p>
+<h3>distance_weight x outside_penalty, jointly</h3>
+<p>The <code>distance_weight</code> docstring says &quot;fix at 1.0 and tune <code>outside_penalty</code> relative to it&quot;. That phrasing implies only the ratio matters. **It does not.** Across 32 equal-ratio comparisons (e.g. <code>(dw=0.25, op=0.5)</code> vs <code>(dw=1.0, op=2.0)</code>, and <code>(dw=0.25, op=0.0)</code> vs <code>(dw=1.0, op=0.0)</code> vs <code>(dw=4.0, op=0.0)</code>), **not one pair produced the same placement**. That is expected from the code - the cost is <code>distance_weight*dist + outside_penalty*outside - interior_bonus*connectivity</code>, and <code>interior_bonus</code> (2.0) and the neighbour term (0.3) are absolute, so scaling the first two terms together changes the balance against the other two. The advice as written is therefore not just unhelpful, it is wrong about the parameterisation.</p>
+<p>Measured jointly, <code>distance_weight != 1.0</code> is disqualified on integrity in 24 of 40 off-default cells on districts and world.</p>
+<h3>max_connectivity_iters (default 15, never measured before)</h3>
+<p>**Morph-dependent, and this is the cleanest morph dependence in the sweep.** At <code>morph=True</code>, all six values (0, 1, 2, 5, 15, 30) are byte-identical on all five inputs - the connectivity repair loop never fires after a morph. At <code>morph=False</code> it fires, but converges immediately: the identity groups are <code>{0} {1} {2, 5, 15, 30}</code> on states and districts, <code>{0} {1, 2, 5, 15, 30}</code> on states_uniform_sq, and all-identical on states_uniform and world. So the knob has at most two useful settings and saturates at 2; the default is 15.</p>
+<p>Disabling it is not free: districts/morph=False at 0 or 1 splits a group and loses 13 points of adjacency (0.485 -&gt; 0.352 at 0).</p>
+<p>Runtime note: districts/morph=False at <code>max_connectivity_iters=0</code> took 16.1 s against 3.5 s at the default - disabling the loop made the run slower, presumably by leaving more work to the downstream repairs.</p>
+<h3>disconnected_penalty_mult (default 10.0, never measured before)</h3>
+<p>Values 0, 1, 2, 5, 10, 50 are byte-identical on 8 of 10 combos. On the other two (states/morph=False, districts/morph=False) the identity groups are <code>{0.0}</code> and <code>{1.0, 2.0, 5.0, 10.0, 50.0}</code>: the parameter saturates at its smallest non-zero tested value. It behaves as a boolean, not as a magnitude, and disabling it caused no integrity defect on any input.</p>
+<h3>gap_bridge_mult (default 5.0, never measured before)</h3>
+<p>**Inert.** 0.0, 1.0, 2.0, 5.0, 20.0 produce byte-identical placements on all five inputs at both morph settings - including turning it off entirely. 50 runs, 10 distinct fingerprints, one per input x morph combo.</p>
+<h3>disconnected_score_weight (default 100, never measured before)</h3>
+<p>**Inert.** 0, 1, 10, 100, 1000 produce byte-identical placements on all five inputs at both morph settings. Its docstring describes it as a tie-break between assignments that split the same number of regions; in 670 runs that tie was never decided by it - a four-order-of-magnitude change moved nothing.</p>
+<h3>swap_repair_passes (default 10; previously changed from 0)</h3>
+<p>**The earlier evidence holds and extends.** Fidelity is almost untouched (largest median-displacement change across the whole sweep: 0.08 tiles, on world), but integrity moves a lot, and the direction is unambiguous:</p>
+<table>
+<tr><th>input</th><th>morph</th><th>defects at 0</th><th>at 1</th><th>at 2</th><th>at 5</th><th>at 10 (default)</th></tr>
+<tr><td>states</td><td>False</td><td>5 noncontig</td><td>4</td><td>3</td><td>0</td><td>0</td></tr>
+<tr><td>districts</td><td>True</td><td>8 split</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>districts</td><td>False</td><td>12 split</td><td>4</td><td>3</td><td>2</td><td>0</td></tr>
+<tr><td>world</td><td>True</td><td>4 noncontig</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>world</td><td>False</td><td>5 noncontig</td><td>4</td><td>3</td><td>0</td><td>0</td></tr>
+</table>
+<p>On states_uniform (both tilings) it is inert - there is nothing to repair. The saturation point moves with the input: 2 passes on districts/morph=True, 5 on world/morph=False, 10 on districts/morph=False. The default 10 is at or just past the worst case measured; 30 never differs from 10. Cost of the passes is within noise except on world/morph=False (1.5 s at 0 vs 3.6 s at 10).</p>
+<h3>ring_swapback_max_hops (default 16; 8 and 14 previously rejected)</h3>
+<p>Live on every input, and **the most clearly conflicted knob in the sweep**.</p>
+<p>*Fidelity says low.* On states_uniform/morph=False, hops 0-4 give median displacement 1.46 tiles and adjacency 0.74; the default 16 gives 2.24 and 0.52. That is a 53% worse displacement and a 22-point adjacency loss at the default, on the gallery input, with **zero integrity defects at any hop value on that input**. Silhouette IoU goes the other way on the same input (0.735 at 0 vs 0.819 at 16), so the trade is real, not a free win - but the default is not at the fidelity optimum for two of the three fidelity axes there.</p>
+<p>*Integrity says high.* On districts and world, hops 0-2 introduce split groups or non-contiguous regions (world/morph=True needs &gt;= 4; districts/morph=True needs &gt;= 2). This is the sign flip: the same value that is best on states_uniform is disqualified on world.</p>
+<p>*And the top of the range is not safe either.* On districts/morph=False, hops=32 introduces a split group that 16 does not have, while also costing adjacency (0.464 vs 0.485). So the curve is not &quot;more is safer&quot; - it has a defect at both ends.</p>
+<p>Dead zones: <code>{8, 16, 32}</code> collapse on states_uniform/states_uniform_sq at morph=True and <code>{16, 32}</code> on several others, but all of 0, 1, 2, 4, 8, 16, 32 are distinct on districts and world - the saturation point moves with input size, as with the grid knobs.</p>
+<h3>extra_tile_rings (default 1, never swept)</h3>
+<p>Live everywhere, every value distinct. Three separate problems:</p>
+<p>1. **0 starves the pool.** world/morph=False leaves 30 requested tiles unplaced (18 at the default), world/morph=True 24 (11 at the default), states/morph=False 1. The reserve ring is doing real work. 2. **&gt;= 2 breaks integrity on every input** - the only value clean on all five inputs at both morph settings is the default 1. 3. **Non-monotone.** states_uniform/morph=True displacement by ring count: 1.30, 1.53, 1.77, **1.19**, 1.77 - the minimum is at 3, between two maxima. districts/morph=False IoU: 0.906, 0.857, 0.890, 0.638, 0.561 - peak at 0, a dip at 1 (the default), a second peak at 2, then collapse.</p>
+<p>Runtime scales badly: districts/morph=True is 6.0 s at the default and 41.3 s at 5; world/morph=False is 3.6 s at the default and 23.0 s at 2.</p>
+<h3>min_overlap_frac (default 0.1, never swept)</h3>
+<p>Live everywhere, every value distinct on all ten combos. The default&#x27;s stated purpose - let extra tiles into the pool - is visible, but the curve is non-monotone and the good part of it is disqualified.</p>
+<p>world/morph=False silhouette IoU across 0.02, 0.1, 0.25, 0.5, 0.75, 1.0: 0.497, 0.542, **0.654, 0.656**, 0.523, 0.341. districts/morph=False: 0.819, 0.857, 0.888, **0.926**, 0.922, 0.829. In both cases the optimum is at 0.25-0.5, three to five times the default - and in both cases those values introduce split groups or non-contiguous regions. Meanwhile 0.02 (lower than the default) is also disqualified on districts/morph=True and world/morph=True.</p>
+<p>At 1.0 the layout degenerates on the large inputs (world/morph=True: 1138 unassigned core tiles, IoU 0.209).</p>
+<h3>spacing (default 0.0, never swept)</h3>
+<p>**Inert with respect to the layout, by construction.** Assignment fingerprint, tile size, and every one of the ~40 metrics are identical for 0.0, 0.05, 0.2 and 0.5 on all five inputs at both morph settings. In the source it divides each tile&#x27;s <code>Transform.scale</code> by <code>1 + spacing</code> and touches nothing else.</p>
+<p>Measured directly (<code>spacing_check.py</code>, <code>spacing_check.json</code>): mean transform scale 1.000 / 0.952 / 0.833 / 0.667 and symbol-area ratio 1.000 / 0.907 / 0.694 / 0.444, matching <code>1/(1+s)^2</code> to machine precision. Note that <code>result.tiles_gdf</code> is **not** affected - its total area is identical across all four values - so the gap only appears in output that goes through <code>transforms</code>.</p>
+<h3>tile_size explicit override (never swept)</h3>
+<p>Setting <code>tile_size</code> to exactly the calibrated value reproduces the default run byte-for-byte on all ten combos, which confirms calibration is deterministic and that this is a clean single-variable test.</p>
+<p>Off-calibration, the answer to &quot;is overriding calibration ever better&quot; is: not without a cost elsewhere. Every value that improved a headline metric also tripped the integrity screen:</p>
+<ul><li>Too large (x1.1, x1.25): the tile pool no longer holds the requested counts.</li></ul>
+<p>districts/morph=False leaves 62 tiles unplaced at x1.25, districts/morph=True 57, world/morph=False 29. Fidelity metrics improve precisely because fewer tiles are placed.</p>
+<ul><li>Too small (x0.8, x0.9): districts/morph=False gains 2 split groups and 244</li></ul>
+<p>unassigned core tiles at x0.8; world/morph=True gains 3-5 non-contiguous regions.</p>
+<ul><li>Direction of the fidelity effect flips between inputs: world prefers smaller</li></ul>
+<p>tiles on IoU (0.588 at x0.8 vs 0.542 calibrated, morph=False) while states_uniform prefers the calibrated size (0.819 vs 0.826 at x0.8 - essentially flat) and districts prefers x0.9 (0.904 vs 0.857).</p>
+<h2>Does any knob&#x27;s effect depend on morph?</h2>
+<p>Yes, three of them, and in two different ways.</p>
+<ul><li><code>max_connectivity_iters</code> and <code>disconnected_penalty_mult</code> are **completely inert</li></ul>
+<p>at morph=True on all five inputs** and live at morph=False. The morph removes the disconnections these two exist to repair.</p>
+<ul><li><code>swap_repair_passes</code> and <code>ring_swapback_max_hops</code> are live at both settings but</li></ul>
+<p>the saturation point differs: districts needs 2 passes at morph=True and 10 at morph=False.</p>
+<ul><li><code>outside_penalty</code> flips sign on displacement between morph settings on</li></ul>
+<p>world: at morph=True, 0.0 beats the default (3.30 vs 3.85); at morph=False the best value is 0.25 (6.50 vs 6.58) and 0.0 is the *worst* tested below 4.0 (7.93).</p>
+<p>Consistent with the brief&#x27;s warning about <code>interior_bonus</code>, morph=False is where almost every defect appeared: 9 of the 10 combos with baseline integrity defects or disqualifications at the largest number of values are morph=False runs.</p>
+<h2>What the non-US input showed that the US inputs did not</h2>
+<ul><li>**Defaults are not clean on world.** 2 non-contiguous regions at morph=False</li></ul>
+<p>and 11-18 requested tiles never placed at both morph settings. No US input shows either at defaults. Several knob verdicts above (&quot;disqualified&quot;) are relative to that already-defective baseline, which US-only measurement cannot see at all.</p>
+<ul><li>**<code>extra_tile_rings=0</code> is a tile-starvation failure**, not a fidelity</li></ul>
+<p>trade-off: 24-30 unplaced tiles on world against 0-1 on the US inputs. The reserve ring&#x27;s real job is only visible on an input with many small disconnected regions.</p>
+<ul><li>**<code>outside_penalty</code> reverses direction.** On world the disabled value 0.0 is</li></ul>
+<p>better on both displacement and adjacency at morph=True; on states it is worse on displacement. Any documented direction derived from US inputs alone would be wrong for world.</p>
+<ul><li>**Silhouette IoU is a different regime.** World sits at 0.42-0.54 against</li></ul>
+<p>0.67-0.86 for US inputs, so metric changes that look small in absolute terms are proportionally much larger there.</p>
+<ul><li>It also surfaced an input-handling fact worth knowing: the bundled world</li></ul>
+<p>dataset is not valid after reprojection to an equal-area CRS and needs <code>make_valid</code> before any union-based work.</p>
+<h2>Things not measured, and why</h2>
+<ul><li><code>interior_bonus</code>, <code>neighbor_weight</code>, <code>neighbor_bfs</code>, <code>morph_options</code>, <code>tiling</code></li></ul>
+<p>were out of scope here (already covered in <code>grid-vs-mosaic-similarity</code>).</p>
+<ul><li>Interactions other than <code>distance_weight</code> x <code>outside_penalty</code> were not</li></ul>
+<p>explored: every other knob was moved one at a time from defaults. Given that <code>distance_weight</code> x <code>outside_penalty</code> turned out not to be separable, other pairs involving <code>interior_bonus</code> may not be either - untested.</p>
+<ul><li><code>min_overlap_frac</code> appears both as a layout option and as a fixed parameter of</li></ul>
+<p>the core-tile metric. The metric&#x27;s own value was held at 0.1 for every run, so the &quot;unassigned core tiles&quot; column is a fixed yardstick and is comparable across the <code>min_overlap_frac</code> sweep; it is not the same quantity the layout used internally.</p>
+<ul><li>Run-to-run repeat variation was not re-measured here; the earlier workspace</li></ul>
+<p>found mosaic deterministic, and the <code>tile_size</code> x1.0 runs reproducing the baseline fingerprint exactly on all ten combos is consistent with that.</p>
+<h2>Where the measurement contradicts the brief</h2>
+<ul><li>The brief lists <code>min_overlap_frac</code>&#x27;s default as &quot;deliberately low so extra tiles</li></ul>
+<p>enter the pool&quot;. Lowering it further (0.02) does not continue that trend - it is disqualified on integrity on two inputs, so 0.1 is not simply the low end of a monotone range.</p>
+<ul><li>The brief describes <code>swap_repair_passes</code> and <code>ring_swapback_max_hops</code> as having</li></ul>
+<p>partial evidence to confirm. <code>swap_repair_passes</code> confirmed cleanly. <code>ring_swapback_max_hops</code> did not: 32 - a value above the default, previously untested - introduces a split group on districts/morph=False that 16 does not have, so &quot;higher is safer&quot; does not hold at the top of the range either.</p>
+<ul><li>The <code>distance_weight</code> docstring&#x27;s premise (that only the ratio to</li></ul>
+<p><code>outside_penalty</code> matters) is contradicted in all 32 equal-ratio comparisons.</p>
+<div class="figure">
+<img src="joint_distance_outside_morph0.png" alt="distance_weight x outside_penalty grid, morph=False">
+<p class="caption">distance_weight x outside_penalty grid, morph=False</p>
+</div><div class="figure">
+<img src="joint_distance_outside_morph1.png" alt="distance_weight x outside_penalty grid, morph=True">
+<p class="caption">distance_weight x outside_penalty grid, morph=True</p>
+</div><div class="figure">
+<img src="knob_disconnected_penalty_mult.png" alt="disconnected_penalty_mult: only 0 vs non-0 separates, and only on two inputs">
+<p class="caption">disconnected_penalty_mult: only 0 vs non-0 separates, and only on two inputs</p>
+</div><div class="figure">
+<img src="knob_disconnected_score_weight.png" alt="disconnected_score_weight: byte-identical results from 0 to 1000">
+<p class="caption">disconnected_score_weight: byte-identical results from 0 to 1000</p>
+</div><div class="figure">
+<img src="knob_extra_tile_rings.png" alt="extra_tile_rings">
+<p class="caption">extra_tile_rings</p>
+</div><div class="figure">
+<img src="knob_gap_bridge_mult.png" alt="gap_bridge_mult: byte-identical results for every value on every input">
+<p class="caption">gap_bridge_mult: byte-identical results for every value on every input</p>
+</div><div class="figure">
+<img src="knob_max_connectivity_iters.png" alt="max_connectivity_iters: flat everywhere at morph=True">
+<p class="caption">max_connectivity_iters: flat everywhere at morph=True</p>
+</div><div class="figure">
+<img src="knob_min_overlap_frac.png" alt="min_overlap_frac">
+<p class="caption">min_overlap_frac</p>
+</div><div class="figure">
+<img src="knob_outside_penalty.png" alt="outside_penalty, all five inputs, both morph settings">
+<p class="caption">outside_penalty, all five inputs, both morph settings</p>
+</div><div class="figure">
+<img src="knob_ring_swapback_max_hops.png" alt="ring_swapback_max_hops: fidelity best at low hops, integrity needs high hops">
+<p class="caption">ring_swapback_max_hops: fidelity best at low hops, integrity needs high hops</p>
+</div><div class="figure">
+<img src="knob_spacing.png" alt="spacing: every metric flat, by construction">
+<p class="caption">spacing: every metric flat, by construction</p>
+</div><div class="figure">
+<img src="knob_swap_repair_passes.png" alt="swap_repair_passes: integrity panel moves, fidelity panels do not">
+<p class="caption">swap_repair_passes: integrity panel moves, fidelity panels do not</p>
+</div><div class="figure">
+<img src="knob_tile_size.png" alt="tile_size override, as a multiple of the calibrated size">
+<p class="caption">tile_size override, as a multiple of the calibrated size</p>
+</div><div class="figure">
+<img src="spacing_symbols.png" alt="what spacing does change: the symbol scale inside an unchanged tile">
+<p class="caption">what spacing does change: the symbol scale inside an unchanged tile</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

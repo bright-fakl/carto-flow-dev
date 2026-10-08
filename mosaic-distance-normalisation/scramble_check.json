@@ -1,0 +1,254 @@
+[
+ {
+  "morph": false,
+  "variant": "squared",
+  "region": "Jamaica",
+  "nearest_tile_owner": "Mali",
+  "nearest_tile_km": 260.7871302388931,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "squared",
+  "region": "Cyprus",
+  "nearest_tile_owner": "India",
+  "nearest_tile_km": 188.65229030342593,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "squared",
+  "region": "Puerto Rico",
+  "nearest_tile_owner": "Niger",
+  "nearest_tile_km": 273.423675232807,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "squared",
+  "region": "Denmark",
+  "nearest_tile_owner": "United Kingdom",
+  "nearest_tile_km": 271.5741519244163,
+  "own_tile_km": 9108.898787215829,
+  "own_tiles": 1
+ },
+ {
+  "morph": false,
+  "variant": "squared",
+  "region": "Bahamas",
+  "nearest_tile_owner": "Dominican Rep.",
+  "nearest_tile_km": 358.04946083191885,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "squared",
+  "region": "Trinidad and Tobago",
+  "nearest_tile_owner": "Algeria",
+  "nearest_tile_km": 103.70782494417357,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "squared",
+  "region": "Iceland",
+  "nearest_tile_owner": "Iceland",
+  "nearest_tile_km": 311.0698086644309,
+  "own_tile_km": 311.0698086644309,
+  "own_tiles": 1
+ },
+ {
+  "morph": false,
+  "variant": "linear",
+  "region": "Jamaica",
+  "nearest_tile_owner": "Dominican Rep.",
+  "nearest_tile_km": 260.7871302388931,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "linear",
+  "region": "Cyprus",
+  "nearest_tile_owner": "Iran",
+  "nearest_tile_km": 188.65229030342593,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "linear",
+  "region": "Puerto Rico",
+  "nearest_tile_owner": "Haiti",
+  "nearest_tile_km": 273.423675232807,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "linear",
+  "region": "Denmark",
+  "nearest_tile_owner": "Austria",
+  "nearest_tile_km": 271.5741519244163,
+  "own_tile_km": 8441.142960438992,
+  "own_tiles": 1
+ },
+ {
+  "morph": false,
+  "variant": "linear",
+  "region": "Bahamas",
+  "nearest_tile_owner": "Cuba",
+  "nearest_tile_km": 358.04946083191885,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "linear",
+  "region": "Trinidad and Tobago",
+  "nearest_tile_owner": "Gambia",
+  "nearest_tile_km": 103.70782494417357,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": false,
+  "variant": "linear",
+  "region": "Iceland",
+  "nearest_tile_owner": "Iceland",
+  "nearest_tile_km": 311.0698086644309,
+  "own_tile_km": 311.0698086644309,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "squared",
+  "region": "Jamaica",
+  "nearest_tile_owner": "Venezuela",
+  "nearest_tile_km": 310.0507389719076,
+  "own_tile_km": 764.1067803225945,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "squared",
+  "region": "Cyprus",
+  "nearest_tile_owner": "Pakistan",
+  "nearest_tile_km": 101.52386120558202,
+  "own_tile_km": 1781.6409976465245,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "squared",
+  "region": "Puerto Rico",
+  "nearest_tile_owner": "Puerto Rico",
+  "nearest_tile_km": 160.52530384532736,
+  "own_tile_km": 160.52530384532736,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "squared",
+  "region": "Denmark",
+  "nearest_tile_owner": "Romania",
+  "nearest_tile_km": 275.9290292470431,
+  "own_tile_km": 7536.931778338572,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "squared",
+  "region": "Bahamas",
+  "nearest_tile_owner": "Jamaica",
+  "nearest_tile_km": 159.91449933633467,
+  "own_tile_km": 1086.7798382129847,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "squared",
+  "region": "Trinidad and Tobago",
+  "nearest_tile_owner": "Senegal",
+  "nearest_tile_km": 715.2032164974256,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": true,
+  "variant": "squared",
+  "region": "Iceland",
+  "nearest_tile_owner": "Czechia",
+  "nearest_tile_km": 313.9353965447559,
+  "own_tile_km": 2102.4956397896835,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "linear",
+  "region": "Jamaica",
+  "nearest_tile_owner": "Jamaica",
+  "nearest_tile_km": 310.0507389719076,
+  "own_tile_km": 310.0507389719076,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "linear",
+  "region": "Cyprus",
+  "nearest_tile_owner": "Pakistan",
+  "nearest_tile_km": 101.52386120558202,
+  "own_tile_km": 1991.353291123672,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "linear",
+  "region": "Puerto Rico",
+  "nearest_tile_owner": "Puerto Rico",
+  "nearest_tile_km": 160.52530384532736,
+  "own_tile_km": 160.52530384532736,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "linear",
+  "region": "Denmark",
+  "nearest_tile_owner": "Hungary",
+  "nearest_tile_km": 275.9290292470431,
+  "own_tile_km": 6851.7881757873765,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "linear",
+  "region": "Bahamas",
+  "nearest_tile_owner": "Cuba",
+  "nearest_tile_km": 159.91449933633467,
+  "own_tile_km": 1086.7798382129847,
+  "own_tiles": 1
+ },
+ {
+  "morph": true,
+  "variant": "linear",
+  "region": "Trinidad and Tobago",
+  "nearest_tile_owner": "Ghana",
+  "nearest_tile_km": 715.2032164974256,
+  "own_tile_km": null,
+  "own_tiles": 0
+ },
+ {
+  "morph": true,
+  "variant": "linear",
+  "region": "Iceland",
+  "nearest_tile_owner": "Sweden",
+  "nearest_tile_km": 313.9353965447559,
+  "own_tile_km": 2205.9336323192783,
+  "own_tiles": 1
+ }
+]

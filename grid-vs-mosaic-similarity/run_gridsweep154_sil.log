@@ -1,0 +1,56 @@
+states=49 tiles=154 districts=432
+[run] sweep__states__origin_weight__0.0
+[done] sweep__states__origin_weight__0.0 in 4.8s
+[run] sweep__states__origin_weight__0.5
+[done] sweep__states__origin_weight__0.5 in 4.7s
+[run] sweep__states__origin_weight__1.0
+[done] sweep__states__origin_weight__1.0 in 4.7s
+[run] sweep__states__origin_weight__2.0
+[done] sweep__states__origin_weight__2.0 in 4.7s
+[run] sweep__states__origin_weight__5.0
+[done] sweep__states__origin_weight__5.0 in 4.9s
+[run] sweep__states__origin_weight__20.0
+[done] sweep__states__origin_weight__20.0 in 4.7s
+[run] sweep__states__origin_weight__100.0
+[done] sweep__states__origin_weight__100.0 in 4.8s
+[run] sweep__states__neighbor_weight__0.0
+[done] sweep__states__neighbor_weight__0.0 in 4.3s
+[run] sweep__states__neighbor_weight__0.01
+[done] sweep__states__neighbor_weight__0.01 in 4.8s
+[run] sweep__states__neighbor_weight__0.05
+[done] sweep__states__neighbor_weight__0.05 in 4.8s
+[run] sweep__states__neighbor_weight__0.1
+[done] sweep__states__neighbor_weight__0.1 in 6.3s
+[run] sweep__states__neighbor_weight__0.2
+[done] sweep__states__neighbor_weight__0.2 in 5.2s
+[run] sweep__states__neighbor_weight__0.5
+[done] sweep__states__neighbor_weight__0.5 in 4.8s
+[run] sweep__states__neighbor_weight__1.0
+[done] sweep__states__neighbor_weight__1.0 in 4.9s
+[run] sweep__states__neighbor_weight__2.0
+[done] sweep__states__neighbor_weight__2.0 in 4.8s
+[run] sweep__states__neighbor_weight__5.0
+[done] sweep__states__neighbor_weight__5.0 in 4.8s
+[run] sweep__states__neighbor_weight__20.0
+[done] sweep__states__neighbor_weight__20.0 in 4.9s
+[run] sweep__states__topology_weight__0.0
+[done] sweep__states__topology_weight__0.0 in 0.8s
+[run] sweep__states__topology_weight__0.5
+[done] sweep__states__topology_weight__0.5 in 4.7s
+[run] sweep__states__topology_weight__1.0
+[done] sweep__states__topology_weight__1.0 in 4.8s
+[run] sweep__states__topology_weight__2.0
+[done] sweep__states__topology_weight__2.0 in 4.8s
+[run] sweep__states__topology_weight__5.0
+[done] sweep__states__topology_weight__5.0 in 4.8s
+[run] sweep__states__compactness__0.0
+[done] sweep__states__compactness__0.0 in 4.7s
+[run] sweep__states__compactness__0.1
+[done] sweep__states__compactness__0.1 in 4.7s
+[run] sweep__states__compactness__0.5
+[done] sweep__states__compactness__0.5 in 5.4s
+[run] sweep__states__compactness__1.0
+[done] sweep__states__compactness__1.0 in 4.7s
+[run] sweep__states__compactness__2.0
+[done] sweep__states__compactness__2.0 in 4.8s
+[all done]

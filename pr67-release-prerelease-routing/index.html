@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #67: fix: route pre-release publishes to TestPyPI, add CHANGELOG rc fallback</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #67: fix: route pre-release publishes to TestPyPI, add CHANGELOG rc fallback</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/67">https://github.com/bright-fakl/carto-flow/pull/67</a></dd>
+<dt>Branch</dt><dd>fix/release-prerelease-routing</dd>
+<dt>Base</dt><dd>origin/main @ bafb662</dd>
+<dt>Date</dt><dd>2026-09-27 02:01</dd>
+<dt>Before</dt><dd>origin/main @ bafb662</dd>
+<dt>After</dt><dd>fix/release-prerelease-routing @ d74246c</dd>
+<dt>Inputs</dt><dd>n/a - CI workflow and documentation change</dd>
+</dl>
+<p class="desc">Routes automatically-triggered pre-release publishes to TestPyPI instead of real PyPI and lets the CHANGELOG lookup fall back from an rc version to its base version; reviewer should check the routing trace table and the changelog-lookup unit test output below.</p>
+<h2>What would happen today if <code>2.0.0-rc1</code> were cut</h2>
+<p>Before this change, <code>.github/workflows/pypi-publish.yml</code> gated the publish step and the <code>UV_PUBLISH_URL</code> fallback only on <code>github.event_name</code>, not on whether the release was a pre-release:</p>
+<p>```yaml</p>
+<ul><li>name: Publish to PyPI</li></ul>
+<p>if: inputs.environment == &#x27;pypi&#x27; || github.event_name == &#x27;release&#x27; env: UV_PUBLISH_URL: ${{ inputs.environment == &#x27;testpypi&#x27; &amp;&amp; &#x27;https://test.pypi.org/legacy/&#x27; || &#x27;https://upload.pypi.org/legacy/&#x27; }} run: uv publish --trusted-publishing always ```</p>
+<p><code>release.yml</code> creating a GitHub Release fires <code>release: published</code> regardless of the <code>prerelease</code> flag on that release. For a <code>release</code>-triggered run, <code>inputs.environment</code> is unset (there is no <code>workflow_dispatch</code> input), so the <code>if:</code> was true via the second clause, and <code>UV_PUBLISH_URL</code> fell through the ternary&#x27;s <code>false</code> branch to <code>https://upload.pypi.org/legacy/</code> — real PyPI. The job&#x27;s <code>environment:</code> field had the same gap: <code>${{ inputs.environment == &#x27;testpypi&#x27; &amp;&amp; &#x27;testpypi&#x27; || &#x27;pypi&#x27; }}</code> also defaults to <code>pypi</code> when <code>inputs.environment</code> is unset. So cutting <code>2.0.0-rc1</code> today would publish it to real PyPI, an irreversible action: a version number on PyPI cannot be reused or deleted.</p>
+<p><code>release.yml</code>&#x27;s CHANGELOG lookup separately hard-fails for <code>2.0.0-rc1</code> because <code>CHANGELOG.md</code> has a <code>## [2.0.0]</code> section but no <code>## [2.0.0-rc1]</code> section, and the old lookup only tried the exact version string.</p>
+<h2>Fix</h2>
+<p><code>pypi-publish.yml</code> gained a <code>determine-target</code> job that computes the environment name (<code>pypi</code> or <code>testpypi</code>) and the matching <code>UV_PUBLISH_URL</code> once, from either the release&#x27;s <code>prerelease</code> flag (release-triggered runs) or the <code>environment</code> workflow_dispatch input (manual runs). The downstream <code>build-and-publish</code> job reads both values via <code>needs.determine-target.outputs.*</code>, for its job-level <code>environment:</code> field and for <code>UV_PUBLISH_URL</code>, replacing the two near-duplicate publish steps with one.</p>
+<p><code>release.yml</code>&#x27;s changelog lookup now tries the exact version first, then falls back to the version with any <code>-&lt;prerelease&gt;</code> suffix stripped (<code>2.0.0-rc1</code> -&gt; <code>2.0.0</code>) before failing. It still fails loudly, naming both forms it tried, if neither section exists, and still fails if the found section is empty.</p>
+<h2>Why the changelog falls back to the base version</h2>
+<p>An rc and the final version it leads to (<code>2.0.0-rc1</code>, <code>2.0.0-rc2</code>, <code>2.0.0</code>) ship the same intended content — the point of cutting an rc is to validate that content before it becomes the real release, not to describe a different set of changes. Requiring a dated <code>## [2.0.0-rc1]</code> section distinct from <code>## [2.0.0]</code> would mean either maintaining duplicate changelog entries that must be kept in sync, or the entry moving/renaming between rc and final, which then breaks any link written against the rc section. Falling back to the base version keeps one section that both the rc and the final release read from.</p>
+<h2>Routing trace (hand-traced; GitHub Actions cannot run locally)</h2>
+<table>
+<tr><th>Case</th><th><code>github.event_name</code></th><th>prerelease / input</th><th>resolves to <code>environment</code></th><th>resolves to <code>UV_PUBLISH_URL</code></th></tr>
+<tr><td><code>workflow_dispatch</code>, <code>environment=testpypi</code></td><td><code>workflow_dispatch</code></td><td>input = <code>testpypi</code></td><td><code>testpypi</code></td><td><code>https://test.pypi.org/legacy/</code></td></tr>
+<tr><td><code>workflow_dispatch</code>, <code>environment=pypi</code></td><td><code>workflow_dispatch</code></td><td>input = <code>pypi</code></td><td><code>pypi</code></td><td><code>https://upload.pypi.org/legacy/</code></td></tr>
+<tr><td><code>release</code> event, pre-release (e.g. <code>2.0.0-rc1</code>)</td><td><code>release</code></td><td><code>github.event.release.prerelease == true</code></td><td><code>testpypi</code></td><td><code>https://test.pypi.org/legacy/</code></td></tr>
+<tr><td><code>release</code> event, final (e.g. <code>2.0.0</code>)</td><td><code>release</code></td><td><code>github.event.release.prerelease == false</code></td><td><code>pypi</code></td><td><code>https://upload.pypi.org/legacy/</code></td></tr>
+<tr><td>anomaly: payload field empty or renamed</td><td><code>release</code></td><td>neither <code>true</code> nor <code>false</code></td><td><code>testpypi</code></td><td><code>https://test.pypi.org/legacy/</code></td></tr>
+</table>
+<h2>The target fails closed (review follow-up, commit 71b26ad)</h2>
+<p>The first implementation selected the target by testing <code>prerelease == &quot;true&quot;</code>, which means every other outcome fell through to real PyPI: a missing or renamed payload field, or an empty expansion, would send a release candidate to the one surface where a version can never be replaced. The condition now tests <code>== &quot;false&quot;</code> instead, so real PyPI is selected only by an explicit non-pre-release and everything else routes to TestPyPI, where a wrong upload costs nothing.</p>
+<p>The change is about which way the logic breaks, not about the four intended cases, which behave identically either way. It matters because the cost is asymmetric: a wrong TestPyPI upload is discarded, a wrong PyPI upload is permanent, and preventing the second is the entire purpose of the job.</p>
+<p>Verified by simulating the step&#x27;s shell logic across all six rows of the table above, including the two anomaly inputs (empty string, and <code>True</code> with different capitalization). Both now resolve to <code>testpypi</code>; under the previous condition both resolved to <code>pypi</code>.</p>
+<p>The dispatch assignment is also quoted now (<code>environment=&quot;${{ inputs.environment }}&quot;</code>). The input is a <code>choice</code>, so its value is constrained to two options and the missing quotes were not exploitable, but an unquoted assignment is not worth keeping in the script that picks a publish target.</p>
+<p>Trace detail for the <code>determine-target</code> job&#x27;s <code>Determine publish target</code> step:</p>
+<ul><li>The step&#x27;s shell script first branches on <code>github.event_name</code>. For</li></ul>
+<p><code>workflow_dispatch</code> runs, <code>${{ github.event_name }}</code> substitutes to the literal text <code>workflow_dispatch</code> at compile time, so the outer <code>if</code> condition (<code>= &quot;release&quot;</code>) is false and the script takes the <code>else</code> branch: <code>environment=${{ inputs.environment }}</code>, which substitutes to the literal <code>testpypi</code> or <code>pypi</code> chosen at dispatch time.</p>
+<ul><li>For <code>release</code> runs, the outer <code>if</code> is true, and the inner check</li></ul>
+<p><code>${{ github.event.release.prerelease }} = &quot;true&quot;</code> compares against the literal <code>true</code> or <code>false</code> GitHub substitutes from the release payload&#x27;s boolean <code>prerelease</code> field.</p>
+<ul><li>Either way, <code>environment</code> is then used in a second <code>if</code> to pick</li></ul>
+<p><code>publish_url</code>: <code>testpypi</code> maps to <code>https://test.pypi.org/legacy/</code>, anything else to <code>https://upload.pypi.org/legacy/</code>.</p>
+<ul><li>Both values are written to <code>$GITHUB_OUTPUT</code> and read by</li></ul>
+<p><code>build-and-publish</code> via <code>needs.determine-target.outputs.environment</code> (used directly as the job&#x27;s <code>environment:</code> key, so the environment&#x27;s protection rules apply) and <code>needs.determine-target.outputs.publish_url</code> (used as <code>UV_PUBLISH_URL</code> in the single <code>Publish package</code> step).</p>
+<ul><li>The <code>${{ inputs.environment }}</code> reference inside the <code>release</code>-branch&#x27;s</li></ul>
+<p>dead <code>else</code> clause is inert: for a <code>release</code>-triggered run there is no <code>workflow_dispatch</code> input, so the expression substitutes to an empty string, but that line is never reached because the outer <code>if</code> already took the <code>release</code> branch.</p>
+<p>All four cases resolve to the environment/URL pairs required by the task: pre-releases and the <code>testpypi</code> dispatch go to TestPyPI; final releases and the <code>pypi</code> dispatch go to real PyPI.</p>
+<h2>Verification output</h2>
+<p>YAML parses for both modified workflow files:</p>
+<p>``<code> $ uv run python -c &quot;import yaml,sys; [yaml.safe_load(open(f)) for f in [&#x27;.github/workflows/pypi-publish.yml&#x27;,&#x27;.github/workflows/release.yml&#x27;]]; print(&#x27;yaml ok&#x27;)&quot; yaml ok </code>``</p>
+<p>Extracted the modified CHANGELOG-lookup Python verbatim into a standalone script and ran it against the real <code>CHANGELOG.md</code>:</p>
+<p>``` === 2.0.0 === used_version: 2.0.0 error: None body starts: &#x27;Step-by-step edits for every break below are in the\n[migration guide](https://br&#x27; body len: 12186</p>
+<p>=== 2.0.0-rc1 === used_version: 2.0.0 error: None body starts: &#x27;Step-by-step edits for every break below are in the\n[migration guide](https://br&#x27; body len: 12186</p>
+<p>=== 9.9.9 === used_version: None error: CHANGELOG.md has neither &#x27;## [9.9.9]&#x27; section. Add one of them before releasing; the release notes are read from it.</p>
+<p>ALL CHECKS PASSED ```</p>
+<p><code>2.0.0</code> and <code>2.0.0-rc1</code> both resolve to the <code>## [2.0.0]</code> section body, and the two bodies are byte-identical (12186 characters, non-empty). <code>9.9.9</code> fails with a message naming the form it looked for.</p>
+<p>Static checks on the three changed files:</p>
+<p>``` $ uv run mypy src/carto_flow --exclude &#x27;mosaic_cartogram&#x27; Success: no issues found in 80 source files</p>
+<p>$ uv run pre-commit run --files .github/workflows/pypi-publish.yml .github/workflows/release.yml RELEASING.md check for case conflicts.................................................Passed check for merge conflicts................................................Passed check yaml...............................................................Passed fix end of files.........................................................Passed trim trailing whitespace.................................................Passed ```</p>
+<p>No figures accompany this report: the change is CI workflow YAML and a documentation rewrite, with no rendered output to compare before/after.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

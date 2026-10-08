@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #49: Pin the repair_contiguity reachability pre-check with tests</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #49: Pin the repair_contiguity reachability pre-check with tests</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/49">https://github.com/bright-fakl/carto-flow/pull/49</a></dd>
+<dt>Branch</dt><dd>test/contiguity-precheck-invariant</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-23</dd>
+<dt>Before</dt><dd>origin/main @ 2bae205</dd>
+<dt>After</dt><dd>test/contiguity-precheck-invariant</dd>
+<dt>Inputs</dt><dd>hand-built adjacency graphs (chains, cycles, stars, a 4x4 grid) and 300 seeded random small graphs - no geodata</dd>
+</dl>
+<p class="desc">No figures - a test-only PR changes no output. The written evidence is the invariant now pinned, how the pre-check and the enumeration are compared directly, and which mutations the tests catch.</p>
+<h2>No figures, and why</h2>
+<p>Every PR gets a page, including one with nothing to draw. This PR adds one test file and changes no source, so there is no before/after image to make: the rendered cartogram is identical by construction. The evidence that belongs here is written, and it is below.</p>
+<h2>What landed</h2>
+<p><code>tests/test_geo_utils_contiguity_precheck.py</code>, 17 tests, 295 lines. No change to <code>src/</code>.</p>
+<h2>The invariant, and why it needed pinning</h2>
+<p>PR #44 put a 25-line node-level BFS in front of the path enumeration inside <code>repair_contiguity</code>. It returns early when no node of <code>dst_slots</code> is reachable from <code>src_slots</code> within <code>max_len</code> nodes while avoiding <code>forbidden_nodes</code>. The correctness argument is that a shortest walk is a simple path, so &quot;unreachable within <code>max_len</code> nodes&quot; is exactly the condition under which the enumeration would have yielded nothing.</p>
+<p>The argument is sound, but the pre-check **duplicates** four things the enumeration also does:</p>
+<p>1. the source filter (<code>s not in forbidden_nodes</code>), 2. the <code>forbidden_nodes</code> handling during expansion, 3. the depth bound (<code>&gt;= max_len</code> stops expanding), 4. the convention that <code>max_len</code> counts **nodes**, starting at 1, not edges.</p>
+<p>Change any one of them on one side only and the pre-check starts returning early on calls that do have a path. <code>repair_contiguity</code> then quietly stops repairing satellites, still returns a valid permutation, and no test fails. That is the failure mode these tests exist to make loud.</p>
+<p>PR #44&#x27;s own page, <code>visual_checks/pr44-contiguity-reachability-precheck/</code>, states plainly that the merged diff adds no test of its own and that the identity evidence was the argument plus end-to-end fingerprint runs. This PR closes that gap.</p>
+<h2>How the two are compared directly</h2>
+<p>Both the pre-check and the enumeration are closures inside <code>repair_contiguity</code>, so neither can be imported. Rather than test only through <code>repair_contiguity</code> - which can show a repair happening but cannot show *which* of the two decided nothing was reachable - the tests lift <code>_enumerate_paths</code> out of the live function source with <code>inspect.getsource</code> and compile three callables over a caller-supplied adjacency list:</p>
+<table>
+<tr><th>form</th><th>what it is</th></tr>
+<tr><td>guarded</td><td>the generator exactly as written</td></tr>
+<tr><td>bare</td><td>the same generator with the pre-check block deleted</td></tr>
+<tr><td>verdict</td><td>the pre-check alone, returning its <code>reachable</code> flag</td></tr>
+</table>
+<p>So the comparison is direct: <code>verdict(...) is bool(list(bare(...)))</code>, plus <code>list(guarded(...)) == list(bare(...))</code> element-wise. All three are derived from the real source at test time - no copy of the algorithm lives in the test file, so the tests cannot drift into agreeing with a stale duplicate.</p>
+<p>The lift is marker-guarded. If the pre-check block stops matching the markers the tests strip it by, they fail with a message saying exactly that, rather than silently testing nothing.</p>
+<h2>What is asserted</h2>
+<ul><li>**The boundary, in both directions.** On a chain, a route of exactly</li></ul>
+<p><code>max_len</code> nodes is yielded and the verdict is reachable; one node further, the verdict is unreachable and the bare enumeration also yields nothing. The node-not-edge convention is asserted explicitly at the default bound of 10.</p>
+<ul><li>**Agreement.** Verdict against bare enumeration on 11 hand-built graphs with</li></ul>
+<p>hand-computed expectations - including <code>forbidden_nodes</code> cutting the only route, <code>forbidden_nodes</code> forcing a longer route that is still within the bound, a forbidden source, a source that is also a destination, an isolated node, a cycle with two routes of different length - and on 300 seeded random small graphs (2-9 nodes, random <code>max_len</code> from 1 to 6).</p>
+<ul><li>**The skip is real, not just harmless.** On a 4x4 grid with a destination</li></ul>
+<p>beyond the bound, the guarded call costs at most one neighbour lookup per node (16) while the bare one costs 471. This pins the performance claim of PR #44 as well as the correctness one.</p>
+<ul><li>**The repair still repairs.** Three cases through <code>repair_contiguity</code></li></ul>
+<p>itself: a reachable satellite is walked back next to the main body; a 10-node route repairs while an 11-node one leaves the satellite in <code>discontiguous</code> with the permutation untouched; a group in three components</p>
+<ul><li>so one satellite sits in <code>forbidden_nodes</code> while the other searches -</li></ul>
+<p>still converges to contiguous. A pre-check that wrongly skipped everything would fail all three.</p>
+<p>Expected values are hand-derived from the graph, never read off a run.</p>
+<h2>Mutation check</h2>
+<p>Four one-line mutations of the pre-check were applied by hand to <code>contiguity.py</code> and the suite re-run. Each is caught:</p>
+<table>
+<tr><th>mutation</th><th>tests failing</th></tr>
+<tr><td>depth bound off by one (<code>depth &gt;= max_len - 1</code>)</td><td>7</td></tr>
+<tr><td><code>forbidden_nodes</code> dropped from expansion</td><td>4</td></tr>
+<tr><td>source filter dropped (<code>seen = set(src_slots)</code>)</td><td>2</td></tr>
+<tr><td>destination test shifted (<code>and depth &gt; 1</code>)</td><td>2</td></tr>
+</table>
+<p>The first three are exactly the three duplications listed above; the fourth is the depth convention. The source was restored after each. Note that the earlier draft of these tests, which compared only guarded-against-bare output, caught the depth mutation but **not** the two <code>forbidden_nodes</code> /source-filter ones - those make the pre-check too permissive, which is invisible in the output and only costs performance. Lifting the verdict out separately is what made them visible; that is the reason the third form exists.</p>
+<h2>Disagreements found</h2>
+<p>None. The merged pre-check agreed with the enumeration on every input tried, including the 300 random graphs. No bug to report against PR #44.</p>
+<h2>Checks</h2>
+<p><code>make check</code> clean. Full suite 649 passed (632 before PR #44&#x27;s page was written, +17 here). No new warnings.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

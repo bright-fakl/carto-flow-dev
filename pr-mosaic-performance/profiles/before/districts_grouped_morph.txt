@@ -1,0 +1,50 @@
+wall_time=5.714s
+
+         2608225 function calls (2601474 primitive calls) in 5.692 seconds
+
+   Ordered by: cumulative time
+   List reduced from 780 to 40 due to restriction <40>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    5.714    5.714 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/scripts/_profile_mosaic.py:102(_run)
+        1    0.002    0.002    5.714    5.714 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/api.py:185(create_layout)
+        1    0.005    0.005    5.181    5.181 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:488(compute)
+    81608    0.142    0.000    3.195    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/decorators.py:73(wrapped)
+25652/21115    0.019    0.000    2.777    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/decorators.py:171(wrapper)
+        1    0.002    0.002    1.991    1.991 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/_calibration.py:53(calibrate_tiling)
+        4    0.001    0.000    1.969    0.492 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/_calibration.py:116(_build)
+     4541    1.876    0.000    1.876    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/set_operations.py:112(intersection)
+        1    0.065    0.065    1.378    1.378 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/_assignment.py:151(hungarian_morphed_assignment)
+        5    0.014    0.003    1.283    0.257 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/tiling.py:876(generate)
+        3    0.000    0.000    1.216    0.405 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/_calibration.py:149(_build_fast)
+        2    0.017    0.008    1.125    0.563 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/geo_utils/adjacency.py:31(find_adjacent_pairs)
+        5    0.381    0.076    0.994    0.199 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/tiling.py:616(_compute_adjacency_from_lattice)
+     4536    0.003    0.000    0.792    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/geometry/base.py:668(intersection)
+        1    0.010    0.010    0.705    0.705 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/flow_cartogram/algorithm.py:221(morph_geometries)
+    32932    0.621    0.000    0.621    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+    27969    0.020    0.000    0.606    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/numpy/_core/fromnumeric.py:2338(sum)
+    28070    0.029    0.000    0.584    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/numpy/_core/fromnumeric.py:69(_wrapreduction)
+       50    0.000    0.000    0.571    0.011 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/ops.py:111(unary_union)
+       50    0.570    0.011    0.570    0.011 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/set_operations.py:463(union_all)
+        1    0.000    0.000    0.531    0.531 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/data_prep.py:171(prepare_layout_data)
+        1    0.000    0.000    0.514    0.514 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/adjacency.py:41(compute_adjacency)
+        1    0.001    0.001    0.510    0.510 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/adjacency.py:16(_find_adjacent_pairs)
+        1    0.009    0.009    0.471    0.471 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/_assignment.py:24(_build_cost_matrix)
+        1    0.000    0.000    0.278    0.278 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:551(<listcomp>)
+     4658    0.038    0.000    0.270    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/tiling.py:827(_create_hexagon)
+        1    0.003    0.003    0.266    0.266 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:116(_relocate_ring_tiles)
+       10    0.027    0.003    0.257    0.026 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/flow_cartogram/density.py:149(compute_density_field_from_geometries)
+     1304    0.006    0.000    0.256    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/strtree.py:109(query)
+     1304    0.236    0.000    0.236    0.000 {method 'query' of 'shapely.lib.STRtree' objects}
+      135    0.004    0.000    0.228    0.002 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:165(score)
+     6795    0.008    0.000    0.203    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/geometry/polygon.py:227(__new__)
+      100    0.000    0.000    0.161    0.002 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/geo_utils/geometry.py:593(compute_areas)
+      100    0.134    0.001    0.161    0.002 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/geo_utils/geometry.py:647(_compute_areas_sequential)
+        2    0.001    0.000    0.144    0.072 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/geo_utils/adjacency.py:70(<listcomp>)
+      864    0.135    0.000    0.139    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/constructive.py:136(buffer)
+      276    0.111    0.000    0.134    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:79(_count_split_units)
+     5914    0.016    0.000    0.127    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/geometry/polygon.py:61(__new__)
+     4280    0.097    0.000    0.097    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/.venv/lib/python3.10/site-packages/shapely/predicates.py:1249(contains_xy)
+        1    0.009    0.009    0.080    0.080 /home/fakl/carto-flow/.claude/worktrees/agent-a759ae71b06ea24bc/src/carto_flow/flow_cartogram/algorithm.py:53(_longest_edge_segment_length)
+
+

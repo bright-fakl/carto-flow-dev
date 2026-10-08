@@ -1,0 +1,6 @@
+== repair_world_800_morph1 call 0: n=842 groups=173 mean_deg=5.13 max_passes=10 max_cand=60 lib_time=39.6s
+  passes= 1  lib=   5.0s fast=  0.06s speedup=  81.2x identical=True  pops=1,482,211 (1,468,147 in calls that yielded nothing) enum_calls=22 no_yield=11 unreachable=11 skips=11 disc=14
+  passes= 2  lib=  10.6s fast=  0.10s speedup= 110.3x identical=True  pops=2,959,350 (2,936,294 in calls that yielded nothing) enum_calls=36 no_yield=21 unreachable=21 skips=21 disc=12
+  passes= 3  lib=  11.0s fast=  0.08s speedup= 142.7x identical=True  pops=4,436,303 (4,404,441 in calls that yielded nothing) enum_calls=48 no_yield=31 unreachable=31 skips=31 disc=12
+  passes= 5  lib=  19.8s fast=  0.11s speedup= 176.3x identical=True  pops=7,384,414 (7,340,735 in calls that yielded nothing) enum_calls=72 no_yield=51 unreachable=51 skips=51 disc=13
+  passes=10  lib=  30.5s fast=  0.23s speedup= 131.7x identical=True  pops=11,807,758 (11,745,176 in calls that yielded nothing) enum_calls=107 no_yield=80 unreachable=80 skips=80 disc=10

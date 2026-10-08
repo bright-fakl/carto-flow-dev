@@ -1,0 +1,78 @@
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_swap_repair_passes=0 8.8s fp=d075b91256ef1a48 noncontig=16 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_swap_repair_passes=1 11.9s fp=ec357e77d8a44bed noncontig=8 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_swap_repair_passes=2 15.4s fp=20725dbfa586abf4 noncontig=7 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_swap_repair_passes=3 18.9s fp=eb95ba40c258bc28 noncontig=7 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_swap_repair_passes=5 29.9s fp=ea4f1b4d7d0178a7 noncontig=7 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_swap_repair_passes=10 38.3s fp=ba7120159c505530 noncontig=6 split=0 short=6
+[done] world_b800_morph0_swap_repair_passes=0 19.2s fp=e933550a60ebc262 noncontig=10 split=0 short=17
+[done] world_b800_morph0_swap_repair_passes=1 26.3s fp=10074b4721b03e36 noncontig=5 split=0 short=17
+[done] world_b800_morph0_swap_repair_passes=2 28.4s fp=54f434ebfcdb3b13 noncontig=4 split=0 short=17
+[done] world_b800_morph0_swap_repair_passes=3 29.7s fp=54f434ebfcdb3b13 noncontig=4 split=0 short=17
+[done] world_b800_morph0_swap_repair_passes=5 33.0s fp=54f434ebfcdb3b13 noncontig=4 split=0 short=17
+[done] world_b800_morph0_swap_repair_passes=10 35.9s fp=54f434ebfcdb3b13 noncontig=4 split=0 short=17
+[done] districts_b0_morph1_swap_repair_passes=0 7.3s fp=51392d27fd964089 noncontig=0 split=8 short=0
+[done] districts_b0_morph1_swap_repair_passes=1 4.5s fp=c81f164260d8d0db noncontig=0 split=1 short=0
+[done] districts_b0_morph1_swap_repair_passes=2 4.6s fp=72cd3f2aa88537ba noncontig=0 split=0 short=0
+[done] districts_b0_morph1_swap_repair_passes=3 5.0s fp=72cd3f2aa88537ba noncontig=0 split=0 short=0
+[done] districts_b0_morph1_swap_repair_passes=5 6.6s fp=72cd3f2aa88537ba noncontig=0 split=0 short=0
+[done] districts_b0_morph1_swap_repair_passes=10 4.5s fp=72cd3f2aa88537ba noncontig=0 split=0 short=0
+[done] districts_b0_morph0_swap_repair_passes=0 4.0s fp=36213bd1a2f06d70 noncontig=0 split=12 short=0
+[done] districts_b0_morph0_swap_repair_passes=1 3.9s fp=71929043be8f1e8b noncontig=0 split=4 short=0
+[done] districts_b0_morph0_swap_repair_passes=2 3.8s fp=b15185d7d0b9a96d noncontig=0 split=3 short=0
+[done] districts_b0_morph0_swap_repair_passes=3 4.0s fp=13d2dc3ba20158b6 noncontig=0 split=2 short=0
+[done] districts_b0_morph0_swap_repair_passes=5 4.2s fp=5e99c1018043e1c4 noncontig=0 split=2 short=0
+[done] districts_b0_morph0_swap_repair_passes=10 4.0s fp=b34667996c9cfeed noncontig=0 split=0 short=0
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_ring_swapback_max_hops=0 4.3s fp=c5ec65a3f034e479 noncontig=9 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_ring_swapback_max_hops=1 5.3s fp=d190bf98b4fcd73e noncontig=6 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_ring_swapback_max_hops=2 4.8s fp=355b965ef904f6d7 noncontig=6 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_ring_swapback_max_hops=4 6.0s fp=0ce130279fbebcf0 noncontig=7 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_ring_swapback_max_hops=8 7.2s fp=8facd017be14db32 noncontig=6 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_ring_swapback_max_hops=16 10.5s fp=ba7120159c505530 noncontig=6 split=0 short=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_b800_morph1_ring_swapback_max_hops=32 14.3s fp=ce20821539c36f09 noncontig=7 split=0 short=6
+[done] world_b800_morph0_ring_swapback_max_hops=0 3.9s fp=fced109fcb374474 noncontig=7 split=0 short=17
+[done] world_b800_morph0_ring_swapback_max_hops=1 4.1s fp=f8929184920a303d noncontig=6 split=0 short=17
+[done] world_b800_morph0_ring_swapback_max_hops=2 3.8s fp=9477703758907e97 noncontig=6 split=0 short=17
+[done] world_b800_morph0_ring_swapback_max_hops=4 4.0s fp=c3186565457d5025 noncontig=5 split=0 short=17
+[done] world_b800_morph0_ring_swapback_max_hops=8 5.7s fp=dbaf6701ae5f00f4 noncontig=4 split=0 short=17
+[done] world_b800_morph0_ring_swapback_max_hops=16 14.2s fp=54f434ebfcdb3b13 noncontig=4 split=0 short=17
+[done] world_b800_morph0_ring_swapback_max_hops=32 22.6s fp=18559a15eac373d1 noncontig=4 split=0 short=17
+[done] districts_b0_morph1_ring_swapback_max_hops=0 4.7s fp=80e5ff5cd30caeff noncontig=0 split=2 short=0
+[done] districts_b0_morph1_ring_swapback_max_hops=1 4.4s fp=c6bbada1e7414d25 noncontig=0 split=1 short=0
+[done] districts_b0_morph1_ring_swapback_max_hops=2 4.2s fp=5cd61136df298703 noncontig=0 split=0 short=0
+[done] districts_b0_morph1_ring_swapback_max_hops=4 4.3s fp=4eb52d4896faa5ea noncontig=0 split=0 short=0
+[done] districts_b0_morph1_ring_swapback_max_hops=8 4.2s fp=3fefc13ab8506861 noncontig=0 split=0 short=0
+[done] districts_b0_morph1_ring_swapback_max_hops=16 4.5s fp=72cd3f2aa88537ba noncontig=0 split=0 short=0
+[done] districts_b0_morph1_ring_swapback_max_hops=32 4.5s fp=6309302b542ee727 noncontig=0 split=0 short=0
+[done] districts_b0_morph0_ring_swapback_max_hops=0 3.6s fp=7c8c25f1716d51a2 noncontig=0 split=2 short=0
+[done] districts_b0_morph0_ring_swapback_max_hops=1 4.4s fp=89bdc539df290821 noncontig=0 split=0 short=0
+[done] districts_b0_morph0_ring_swapback_max_hops=2 4.2s fp=a14b44e666ef2668 noncontig=0 split=0 short=0
+[done] districts_b0_morph0_ring_swapback_max_hops=4 3.9s fp=b1b62f64b2fdc91e noncontig=0 split=0 short=0
+[done] districts_b0_morph0_ring_swapback_max_hops=8 4.5s fp=540ee4ad0196b9b5 noncontig=0 split=0 short=0
+[done] districts_b0_morph0_ring_swapback_max_hops=16 3.7s fp=b34667996c9cfeed noncontig=0 split=0 short=0
+[done] districts_b0_morph0_ring_swapback_max_hops=32 3.8s fp=80692fad1d580342 noncontig=0 split=1 short=0

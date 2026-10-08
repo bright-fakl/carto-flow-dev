@@ -1,0 +1,32 @@
+[
+  {
+    "case": "states",
+    "split": [
+      "Michigan",
+      "Washington"
+    ],
+    "n_split": 2,
+    "wall_s": 2.12
+  },
+  {
+    "case": "districts_group_by",
+    "split": [
+      "Alabama",
+      "Arizona",
+      "California",
+      "Florida",
+      "Louisiana",
+      "Massachusetts",
+      "Michigan",
+      "Mississippi",
+      "New Hampshire",
+      "New Jersey",
+      "New Mexico",
+      "New York",
+      "Tennessee",
+      "Virginia"
+    ],
+    "n_split": 14,
+    "wall_s": 5.07
+  }
+]

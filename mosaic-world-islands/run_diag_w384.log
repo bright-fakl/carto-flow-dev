@@ -1,0 +1,12 @@
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/carto-flow/visual_checks/mosaic-world-islands/trace_loss.py:43: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  r = morph_geometries(geometries, values=counts.astype(np.float64),
+[done] world_b384_morph1 3.7s short=8 zero=6 overwrites=8
+[done] world_b384_morph0 14.7s short=18 zero=14 overwrites=7
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (242810.8 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/carto-flow/visual_checks/mosaic-world-islands/trace_loss.py:43: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (242810.8 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  r = morph_geometries(geometries, values=counts.astype(np.float64),
+[done] world_mainland_b384_morph1 3.3s short=0 zero=0 overwrites=0
+[done] world_mainland_b384_morph0 5.8s short=0 zero=0 overwrites=0

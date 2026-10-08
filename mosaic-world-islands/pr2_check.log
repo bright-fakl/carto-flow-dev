@@ -1,0 +1,138 @@
+🚀 Checking lock file consistency with 'pyproject.toml'
+[2mResolved [1m215 packages[0m [2min 1ms[0m[0m
+🚀 Linting code: Running pre-commit
+check for case conflicts.................................................Passed
+check for merge conflicts................................................Passed
+check toml...............................................................Passed
+check yaml...............................................................Passed
+check json...............................................................Passed
+pretty format json.......................................................Passed
+fix end of files.........................................................Passed
+trim trailing whitespace.................................................Passed
+nbstripout...............................................................Passed
+ruff check...............................................................Passed
+ruff format..............................................................Passed
+🚀 Static type checking: Running mypy
+[1m[32mSuccess: no issues found in 82 source files(B[m
+🚀 Checking for obsolete dependencies: Running deptry
+Assuming the corresponding module name of package 'pytest-benchmark' is 'pytest_benchmark'. Install the package or configure a package_module_name_map entry to override this behaviour.
+Scanning 82 files...
+
+[1m[32mSuccess! No dependency issues found.[m
+=== CHECK EXIT 0 ===
+🚀 Testing code: Running pytest
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.10.18, pytest-8.4.2, pluggy-1.6.0
+rootdir: /home/fakl/cf-verify
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.11.0, cov-7.0.0
+collected 632 items
+
+tests/test_data_module.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                       [  1%][0m
+tests/test_flow_cartogram.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                   [  2%][0m
+tests/test_flow_errors.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                       [  3%][0m
+tests/test_geo_utils_adjacency.py [32m.[0m[32m.[0m[32m.[0m[33m                                    [  4%][0m
+tests/test_geo_utils_explode.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                     [  5%][0m
+tests/test_geo_utils_prescale.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                             [  6%][0m
+tests/test_geo_utils_simplification.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                        [  8%][0m
+tests/test_grid.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                 [ 11%][0m
+tests/test_history.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m       [ 18%][0m
+tests/test_integration.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                           [ 19%][0m
+tests/test_proportional_cartogram.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                [ 19%][0m
+tests/test_styling.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                     [ 22%][0m
+tests/test_symbol_cartogram_baseline.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m [ 27%]
+[0m[32m.[0m[32m.[0m[32m.[0m[33m                                                                      [ 27%][0m
+tests/test_symbol_cartogram_coverage.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                           [ 28%][0m
+tests/test_symbol_cartogram_flow_density.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                [ 30%][0m
+tests/test_symbol_cartogram_group_by_support.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m [ 34%]
+[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                                                [ 35%][0m
+tests/test_symbol_cartogram_mosaic.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m [ 41%]
+[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m [ 52%]
+[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                                         [ 55%][0m
+tests/test_symbol_cartogram_zero_size.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m [ 60%]
+[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                     [ 65%][0m
+tests/test_tiling_cartogram.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m    [ 71%][0m
+tests/test_tilings.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m [ 79%]
+[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m [ 91%]
+[0m[32m.[0m[32m.[0m[33m                                                                       [ 91%][0m
+tests/test_voronoi_cartogram.py [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m [ 97%]
+[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[33m                                                           [100%][0m
+
+[33m=============================== warnings summary ===============================[0m
+.venv/lib/python3.10/site-packages/geopandas/_compat.py:7
+  /home/fakl/cf-verify/.venv/lib/python3.10/site-packages/geopandas/_compat.py:7: DeprecationWarning: The 'shapely.geos' module is deprecated, and will be removed in a future version. All attributes of 'shapely.geos' are available directly from the top-level 'shapely' namespace (since shapely 2.0.0).
+    import shapely.geos
+
+tests/test_flow_cartogram.py::TestFlowCartogram::test_basic_flow_cartogram
+tests/test_flow_cartogram.py::TestFlowCartogram::test_flow_cartogram_different_grid_sizes
+tests/test_flow_cartogram.py::TestFlowCartogram::test_flow_cartogram_convergence
+tests/test_integration.py::TestIntegration::test_flow_cartogram_workflow
+  /home/fakl/cf-verify/src/carto_flow/flow_cartogram/workflow.py:259: UserWarning: Input geometries contain a straight segment of length 1.0 (grid units), which exceeds 4 grid cells (0.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    result = morph_geometries(
+
+tests/test_flow_cartogram.py::TestFlowCartogram::test_flow_cartogram_with_parameters
+tests/test_flow_cartogram.py::TestFlowCartogram::test_flow_cartogram_different_grid_sizes
+tests/test_flow_cartogram.py::TestZeroValueGeometry::test_zero_value_region_shrinks_and_convergence_is_reachable
+  /home/fakl/cf-verify/src/carto_flow/flow_cartogram/workflow.py:259: UserWarning: Input geometries contain a straight segment of length 1.0 (grid units), which exceeds 4 grid cells (0.1 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    result = morph_geometries(
+
+tests/test_flow_cartogram.py::TestFlowCartogram::test_flow_cartogram_different_grid_sizes
+tests/test_flow_cartogram.py::TestZeroValueGeometry::test_zero_value_does_not_emit_divide_by_zero_warnings
+  /home/fakl/cf-verify/src/carto_flow/flow_cartogram/workflow.py:259: UserWarning: Input geometries contain a straight segment of length 1.0 (grid units), which exceeds 4 grid cells (0.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    result = morph_geometries(
+
+tests/test_flow_cartogram.py::TestZeroValueGeometry::test_collapsed_current_area_does_not_diverge
+  /home/fakl/cf-verify/tests/test_flow_cartogram.py:144: UserWarning: Input geometries contain a straight segment of length 1.0 (grid units), which exceeds 4 grid cells (0.1 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    cartogram = morph_geometries(geoms, values, options=options)
+
+tests/test_symbol_cartogram_baseline.py::TestSizeNormalizationDefault::test_mosaic_layout_is_unaffected
+tests/test_symbol_cartogram_baseline.py::TestSizeNormalizationDefault::test_mosaic_layout_is_unaffected
+tests/test_symbol_cartogram_mosaic.py::TestTileCounts::test_counts_with_morph
+tests/test_symbol_cartogram_mosaic.py::TestOptions::test_registry_key_and_create_layout
+tests/test_symbol_cartogram_zero_size.py::TestZeroSizeSymbols::test_row_count_and_finite_positions[mosaic-options3-grid]
+tests/test_symbol_cartogram_zero_size.py::TestAllZeroSizingColumn::test_row_count_and_finite_positions[mosaic-options3-grid]
+  /home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1.0 (grid units), which exceeds 4 grid cells (0.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    flow_result = morph_geometries(
+
+tests/test_symbol_cartogram_flow_density.py::TestFlowDensityLayout::test_group_by_cross_group_pull
+  /home/fakl/cf-verify/src/carto_flow/symbol_cartogram/api.py:336: UserWarning: group_by was given to FlowDensityLayout but cross_group_pull_scale is 1.0, so cross-group pairs are pulled together exactly like within-group pairs and the grouping does not affect placement. Set cross_group_pull_scale below 1.0 (e.g. FlowDensityLayout(cross_group_pull_scale=0.0)) to separate groups.
+    return layout.compute(data, show_progress=show_progress, save_history=save_history)
+
+tests/test_symbol_cartogram_mosaic.py::TestZeroTileCount::test_zero_count_region_gets_no_tiles_and_no_warnings
+  /home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1.0 (grid units), which exceeds 4 grid cells (0.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    flow_result = morph_geometries(
+
+tests/test_symbol_cartogram_mosaic.py::TestZeroTileCount::test_isolated_zero_count_component_does_not_crash[False-True]
+  /home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1.0 (grid units), which exceeds 4 grid cells (0.1 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    flow_result = morph_geometries(
+
+tests/test_symbol_cartogram_mosaic.py::TestZeroTileCount::test_isolated_zero_count_component_does_not_crash[True-True]
+  /home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1.1 (grid units), which exceeds 4 grid cells (0.1 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    flow_result = morph_geometries(
+
+tests/test_symbol_cartogram_mosaic.py::TestCollapsedComponentAcrossLayouts::test_mosaic_handles_collapsed_component[True]
+  /home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1.2 (grid units), which exceeds 4 grid cells (0.1 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    flow_result = morph_geometries(
+
+tests/test_symbol_cartogram_zero_size.py::TestZeroSizeSymbols::test_row_count_and_finite_positions[mosaic-options3-voronoi]
+tests/test_symbol_cartogram_zero_size.py::TestAllZeroSizingColumn::test_row_count_and_finite_positions[mosaic-options3-voronoi]
+  /home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 6.2 (grid units), which exceeds 4 grid cells (0.1 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+    flow_result = morph_geometries(
+
+tests/test_tilings.py::TestIsohedralEdgeCurves::test_edge_curves_ih83
+  /home/fakl/cf-verify/tests/test_tilings.py:668: UserWarning: IH83: the supplied edge_curves produce a self-intersecting prototile. Tiles will be repaired automatically via make_valid(), but visual artefacts may occur. Consider using a less extreme curve.
+    t = IsohedralTiling(tiling_type=83, edge_curves={0: curve})
+
+tests/test_voronoi_cartogram.py::TestAnimation::test_animate_positions_only
+tests/test_voronoi_cartogram.py::TestAnimation::test_animate_with_cells
+  /home/fakl/cf-verify/.venv/lib/python3.10/site-packages/matplotlib/animation.py:908: UserWarning: Animation was deleted without rendering anything. This is most likely not intended. To prevent deletion, assign the Animation to a variable, e.g. `anim`, that exists until you output the Animation using `plt.show()` or `anim.save()`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.10.18-final-0 _______________
+
+Coverage XML written to file coverage.xml
+[33m================= [32m632 passed[0m, [33m[1m27 warnings[0m[33m in 178.98s (0:02:58)[0m[33m =================[0m
+=== TEST EXIT 0 ===

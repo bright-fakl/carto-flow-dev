@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #97: Copy displaced coordinates into each morph snapshot</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #97: Copy displaced coordinates into each morph snapshot</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/97">https://github.com/bright-fakl/carto-flow/pull/97</a></dd>
+<dt>Branch</dt><dd>fix/morph-snapshot-coords-copy</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-10-08</dd>
+<dt>Before</dt><dd>main (every snapshot&#x27;s coords equal the final positions)</dd>
+<dt>After</dt><dd>fix/morph-snapshot-coords-copy</dd>
+<dt>Inputs</dt><dd>US census (bundled), 9x6 grid via displacement_coords=(X, Y), preset_balanced, area_scale=1e-6, snapshot_every=10, n_iter=400 (13 snapshots)</dd>
+</dl>
+<p class="desc">With displacement_coords and snapshot_every, each snapshot&#x27;s coords now holds the positions at its own iteration instead of the final positions; geometry output is unchanged.</p>
+<h2>What changed</h2>
+<p><code>flat_coords</code> is updated in place each iteration, and <code>_convert_coords_to_input_format</code> returns the array itself or views of it, so all snapshots shared one buffer. The array is now copied when a snapshot is built; nothing is copied for iterations without a snapshot.</p>
+<h2>Evidence</h2>
+<ul><li><code>TestSnapshotCoords</code> in <code>tests/test_flow_cartogram.py</code> runs the three <code>displacement_coords</code> formats ((X, Y) tuple, (N, 2), (M, N, 2)) with <code>snapshot_every=5</code>. It checks that the first and last snapshots differ, that successive snapshots differ, that the last equals <code>cartogram.get_coords()</code>, and that no two snapshots share memory. All three fail on main and pass now.</li><li>Geometry output on the US census run above: 13 snapshots on both branches, maximum absolute coordinate difference 4.7e-9 on coordinates of order 1e6 (relative ~1e-15, the run-to-run noise of the parallel numba kernels).</li><li>Before, all 13 snapshots had identical grid coordinates; after, they do not.</li></ul>
+<div class="figure">
+<img src="grid_snapshots.png" alt="co-displaced grid at snapshots 0, 3, 6 and 12 over the original state outlines. Top row: before, the grid is identical in every snapshot (final positions). Bottom row: after, the grid progresses with the iteration.">
+<p class="caption">co-displaced grid at snapshots 0, 3, 6 and 12 over the original state outlines. Top row: before, the grid is identical in every snapshot (final positions). Bottom row: after, the grid progresses with the iteration.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

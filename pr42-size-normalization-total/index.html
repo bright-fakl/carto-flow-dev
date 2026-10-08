@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #42: Default size_normalization to &quot;total&quot; for radius-based layouts</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #42: Default size_normalization to &quot;total&quot; for radius-based layouts</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/42">https://github.com/bright-fakl/carto-flow/pull/42</a></dd>
+<dt>Branch</dt><dd>feat/size-normalization-total</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-22</dd>
+<dt>Before</dt><dd>origin/main @ a095187 (size_normalization=&quot;max&quot;)</dd>
+<dt>After</dt><dd>feat/size-normalization-total @ 5f18adf (size_normalization=&quot;total&quot;)</dd>
+<dt>Inputs</dt><dd>US states (bundled census, Population, ESRI:102008); Europe (load_world pop_est, EPSG:3035); Africa (load_world pop_est, ESRI:102022); US states with a constant sizing column as a control</dd>
+</dl>
+<p class="desc">The symbol pipeline now sizes symbols so their total area matches the total geometry area, instead of giving the largest symbol the mean geometry area. Look at how much of each map the symbols cover, and check the uniform-column row, where the two modes must coincide exactly.</p>
+<h2>What the default was doing</h2>
+<p>Under <code>size_normalization=&quot;max&quot;</code> the largest symbol is given an area equal to the mean geometry area. With the default <code>sqrt</code> scale, the symbols then cover exactly <code>mean(value) / max(value)</code> of the total geometry area. The scale of the output is set by the skew of the sizing column, not by anything the caller chose. <code>&quot;total&quot;</code> sets the total symbol area equal to the total geometry area instead, which is the classic Dorling convention.</p>
+<h2>Circle packing</h2>
+<table>
+<tr><th>Input</th><th>coverage before</th><th>coverage after</th><th>median displacement before</th><th>after</th></tr>
+<tr><td>US states (Population)</td><td>0.167</td><td>0.994</td><td>0.165</td><td>0.120</td></tr>
+<tr><td>Europe (pop_est)</td><td>0.132</td><td>0.994</td><td>0.058</td><td>0.138</td></tr>
+<tr><td>Africa (pop_est)</td><td>0.127</td><td>0.994</td><td>0.278</td><td>0.069</td></tr>
+<tr><td>US states (uniform column)</td><td>0.994</td><td>0.994</td><td>0.094</td><td>0.094</td></tr>
+</table>
+<p>Coverage is measured on the rendered symbols, so 0.994 rather than 1.0 — the circle is drawn as a 32-gon. Displacement is the median centroid shift in units of sqrt(total geometry area).</p>
+<p>Europe is the one input where displacement gets worse: the larger circles have further to travel before they stop overlapping. The uniform-column row is identical in both columns, as it must be.</p>
+<h2>centroid_cartogram (gallery example)</h2>
+<table>
+<tr><th></th><th>coverage</th><th>median displacement</th></tr>
+<tr><td>before</td><td>0.167</td><td>0.000</td></tr>
+<tr><td>after</td><td>0.994</td><td>0.066</td></tr>
+</table>
+<p>Displacement was zero before because circles that small never overlapped, so stage 1 had nothing to resolve.</p>
+<h2>Grid layout — not changed</h2>
+<table>
+<tr><th>Input</th><th>mode</th><th>coverage</th><th>median displacement</th><th>extent vs input</th><th>median displacement after removing the scale</th></tr>
+<tr><td>US states</td><td>max</td><td>0.153</td><td>0.108</td><td>1.05x</td><td>0.095</td></tr>
+<tr><td>US states</td><td>total</td><td>0.907</td><td>0.572</td><td>2.42x</td><td>0.111</td></tr>
+<tr><td>Europe</td><td>max</td><td>0.120</td><td>0.302</td><td>2.11x</td><td>0.090</td></tr>
+<tr><td>Europe</td><td>total</td><td>0.907</td><td>1.027</td><td>5.69x</td><td>0.089</td></tr>
+</table>
+<p>The grid layout derives its tile size from the largest symbol, so the mode scales lattice and symbols together. The last column fits a scale and translation before measuring displacement: the arrangement is essentially the same either way. All <code>&quot;total&quot;</code> changes is the absolute scale, which stops the grid lining up with the geography it came from. The grid layout therefore keeps <code>&quot;max&quot;</code>, and <code>demers_cartogram</code> and <code>tile_map_cartogram</code> are unchanged.</p>
+<h2>Mosaic layout — inert</h2>
+<p>Symbol areas are identical under both modes (US states: coverage 0.2231, median displacement 0.1558 either way). Each mosaic symbol is scaled to its tile in proportion to the largest symbol, so a single global factor cancels.</p>
+<div class="figure">
+<img src="centroid_example_before_after.png" alt="The one affected gallery example, plot_symbol_centroid_layout.py, which calls centroid_cartogram without the argument.">
+<p class="caption">The one affected gallery example, plot_symbol_centroid_layout.py, which calls centroid_cartogram without the argument.</p>
+</div><div class="figure">
+<img src="doc_cells_before_after.png" alt="The two documentation cells whose output changes: the tutorial&#x27;s CentroidLayout cell and the tile-count how-to&#x27;s grouped topology layout. Both read sensibly after.">
+<p class="caption">The two documentation cells whose output changes: the tutorial&#x27;s CentroidLayout cell and the tile-count how-to&#x27;s grouped topology layout. Both read sensibly after.</p>
+</div><div class="figure">
+<img src="grid_before_after.png" alt="The grid layout, which keeps &quot;max&quot;. The right column shows what &quot;total&quot; would have done: the lattice, calibrated from the largest symbol, is pushed 2.4x (US) and 5.7x (Europe) off the scale of the input geometries while the arrangement stays the same.">
+<p class="caption">The grid layout, which keeps &quot;max&quot;. The right column shows what &quot;total&quot; would have done: the lattice, calibrated from the largest symbol, is pushed 2.4x (US) and 5.7x (Europe) off the scale of the input geometries while the arrangement stays the same.</p>
+</div><div class="figure">
+<img src="mosaic_before_after.png" alt="The mosaic layout under both modes. The two panels are identical: mosaic symbol scale comes from the tile lattice, so a global size factor cancels.">
+<p class="caption">The mosaic layout under both modes. The two panels are identical: mosaic symbol scale comes from the tile lattice, so a global size factor cancels.</p>
+</div><div class="figure">
+<img src="packing_before_after.png" alt="Circle packing on four inputs. Left column is the old default (&quot;max&quot;), right column the new one (&quot;total&quot;). Both panels of a row share axis limits, so the size change is real and not a zoom. The bottom row is the control: a uniform sizing column, where the two modes are mathematically identical.">
+<p class="caption">Circle packing on four inputs. Left column is the old default (&quot;max&quot;), right column the new one (&quot;total&quot;). Both panels of a row share axis limits, so the size change is real and not a zoom. The bottom row is the control: a uniform sizing column, where the two modes are mathematically identical.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

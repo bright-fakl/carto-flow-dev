@@ -1,0 +1,74 @@
+[
+ {
+  "label": "patched",
+  "case": "world",
+  "budget": 800,
+  "morph": true,
+  "best": 26.52154863200849,
+  "times": [
+   26.52,
+   29.4
+  ],
+  "fp": "ba7120159c505530"
+ },
+ {
+  "label": "patched",
+  "case": "world",
+  "budget": 800,
+  "morph": false,
+  "best": 43.5707779499935,
+  "times": [
+   43.57,
+   44.04
+  ],
+  "fp": "54f434ebfcdb3b13"
+ },
+ {
+  "label": "patched",
+  "case": "world",
+  "budget": 1500,
+  "morph": true,
+  "best": 90.35447827499593,
+  "times": [
+   99.43,
+   90.35
+  ],
+  "fp": "26b69d400d5f857d"
+ },
+ {
+  "label": "patched",
+  "case": "world",
+  "budget": 1500,
+  "morph": false,
+  "best": 77.33681947004516,
+  "times": [
+   85.18,
+   77.34
+  ],
+  "fp": "bfc4350f6e66da76"
+ },
+ {
+  "label": "patched",
+  "case": "districts",
+  "budget": 0,
+  "morph": true,
+  "best": 4.165595641010441,
+  "times": [
+   4.33,
+   4.17
+  ],
+  "fp": "72cd3f2aa88537ba"
+ },
+ {
+  "label": "patched",
+  "case": "districts",
+  "budget": 0,
+  "morph": false,
+  "best": 3.658874573011417,
+  "times": [
+   3.66,
+   3.81
+  ],
+  "fp": "b34667996c9cfeed"
+ }
+]

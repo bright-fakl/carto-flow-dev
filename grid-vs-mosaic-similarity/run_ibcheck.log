@@ -1,0 +1,113 @@
+[run] ibcheck__states_uniform_hex__morphT__0.0
+[done] ibcheck__states_uniform_hex__morphT__0.0 in 1.0s
+[run] ibcheck__states_uniform_hex__morphT__0.25
+[done] ibcheck__states_uniform_hex__morphT__0.25 in 1.0s
+[run] ibcheck__states_uniform_hex__morphT__0.5
+[done] ibcheck__states_uniform_hex__morphT__0.5 in 1.0s
+[run] ibcheck__states_uniform_hex__morphT__1.0
+[done] ibcheck__states_uniform_hex__morphT__1.0 in 1.2s
+[run] ibcheck__states_uniform_hex__morphT__2.0
+[done] ibcheck__states_uniform_hex__morphT__2.0 in 1.1s
+[run] ibcheck__states_uniform_hex__morphT__4.0
+[done] ibcheck__states_uniform_hex__morphT__4.0 in 1.1s
+[run] ibcheck__states_uniform_hex__morphT__8.0
+[done] ibcheck__states_uniform_hex__morphT__8.0 in 1.0s
+[run] ibcheck__states_uniform_hex__morphF__0.0
+[done] ibcheck__states_uniform_hex__morphF__0.0 in 0.8s
+[run] ibcheck__states_uniform_hex__morphF__0.25
+[done] ibcheck__states_uniform_hex__morphF__0.25 in 0.9s
+[run] ibcheck__states_uniform_hex__morphF__0.5
+[done] ibcheck__states_uniform_hex__morphF__0.5 in 0.8s
+[run] ibcheck__states_uniform_hex__morphF__1.0
+[done] ibcheck__states_uniform_hex__morphF__1.0 in 0.8s
+[run] ibcheck__states_uniform_hex__morphF__2.0
+[done] ibcheck__states_uniform_hex__morphF__2.0 in 0.8s
+[run] ibcheck__states_uniform_hex__morphF__4.0
+[done] ibcheck__states_uniform_hex__morphF__4.0 in 0.8s
+[run] ibcheck__states_uniform_hex__morphF__8.0
+[done] ibcheck__states_uniform_hex__morphF__8.0 in 0.8s
+[run] ibcheck__states_uniform_sq__morphT__0.0
+[done] ibcheck__states_uniform_sq__morphT__0.0 in 1.0s
+[run] ibcheck__states_uniform_sq__morphT__0.25
+[done] ibcheck__states_uniform_sq__morphT__0.25 in 1.0s
+[run] ibcheck__states_uniform_sq__morphT__0.5
+[done] ibcheck__states_uniform_sq__morphT__0.5 in 1.0s
+[run] ibcheck__states_uniform_sq__morphT__1.0
+[done] ibcheck__states_uniform_sq__morphT__1.0 in 1.0s
+[run] ibcheck__states_uniform_sq__morphT__2.0
+[done] ibcheck__states_uniform_sq__morphT__2.0 in 1.1s
+[run] ibcheck__states_uniform_sq__morphT__4.0
+[done] ibcheck__states_uniform_sq__morphT__4.0 in 1.0s
+[run] ibcheck__states_uniform_sq__morphT__8.0
+[done] ibcheck__states_uniform_sq__morphT__8.0 in 1.0s
+[run] ibcheck__states_uniform_sq__morphF__0.0
+[done] ibcheck__states_uniform_sq__morphF__0.0 in 1.0s
+[run] ibcheck__states_uniform_sq__morphF__0.25
+[done] ibcheck__states_uniform_sq__morphF__0.25 in 1.0s
+[run] ibcheck__states_uniform_sq__morphF__0.5
+[done] ibcheck__states_uniform_sq__morphF__0.5 in 0.9s
+[run] ibcheck__states_uniform_sq__morphF__1.0
+[done] ibcheck__states_uniform_sq__morphF__1.0 in 1.0s
+[run] ibcheck__states_uniform_sq__morphF__2.0
+[done] ibcheck__states_uniform_sq__morphF__2.0 in 1.0s
+[run] ibcheck__states_uniform_sq__morphF__4.0
+[done] ibcheck__states_uniform_sq__morphF__4.0 in 1.0s
+[run] ibcheck__states_uniform_sq__morphF__8.0
+[done] ibcheck__states_uniform_sq__morphF__8.0 in 1.0s
+[run] ibcheck__states154__morphT__0.0
+[done] ibcheck__states154__morphT__0.0 in 1.5s
+[run] ibcheck__states154__morphT__0.25
+[done] ibcheck__states154__morphT__0.25 in 1.5s
+[run] ibcheck__states154__morphT__0.5
+[done] ibcheck__states154__morphT__0.5 in 1.5s
+[run] ibcheck__states154__morphT__1.0
+[done] ibcheck__states154__morphT__1.0 in 1.5s
+[run] ibcheck__states154__morphT__2.0
+[done] ibcheck__states154__morphT__2.0 in 1.5s
+[run] ibcheck__states154__morphT__4.0
+[done] ibcheck__states154__morphT__4.0 in 1.5s
+[run] ibcheck__states154__morphT__8.0
+[done] ibcheck__states154__morphT__8.0 in 1.5s
+[run] ibcheck__states154__morphF__0.0
+[done] ibcheck__states154__morphF__0.0 in 1.2s
+[run] ibcheck__states154__morphF__0.25
+[done] ibcheck__states154__morphF__0.25 in 1.2s
+[run] ibcheck__states154__morphF__0.5
+[done] ibcheck__states154__morphF__0.5 in 1.2s
+[run] ibcheck__states154__morphF__1.0
+[done] ibcheck__states154__morphF__1.0 in 1.2s
+[run] ibcheck__states154__morphF__2.0
+[done] ibcheck__states154__morphF__2.0 in 5.8s
+[run] ibcheck__states154__morphF__4.0
+[done] ibcheck__states154__morphF__4.0 in 1.3s
+[run] ibcheck__states154__morphF__8.0
+[done] ibcheck__states154__morphF__8.0 in 1.2s
+[run] ibcheck__districts__morphT__0.0
+[done] ibcheck__districts__morphT__0.0 in 5.0s
+[run] ibcheck__districts__morphT__0.25
+[done] ibcheck__districts__morphT__0.25 in 4.5s
+[run] ibcheck__districts__morphT__0.5
+[done] ibcheck__districts__morphT__0.5 in 4.2s
+[run] ibcheck__districts__morphT__1.0
+[done] ibcheck__districts__morphT__1.0 in 4.3s
+[run] ibcheck__districts__morphT__2.0
+[done] ibcheck__districts__morphT__2.0 in 4.2s
+[run] ibcheck__districts__morphT__4.0
+[done] ibcheck__districts__morphT__4.0 in 4.3s
+[run] ibcheck__districts__morphT__8.0
+[done] ibcheck__districts__morphT__8.0 in 4.5s
+[run] ibcheck__districts__morphF__0.0
+[done] ibcheck__districts__morphF__0.0 in 5.5s
+[run] ibcheck__districts__morphF__0.25
+[done] ibcheck__districts__morphF__0.25 in 6.9s
+[run] ibcheck__districts__morphF__0.5
+[done] ibcheck__districts__morphF__0.5 in 3.6s
+[run] ibcheck__districts__morphF__1.0
+[done] ibcheck__districts__morphF__1.0 in 6.8s
+[run] ibcheck__districts__morphF__2.0
+[done] ibcheck__districts__morphF__2.0 in 3.7s
+[run] ibcheck__districts__morphF__4.0
+[done] ibcheck__districts__morphF__4.0 in 4.6s
+[run] ibcheck__districts__morphF__8.0
+[done] ibcheck__districts__morphF__8.0 in 3.7s
+[all done]

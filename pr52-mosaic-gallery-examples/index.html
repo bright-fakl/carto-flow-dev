@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #52: Two gallery examples for the mosaic layout</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #52: Two gallery examples for the mosaic layout</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/52">https://github.com/bright-fakl/carto-flow/pull/52</a></dd>
+<dt>Branch</dt><dd>docs/mosaic-gallery-examples</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-23 15:46</dd>
+<dt>Before</dt><dd>origin/main @ 58f3cc2 (no mosaic example in the gallery at all)</dd>
+<dt>After</dt><dd>docs/mosaic-gallery-examples @ 2a7e10b</dd>
+<dt>Inputs</dt><dd>US states (bundled census, population/2e6 tile counts), US congressional districts (bundled census, one tile each, grouped by State Name)</dd>
+</dl>
+<p class="desc">MosaicLayout had no gallery example at all; these two show the basic tilegram and group_by block contiguity.</p>
+<h2>What was added</h2>
+<p>Two examples under <code>docs/examples/symbol_cartogram/</code>, all on bundled data:</p>
+<table>
+<tr><th>file</th><th>what it teaches</th><th>runtime (gallery build)</th></tr>
+<tr><td><code>plot_symbol_mosaic_layout.py</code></td><td><code>tile_count</code>, the basic tilegram</td><td>1.6 s</td></tr>
+<tr><td><code>plot_symbol_mosaic_groups.py</code></td><td><code>group_by</code>, block contiguity</td><td>4.5 s</td></tr>
+</table>
+<p>No gallery registration was needed: the <code>gallery</code> plugin picks up everything under <code>docs/examples/</code> and orders it by filename, so the two land next to the other symbol-cartogram examples.</p>
+<h2>What the figures show</h2>
+<p>**<code>mosaic_layout.png</code>** — the outline of the country is clearly readable: the West is a wide orange block dominated by California, the Northeast is a dense red cluster, Texas and Florida keep their shapes. Population, not area, drives the block sizes, so Montana, Wyoming and the Dakotas shrink to one hexagon each while California takes about twenty.</p>
+<p>**<code>mosaic_groups.png</code>** — 432 districts, one hexagon each, grouped by state. The run reports every region at its exact tile count, no non-contiguous region and no split group. Two things in the picture are worth naming rather than glossing over, and the example&#x27;s prose names both:</p>
+<ul><li>Several lattice cells inside the outline are left empty and read as small</li></ul>
+<p>holes (the run leaves ten), with the same number of tiles pulled from just outside the outline instead.</p>
+<ul><li>A few tiles look detached — Michigan&#x27;s northern one is the clearest — but are</li></ul>
+<p>lattice neighbors; the apparent gap is only the drawn <code>spacing</code>. This was checked against the metrics rather than assumed.</p>
+<h2>Considered and not added</h2>
+<ul><li>**A <code>morph=False</code> vs <code>morph=True</code> contrast.** Written, rendered and then</li></ul>
+<p>dropped: the user judged it not helpful enough to carry. The two panels differ in ways that are hard to attribute without already knowing the algorithm, and the <code>morph=False</code> panel raises questions the gallery is the wrong place to answer — Maryland lands among New York and Pennsylvania, losing contact with the four states it borders, which is an open question about the cost function rather than a lesson about the option.</p>
+<ul><li>**<code>min_one_tile_per_region</code> on world countries.** A genuine capability, but the</li></ul>
+<p>input it needs is the one where the layout is roughest, and a world run is much slower than a US one. Poor fit for a first impression of the layout in a CI-built gallery.</p>
+<ul><li>**A square-tiling variant.** It is a one-word change to an example already</li></ul>
+<p>present and teaches nothing the hexagon version does not.</p>
+<ul><li>**Mosaic versus grid side by side.** The grid layout rejects <code>group_by</code></li></ul>
+<p>outright, so the two cannot be shown on the same input in one figure.</p>
+<h2>Checks</h2>
+<ul><li><code>uv run mkdocs build -s</code> completes after removing <code>docs/generated/</code>: 611 s,</li></ul>
+<p>exit 0, both examples executed (verified in <code>mg_execution_times.md</code>).</p>
+<ul><li><code>make check</code> clean; 712 tests pass.</li><li>Every figure above was rendered by the gallery build itself and inspected.</li></ul>
+<div class="figure">
+<img src="mosaic_groups.png" alt="group_by: one hexagon per congressional district, each state&#x27;s districts kept as one connected block">
+<p class="caption">group_by: one hexagon per congressional district, each state&#x27;s districts kept as one connected block</p>
+</div><div class="figure">
+<img src="mosaic_layout.png" alt="basic tilegram: US states, one hexagon per two million people, colored by census region">
+<p class="caption">basic tilegram: US states, one hexagon per two million people, colored by census region</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

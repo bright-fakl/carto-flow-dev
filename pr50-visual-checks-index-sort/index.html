@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #50: Sort the review index by date and show review status</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #50: Sort the review index by date and show review status</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/50">https://github.com/bright-fakl/carto-flow/pull/50</a></dd>
+<dt>Branch</dt><dd>fix/visual-checks-index-sort</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-23 14:26</dd>
+</dl>
+<p class="desc">The index sorted by PR number and had no notion of whether a report had been reviewed. It now lists newest first and marks each page outstanding, deferred or done.</p>
+<p>No figures: this changes the index that lists the other pages, so the evidence is the generated page itself. Open <code>../index.html</code>.</p>
+<h2>What was wrong</h2>
+<p>**Sorted by PR number.** Several directories are investigation workspaces that belong to no single PR, so they were pushed to the bottom whatever their date — and one had been given <code>pr: 0</code> to escape that, claiming a PR number that does not exist.</p>
+<p>**The mtime fallback could never work.** This script writes <code>index.html</code> into every subdirectory, and <code>_dir_mtime</code> took the newest mtime among *all* files there, so every rebuild reset every directory&#x27;s mtime to the moment of the rebuild. Ordering unnumbered directories by mtime was ordering them by nothing.</p>
+<p>**<code>_sort_key</code> was dead code.** <code>main()</code> partitioned the directories into numbered and unnumbered and sorted each separately, so the sort key was never called. The first attempt at this fix changed it and had no effect on the output; that was only caught by reading the rendered table.</p>
+<p>**Eight warnings on every build.** <code>pr</code> and <code>url</code> were required metadata, so each of the four investigation workspaces emitted two warnings every time. A build that always warns trains the reader to ignore warnings, so a real one would have gone unnoticed.</p>
+<h2>What it does now</h2>
+<p>Pages list **newest first**, by the <code>date</code> metadata field where present and by a now-meaningful directory mtime otherwise. PR number only breaks ties within a date.</p>
+<p>Each page carries a **review status**, taken from the PR&#x27;s GitHub state via one batched <code>gh</code> call — merged or closed is done, open needs review. An explicit <code>status:</code> in <code>summary.md</code> always wins, so a merged PR can still be flagged for follow-up, and a directory with no PR can say where it stands. Those default to needs review: an investigation is outstanding until someone says it is not. The lookup degrades to the declared status when <code>gh</code> is unavailable, and <code>--offline</code> skips it.</p>
+<p>Three states, because a parked item is neither finished nor awaiting attention:</p>
+<table>
+<tr><th>Status</th><th>State</th></tr>
+<tr><td><code>needs review</code></td><td>outstanding — amber tint, left border</td></tr>
+<tr><td><code>deferred</code></td><td>parked — grey tint</td></tr>
+<tr><td><code>reviewed</code>, <code>merged</code>, <code>closed</code>, <code>superseded</code></td><td>done — no tint</td></tr>
+</table>
+<p>An unrecognised value warns rather than silently reading as outstanding; <code>status:</code> is hand-edited, so a typo like <code>reviewd</code> would otherwise be invisible.</p>
+<p>The generated pages are static files, so there is no control to click:</p>
+<p>--set-status &lt;dir&gt; &lt;status&gt;   write the field and rebuild --list-status                 print every page&#x27;s status, outstanding first</p>
+<p>Column headings re-sort the table client-side. Status sorts by how much attention an item still needs rather than alphabetically; PR and Figures sort numerically. The default order stays newest-first.</p>
+<h2>Tests</h2>
+<p><code>tests/test_visual_checks_index.py</code>, 27 tests. The script previously had none, which is why two regressions in the ordering shipped without anything failing. They pin: the order pages are listed in; that <code>_sort_key</code> is actually reached; that <code>_dir_mtime</code> ignores the <code>index.html</code> the script itself writes; status resolution including the manual override; that an unknown status warns; that <code>--set-status</code> adds, replaces and leaves the body alone; and that the client-side rank table has not drifted from the Python vocabulary.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+run 0: checksum=20570291302.722187 n_coords=391644 time=1.355s
+run 1: checksum=20570291302.722187 n_coords=391644 time=0.771s
+run 2: checksum=20570291302.722187 n_coords=391644 time=0.755s
+run 3: checksum=20570291302.722187 n_coords=391644 time=0.772s
+run 4: checksum=20570291302.722187 n_coords=391644 time=0.775s
+n_iter=500 runs=5 unique_checksums=1 mean_time=0.886s std=0.235s

@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #58: Add the 2.0.0 changelog and migration guide, bump to 2.0.0</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #58: Add the 2.0.0 changelog and migration guide, bump to 2.0.0</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/58">https://github.com/bright-fakl/carto-flow/pull/58</a></dd>
+<dt>Branch</dt><dd>docs/changelog-2.0</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-24 21:26</dd>
+<dt>Before</dt><dd>origin/main @ 5020fe5</dd>
+<dt>After</dt><dd>docs/changelog-2.0 @ 165efe3</dd>
+<dt>Inputs</dt><dd>none (no computation)</dd>
+</dl>
+<p class="desc">Documentation-only change plus a version bump. No figures - nothing in the rendered output of an existing page changes; review the two new pages in the built site.</p>
+<h1>PR58 - 2.0.0 changelog, migration guide, version bump</h1>
+<p>No figures. This PR adds <code>CHANGELOG.md</code>, <code>docs/migrating-to-2.0.md</code>, <code>docs/changelog.md</code> (a one-line snippet include), two nav entries, a README section and the version bump. No code path changes, so no before/after result differs.</p>
+<h2>What to review</h2>
+<p>Serve the docs and read the two new pages:</p>
+<p>``<code> cd /home/fakl/carto-flow &amp;&amp; uv run mkdocs serve </code>``</p>
+<p>Then open &lt;http://127.0.0.1:8000/carto-flow/changelog/&gt; and &lt;http://127.0.0.1:8000/carto-flow/migrating-to-2.0/&gt;.</p>
+<h2>Files</h2>
+<table>
+<tr><th>File</th><th>Change</th></tr>
+<tr><td><code>CHANGELOG.md</code></td><td>New. Keep a Changelog format, starts at 2.0.0.</td></tr>
+<tr><td><code>docs/changelog.md</code></td><td>New. <code>--8&lt;-- &quot;CHANGELOG.md&quot;</code>.</td></tr>
+<tr><td><code>docs/migrating-to-2.0.md</code></td><td>New. One section per break, old and new call.</td></tr>
+<tr><td><code>mkdocs.yml</code></td><td><code>pymdownx.snippets</code> (<code>base_path: [&#x27;.&#x27;]</code>, <code>check_paths: true</code>); two nav entries after Reference; <code>extra.version</code> 2.0.0.</td></tr>
+<tr><td><code>README.md</code></td><td>Changelog section linking both.</td></tr>
+<tr><td><code>pyproject.toml</code>, <code>src/carto_flow/__init__.py</code>, <code>uv.lock</code></td><td>1.1.2 -&gt; 2.0.0.</td></tr>
+</table>
+<h2>Verification</h2>
+<ul><li><code>uv run mkdocs build -s</code> passes from a cleared <code>docs/generated/</code> and <code>site/</code></li></ul>
+<p>(392 s, 26/26 gallery files).</p>
+<ul><li><code>site/changelog/index.html</code> contains the 2.0.0 body text, the grouped</li></ul>
+<p>sections and working PR links; the snippet include is not producing an empty page.</p>
+<ul><li>Both pages appear in the built nav, and the cross-links resolve to</li></ul>
+<p><code>../migrating-to-2.0/</code> and <code>../changelog/</code>.</p>
+<ul><li><code>make check</code> passes (pre-commit, mypy on 80 source files, deptry).</li><li><code>uv run python -m pytest</code>: 711 passed.</li></ul>
+<h2>Notes on the content</h2>
+<ul><li>Every breaking change was checked against the code on <code>main</code> rather than taken</li></ul>
+<p>from the PR titles. Four breaks not on the original list were found: the <code>value_column</code> -&gt; <code>size</code> rename, the <code>preset_*</code> -&gt; named-function replacement, <code>SymbolCartogram.metrics</code> -&gt; <code>placement_metrics</code> with <code>simulation_history</code> removed, and the bundled datasets moving from GeoJSON to GeoParquet.</p>
+<ul><li><code>MosaicLayout</code> does not exist in 1.1.2, so the mosaic option changes (#40,</li></ul>
+<p>#43, #46, #47, #48, #56) break only code written against an unreleased <code>main</code>. Both pages say so instead of presenting them as 1.x -&gt; 2.0 breaks.</p>
+<ul><li>The version string lives in three files, not two: <code>pyproject.toml</code>,</li></ul>
+<p><code>src/carto_flow/__init__.py</code> and <code>mkdocs.yml</code> (<code>extra.version</code>). <code>scripts/bump_version.py</code> already updates all three.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

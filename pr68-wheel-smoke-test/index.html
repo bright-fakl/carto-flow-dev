@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #68: ci: add a wheel smoke test for the built wheel</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #68: ci: add a wheel smoke test for the built wheel</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/68">https://github.com/bright-fakl/carto-flow/pull/68</a></dd>
+<dt>Branch</dt><dd>ci/wheel-smoke-test</dd>
+<dt>Base</dt><dd>origin/main @ bafb662</dd>
+<dt>Date</dt><dd>2026-09-27 06:02</dd>
+<dt>Before</dt><dd>origin/main @ bafb662</dd>
+<dt>After</dt><dd>ci/wheel-smoke-test @ 66835e0</dd>
+<dt>Inputs</dt><dd>the built carto_flow wheel, installed into a clean Python 3.10 venv</dd>
+</dl>
+<p class="desc">Adds a CI job that builds the wheel, installs it into a clean venv, and proves the seven bundled data files and dataset loaders work from outside the repo checkout.</p>
+<h2>What this guards against</h2>
+<p><code>carto_flow</code> bundles seven data files (six <code>.parquet</code>, one <code>.csv</code>) inside the package under <code>carto_flow/data/</code>. Nothing in the existing CI jobs checks that these files actually ship in the built wheel: <code>tests-and-type-check</code> runs against the source tree via <code>uv sync --frozen</code>, so a <code>pyproject.toml</code> packaging regression that drops a data file (for example, forgetting to declare a new file under <code>[tool.hatch.build.targets.wheel]</code>) would pass every existing check and reach PyPI undetected. <code>us_covid_weekly.parquet</code>, added in a recent PR, is exactly the kind of file that packaging config can miss.</p>
+<p>The property under test — is the file present, and does the loader work — is a property of the wheel archive itself, not of any package index. The new <code>wheel-smoke-test</code> job therefore needs no network access, no TestPyPI upload, and no retry loop: it builds the wheel locally with <code>uv build</code>, inspects the archive contents directly, installs the wheel into a clean venv (not the project venv, not editable), and runs the import and dataset-loading checks from <code>/tmp/smoke-neutral</code>, a directory outside the repo checkout. Running from a neutral directory matters because <code>import carto_flow</code> from the repo root can resolve against local <code>src/</code> instead of the installed wheel (the src-layout makes this less likely, but the job does not rely on that — it asserts <code>carto_flow.__file__</code> does not point into <code>${{ github.workspace }}</code> as an explicit check, not just an inference from the working directory).</p>
+<h2>Local run output</h2>
+<p>Full sequence, matching the job&#x27;s steps exactly:</p>
+<p>``` $ uv build -o dist Building source distribution... Building wheel from source distribution... Successfully built dist/carto_flow-1.1.2.tar.gz Successfully built dist/carto_flow-1.1.2-py3-none-any.whl</p>
+<p>$ uv run python -m zipfile -e dist/carto_flow-1.1.2-py3-none-any.whl /tmp/wheel-metadata $ cat /tmp/wheel-metadata/carto_flow-1.1.2.dist-info/WHEEL Wheel-Version: 1.0 Generator: hatchling 1.32.4 Root-Is-Purelib: true Tag: py3-none-any tag ok purelib ok</p>
+<p>$ (data-file presence loop) found: cities.parquet found: us_census_2020_state.parquet found: us_census_2020_congressional_district.parquet found: us_covid_weekly.parquet found: us_state_population.csv found: us_states.parquet found: world.parquet</p>
+<p>$ uv venv /tmp/smokevenv --python 3.10 Using CPython 3.10.18 Creating virtual environment at: /tmp/smokevenv</p>
+<p>$ VIRTUAL_ENV=/tmp/smokevenv uv pip install dist/carto_flow-1.1.2-py3-none-any.whl Resolved 30 packages ... Installed 30 packages (geopandas, numpy, pandas, pyarrow, shapely, ...)</p>
+<p>$ cd /tmp/smoke-neutral &amp;&amp; VIRTUAL_ENV=/tmp/smokevenv uv run --no-project python -c &quot;&lt;import + load checks&gt;&quot; wheel smoke test passed: /tmp/smokevenv/lib/python3.10/site-packages/carto_flow/__init__.py ```</p>
+<p>The reported <code>carto_flow.__file__</code> resolves inside <code>/tmp/smokevenv/...</code>, not the repo checkout, confirming the checks ran against the installed wheel.</p>
+<h2>Deliberate-failure demonstration</h2>
+<p>To prove the job can actually fail, the <code>load_world</code> assertion in <code>.github/workflows/main.yml</code> was temporarily changed from <code>== 177</code> to <code>== 178</code>, and the neutral-directory check step was rerun in isolation:</p>
+<p>``<code> Traceback (most recent call last): File &quot;&lt;string&gt;&quot;, line 11, in &lt;module&gt; AssertionError: load_world: expected 178 rows, got 177 exit code: 1 </code>``</p>
+<p>The step fails with a specific message naming the loader and the row-count mismatch, and exits non-zero. The assertion was then reverted to <code>== 177</code> and <code>.github/workflows/main.yml</code> was re-verified with <code>uv run python -c &quot;import yaml; yaml.safe_load(open(&#x27;.github/workflows/main.yml&#x27;)); print(&#x27;yaml ok&#x27;)&quot;</code>, which printed <code>yaml ok</code>.</p>
+<h2>Python-version choice</h2>
+<p>The job runs only on Python 3.10, the minimum supported version, not the full <code>[&quot;3.10&quot;, &quot;3.11&quot;, &quot;3.12&quot;, &quot;3.13&quot;]</code> matrix used by <code>tests-and-type-check</code>. The wheel is pure Python (<code>py3-none-any</code>), so its content and installability do not vary across interpreter versions — the question this job answers (&quot;did all seven data files make it into the archive, and does the code that loads them work&quot;) has the same answer on every supported Python. Running the full matrix would multiply the job&#x27;s cost by four for no additional coverage; one version is sufficient and cheaper.</p>
+<h2>Runtime cost</h2>
+<p>The job adds one more <code>ubuntu-latest</code> runner to the pull-request workflow, running once per PR (not per matrix entry). Its steps are: environment setup (shared composite action, already paid for by other jobs), <code>uv build</code> (a few seconds for a pure-Python package), two archive-inspection steps (near instant), a clean <code>uv venv</code> plus <code>uv pip install</code> of the wheel and its dependencies (dominated by pulling geopandas/numpy/pandas/shapely/pyarrow — comparable to the dependency install time already paid by <code>tests-and-type-check</code>), and a single Python process that loads four small bundled datasets. No network calls beyond the existing package-dependency resolution, no retries, no TestPyPI. Total added wall time is on the order of the existing <code>tests-and-type-check</code> setup cost, i.e., well under a minute beyond dependency installation.</p>
+<h2>Review follow-up: the expected contents are derived, not listed (commit 3a1180d)</h2>
+<p>The first implementation named the seven data files and four loaders in the workflow. That has two problems, and the second is the serious one.</p>
+<p>It is a maintenance burden: every new bundled dataset requires editing the workflow, by the same person who would forget to.</p>
+<p>It also cannot catch the failure worth catching. A hardcoded list detects a file being *dropped* from a wheel, but a newly added data file that fails to be packaged is absent from the list as well, so the check passes. That case - a dataset added to the source tree but not reaching the wheel - is precisely the risk that motivated the job, and the original form was blind to it.</p>
+<p>Both lists are now derived:</p>
+<ul><li>the expected data files are read from <code>src/carto_flow/data</code>, and the wheel</li></ul>
+<p>must contain all of them</p>
+<ul><li>the loaders are discovered from <code>carto_flow.data.__all__</code></li></ul>
+<p>Adding a dataset extends the check with no workflow edit.</p>
+<h3>Row counts are no longer asserted</h3>
+<p>Exact counts (177, 49, (9184, 3), 243) were dropped. Dataset contents are covered by <code>tests/test_data_validity.py</code>, which runs in the <code>tests-and-type-check</code> job; the question here is only whether the packaged wheel can load them at all. Each loader must return a non-empty result. Keeping exact counts in two places would mean a legitimate data update failing in two jobs for one reason.</p>
+<h3>Coverage increased</h3>
+<p>Six loaders are exercised, against four before: <code>load_us_state_population</code> and <code>load_us_states</code> were never checked.</p>
+<p>``<code> load_sample_cities: 243 rows load_us_census: 49 rows load_us_covid_weekly: 9184 rows load_us_state_population: 6290 rows load_us_states: 51 rows load_world: 177 rows 6 loader(s) verified from /tmp/.../sv2/lib/python3.10/site-packages/carto_flow/__init__.py </code>``</p>
+<p>The resolved path confirms the loaders ran against the installed wheel rather than the source tree.</p>
+<h3>Demonstrated failure, for the case the list could not catch</h3>
+<p>A file was added to <code>src/carto_flow/data</code> without rebuilding the wheel, which reproduces &quot;a dataset was added and packaging missed it&quot;:</p>
+<p>``<code> Data files present in the source tree but absent from the wheel: newly_added.parquet Check the packaging configuration in pyproject.toml. exit=1 </code>``</p>
+<p>The check fails and names the file. Under the hardcoded list the same scenario passed silently.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

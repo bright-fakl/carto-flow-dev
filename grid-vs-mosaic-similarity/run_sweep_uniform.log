@@ -1,0 +1,56 @@
+states=49 tiles=154 districts=432
+[run] sweep__states_uniform__origin_weight__0.0
+[done] sweep__states_uniform__origin_weight__0.0 in 1.6s
+[run] sweep__states_uniform__origin_weight__0.5
+[done] sweep__states_uniform__origin_weight__0.5 in 1.6s
+[run] sweep__states_uniform__origin_weight__1.0
+[done] sweep__states_uniform__origin_weight__1.0 in 1.6s
+[run] sweep__states_uniform__origin_weight__2.0
+[done] sweep__states_uniform__origin_weight__2.0 in 1.7s
+[run] sweep__states_uniform__origin_weight__5.0
+[done] sweep__states_uniform__origin_weight__5.0 in 1.6s
+[run] sweep__states_uniform__origin_weight__20.0
+[done] sweep__states_uniform__origin_weight__20.0 in 1.6s
+[run] sweep__states_uniform__origin_weight__100.0
+[done] sweep__states_uniform__origin_weight__100.0 in 1.6s
+[run] sweep__states_uniform__neighbor_weight__0.0
+[done] sweep__states_uniform__neighbor_weight__0.0 in 1.5s
+[run] sweep__states_uniform__neighbor_weight__0.01
+[done] sweep__states_uniform__neighbor_weight__0.01 in 0.8s
+[run] sweep__states_uniform__neighbor_weight__0.05
+[done] sweep__states_uniform__neighbor_weight__0.05 in 1.6s
+[run] sweep__states_uniform__neighbor_weight__0.1
+[done] sweep__states_uniform__neighbor_weight__0.1 in 1.7s
+[run] sweep__states_uniform__neighbor_weight__0.2
+[done] sweep__states_uniform__neighbor_weight__0.2 in 1.6s
+[run] sweep__states_uniform__neighbor_weight__0.5
+[done] sweep__states_uniform__neighbor_weight__0.5 in 1.6s
+[run] sweep__states_uniform__neighbor_weight__1.0
+[done] sweep__states_uniform__neighbor_weight__1.0 in 1.6s
+[run] sweep__states_uniform__neighbor_weight__2.0
+[done] sweep__states_uniform__neighbor_weight__2.0 in 1.6s
+[run] sweep__states_uniform__neighbor_weight__5.0
+[done] sweep__states_uniform__neighbor_weight__5.0 in 1.7s
+[run] sweep__states_uniform__neighbor_weight__20.0
+[done] sweep__states_uniform__neighbor_weight__20.0 in 1.7s
+[run] sweep__states_uniform__topology_weight__0.0
+[done] sweep__states_uniform__topology_weight__0.0 in 0.3s
+[run] sweep__states_uniform__topology_weight__0.5
+[done] sweep__states_uniform__topology_weight__0.5 in 1.7s
+[run] sweep__states_uniform__topology_weight__1.0
+[done] sweep__states_uniform__topology_weight__1.0 in 1.7s
+[run] sweep__states_uniform__topology_weight__2.0
+[done] sweep__states_uniform__topology_weight__2.0 in 1.6s
+[run] sweep__states_uniform__topology_weight__5.0
+[done] sweep__states_uniform__topology_weight__5.0 in 1.6s
+[run] sweep__states_uniform__compactness__0.0
+[done] sweep__states_uniform__compactness__0.0 in 1.7s
+[run] sweep__states_uniform__compactness__0.1
+[done] sweep__states_uniform__compactness__0.1 in 1.6s
+[run] sweep__states_uniform__compactness__0.5
+[done] sweep__states_uniform__compactness__0.5 in 1.7s
+[run] sweep__states_uniform__compactness__1.0
+[done] sweep__states_uniform__compactness__1.0 in 1.6s
+[run] sweep__states_uniform__compactness__2.0
+[done] sweep__states_uniform__compactness__2.0 in 1.7s
+[all done]

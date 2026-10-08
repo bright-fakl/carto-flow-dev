@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #63: Silence progress bars in the executed notebooks and add the mosaic layout to the symbol quick start</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #63: Silence progress bars in the executed notebooks and add the mosaic layout to the symbol quick start</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/63">https://github.com/bright-fakl/carto-flow/pull/63</a></dd>
+<dt>Branch</dt><dd>docs/suppress-progress-and-mosaic-quickstart</dd>
+<dt>Base</dt><dd>origin/main @ ba87610</dd>
+<dt>Date</dt><dd>2026-09-26 11:20</dd>
+<dt>Before</dt><dd>origin/main @ ba87610</dd>
+<dt>After</dt><dd>docs/suppress-progress-and-mosaic-quickstart @ f03f0ae</dd>
+<dt>Inputs</dt><dd>US census snapshot (49 contiguous geographies, bundled), one tile per two million people with a floor of one tile (168 tiles)</dd>
+</dl>
+<p class="desc">Fourteen morph and layout calls across nine notebooks now pass show_progress=False, so no tqdm fragments survive into the rendered docs. The symbol cartogram quick start gains a fifth section teaching MosaicLayout, which it did not cover at all.</p>
+<h2>What changed</h2>
+<p>Two independent things, kept in separate commits.</p>
+<p>**Progress bars.** Fourteen call sites across nine notebooks now pass <code>show_progress=False</code>. Most are <code>flow.MorphOptions(...)</code>; one goes through <code>flow.MorphOptions.preset_balanced().copy_with(show_progress=False)</code> and one is <code>sym.create_layout(..., show_progress=False)</code>, which takes the flag directly. The notebooks affected are the seven how-to pages, <code>basic-flow-cartogram</code> and <code>basic-symbol-cartogram</code>.</p>
+<p>**Mosaic section.** <code>basic-symbol-cartogram.ipynb</code> taught the centroid, grid, circle packing and flow density layouts and stopped. It now closes with &quot;Tiles on a Mosaic&quot;, which introduces <code>tile_count</code> as a second way to carry the data - by number of tiles rather than by symbol size - and <code>MosaicLayout</code> as the layout that keeps each region&#x27;s tiles in one connected block.</p>
+<p>A third commit fixes a factual error found while reviewing: three gallery examples commented that the state abbreviation lookup comes from the <code>censusdis</code> package. It comes from the bundled census snapshot, and none of them import <code>censusdis</code>.</p>
+<h2>Does the quick start still need updating after the 2.0 work?</h2>
+<p>Yes, and this covers it. Two specific staleness items were checked:</p>
+<ul><li>The install cell listed <code>pip install censusdis</code> as a prerequisite. The bundled</li></ul>
+<p>snapshot removed that dependency, so the cell now installs <code>carto-flow</code> alone.</p>
+<ul><li>The physics layout was removed in 2.0 and the default changed to packing. The</li></ul>
+<p>quick start never taught the physics layout, so nothing there had to change.</p>
+<h2>Verification</h2>
+<ul><li>All nine touched notebooks executed with <code>nbclient</code>, <code>allow_errors=False</code>:</li></ul>
+<p>no errors, no stderr stream on any cell, and zero tqdm fragments (<code>it/s]</code> or <code>%|</code>) in any output. Runtimes 7.8 s to 37.0 s, 148 s in total.</p>
+<ul><li><code>make check</code>: pre-commit, ruff, mypy (80 files), deptry all clean.</li><li><code>grep</code> over <code>docs/</code> confirms no <code>censusdis</code> reference remains in a tracked</li></ul>
+<p>source. The matches left are in <code>docs/generated/</code> (gitignored build output, regenerated on the next build) and two prose mentions in <code>migrating-to-2.0.md</code> and <code>reference/data/index.md</code> that correctly describe regenerating the snapshot.</p>
+<div class="figure">
+<img src="after-mosaic-section.png" alt="The new closing section. One tile per two million people on a shared hexagon lattice, labeled by state abbreviation and colored by population. Every state&#x27;s tiles form one connected block and the national outline survives, which is the property the section is there to teach.">
+<p class="caption">The new closing section. One tile per two million people on a shared hexagon lattice, labeled by state abbreviation and colored by population. Every state&#x27;s tiles form one connected block and the national outline survives, which is the property the section is there to teach.</p>
+</div><div class="figure">
+<img src="before-last-section-flow-density.png" alt="Where the quick start used to end: the flow density layout, the last of its four sections. A reader finished the tutorial without meeting the mosaic layout.">
+<p class="caption">Where the quick start used to end: the flow density layout, the last of its four sections. A reader finished the tutorial without meeting the mosaic layout.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

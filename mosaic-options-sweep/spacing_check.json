@@ -1,0 +1,38 @@
+[
+  {
+    "spacing": 0.0,
+    "mean_transform_scale": 1.0,
+    "mean_symbol_area": 213122640590.4193,
+    "tile_size": 286410.4443105878,
+    "tiles_gdf_area": 10443009388930.545,
+    "area_ratio_vs_0": 1.0,
+    "predicted_1_over_1plus_s_sq": 1.0
+  },
+  {
+    "spacing": 0.05,
+    "mean_transform_scale": 0.9523809523809523,
+    "mean_symbol_area": 193308517542.33038,
+    "tile_size": 286410.4443105878,
+    "tiles_gdf_area": 10443009388930.545,
+    "area_ratio_vs_0": 0.9070294784580496,
+    "predicted_1_over_1plus_s_sq": 0.9070294784580498
+  },
+  {
+    "spacing": 0.2,
+    "mean_transform_scale": 0.8333333333333334,
+    "mean_symbol_area": 148001833743.34677,
+    "tile_size": 286410.4443105878,
+    "tiles_gdf_area": 10443009388930.545,
+    "area_ratio_vs_0": 0.6944444444444445,
+    "predicted_1_over_1plus_s_sq": 0.6944444444444444
+  },
+  {
+    "spacing": 0.5,
+    "mean_transform_scale": 0.6666666666666666,
+    "mean_symbol_area": 94721173595.74191,
+    "tile_size": 286410.4443105878,
+    "tiles_gdf_area": 10443009388930.545,
+    "area_ratio_vs_0": 0.4444444444444444,
+    "predicted_1_over_1plus_s_sq": 0.4444444444444444
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "case": "fixture",
+    "split": [],
+    "n_split": 0,
+    "wall_s": 0.06
+  },
+  {
+    "case": "states",
+    "split": [],
+    "n_split": 0,
+    "wall_s": 2.02
+  },
+  {
+    "case": "districts_group_by",
+    "split": [],
+    "n_split": 0,
+    "wall_s": 5.33
+  },
+  {
+    "case": "michigan",
+    "blocks": 1
+  },
+  {
+    "case": "holes",
+    "n_holes": 0,
+    "n_unassigned_core": 5
+  }
+]

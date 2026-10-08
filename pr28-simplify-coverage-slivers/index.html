@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #28: Prevent sliver interior rings in simplify_coverage output</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #28: Prevent sliver interior rings in simplify_coverage output</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/28">https://github.com/bright-fakl/carto-flow/pull/28</a></dd>
+<dt>Branch</dt><dd>fix/simplify-coverage-sliver-rings</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-18</dd>
+<dt>Before</dt><dd>origin/main</dd>
+<dt>After</dt><dd>fix/simplify-coverage-sliver-rings @ fe10f3a</dd>
+<dt>Inputs</dt><dd>districts (bundled, 1000 m + 5 km densify; also simplify_coverage(5000, min_island_size=50000)); states (bundled)</dd>
+</dl>
+<p class="desc">shapely.segmentize interpolated shared edges asymmetrically between two polygons traversing them in opposite directions, leaving invisible spike rings that could collapse a GEOS overlay clip; _densify_coords now uses a canonical orientation and exact rational parameter.</p>
+<h1>simplify_coverage: sliver interior rings removed at the source</h1>
+<p>Branch <code>fix/simplify-coverage-sliver-rings</code> — &quot;Prevent sliver interior rings in simplify_coverage output&quot;.</p>
+<h2>What was wrong</h2>
+<p><code>simplify_coverage(..., max_segment_length=L)</code> and <code>densify_coverage</code> called <code>shapely.segmentize</code>, which interpolates each segment from the polygon&#x27;s own traversal direction. Two polygons sharing an edge traverse it in opposite directions, so the inserted points came out up to ~7e-10 m apart on the two sides. The shared edge was no longer shared, and <code>unary_union</code> of the coverage produced near-collinear three-point &quot;spike&quot; rings of 1e-11 .. 2e-6 m2 — valid, invisible, and enough to make a GEOS overlay collapse a clip to a line (the defect PR #25 guarded against downstream in the Voronoi field).</p>
+<p>The bundled census snapshot is built with exactly that call, so the shipped parquet carried 291 sliver rings before any user-level simplification.</p>
+<h2>The fix</h2>
+<p><code>_densify_coords</code> replaces <code>shapely.segmentize</code> inside <code>carto_flow.geo_utils.simplification</code>. It splits each segment into the same number of equal parts, but computes the inserted points from a canonical segment orientation (lexicographically smaller endpoint first) and from an exact integer parameter <code>k / n</code>, so a segment and its reverse yield bit-for-bit identical points. The bundled parquet files were regenerated with the fixed function.</p>
+<h2>Figures</h2>
+<h2>Numbers</h2>
+<table>
+<tr><th>coverage</th><th>rings before</th><th>sliver rings before</th><th>rings after</th><th>sliver rings after</th></tr>
+<tr><td>districts, bundled (1000 m + 5 km densify)</td><td>291</td><td>291</td><td>0</td><td>0</td></tr>
+<tr><td>districts, + <code>simplify_coverage(5000, min_island_size=50000)</code></td><td>287</td><td>273</td><td>14</td><td>0</td></tr>
+<tr><td>states, bundled</td><td>141</td><td>141</td><td>0</td><td>0</td></tr>
+</table>
+<p><code>shapely.coverage_is_valid</code> is <code>True</code> for every regenerated coverage (it was <code>False</code> for all of them before). Regenerating the snapshot moved no geometry: max per-district relative area change 6.8e-16, max Hausdorff distance 4.7e-10 m, vertex counts identical.</p>
+<div class="figure">
+<img src="overview_before_after.png" alt="Every sliver ring of unary_union(districts): 291 before, 0 after. Blue circle marks the spike zoomed in the other figure.">
+<p class="caption">Every sliver ring of unary_union(districts): 291 before, 0 after. Blue circle marks the spike zoomed in the other figure.</p>
+</div><div class="figure">
+<img src="spike_zoom_before_after.png" alt="The largest spike (1.14e-06 m2, Idaho CD-2 / Wyoming border): context and nanometer-scale zoom, before (two vertices 2.3e-10 m apart) vs after (single shared vertex, no sliver).">
+<p class="caption">The largest spike (1.14e-06 m2, Idaho CD-2 / Wyoming border): context and nanometer-scale zoom, before (two vertices 2.3e-10 m apart) vs after (single shared vertex, no sliver).</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

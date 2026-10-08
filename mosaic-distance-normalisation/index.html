@@ -1,0 +1,242 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Should the mosaic cost matrix normalise linear distance instead of squared distance?</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Should the mosaic cost matrix normalise linear distance instead of squared distance?</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status parked">deferred</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Branch</dt><dd>none — measured by monkeypatching _build_cost_matrix, nothing in the library changed</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-23</dd>
+<dt>Before</dt><dd>origin/main @ 7ea877e (squared normalisation, as shipped)</dd>
+<dt>After</dt><dd>the same checkout with a linear-normalisation copy of _build_cost_matrix patched in</dd>
+<dt>Inputs</dt><dd>US states (uniform hexagon, uniform square, 154 tiles), congressional districts grouped by State Name, world countries (Natural Earth, Mollweide ESRI:54009, 384 nominal / 460 actual tiles), africa, world mainland only — each at both morph settings</dd>
+</dl>
+<p class="desc">Evaluation only, no implementation. Re-measured on repaired world geometry, the variant wins on the metric it targets but now FAILS the mandatory integrity screen on world at both morph settings, and its costs are mediated by interior_bonus — so it is not a one-line change.</p>
+<h2>Read this first: the verdict changed</h2>
+<p>**Measured against <code>origin/main</code> @ 7ea877e**, which includes the repaired <code>world.parquet</code> (#45), the disjoint component pools (#46), <code>min_one_tile_per_region</code> (#47) and the honest defaults (#48).</p>
+<p>An earlier pass of this evaluation ran at 2bae205, **on a different world dataset**. None of its world numbers are comparable and none are carried forward; that results file is kept alongside as <code>results-2bae205-old-world-dataset.jsonl</code> and its figures are prefixed <code>old-2bae205-</code>, clearly labelled, for comparison only. The earlier pass recommended taking the change. **On repaired geometry that recommendation no longer holds**, for one specific reason given below.</p>
+<p>**Nothing was implemented.** The variant is applied by monkeypatching <code>_build_cost_matrix</code> with a verbatim copy carrying one changed expression, so both variants run against the same checkout in the same process. No default was changed and no PR opened.</p>
+<h2>The question, stated precisely</h2>
+<p><code>HungarianOptions</code>&#x27; docstring says &quot;All cost terms are normalized to [0, 1] so the parameters are comparable across datasets&quot;, and that intent is sound. The distance term **is** in [0, 1]. The issue is narrower: it is squared and divided by the maximum *squared* distance, while <code>outside_frac</code> and <code>connectivity</code> are linear fractions. Same range, quadratically different distribution.</p>
+<p>``<code>python dist_matrix = dx**2 + dy**2 max_dist = dist_matrix.max() or 1.0 dist_norm = dist_matrix / max_dist </code>``</p>
+<p>A tile at fraction *f* of the maximum distance costs *f²*, not *f*: at half the map&#x27;s extent 0.25 instead of 0.5, at a quarter 0.06 instead of 0.25. The variant replaces those three lines with <code>sqrt(dx**2 + dy**2)</code> over the maximum linear distance. Range stays [0, 1].</p>
+<h2>Headline</h2>
+<table>
+<tr><th></th><th>verdict on 7ea877e</th></tr>
+<tr><td>Integrity screen at the shipped defaults</td><td>**FAILS on world** — non-contiguous regions 1 → 4 at morph=True, 3 → 7 at morph=False</td></tr>
+<tr><td>Stability of that failure</td><td>**stable**: 4 repeats at morph=True and 2 at morph=False, every one identical</td></tr>
+<tr><td>The metric it targets</td><td>improves on **all seven inputs at morph=False and five of seven at morph=True**</td></tr>
+<tr><td>Adjacency preservation</td><td>mixed: **+11 points on world at morph=True**, **−13 points on districts at morph=False**</td></tr>
+<tr><td><code>distance_weight</code> = 1.0 still right under linear?</td><td>**No.** It is the worst weight for contiguity on world</td></tr>
+<tr><td>Is it a one-line change?</td><td>**No.** Both costs are mediated by <code>interior_bonus</code></td></tr>
+</table>
+<h2>1. The world integrity blemish — my earlier attribution was right, and a worse one replaced it</h2>
+<p>The earlier pass saw one extra region with no tile under the variant (15 vs 14) and attributed it to the empty-component-pool defect rather than the normalisation. #46 and #47 have landed, so that is now testable:</p>
+<table>
+<tr><th>world</th><th>current</th><th>variant</th></tr>
+<tr><td>regions with no tile, <code>min_one_tile_per_region</code> **off** (default)</td><td>13</td><td>**13**</td></tr>
+<tr><td>regions with no tile, <code>min_one_tile_per_region</code> **on**</td><td>0</td><td>**0**</td></tr>
+<tr><td>total tile shortfall, option off</td><td>13</td><td>13</td></tr>
+</table>
+<p>Identical in every cell, at both morph settings. **The attribution was correct**: the normalisation never cost a region its tile, and the asymmetry was the empty-pool defect moving under a changed assignment.</p>
+<p>**But a larger integrity regression has appeared on repaired geometry**, and this one is caused by the normalisation:</p>
+<table>
+<tr><th>input</th><th>morph</th><th>non-contiguous regions, current → variant</th></tr>
+<tr><td>world</td><td>True</td><td>1 → **4**</td></tr>
+<tr><td>world</td><td>False</td><td>3 → **7**</td></tr>
+<tr><td>world mainland only</td><td>True</td><td>1 → **0**</td></tr>
+<tr><td>world mainland only</td><td>False</td><td>2 → 2</td></tr>
+<tr><td>africa, states (×3), districts</td><td>both</td><td>0 → 0 everywhere</td></tr>
+</table>
+<p>Split groups are zero everywhere, before and after. Confirmed stable by repetition: four repeats at morph=True and two at morph=False produced byte-identical non-contiguity counts and displacement medians (<code>stability.json</code>).</p>
+<p>By the rule established throughout this effort — any variant that introduces a split group or a non-contiguous region is disqualified regardless of fidelity — **the variant loses on world at the shipped defaults.** That is the reverse of the earlier pass, where world morph=True improved 1 → 0, and it is a consequence of the repaired geometry, not of anything I changed.</p>
+<p>Note the shape of it: **world mainland only is fine, and world is not.** The regressions are concentrated on the multi-landmass input, where a region&#x27;s block is easiest to break apart.</p>
+<h2>2. The districts adjacency loss holds exactly</h2>
+<p>0.485 → 0.354 at morph=False, identical to the earlier pass to three decimals, as are the whole districts and states blocks. Nothing merged touched those inputs, which is the expected result and a useful check that the harness is measuring the same thing it did before.</p>
+<h2>3. The headline comparison holds, and is stronger on repaired geometry</h2>
+<p>World at morph=False, median tile-to-owning-region displacement:</p>
+<table>
+<tr><th>configuration</th><th>km</th><th>tile widths</th></tr>
+<tr><td>current normalisation, <code>distance_weight</code> 1.0 (shipped)</td><td>3457</td><td>8.89</td></tr>
+<tr><td>current normalisation, <code>distance_weight</code> 4.0</td><td>2788</td><td>7.17</td></tr>
+<tr><td>**variant, <code>distance_weight</code> 1.0**</td><td>**2063**</td><td>**5.30**</td></tr>
+</table>
+<p>**Linear at the default weight still beats squared at four times the weight**, by a wider margin than before. The squared form cannot reach the variant&#x27;s distance fidelity by re-weighting, because the problem is the shape of the distribution rather than its scale. &quot;Just raise <code>distance_weight</code>&quot; remains unavailable as an alternative.</p>
+<p>*(Correcting the earlier write-up: I previously quoted &quot;3.85 and 5.96 tiles&quot; alongside those kilometre figures. Those were <code>displacement.median_tiles</code> — region-centroid displacement from the metrics module — paired with kilometres from the tile-to-owner statistic, so one sentence mixed two different metrics. The kilometres were right. The tile-width figures for the tile-to-owner metric on that older dataset were 4.78 and 5.77.)*</p>
+<h2>4. <code>distance_weight</code> = 1.0 is no longer the right point under linear</h2>
+<p>Swept 0.25, 0.5, 1.0, 2.0, 4.0 under both normalisations on states, districts and world, at both morph settings. World, non-contiguous regions:</p>
+<table>
+<tr><th><code>distance_weight</code></th><th>0.25</th><th>0.5</th><th>1.0</th><th>2.0</th><th>4.0</th></tr>
+<tr><td>current, morph=True</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td>variant, morph=True</td><td>2</td><td>4</td><td>**4**</td><td>3</td><td>**1**</td></tr>
+<tr><td>current, morph=False</td><td>3</td><td>6</td><td>3</td><td>1</td><td>3</td></tr>
+<tr><td>variant, morph=False</td><td>4</td><td>5</td><td>**7**</td><td>3</td><td>5</td></tr>
+</table>
+<p>The default 1.0 is the **worst** weight for the variant on world at both settings. At weight 4.0 and morph=True the variant reaches parity on contiguity (1 vs 1) while being better on everything else — 1676 km against 2138, adjacency 0.537 against 0.444, direction 27.5° against 29.8°. At morph=False no weight reaches parity.</p>
+<p>This reverses the earlier pass&#x27;s finding that 1.0 remained the right default. It also means the risk flagged earlier — that low weights introduce non-contiguity — is the lesser half of the story: the whole mid-range is bad, and only the high end recovers.</p>
+<h2>5. It is not a one-line change: both costs are mediated by <code>interior_bonus</code></h2>
+<p>The variant raises the distance term at mid-range, which competes directly against <code>interior_bonus</code> — the term that keeps a region&#x27;s tiles in one block. So the natural question is whether raising that bonus restores what the variant costs. Swept 2.0, 3.0, 4.0, 6.0 at <code>distance_weight</code> 1.0.</p>
+<p>**World, non-contiguous regions:**</p>
+<table>
+<tr><th><code>interior_bonus</code></th><th>2.0</th><th>3.0</th><th>4.0</th><th>6.0</th></tr>
+<tr><td>current, morph=True</td><td>1</td><td>2</td><td>2</td><td>2</td></tr>
+<tr><td>variant, morph=True</td><td>4</td><td>3</td><td>**2**</td><td>2</td></tr>
+<tr><td>current, morph=False</td><td>3</td><td>2</td><td>2</td><td>2</td></tr>
+<tr><td>variant, morph=False</td><td>7</td><td>5</td><td>**4**</td><td>6</td></tr>
+</table>
+<p>At <code>interior_bonus</code> 4.0 the variant reaches **parity on world at morph=True** (2 vs 2) while keeping its fidelity advantage — 2059 km against 2257, adjacency 0.476 against 0.387, direction 28.1° against 33.4°. At morph=False it closes most of the gap but does not reach parity (4 vs 2).</p>
+<p>**Districts, morph=False** — where the adjacency cost lives:</p>
+<table>
+<tr><th></th><th>adjacency</th><th>IoU</th><th>owner displacement</th></tr>
+<tr><td>current, <code>interior_bonus</code> 2.0 (shipped)</td><td>0.485</td><td>0.857</td><td>638 km</td></tr>
+<tr><td>variant, <code>interior_bonus</code> 2.0</td><td>0.354</td><td>0.838</td><td>394 km</td></tr>
+<tr><td>variant, <code>interior_bonus</code> 4.0</td><td>**0.433**</td><td>**0.870**</td><td>447 km</td></tr>
+<tr><td>current, <code>interior_bonus</code> 4.0</td><td>0.464</td><td>0.880</td><td>650 km</td></tr>
+</table>
+<p>**Most of the districts adjacency loss is recoverable** by raising <code>interior_bonus</code>, at a small cost in displacement that still leaves the variant far ahead of the current form (447 km against 638). So the 13-point drop is not intrinsic to linear normalisation; it is the two terms being out of balance at the shipped bonus.</p>
+<p>The honest conclusion: **this is a two-parameter proposal, not a one-liner.** Changing the normalisation alone is disqualified by the integrity screen on world. Changing it together with <code>interior_bonus</code> ≈ 4.0 buys parity at morph=True and a clear fidelity win, and still leaves a residual regression at morph=False. Also worth noting: <code>interior_bonus</code> was raised to 2.0 recently and deliberately, so moving it again is not a free rider on this change — it is a second decision of the same size.</p>
+<h2>6. Full fidelity metrics at the shipped defaults</h2>
+<p>Current → variant, <code>distance_weight</code> 1.0, <code>interior_bonus</code> 2.0.</p>
+<table>
+<tr><th>input</th><th>morph</th><th>owner displacement (km)</th><th>displacement (tiles)</th><th>adjacency</th><th>direction (deg)</th><th>IoU vs original</th></tr>
+<tr><td>states_uniform</td><td>True</td><td>435 → **351**</td><td>1.53 → **1.23**</td><td>0.725 → 0.688</td><td>28.3 → 29.1</td><td>0.713 → 0.713</td></tr>
+<tr><td>states_uniform</td><td>False</td><td>641 → **535**</td><td>2.24 → **1.87**</td><td>0.523 → 0.505</td><td>34.2 → 39.4</td><td>0.819 → 0.819</td></tr>
+<tr><td>states_uniform_sq</td><td>True</td><td>326 → 341</td><td>0.74 → 0.78</td><td>0.459 → **0.495**</td><td>24.8 → **20.6**</td><td>0.666 → **0.684**</td></tr>
+<tr><td>states_uniform_sq</td><td>False</td><td>723 → **511**</td><td>1.58 → **1.12**</td><td>0.468 → 0.385</td><td>30.2 → 36.7</td><td>0.801 → 0.793</td></tr>
+<tr><td>states</td><td>True</td><td>393 → 414</td><td>2.10 → 2.34</td><td>0.798 → 0.761</td><td>17.1 → **15.1**</td><td>0.687 → 0.682</td></tr>
+<tr><td>states</td><td>False</td><td>630 → **474**</td><td>3.93 → **2.52**</td><td>0.697 → 0.615</td><td>25.4 → **20.2**</td><td>0.812 → 0.792</td></tr>
+<tr><td>districts</td><td>True</td><td>399 → **380**</td><td>4.52 → **4.30**</td><td>0.527 → 0.498</td><td>25.9 → 27.6</td><td>0.687 → 0.679</td></tr>
+<tr><td>districts</td><td>False</td><td>638 → **394**</td><td>7.29 → **4.50**</td><td>**0.485 → 0.354**</td><td>33.9 → 41.5</td><td>0.857 → 0.838</td></tr>
+<tr><td>africa</td><td>True</td><td>616 → **591**</td><td>1.72 → **1.30**</td><td>0.700 → **0.709**</td><td>14.8 → **12.7**</td><td>0.839 → 0.832</td></tr>
+<tr><td>africa</td><td>False</td><td>634 → **606**</td><td>1.81 → **1.36**</td><td>0.691 → 0.645</td><td>15.6 → **12.8**</td><td>0.855 → **0.864**</td></tr>
+<tr><td>world_mainland</td><td>True</td><td>1723 → **1617**</td><td>3.76 → **3.56**</td><td>0.603 → **0.609**</td><td>28.7 → **21.5**</td><td>0.364 → 0.361</td></tr>
+<tr><td>world_mainland</td><td>False</td><td>2865 → **1956**</td><td>8.92 → **4.27**</td><td>0.442 → **0.462**</td><td>31.5 → **30.4**</td><td>0.616 → 0.604</td></tr>
+<tr><td>world</td><td>True</td><td>2287 → **1987**</td><td>5.42 → **4.37**</td><td>0.400 → **0.511**</td><td>35.7 → **29.5**</td><td>0.436 → 0.430</td></tr>
+<tr><td>world</td><td>False</td><td>3457 → **2063**</td><td>9.94 → **4.17**</td><td>0.443 → 0.382</td><td>33.8 → **32.6**</td><td>0.517 → **0.547**</td></tr>
+</table>
+<p>**Lead with morph=True, as established.** The large morph=False gains are the variant distributing an unavoidable population/area overflow more sensibly, not fixing a cost-function defect — see the next section. At morph=True, where morphing has already removed the mismatch, world improves by 13% on the targeted metric, gains **11 points of adjacency** (0.400 → 0.511) and 6° of direction — and costs three non-contiguous regions.</p>
+<h2>7. The scrambled placements — correcting the correction</h2>
+<p>The specific cases named in the world diagnosis, re-measured on 7ea877e:</p>
+<table>
+<tr><th>region</th><th>morph</th><th>current: nearest tile belongs to</th><th>variant: nearest tile belongs to</th><th>its own tile, current → variant</th></tr>
+<tr><td>Jamaica</td><td>True</td><td>Venezuela</td><td>**Jamaica**</td><td>764 km → **310 km**</td></tr>
+<tr><td>Jamaica</td><td>False</td><td>**Mali**</td><td>Dominican Rep.</td><td>no tile placed</td></tr>
+<tr><td>Puerto Rico</td><td>False</td><td>**Niger**</td><td>Haiti</td><td>no tile placed</td></tr>
+<tr><td>Trinidad and Tobago</td><td>False</td><td>**Algeria**</td><td>Gambia</td><td>no tile placed</td></tr>
+<tr><td>Cyprus</td><td>False</td><td>**India**</td><td>Iran</td><td>no tile placed</td></tr>
+<tr><td>Cyprus</td><td>True</td><td>Pakistan</td><td>Pakistan</td><td>1782 km → 1991 km</td></tr>
+<tr><td>Bahamas</td><td>True</td><td>Jamaica</td><td>Cuba</td><td>1087 km → 1087 km</td></tr>
+<tr><td>Denmark</td><td>False</td><td>United Kingdom</td><td>Austria</td><td>9109 km → 8441 km</td></tr>
+<tr><td>Iceland</td><td>True</td><td>Czechia</td><td>Sweden</td><td>2102 km → 2206 km</td></tr>
+</table>
+<p>**A correction to a correction, which needs to be on the record.** I previously reported that my Senegal / Mali / India examples were measured on an older commit and did not hold on current main. That statement was itself based on the 2bae205 run — an intermediate commit with the *old* world dataset and without #46. **On the repaired dataset at 7ea877e they do reproduce**: at morph=False the tile nearest Jamaica belongs to Mali, the tile nearest Puerto Rico to Niger, the tile nearest Trinidad to Algeria, and the tile nearest Cyprus to India. The variant improves all four of those, though not always to a sensible owner. The lesson is that these individual examples are sensitive to both commit and dataset and should never be quoted without the commit they were measured on.</p>
+<p>**The second correction stands unchanged, and matters more.** The extreme placements are not a cost-function problem. Denmark&#x27;s tile sits in North America because at morph=False tile counts are proportional to population while geometry is proportional to land area; Europe demands far more tiles than Europe&#x27;s area can host, so some countries *must* be placed elsewhere. No distance normalisation fixes that, and <code>morph=True</code> exists precisely to remove the mismatch. The variant moves Denmark&#x27;s tile from 9109 km to 8441 km — it redistributes the overflow, it does not remove it.</p>
+<h2>Recommendation</h2>
+<p>**Do not take the change as it stands.** The integrity screen is disqualifying and it fails on world at both morph settings, stably. That screen has killed the best-fidelity candidate repeatedly in this effort, and this is another instance of the same pattern: the variant is clearly better on displacement, direction and — at morph=True — adjacency, and it breaks contiguity on the one input that most needs it.</p>
+<p>Three options for the user, in the order I would put them:</p>
+<p>1. **Park it.** The fidelity case is genuine and the diagnosis is correct — a quadratically distributed term against two linear ones does defeat the documented design intent. But the fix as measured costs contiguity on world, and the remedy for that is a second default change of the same magnitude as the first. Not a good trade to make quietly. 2. **Take it as an explicit pair with <code>interior_bonus</code> ≈ 4.0.** This reaches contiguity parity on world at morph=True with a clear fidelity win across the board, and recovers most of the districts adjacency loss (0.354 → 0.433). It leaves a residual regression on world at morph=False (4 non-contiguous against 2). This is a materially bigger proposal than the one-liner it started as, and <code>interior_bonus</code> was itself deliberately set to 2.0 recently. 3. **Reject.** Defensible on the integrity rule alone.</p>
+<p>Whichever is chosen, two things are now settled and should be recorded regardless: the normalisation asymmetry is real and cannot be compensated by <code>distance_weight</code>; and the extreme world placements at morph=False are a population/area mismatch that no cost-function change addresses.</p>
+<h2>Scripts and records</h2>
+<p><code>run.py</code> (the variant, the <code>distance_weight</code> and <code>interior_bonus</code> sweeps, and the <code>min_one_tile_per_region</code> axis; <code>results.jsonl</code> written incrementally, one line per run), <code>stability.py</code> (<code>stability.json</code>), <code>scramble_check.py</code> (<code>scramble_check.json</code>), <code>figures.py</code>. Metrics come from <code>visual_checks/grid-vs-mosaic-similarity/metrics.py</code>, imported unchanged.</p>
+<p>Superseded, kept for comparison and clearly labelled by commit: <code>results-2bae205-old-world-dataset.jsonl</code>, <code>scramble_check-2bae205-old-world-dataset.json</code>, <code>old-2bae205-norm_*.png</code>.</p>
+<div class="figure">
+<img src="norm_districts_morph0.png" alt="congressional districts, morph=False, where the adjacency cost concentrates.">
+<p class="caption">congressional districts, morph=False, where the adjacency cost concentrates.</p>
+</div><div class="figure">
+<img src="norm_states_morph0.png" alt="US states at 154 tiles, morph=False.">
+<p class="caption">US states at 154 tiles, morph=False.</p>
+</div><div class="figure">
+<img src="norm_world_morph0.png" alt="world, morph=False, where the displacement effect is largest and least meaningful.">
+<p class="caption">world, morph=False, where the displacement effect is largest and least meaningful.</p>
+</div><div class="figure">
+<img src="norm_world_morph1.png" alt="world, morph=True. Current normalisation above, variant below. Each tile is coloured by how far it sits from the centroid of the region owning it; dark tiles are symbols a long way from their land.">
+<p class="caption">world, morph=True. Current normalisation above, variant below. Each tile is coloured by how far it sits from the centroid of the region owning it; dark tiles are symbols a long way from their land.</p>
+</div><div class="figure">
+<img src="old-2bae205-norm_districts_morph0.png" alt="old-2bae205-norm_districts_morph0.png">
+<p class="caption">old-2bae205-norm_districts_morph0.png</p>
+</div><div class="figure">
+<img src="old-2bae205-norm_states_morph0.png" alt="old-2bae205-norm_states_morph0.png">
+<p class="caption">old-2bae205-norm_states_morph0.png</p>
+</div><div class="figure">
+<img src="old-2bae205-norm_world_morph0.png" alt="old-2bae205-norm_world_morph0.png">
+<p class="caption">old-2bae205-norm_world_morph0.png</p>
+</div><div class="figure">
+<img src="old-2bae205-norm_world_morph1.png" alt="the same world panel from the earlier pass, on the pre-repair dataset, kept only for comparison. Do not read numbers off it.">
+<p class="caption">the same world panel from the earlier pass, on the pre-repair dataset, kept only for comparison. Do not read numbers off it.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

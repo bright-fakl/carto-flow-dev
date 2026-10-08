@@ -1,0 +1,6 @@
+wrote /home/fakl/carto-flow/visual_checks/pr40-mosaic-interior-bonus/01_uniform_hex_morphTrue.png {'before': {'interior_bonus': 0.5, 'n_noncontiguous': 0, 'n_split_groups': 0}, 'after': {'interior_bonus': 2.0, 'n_noncontiguous': 0, 'n_split_groups': 0}}
+wrote /home/fakl/carto-flow/visual_checks/pr40-mosaic-interior-bonus/02_uniform_hex_morphFalse_REGRESSION.png {'before': {'interior_bonus': 0.5, 'n_noncontiguous': 0, 'n_split_groups': 0}, 'after': {'interior_bonus': 2.0, 'n_noncontiguous': 0, 'n_split_groups': 0}}
+wrote /home/fakl/carto-flow/visual_checks/pr40-mosaic-interior-bonus/03_uniform_square_morphFalse_REGRESSION.png {'before': {'interior_bonus': 0.5, 'n_noncontiguous': 0, 'n_split_groups': 0}, 'after': {'interior_bonus': 2.0, 'n_noncontiguous': 0, 'n_split_groups': 0}}
+wrote /home/fakl/carto-flow/visual_checks/pr40-mosaic-interior-bonus/04_states154_morphTrue.png {'before': {'interior_bonus': 0.5, 'n_noncontiguous': 0, 'n_split_groups': 0}, 'after': {'interior_bonus': 2.0, 'n_noncontiguous': 0, 'n_split_groups': 0}}
+wrote /home/fakl/carto-flow/visual_checks/pr40-mosaic-interior-bonus/05_districts_groupby_morphTrue.png {'before': {'interior_bonus': 0.5, 'n_noncontiguous': 0, 'n_split_groups': 0}, 'after': {'interior_bonus': 2.0, 'n_noncontiguous': 0, 'n_split_groups': 0}}
+all done

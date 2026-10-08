@@ -1,0 +1,37 @@
+[run] msweep_nomorph__states_uniform__interior_bonus__0.25
+[done] msweep_nomorph__states_uniform__interior_bonus__0.25 in 0.7s
+[run] msweep_nomorph__states_uniform__interior_bonus__0.5
+[done] msweep_nomorph__states_uniform__interior_bonus__0.5 in 0.7s
+[run] msweep_nomorph__states_uniform__interior_bonus__2.0
+[done] msweep_nomorph__states_uniform__interior_bonus__2.0 in 0.7s
+[run] msweep_nomorph__states_uniform__neighbor_weight__0.2
+[done] msweep_nomorph__states_uniform__neighbor_weight__0.2 in 0.7s
+[run] msweep_nomorph__states_uniform__distance_weight__2.0
+[done] msweep_nomorph__states_uniform__distance_weight__2.0 in 0.7s
+[run] msweep_nomorph__states_uniform__neighbor_bfs__True
+[done] msweep_nomorph__states_uniform__neighbor_bfs__True in 0.7s
+[run] msweep_nomorph__states__interior_bonus__0.25
+[done] msweep_nomorph__states__interior_bonus__0.25 in 1.0s
+[run] msweep_nomorph__states__interior_bonus__0.5
+[done] msweep_nomorph__states__interior_bonus__0.5 in 1.2s
+[run] msweep_nomorph__states__interior_bonus__2.0
+[done] msweep_nomorph__states__interior_bonus__2.0 in 7.2s
+[run] msweep_nomorph__states__neighbor_weight__0.2
+[done] msweep_nomorph__states__neighbor_weight__0.2 in 1.3s
+[run] msweep_nomorph__states__distance_weight__2.0
+[done] msweep_nomorph__states__distance_weight__2.0 in 1.2s
+[run] msweep_nomorph__states__neighbor_bfs__True
+[done] msweep_nomorph__states__neighbor_bfs__True in 1.2s
+[run] msweep_nomorph__districts__interior_bonus__0.25
+[done] msweep_nomorph__districts__interior_bonus__0.25 in 7.4s
+[run] msweep_nomorph__districts__interior_bonus__0.5
+[done] msweep_nomorph__districts__interior_bonus__0.5 in 3.8s
+[run] msweep_nomorph__districts__interior_bonus__2.0
+[done] msweep_nomorph__districts__interior_bonus__2.0 in 4.3s
+[run] msweep_nomorph__districts__neighbor_weight__0.2
+[done] msweep_nomorph__districts__neighbor_weight__0.2 in 6.0s
+[run] msweep_nomorph__districts__distance_weight__2.0
+[done] msweep_nomorph__districts__distance_weight__2.0 in 4.2s
+[run] msweep_nomorph__districts__neighbor_bfs__True
+[done] msweep_nomorph__districts__neighbor_bfs__True in 5.0s
+[all done]

@@ -1,0 +1,46 @@
+[done] states_uniform__morph1__squared__dw1.0__ib2.0   1.0s  disp_tiles=1.53  owner_km=435  adj=0.725  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states_uniform__morph1__linear__dw1.0__ib2.0   1.0s  disp_tiles=1.23  owner_km=351  adj=0.688  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states_uniform__morph0__squared__dw1.0__ib2.0   0.7s  disp_tiles=2.24  owner_km=641  adj=0.523  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states_uniform__morph0__linear__dw1.0__ib2.0   0.7s  disp_tiles=1.87  owner_km=535  adj=0.505  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states_uniform_sq__morph1__squared__dw1.0__ib2.0   0.9s  disp_tiles=0.74  owner_km=326  adj=0.459  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states_uniform_sq__morph1__linear__dw1.0__ib2.0   1.0s  disp_tiles=0.78  owner_km=341  adj=0.495  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states_uniform_sq__morph0__squared__dw1.0__ib2.0   0.9s  disp_tiles=1.58  owner_km=723  adj=0.468  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states_uniform_sq__morph0__linear__dw1.0__ib2.0   0.9s  disp_tiles=1.12  owner_km=511  adj=0.385  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states__morph1__squared__dw1.0__ib2.0   1.4s  disp_tiles=2.10  owner_km=393  adj=0.798  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states__morph1__linear__dw1.0__ib2.0   1.4s  disp_tiles=2.34  owner_km=414  adj=0.761  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states__morph0__squared__dw1.0__ib2.0   1.1s  disp_tiles=3.93  owner_km=630  adj=0.697  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] states__morph0__linear__dw1.0__ib2.0   2.6s  disp_tiles=2.52  owner_km=474  adj=0.615  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] districts__morph1__squared__dw1.0__ib2.0   4.6s  disp_tiles=4.52  owner_km=399  adj=0.527  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] districts__morph1__linear__dw1.0__ib2.0   4.4s  disp_tiles=4.30  owner_km=380  adj=0.498  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] districts__morph0__squared__dw1.0__ib2.0   3.8s  disp_tiles=7.29  owner_km=638  adj=0.485  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] districts__morph0__linear__dw1.0__ib2.0  16.2s  disp_tiles=4.50  owner_km=394  adj=0.354  iou=nan  noncontig=0  split=0  short=0  missing=0
+/home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/run.py:155: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  res = morph_geometries(list(gdf.geometry), values=np.asarray(counts, dtype=np.float64),
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] africa__morph1__squared__dw1.0__ib2.0   0.4s  disp_tiles=1.20  owner_km=582  adj=0.736  iou=nan  noncontig=0  split=0  short=0  missing=0
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] africa__morph1__linear__dw1.0__ib2.0   0.3s  disp_tiles=1.26  owner_km=565  adj=0.700  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] africa__morph0__squared__dw1.0__ib2.0   0.2s  disp_tiles=1.75  owner_km=659  adj=0.664  iou=nan  noncontig=0  split=0  short=0  missing=0
+[done] africa__morph0__linear__dw1.0__ib2.0   0.3s  disp_tiles=1.57  owner_km=620  adj=0.627  iou=nan  noncontig=0  split=0  short=0  missing=0
+/home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/run.py:155: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (242810.8 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  res = morph_geometries(list(gdf.geometry), values=np.asarray(counts, dtype=np.float64),
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (242810.8 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_mainland__morph1__squared__dw1.0__ib2.0   2.1s  disp_tiles=3.81  owner_km=1749  adj=0.587  iou=nan  noncontig=1  split=0  short=0  missing=0
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (242810.8 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world_mainland__morph1__linear__dw1.0__ib2.0   1.8s  disp_tiles=3.37  owner_km=1579  adj=0.619  iou=nan  noncontig=1  split=0  short=0  missing=0
+[done] world_mainland__morph0__squared__dw1.0__ib2.0   2.2s  disp_tiles=7.92  owner_km=2777  adj=0.385  iou=nan  noncontig=5  split=0  short=0  missing=0
+[done] world_mainland__morph0__linear__dw1.0__ib2.0   2.3s  disp_tiles=4.48  owner_km=1931  adj=0.388  iou=nan  noncontig=3  split=0  short=0  missing=0
+/home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/run.py:155: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  res = morph_geometries(list(gdf.geometry), values=np.asarray(counts, dtype=np.float64),
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__squared__dw1.0__ib2.0   3.2s  disp_tiles=3.91  owner_km=1841  adj=0.541  iou=nan  noncontig=1  split=0  short=8  missing=6
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__linear__dw1.0__ib2.0   3.1s  disp_tiles=3.31  owner_km=1597  adj=0.560  iou=nan  noncontig=0  split=0  short=8  missing=4
+[done] world__morph0__squared__dw1.0__ib2.0   3.7s  disp_tiles=7.62  owner_km=2581  adj=0.377  iou=nan  noncontig=3  split=0  short=18  missing=14
+[done] world__morph0__linear__dw1.0__ib2.0   4.6s  disp_tiles=3.85  owner_km=1859  adj=0.340  iou=nan  noncontig=3  split=0  short=17  missing=15

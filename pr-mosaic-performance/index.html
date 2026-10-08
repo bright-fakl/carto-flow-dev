@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #36: Speed up mosaic calibration: skip adjacency during search, vectorise lattice adjacency</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #36: Speed up mosaic calibration: skip adjacency during search, vectorise lattice adjacency</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/36">https://github.com/bright-fakl/carto-flow/pull/36</a></dd>
+<dt>Branch</dt><dd>perf/mosaic-calibration</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-20</dd>
+<dt>Before</dt><dd>main @ 9064d77</dd>
+<dt>After</dt><dd>perf/mosaic-calibration @ 997c725</dd>
+<dt>Inputs</dt><dd>US states (bundled, ~150 tiles via load_us_census(level=&quot;state&quot;) population), congressional districts (bundled, 432, 1 tile each), congressional districts with group_by=&quot;State Name&quot;; each with and without morph</dd>
+</dl>
+<p class="desc">Re-profiled the mosaic layout (calibration, tiling.generate/adjacency, assignment, repair) before optimising; skipped lattice-adjacency computation during calibrate_tiling&#x27;s tile-size search trials and vectorised _compute_adjacency_from_lattice with a KD-tree. Both changes are bit-identical to the previous output - verified on every deterministic (morph=False) config and shown to add no divergence beyond this codebase&#x27;s pre-existing morph-step float noise on the morph=True configs.</p>
+<h2>No before/after figures - this is a pure performance change</h2>
+<p>Output is bit-identical (see below), so there is nothing visual to compare. In place of figures, this directory holds the raw evidence:</p>
+<ul><li><code>profiles/before/</code> and <code>profiles/after/</code> - cProfile <code>.prof</code> and <code>.txt</code> dumps (top 40 by</li></ul>
+<p>cumulative time) for all six configs, plus <code>timings.json</code> with whole-<code>compute()</code> wall times. Both taken against current <code>main</code> @ 9064d77 (includes #29-#35).</p>
+<ul><li><code>bitcheck/before/</code> and <code>bitcheck/after/</code> - <code>LayoutResult.serialize()</code> + <code>result.metrics</code> (as</li></ul>
+<p>JSON) and the styled tile geometry (as WKB hex) for all six configs.</p>
+<ul><li><code>scripts/</code> - the three ad-hoc scripts used to produce the above</li></ul>
+<p>(<code>_profile_mosaic.py</code>, <code>_bitcheck_mosaic.py</code>, <code>_compare_morph.py</code>). Not part of the package; kept here only so the numbers below are reproducible.</p>
+<p>Note: an earlier pass at this PR was accidentally branched from a stale local <code>main</code> missing 4 merged PRs (#31/#32/#34/#35). That produced a misleading profile in which contiguity repair appeared to dominate one configuration. It was caught before merging (CI never triggered on the first push; tracing that down found the branch&#x27;s merge-base was behind <code>origin/main</code>) and the branch was rebased onto current <code>main</code>. All data in this directory is from the corrected base.</p>
+<h2>Bit-identity evidence</h2>
+<p>**<code>morph=False</code> configs (states, districts, districts grouped by state)** - the three configs the calibration/adjacency changes directly affect, and the only configs in this pipeline free of the flow-cartogram&#x27;s pre-existing morph-step float noise: <code>serialize()</code> JSON equal by Python dict equality, styled-geometry WKB hex equal byte-for-byte, every <code>MosaicMetrics</code> / <code>AlgorithmMetrics</code> field equal (including <code>n_unassigned_core_tiles</code> and <code>n_enclosed_unassigned_tiles</code>), for all three inputs. Confirmed stable across repeated runs on both sides (not just before==after, but before==before and after==after across separate process launches).</p>
+<p>**<code>morph=True</code> configs** - <code>main</code> already has small run-to-run floating-point noise from the flow-cartogram&#x27;s numba-parallel morph step (confirmed by running the *unmodified* <code>main</code> tree three times in separate processes: <code>tile_size</code> varied at ~1e-10 relative). Comparing before vs after: <code>tile_size</code> relative difference ~6e-16 to ~3e-15 (float64 machine epsilon - below <code>main</code>&#x27;s own noise floor), max tile-vertex coordinate difference ~5e-9 to ~1.4e-8 (absolute, Albers-projection metres), every other metric exactly equal. This branch adds no divergence beyond what <code>main</code> already has.</p>
+<p><code>load_world()</code> was not used as a bit-identity reference, per the documented prior run-to-run variation on that input; it was used for profiling only (not included in the final config set above, since all three states/districts variants already covered the multi-tile and one-tile-per-geometry cases the task asked for).</p>
+<h2>Numbers</h2>
+<table>
+<tr><th>config</th><th>calibrate_tiling before</th><th>calibrate_tiling after</th><th>lattice-adjacency share (before)</th></tr>
+<tr><td>states, nomorph</td><td>0.206s</td><td>0.167s</td><td>0.042s (20%)</td></tr>
+<tr><td>districts, nomorph</td><td>1.504s</td><td>0.804s</td><td>0.696s (46%)</td></tr>
+<tr><td>districts grouped, nomorph</td><td>1.491s</td><td>0.889s</td><td>0.692s (46%)</td></tr>
+</table>
+<p><code>_compute_adjacency_from_lattice</code> no longer appears in any &quot;after&quot; profile&#x27;s top 40 for the search-heavy configs (districts) - now only called once, for the accepted tile size.</p>
+<p>Whole-<code>compute()</code> wall time:</p>
+<table>
+<tr><th>config</th><th>before</th><th>after</th></tr>
+<tr><td>states, morph</td><td>1.686s</td><td>1.685s</td></tr>
+<tr><td>states, nomorph</td><td>0.772s</td><td>0.745s</td></tr>
+<tr><td>districts, morph</td><td>5.797s</td><td>4.880s</td></tr>
+<tr><td>districts, nomorph</td><td>4.392s</td><td>3.701s</td></tr>
+<tr><td>districts grouped, morph</td><td>5.714s</td><td>4.727s</td></tr>
+<tr><td>districts grouped, nomorph</td><td>4.542s</td><td>4.180s</td></tr>
+</table>
+<p>Full analysis is in the PR description.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

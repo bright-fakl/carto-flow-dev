@@ -1,0 +1,12 @@
+{
+  "forced into one block (before)": {
+    "neighbour_blocks": 3,
+    "multipart_blocks": 1,
+    "converged": false
+  },
+  "sub-regions (after)": {
+    "neighbour_blocks": 1,
+    "multipart_blocks": 2,
+    "converged": true
+  }
+}

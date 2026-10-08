@@ -1,0 +1,73 @@
+[
+  {
+    "case": "fixture",
+    "split": [],
+    "n_split": 0,
+    "wall_s": 0.06
+  },
+  {
+    "case": "states",
+    "split": [],
+    "n_split": 0,
+    "wall_s": 2.08
+  },
+  {
+    "case": "districts_group_by",
+    "split": [],
+    "n_split": 0,
+    "wall_s": 5.06
+  },
+  {
+    "case": "swapback",
+    "ring_used": 2,
+    "ring_owners": [
+      "Maine",
+      "Washington"
+    ],
+    "n_unassigned_core": 2,
+    "n_enclosed_holes": 0,
+    "metric_n_unassigned_core_tiles": 2,
+    "n_greatlakes_empty": 1
+  },
+  {
+    "case": "counts",
+    "rows": [
+      {
+        "name": "3x3 fixture",
+        "ring_used": 0,
+        "empty_core": 1,
+        "split_regions": 0,
+        "split_groups": 0,
+        "regions_correct": "9/9",
+        "wall_s": 0.06
+      },
+      {
+        "name": "US states",
+        "ring_used": 2,
+        "empty_core": 2,
+        "split_regions": 0,
+        "split_groups": 0,
+        "regions_correct": "49/49",
+        "wall_s": 1.53
+      },
+      {
+        "name": "Districts",
+        "ring_used": 6,
+        "empty_core": 10,
+        "split_regions": 0,
+        "split_groups": 0,
+        "regions_correct": "432/432",
+        "wall_s": 5.2
+      },
+      {
+        "name": "Districts + group_by",
+        "ring_used": 8,
+        "empty_core": 12,
+        "split_regions": 0,
+        "split_groups": 0,
+        "regions_correct": "432/432",
+        "wall_s": 5.13
+      }
+    ]
+  }
+]

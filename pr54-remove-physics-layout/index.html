@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #54: Remove the physics symbol-cartogram layout and default to circle packing</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #54: Remove the physics symbol-cartogram layout and default to circle packing</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/54">https://github.com/bright-fakl/carto-flow/pull/54</a></dd>
+<dt>Branch</dt><dd>remove-physics-layout</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-24 01:31</dd>
+<dt>Before</dt><dd>layout=&quot;physics&quot; (the old default)</dd>
+<dt>After</dt><dd>layout=&quot;packing&quot; (the new default) @ e41edf2</dd>
+<dt>Inputs</dt><dd>US states by population (bundled load_us_census, 49 rows), all other options at defaults</dd>
+</dl>
+<p class="desc">The default layout changes from &quot;physics&quot; to &quot;packing&quot;; check that the new default reads as a sensible Dorling cartogram for a call that passes no layout.</p>
+<p>The <code>physics</code> layout is removed, so every call that does not pass <code>layout=</code> now runs the circle packing layout instead. The figure is that change, on the most common call.</p>
+<table>
+<tr><th></th><th><code>physics</code> (before)</th><th><code>packing</code> (after)</th></tr>
+<tr><td>converged</td><td>no — hit the 500-iteration cap</td><td>yes, at 205 iterations</td></tr>
+<tr><td>overlapping pairs at termination</td><td>11 (max penetration 38 km)</td><td>0</td></tr>
+<tr><td>wall time</td><td>2.2 s</td><td>0.4 s</td></tr>
+<tr><td>mean displacement from centroid</td><td>319 km</td><td>347 km</td></tr>
+<tr><td>max displacement</td><td>703 km</td><td>791 km</td></tr>
+</table>
+<p>What to look for: the left panel still has visibly overlapping circles in the Northeast and around the Great Lakes, and the whole cloud has drifted north-east of the outline. The right panel is overlap-free and keeps the coastal states pinned closer to their geography, at the price of a slightly larger average displacement — which is what resolving the overlaps costs.</p>
+<p>A third commit cleans up <code>layout_type</code>, which the removal left naming a layout that no longer exists: packing and flow-density results both recorded <code>layout_type=&quot;physics&quot;</code>. Each now records its own registry key (<code>&quot;packing&quot;</code>, <code>&quot;flow_density&quot;</code>). This is not visible in the figure — it changes the provenance string on a result, not the placement. The field&#x27;s one functional job, picking the result class back up in <code>from_dict</code>, is unchanged and now has a round-trip test for every registered layout.</p>
+<p>Making packing the default also exposed two gaps in its simulator that the old default happened to avoid; both are fixed in the same commit and are not visible in this figure: an input with no adjacent pairs at all crashed, and a single symbol never met the drift convergence criterion.</p>
+<div class="figure">
+<img src="default-layout-physics-vs-packing.png" alt="Same call, `create_symbol_cartogram(us_states, &quot;Population&quot;)`, under the old default (left) and the new one (right).">
+<p class="caption">Same call, <code>create_symbol_cartogram(us_states, &quot;Population&quot;)</code>, under the old default (left) and the new one (right).</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

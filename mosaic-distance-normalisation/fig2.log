@@ -1,0 +1,57 @@
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:848: UserWarning: 1 region(s) received no tile and are missing from the mosaic: Trinidad and Tobago. Each sits on a land mass no tile overlaps by min_overlap_frac, so its geographic component has no tiles to assign. To place them, set min_one_tile_per_region=True to place them on the nearest free cells, raise the tile budget so each of them covers more of a tile, or lower min_overlap_frac.
+  _warn_unplaced_regions(tile_count_per_region, counts, source_gdf, enabled=opts.min_one_tile_per_region)
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:848: UserWarning: 1 region(s) received no tile and are missing from the mosaic: Trinidad and Tobago. Each sits on a land mass no tile overlaps by min_overlap_frac, so its geographic component has no tiles to assign. To place them, set min_one_tile_per_region=True to place them on the nearest free cells, raise the tile budget so each of them covers more of a tile, or lower min_overlap_frac.
+  _warn_unplaced_regions(tile_count_per_region, counts, source_gdf, enabled=opts.min_one_tile_per_region)
+wrote /home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/norm_world_morph1.png
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:848: UserWarning: 13 region(s) received no tile and are missing from the mosaic: Fiji, Bahamas, Falkland Is., Fr. S. Antarctic Lands, Puerto Rico, Jamaica, Vanuatu, New Caledonia, Solomon Is., Taiwan, and 3 more. Each sits on a land mass no tile overlaps by min_overlap_frac, so its geographic component has no tiles to assign. To place them, set min_one_tile_per_region=True to place them on the nearest free cells, raise the tile budget so each of them covers more of a tile, or lower min_overlap_frac.
+  _warn_unplaced_regions(tile_count_per_region, counts, source_gdf, enabled=opts.min_one_tile_per_region)
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:848: UserWarning: 13 region(s) received no tile and are missing from the mosaic: Fiji, Bahamas, Falkland Is., Fr. S. Antarctic Lands, Puerto Rico, Jamaica, Vanuatu, New Caledonia, Solomon Is., Taiwan, and 3 more. Each sits on a land mass no tile overlaps by min_overlap_frac, so its geographic component has no tiles to assign. To place them, set min_one_tile_per_region=True to place them on the nearest free cells, raise the tile budget so each of them covers more of a tile, or lower min_overlap_frac.
+  _warn_unplaced_regions(tile_count_per_region, counts, source_gdf, enabled=opts.min_one_tile_per_region)
+wrote /home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/norm_world_morph0.png
+wrote /home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/norm_districts_morph0.png
+wrote /home/fakl/carto-flow/visual_checks/mosaic-distance-normalisation/norm_states_morph0.png
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:848: UserWarning: 13 region(s) received no tile and are missing from the mosaic: Fiji, Bahamas, Falkland Is., Fr. S. Antarctic Lands, Puerto Rico, Jamaica, Vanuatu, New Caledonia, Solomon Is., Taiwan, and 3 more. Each sits on a land mass no tile overlaps by min_overlap_frac, so its geographic component has no tiles to assign. To place them, set min_one_tile_per_region=True to place them on the nearest free cells, raise the tile budget so each of them covers more of a tile, or lower min_overlap_frac.
+  _warn_unplaced_regions(tile_count_per_region, counts, source_gdf, enabled=opts.min_one_tile_per_region)
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:848: UserWarning: 13 region(s) received no tile and are missing from the mosaic: Fiji, Bahamas, Falkland Is., Fr. S. Antarctic Lands, Puerto Rico, Jamaica, Vanuatu, New Caledonia, Solomon Is., Taiwan, and 3 more. Each sits on a land mass no tile overlaps by min_overlap_frac, so its geographic component has no tiles to assign. To place them, set min_one_tile_per_region=True to place them on the nearest free cells, raise the tile budget so each of them covers more of a tile, or lower min_overlap_frac.
+  _warn_unplaced_regions(tile_count_per_region, counts, source_gdf, enabled=opts.min_one_tile_per_region)
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:848: UserWarning: 1 region(s) received no tile and are missing from the mosaic: Trinidad and Tobago. Each sits on a land mass no tile overlaps by min_overlap_frac, so its geographic component has no tiles to assign. To place them, set min_one_tile_per_region=True to place them on the nearest free cells, raise the tile budget so each of them covers more of a tile, or lower min_overlap_frac.
+  _warn_unplaced_regions(tile_count_per_region, counts, source_gdf, enabled=opts.min_one_tile_per_region)
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:848: UserWarning: 1 region(s) received no tile and are missing from the mosaic: Trinidad and Tobago. Each sits on a land mass no tile overlaps by min_overlap_frac, so its geographic component has no tiles to assign. To place them, set min_one_tile_per_region=True to place them on the nearest free cells, raise the tile budget so each of them covers more of a tile, or lower min_overlap_frac.
+  _warn_unplaced_regions(tile_count_per_region, counts, source_gdf, enabled=opts.min_one_tile_per_region)
+
+=== world morph=False squared ===
+  Jamaica                nearest tile -> Mali                   (  261 km); its own 0 tile(s) nearest at none placed
+  Cyprus                 nearest tile -> India                  (  189 km); its own 0 tile(s) nearest at none placed
+  Puerto Rico            nearest tile -> Niger                  (  273 km); its own 0 tile(s) nearest at none placed
+  Denmark                nearest tile -> United Kingdom         (  272 km); its own 1 tile(s) nearest at 9109 km
+  Bahamas                nearest tile -> Dominican Rep.         (  358 km); its own 0 tile(s) nearest at none placed
+  Trinidad and Tobago    nearest tile -> Algeria                (  104 km); its own 0 tile(s) nearest at none placed
+  Iceland                nearest tile -> Iceland                (  311 km); its own 1 tile(s) nearest at 311 km
+
+=== world morph=False linear ===
+  Jamaica                nearest tile -> Dominican Rep.         (  261 km); its own 0 tile(s) nearest at none placed
+  Cyprus                 nearest tile -> Iran                   (  189 km); its own 0 tile(s) nearest at none placed
+  Puerto Rico            nearest tile -> Haiti                  (  273 km); its own 0 tile(s) nearest at none placed
+  Denmark                nearest tile -> Austria                (  272 km); its own 1 tile(s) nearest at 8441 km
+  Bahamas                nearest tile -> Cuba                   (  358 km); its own 0 tile(s) nearest at none placed
+  Trinidad and Tobago    nearest tile -> Gambia                 (  104 km); its own 0 tile(s) nearest at none placed
+  Iceland                nearest tile -> Iceland                (  311 km); its own 1 tile(s) nearest at 311 km
+
+=== world morph=True squared ===
+  Jamaica                nearest tile -> Venezuela              (  310 km); its own 1 tile(s) nearest at 764 km
+  Cyprus                 nearest tile -> Pakistan               (  102 km); its own 1 tile(s) nearest at 1782 km
+  Puerto Rico            nearest tile -> Puerto Rico            (  161 km); its own 1 tile(s) nearest at 161 km
+  Denmark                nearest tile -> Romania                (  276 km); its own 1 tile(s) nearest at 7537 km
+  Bahamas                nearest tile -> Jamaica                (  160 km); its own 1 tile(s) nearest at 1087 km
+  Trinidad and Tobago    nearest tile -> Senegal                (  715 km); its own 0 tile(s) nearest at none placed
+  Iceland                nearest tile -> Czechia                (  314 km); its own 1 tile(s) nearest at 2102 km
+
+=== world morph=True linear ===
+  Jamaica                nearest tile -> Jamaica                (  310 km); its own 1 tile(s) nearest at 310 km
+  Cyprus                 nearest tile -> Pakistan               (  102 km); its own 1 tile(s) nearest at 1991 km
+  Puerto Rico            nearest tile -> Puerto Rico            (  161 km); its own 1 tile(s) nearest at 161 km
+  Denmark                nearest tile -> Hungary                (  276 km); its own 1 tile(s) nearest at 6852 km
+  Bahamas                nearest tile -> Cuba                   (  160 km); its own 1 tile(s) nearest at 1087 km
+  Trinidad and Tobago    nearest tile -> Ghana                  (  715 km); its own 0 tile(s) nearest at none placed
+  Iceland                nearest tile -> Sweden                 (  314 km); its own 1 tile(s) nearest at 2206 km
+FIGDONE

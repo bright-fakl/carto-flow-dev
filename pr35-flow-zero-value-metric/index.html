@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #35: Floor flow-cartogram log-ratio errors at one grid cell</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #35: Floor flow-cartogram log-ratio errors at one grid cell</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/35">https://github.com/bright-fakl/carto-flow/pull/35</a></dd>
+<dt>Branch</dt><dd>fix/flow-zero-value-error-metric</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-20</dd>
+<dt>Before</dt><dd>main @ 72ba382</dd>
+<dt>After</dt><dd>fix/flow-zero-value-error-metric @ a8bfb18</dd>
+<dt>Inputs</dt><dd>US states (bundled census, Population), congressional districts (bundled census, Population), all at default MorphOptions (grid_size=256, n_iter=500); a synthetic 3x3 grid with one region&#x27;s value set to 0 (grid_size=64, mean_tol=0.02, max_tol=0.05)</dd>
+</dl>
+<p class="desc">A zero sizing value gave a zero target area, so log2(current/target) was inf for the whole morph (not just that geometry), permanently defeating convergence and emitting ~100 divide-by-zero warnings per run. compute_error_metrics() now floors both sides of the ratio at eps (default 0.0, unclamped); the production call sites pass one flow-grid cell area, since the density field cannot represent an area difference finer than that. Confirmed bit-identical on states and congressional districts at default settings.</p>
+
+<div class="figure">
+<img src="districts_after.png" alt="Same input, eps = one grid cell. Converged at iteration 154 — bit-identical geometry and error metrics to before, despite those sub-cell fragments.">
+<p class="caption">Same input, eps = one grid cell. Converged at iteration 154 — bit-identical geometry and error metrics to before, despite those sub-cell fragments.</p>
+</div><div class="figure">
+<img src="districts_before.png" alt="Congressional districts, default settings, eps=0. Converged at iteration 154. Several real (non-zero) district fragments are smaller than one grid cell at this resolution, but by the time the run approaches its convergence threshold they have grown past it under the flow.">
+<p class="caption">Congressional districts, default settings, eps=0. Converged at iteration 154. Several real (non-zero) district fragments are smaller than one grid cell at this resolution, but by the time the run approaches its convergence threshold they have grown past it under the flow.</p>
+</div><div class="figure">
+<img src="states_after.png" alt="Same input, eps = one grid cell (this PR). Converged at iteration 113 — bit-identical geometry and error metrics to before.">
+<p class="caption">Same input, eps = one grid cell (this PR). Converged at iteration 113 — bit-identical geometry and error metrics to before.</p>
+</div><div class="figure">
+<img src="states_before.png" alt="US states, default settings, eps=0 (historical unclamped ratio, monkeypatched in). Converged at iteration 113.">
+<p class="caption">US states, default settings, eps=0 (historical unclamped ratio, monkeypatched in). Converged at iteration 113.</p>
+</div><div class="figure">
+<img src="zero_value_after.png" alt="Same input, eps = one grid cell. status=CONVERGED in 81 iterations, mean_log_error=0.0219, no warnings. The zero-value region (center, thin red sliver) shrinks from area 1.00 to 0.0050 — visibly the same mesh shape as before (the eps floor only changes the reported error and hence when the loop stops, not the velocity field driving the geometry), but now the algorithm correctly recognizes it has converged and stops instead of running to n_iter while reporting infinite error.">
+<p class="caption">Same input, eps = one grid cell. status=CONVERGED in 81 iterations, mean_log_error=0.0219, no warnings. The zero-value region (center, thin red sliver) shrinks from area 1.00 to 0.0050 — visibly the same mesh shape as before (the eps floor only changes the reported error and hence when the loop stops, not the velocity field driving the geometry), but now the algorithm correctly recognizes it has converged and stops instead of running to n_iter while reporting infinite error.</p>
+</div><div class="figure">
+<img src="zero_value_before.png" alt="Synthetic 3x3 grid, center region value=0, eps=0. status=COMPLETED (runs the full 150 iterations, never converges), mean_log_error=inf, max_log_error=inf, and ~100 RuntimeWarning: divide by zero per run (not visible in the image, confirmed in the log).">
+<p class="caption">Synthetic 3x3 grid, center region value=0, eps=0. status=COMPLETED (runs the full 150 iterations, never converges), mean_log_error=inf, max_log_error=inf, and ~100 RuntimeWarning: divide by zero per run (not visible in the image, confirmed in the log).</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

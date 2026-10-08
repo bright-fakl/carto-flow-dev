@@ -1,0 +1,44 @@
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[patched] world b800 morph=1 best= 26.52s [26.52, 29.4] fp=ba7120159c505530
+[patched] world b800 morph=0 best= 43.57s [43.57, 44.04] fp=54f434ebfcdb3b13
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[patched] world b1500 morph=1 best= 90.35s [99.43, 90.35] fp=26b69d400d5f857d
+[patched] world b1500 morph=0 best= 77.34s [85.18, 77.34] fp=bfc4350f6e66da76
+[patched] districts b0 morph=1 best=  4.17s [4.33, 4.17] fp=72cd3f2aa88537ba
+[patched] districts b0 morph=0 best=  3.66s [3.66, 3.81] fp=b34667996c9cfeed
+Saved working directory and index state WIP on perf/contiguity-path-reachability-precheck: a095187 Raise mosaic interior_bonus default to 2.0 (#40)
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[main] world b800 morph=1 best= 52.43s [52.43, 80.97] fp=ba7120159c505530
+[main] world b800 morph=0 best= 45.60s [45.64, 45.6] fp=54f434ebfcdb3b13
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[main] world b1500 morph=1 best=129.63s [131.32, 129.63] fp=26b69d400d5f857d
+[main] world b1500 morph=0 best=204.74s [204.74, 206.27] fp=bfc4350f6e66da76
+[main] districts b0 morph=1 best= 11.00s [12.01, 11.0] fp=72cd3f2aa88537ba
+[main] districts b0 morph=0 best=  9.41s [9.54, 9.41] fp=b34667996c9cfeed
+On branch perf/contiguity-path-reachability-precheck
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/carto_flow/geo_utils/contiguity.py
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	africa.py
+	norm.py
+	prof.py
+	wtime.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (a06d316d293d7e3a55d7f3f0e1c57decbb3487e8)

@@ -1,0 +1,62 @@
+{
+  "01_uniform_hex_morphTrue": {
+    "before": {
+      "interior_bonus": 0.5,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    },
+    "after": {
+      "interior_bonus": 2.0,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    }
+  },
+  "02_uniform_hex_morphFalse_REGRESSION": {
+    "before": {
+      "interior_bonus": 0.5,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    },
+    "after": {
+      "interior_bonus": 2.0,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    }
+  },
+  "03_uniform_square_morphFalse_REGRESSION": {
+    "before": {
+      "interior_bonus": 0.5,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    },
+    "after": {
+      "interior_bonus": 2.0,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    }
+  },
+  "04_states154_morphTrue": {
+    "before": {
+      "interior_bonus": 0.5,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    },
+    "after": {
+      "interior_bonus": 2.0,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    }
+  },
+  "05_districts_groupby_morphTrue": {
+    "before": {
+      "interior_bonus": 0.5,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    },
+    "after": {
+      "interior_bonus": 2.0,
+      "n_noncontiguous": 0,
+      "n_split_groups": 0
+    }
+  }
+}

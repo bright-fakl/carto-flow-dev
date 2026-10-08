@@ -1,0 +1,182 @@
+states=49 tiles=154 districts=432
+[run] msweep__states_uniform__neighbor_bfs__False
+[done] msweep__states_uniform__neighbor_bfs__False in 0.9s
+[run] msweep__states_uniform__neighbor_bfs__True
+[done] msweep__states_uniform__neighbor_bfs__True in 0.9s
+[run] msweep__states_uniform__neighbor_weight__0.0
+[done] msweep__states_uniform__neighbor_weight__0.0 in 0.9s
+[run] msweep__states_uniform__neighbor_weight__0.05
+[done] msweep__states_uniform__neighbor_weight__0.05 in 0.9s
+[run] msweep__states_uniform__neighbor_weight__0.1
+[done] msweep__states_uniform__neighbor_weight__0.1 in 0.9s
+[run] msweep__states_uniform__neighbor_weight__0.2
+[done] msweep__states_uniform__neighbor_weight__0.2 in 0.9s
+[run] msweep__states_uniform__neighbor_weight__0.3
+[done] msweep__states_uniform__neighbor_weight__0.3 in 0.9s
+[run] msweep__states_uniform__neighbor_weight__0.6
+[done] msweep__states_uniform__neighbor_weight__0.6 in 0.9s
+[run] msweep__states_uniform__neighbor_weight__1.0
+[done] msweep__states_uniform__neighbor_weight__1.0 in 0.9s
+[run] msweep__states_uniform__neighbor_weight__2.0
+[done] msweep__states_uniform__neighbor_weight__2.0 in 0.9s
+[run] msweep__states_uniform__neighbor_weight__5.0
+[done] msweep__states_uniform__neighbor_weight__5.0 in 0.9s
+[run] msweep__states_uniform__distance_weight__0.25
+[done] msweep__states_uniform__distance_weight__0.25 in 0.9s
+[run] msweep__states_uniform__distance_weight__0.5
+[done] msweep__states_uniform__distance_weight__0.5 in 0.9s
+[run] msweep__states_uniform__distance_weight__1.0
+[done] msweep__states_uniform__distance_weight__1.0 in 0.9s
+[run] msweep__states_uniform__distance_weight__2.0
+[done] msweep__states_uniform__distance_weight__2.0 in 0.9s
+[run] msweep__states_uniform__distance_weight__4.0
+[done] msweep__states_uniform__distance_weight__4.0 in 0.9s
+[run] msweep__states_uniform__interior_bonus__0.0
+[done] msweep__states_uniform__interior_bonus__0.0 in 0.9s
+[run] msweep__states_uniform__interior_bonus__0.25
+[done] msweep__states_uniform__interior_bonus__0.25 in 0.9s
+[run] msweep__states_uniform__interior_bonus__0.5
+[done] msweep__states_uniform__interior_bonus__0.5 in 0.9s
+[run] msweep__states_uniform__interior_bonus__1.0
+[done] msweep__states_uniform__interior_bonus__1.0 in 0.9s
+[run] msweep__states_uniform__interior_bonus__2.0
+[done] msweep__states_uniform__interior_bonus__2.0 in 0.9s
+[run] msweep__states_uniform__bfs_x_nw__0.0
+[done] msweep__states_uniform__bfs_x_nw__0.0 in 0.9s
+[run] msweep__states_uniform__bfs_x_nw__0.05
+[done] msweep__states_uniform__bfs_x_nw__0.05 in 0.9s
+[run] msweep__states_uniform__bfs_x_nw__0.1
+[done] msweep__states_uniform__bfs_x_nw__0.1 in 0.9s
+[run] msweep__states_uniform__bfs_x_nw__0.2
+[done] msweep__states_uniform__bfs_x_nw__0.2 in 0.9s
+[run] msweep__states_uniform__bfs_x_nw__0.3
+[done] msweep__states_uniform__bfs_x_nw__0.3 in 0.9s
+[run] msweep__states_uniform__bfs_x_nw__0.6
+[done] msweep__states_uniform__bfs_x_nw__0.6 in 0.9s
+[run] msweep__states_uniform__bfs_x_nw__1.0
+[done] msweep__states_uniform__bfs_x_nw__1.0 in 0.9s
+[run] msweep__states_uniform__bfs_x_nw__2.0
+[done] msweep__states_uniform__bfs_x_nw__2.0 in 0.9s
+[run] msweep__states_uniform__bfs_x_nw__5.0
+[done] msweep__states_uniform__bfs_x_nw__5.0 in 0.9s
+[run] msweep__states__neighbor_bfs__False
+[done] msweep__states__neighbor_bfs__False in 1.3s
+[run] msweep__states__neighbor_bfs__True
+[done] msweep__states__neighbor_bfs__True in 1.3s
+[run] msweep__states__neighbor_weight__0.0
+[done] msweep__states__neighbor_weight__0.0 in 1.3s
+[run] msweep__states__neighbor_weight__0.05
+[done] msweep__states__neighbor_weight__0.05 in 1.3s
+[run] msweep__states__neighbor_weight__0.1
+[done] msweep__states__neighbor_weight__0.1 in 1.3s
+[run] msweep__states__neighbor_weight__0.2
+[done] msweep__states__neighbor_weight__0.2 in 1.3s
+[run] msweep__states__neighbor_weight__0.3
+[done] msweep__states__neighbor_weight__0.3 in 1.3s
+[run] msweep__states__neighbor_weight__0.6
+[done] msweep__states__neighbor_weight__0.6 in 1.3s
+[run] msweep__states__neighbor_weight__1.0
+[done] msweep__states__neighbor_weight__1.0 in 1.3s
+[run] msweep__states__neighbor_weight__2.0
+[done] msweep__states__neighbor_weight__2.0 in 1.3s
+[run] msweep__states__neighbor_weight__5.0
+[done] msweep__states__neighbor_weight__5.0 in 1.3s
+[run] msweep__states__distance_weight__0.25
+[done] msweep__states__distance_weight__0.25 in 1.3s
+[run] msweep__states__distance_weight__0.5
+[done] msweep__states__distance_weight__0.5 in 1.3s
+[run] msweep__states__distance_weight__1.0
+[done] msweep__states__distance_weight__1.0 in 1.3s
+[run] msweep__states__distance_weight__2.0
+[done] msweep__states__distance_weight__2.0 in 1.3s
+[run] msweep__states__distance_weight__4.0
+[done] msweep__states__distance_weight__4.0 in 1.7s
+[run] msweep__states__interior_bonus__0.0
+[done] msweep__states__interior_bonus__0.0 in 1.3s
+[run] msweep__states__interior_bonus__0.25
+[done] msweep__states__interior_bonus__0.25 in 1.3s
+[run] msweep__states__interior_bonus__0.5
+[done] msweep__states__interior_bonus__0.5 in 1.3s
+[run] msweep__states__interior_bonus__1.0
+[done] msweep__states__interior_bonus__1.0 in 1.3s
+[run] msweep__states__interior_bonus__2.0
+[done] msweep__states__interior_bonus__2.0 in 1.3s
+[run] msweep__states__bfs_x_nw__0.0
+[done] msweep__states__bfs_x_nw__0.0 in 1.3s
+[run] msweep__states__bfs_x_nw__0.05
+[done] msweep__states__bfs_x_nw__0.05 in 1.3s
+[run] msweep__states__bfs_x_nw__0.1
+[done] msweep__states__bfs_x_nw__0.1 in 1.4s
+[run] msweep__states__bfs_x_nw__0.2
+[done] msweep__states__bfs_x_nw__0.2 in 1.3s
+[run] msweep__states__bfs_x_nw__0.3
+[done] msweep__states__bfs_x_nw__0.3 in 1.3s
+[run] msweep__states__bfs_x_nw__0.6
+[done] msweep__states__bfs_x_nw__0.6 in 1.4s
+[run] msweep__states__bfs_x_nw__1.0
+[done] msweep__states__bfs_x_nw__1.0 in 1.3s
+[run] msweep__states__bfs_x_nw__2.0
+[done] msweep__states__bfs_x_nw__2.0 in 1.3s
+[run] msweep__states__bfs_x_nw__5.0
+[done] msweep__states__bfs_x_nw__5.0 in 1.3s
+[run] msweep__districts__neighbor_bfs__False
+[done] msweep__districts__neighbor_bfs__False in 4.0s
+[run] msweep__districts__neighbor_bfs__True
+[done] msweep__districts__neighbor_bfs__True in 4.3s
+[run] msweep__districts__neighbor_weight__0.0
+[done] msweep__districts__neighbor_weight__0.0 in 4.0s
+[run] msweep__districts__neighbor_weight__0.05
+[done] msweep__districts__neighbor_weight__0.05 in 4.0s
+[run] msweep__districts__neighbor_weight__0.1
+[done] msweep__districts__neighbor_weight__0.1 in 4.0s
+[run] msweep__districts__neighbor_weight__0.2
+[done] msweep__districts__neighbor_weight__0.2 in 4.1s
+[run] msweep__districts__neighbor_weight__0.3
+[done] msweep__districts__neighbor_weight__0.3 in 4.1s
+[run] msweep__districts__neighbor_weight__0.6
+[done] msweep__districts__neighbor_weight__0.6 in 4.1s
+[run] msweep__districts__neighbor_weight__1.0
+[done] msweep__districts__neighbor_weight__1.0 in 4.1s
+[run] msweep__districts__neighbor_weight__2.0
+[done] msweep__districts__neighbor_weight__2.0 in 4.3s
+[run] msweep__districts__neighbor_weight__5.0
+[done] msweep__districts__neighbor_weight__5.0 in 6.6s
+[run] msweep__districts__distance_weight__0.25
+[done] msweep__districts__distance_weight__0.25 in 4.1s
+[run] msweep__districts__distance_weight__0.5
+[done] msweep__districts__distance_weight__0.5 in 4.1s
+[run] msweep__districts__distance_weight__1.0
+[done] msweep__districts__distance_weight__1.0 in 4.0s
+[run] msweep__districts__distance_weight__2.0
+[done] msweep__districts__distance_weight__2.0 in 4.1s
+[run] msweep__districts__distance_weight__4.0
+[done] msweep__districts__distance_weight__4.0 in 4.1s
+[run] msweep__districts__interior_bonus__0.0
+[done] msweep__districts__interior_bonus__0.0 in 5.0s
+[run] msweep__districts__interior_bonus__0.25
+[done] msweep__districts__interior_bonus__0.25 in 4.4s
+[run] msweep__districts__interior_bonus__0.5
+[done] msweep__districts__interior_bonus__0.5 in 4.1s
+[run] msweep__districts__interior_bonus__1.0
+[done] msweep__districts__interior_bonus__1.0 in 4.1s
+[run] msweep__districts__interior_bonus__2.0
+[done] msweep__districts__interior_bonus__2.0 in 4.0s
+[run] msweep__districts__bfs_x_nw__0.0
+[done] msweep__districts__bfs_x_nw__0.0 in 4.0s
+[run] msweep__districts__bfs_x_nw__0.05
+[done] msweep__districts__bfs_x_nw__0.05 in 4.4s
+[run] msweep__districts__bfs_x_nw__0.1
+[done] msweep__districts__bfs_x_nw__0.1 in 4.3s
+[run] msweep__districts__bfs_x_nw__0.2
+[done] msweep__districts__bfs_x_nw__0.2 in 4.3s
+[run] msweep__districts__bfs_x_nw__0.3
+[done] msweep__districts__bfs_x_nw__0.3 in 4.4s
+[run] msweep__districts__bfs_x_nw__0.6
+[done] msweep__districts__bfs_x_nw__0.6 in 4.4s
+[run] msweep__districts__bfs_x_nw__1.0
+[done] msweep__districts__bfs_x_nw__1.0 in 4.4s
+[run] msweep__districts__bfs_x_nw__2.0
+[done] msweep__districts__bfs_x_nw__2.0 in 4.3s
+[run] msweep__districts__bfs_x_nw__5.0
+[done] msweep__districts__bfs_x_nw__5.0 in 4.3s
+[all done]

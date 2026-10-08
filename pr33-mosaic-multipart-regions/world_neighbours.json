@@ -1,0 +1,131 @@
+{
+  "morph=True/forced": {
+    "split_single_part": 4,
+    "which_single_part": [
+      "India",
+      "Morocco",
+      "Nigeria",
+      "Peru"
+    ],
+    "split_by_subregion_metric": 6,
+    "n_split_geometries": 0,
+    "repair_passes": 2,
+    "ring_used": 6,
+    "empty_core": 29,
+    "enclosed": 4,
+    "regions_correct": "163/176",
+    "wall_s": 42.6,
+    "Malaysia": {
+      "tiles": 3,
+      "blocks": 1
+    },
+    "Indonesia": {
+      "tiles": 21,
+      "blocks": 4
+    },
+    "New Zealand": {
+      "tiles": 1,
+      "blocks": 1
+    },
+    "United States of America": {
+      "tiles": 26,
+      "blocks": 1
+    }
+  },
+  "morph=True/subregions": {
+    "split_single_part": 4,
+    "which_single_part": [
+      "India",
+      "Morocco",
+      "Nigeria",
+      "Peru"
+    ],
+    "split_by_subregion_metric": 7,
+    "n_split_geometries": 4,
+    "repair_passes": 3,
+    "ring_used": 8,
+    "empty_core": 31,
+    "enclosed": 5,
+    "regions_correct": "164/176",
+    "wall_s": 44.0,
+    "Malaysia": {
+      "tiles": 3,
+      "blocks": 1
+    },
+    "Indonesia": {
+      "tiles": 21,
+      "blocks": 4
+    },
+    "New Zealand": {
+      "tiles": 1,
+      "blocks": 1
+    },
+    "United States of America": {
+      "tiles": 26,
+      "blocks": 1
+    }
+  },
+  "morph=False/forced": {
+    "split_single_part": 2,
+    "which_single_part": [
+      "Bangladesh",
+      "South Africa"
+    ],
+    "split_by_subregion_metric": 3,
+    "n_split_geometries": 0,
+    "repair_passes": 2,
+    "ring_used": 20,
+    "empty_core": 46,
+    "enclosed": 1,
+    "regions_correct": "156/176",
+    "wall_s": 41.4,
+    "Malaysia": {
+      "tiles": 3,
+      "blocks": 1
+    },
+    "Indonesia": {
+      "tiles": 21,
+      "blocks": 3
+    },
+    "New Zealand": {
+      "tiles": 1,
+      "blocks": 1
+    },
+    "United States of America": {
+      "tiles": 26,
+      "blocks": 1
+    }
+  },
+  "morph=False/subregions": {
+    "split_single_part": 3,
+    "which_single_part": [
+      "Bangladesh",
+      "Poland",
+      "South Africa"
+    ],
+    "split_by_subregion_metric": 7,
+    "n_split_geometries": 3,
+    "repair_passes": 2,
+    "ring_used": 21,
+    "empty_core": 47,
+    "enclosed": 1,
+    "regions_correct": "157/176",
+    "wall_s": 40.3,
+    "Malaysia": {
+      "tiles": 3,
+      "blocks": 2
+    },
+    "Indonesia": {
+      "tiles": 21,
+      "blocks": 4
+    },
+    "New Zealand": {
+      "tiles": 1,
+      "blocks": 1
+    },
+    "United States of America": {
+      "tiles": 26,
+      "blocks": 1
+    }
+  }
+}

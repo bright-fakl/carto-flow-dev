@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #39: Raise when a symbol-cartogram layout does not honour group_by</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #39: Raise when a symbol-cartogram layout does not honour group_by</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/39">https://github.com/bright-fakl/carto-flow/pull/39</a></dd>
+<dt>Branch</dt><dd>fix/group-by-unsupported-error</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-22</dd>
+<dt>After</dt><dd>e562d14 (merged)</dd>
+</dl>
+<p class="desc">No figures - this is a behaviour change with no visual output. group_by on the grid and physics layouts now raises instead of silently placing symbols as if no grouping had been given.</p>
+<h2>No figures, and why</h2>
+<p>There is nothing to render. The change does not move a symbol: every configuration that produced a plot before still produces the identical plot. What changed is that two configurations which used to produce a plot now raise <code>ValueError</code> instead, because the plot they produced was misleading. A before/after figure pair would be &quot;a cartogram&quot; next to &quot;a traceback&quot;.</p>
+<p>The evidence is therefore written, not drawn: the audit below, and the error and warning text as they landed.</p>
+<h2>The defect</h2>
+<p><code>prepare_layout_data</code> sets <code>group_ids_G</code> when the user passes <code>group_by</code>. <code>GridBasedLayout</code> and <code>CirclePhysicsLayout</code> never read it - grid passes <code>group_ids</code> into the <code>LayoutResult</code> constructor for labelling only, physics does not reference the grouping at all. The user got a plausible-looking cartogram in which <code>group_by</code> had no effect on placement.</p>
+<h2>Audit of all layouts</h2>
+<p>Verified against the merged tree, not only the PR description:</p>
+<table>
+<tr><th>Layout</th><th>Honours <code>group_by</code></th><th>Evidence in the merged tree</th></tr>
+<tr><td><code>mosaic</code></td><td>yes</td><td><code>group_ids_G</code> drives region blocks, contiguity scoring, swap repair</td></tr>
+<tr><td><code>centroid</code></td><td>yes</td><td><code>group_attraction</code>, default <code>0.15</code>, pulls group members together</td></tr>
+<tr><td><code>packing</code></td><td>only when enabled</td><td><code>group_weight</code> group-centroid force, default <code>0.0</code> (inert)</td></tr>
+<tr><td><code>flow_density</code></td><td>only when enabled</td><td><code>cross_group_pull_scale</code>, default <code>1.0</code> (no distinction)</td></tr>
+<tr><td><code>grid</code></td><td>no</td><td>one <code>group_ids</code> reference, in the result constructor</td></tr>
+<tr><td><code>physics</code></td><td>no</td><td>no group reference at all</td></tr>
+</table>
+<p><code>topology</code> is a registered alias of <code>packing</code>.</p>
+<h2>Mechanism</h2>
+<ul><li><code>Layout</code> gains <code>supports_group_by: ClassVar[bool] = False</code>.</li><li><code>Layout.compute</code> becomes a template method: it checks the flag (from</li></ul>
+<p><code>data.group_ids_G is not None</code>), then delegates to a new abstract <code>_compute</code> that subclasses implement. A layout instance called directly therefore cannot bypass the check - there is no unvalidated entry point left.</p>
+<ul><li><code>create_layout</code> runs the same <code>check_group_by_support</code> as soon as the layout</li></ul>
+<p>string is resolved, so the error is raised before any preprocessing work.</p>
+<ul><li>The list of supporting layouts in the message is derived from the registry</li></ul>
+<p>(<code>group_by_layouts()</code>, aliases dropped), so it cannot drift from the flags.</p>
+<p>``<code> ValueError: Layout GridBasedLayout does not support group_by: it would ignore the grouping and place symbols as if it were absent. Layouts that honour group_by: centroid, flow_density, mosaic, packing. Drop group_by or use one of those layouts. </code>``</p>
+<h2>Inert-default warning</h2>
+<p><code>packing</code> and <code>flow_density</code> read the grouping only through an option that defaults to a no-op. At those defaults <code>group_by</code> is accepted and changes nothing - the same defect as grid, just quieter. Both now emit a <code>UserWarning</code> through a <code>_inert_group_by_warning</code> hook on <code>Layout</code>, called from the same template method, naming the option to set:</p>
+<ul><li>packing: <code>group_weight is 0.0</code> - set e.g. <code>CirclePackingLayout(group_weight=0.5)</code></li><li>flow_density: <code>cross_group_pull_scale is 1.0</code> - set it below 1.0</li></ul>
+<p>Centroid and mosaic inherit the default no-op hook and never warn. The shipped grouped presets set the options, so they stay silent too.</p>
+<h2>The documentation example that did nothing</h2>
+<p><code>docs/reference/symbol_cartogram/index.md</code> carried</p>
+<p>``<code>python result = create_symbol_cartogram(gdf, size=&quot;population&quot;, group_by=&quot;region&quot;) </code>``</p>
+<p>with no <code>layout=</code>, and the default is <code>layout=&quot;physics&quot;</code>. So the documented way to use <code>group_by</code> was one of the two layouts that ignored it entirely. The example now passes <code>layout=&quot;packing&quot;</code> and names the layouts that honour the grouping. Under the new check the old line would raise.</p>
+<h2>Breaking change for 2.0</h2>
+<p>Any caller passing <code>group_by</code> with <code>grid</code> or <code>physics</code> now raises where it previously ran. That is the intent - the previous result was wrong in a way the user could not see - but it is a hard break, not a deprecation.</p>
+<p>**Accepted consequence.** <code>collapse_group</code> acts on starting positions inside <code>prepare_layout_data</code> (<code>if collapse_group &gt; 0 and group_ids is not None</code>), so it used to reach every layout, grid and physics included. Since <code>check_group_by_support</code> now fires in <code>create_layout</code> *before* preprocessing, <code>group_by</code> + <code>collapse_group</code> + grid/physics is closed off. Collapsing the starting positions of a grouping the layout then ignores was a thin use case, and the alternative - allowing <code>group_by</code> through when <code>collapse_group &gt; 0</code> - would reintroduce exactly the silent-no-effect surface the PR removes.</p>
+<p><code>tile_count</code> is unaffected: it leaves <code>group_ids_G</code> as <code>None</code>, so the check stays silent.</p>
+<h2>Tests</h2>
+<p><code>tests/test_symbol_cartogram_group_by_support.py</code> (new, 193 lines): each non-supporting layout raises via both <code>create_layout</code> and <code>compute</code>, the message names the supporting layouts, supporting layouts never raise, and the check stays silent with no <code>group_by</code> and with <code>tile_count</code>. The inert-grouping warning fires for packing and flow_density at their defaults, and is silent once the option is set, without <code>group_by</code>, and for both grouped presets.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

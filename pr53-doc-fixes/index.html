@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #53: Fix documentation examples that never ran and prose that is no longer true</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #53: Fix documentation examples that never ran and prose that is no longer true</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/53">https://github.com/bright-fakl/carto-flow/pull/53</a></dd>
+<dt>Branch</dt><dd>docs/fix-broken-docs</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-24 00:28</dd>
+<dt>Before</dt><dd>origin/main @ b9794bb</dd>
+<dt>After</dt><dd>docs/fix-broken-docs @ bedc517</dd>
+<dt>Inputs</dt><dd>states (bundled US census)</dd>
+</dl>
+<p class="desc">Six documentation defects — two examples that cannot execute, two inert-grouping warnings that render into the published pages, and explanation prose written as decision history or one-off result figures.</p>
+<h2>What changed</h2>
+<p>Only one item changes rendered output: the <code>group_by</code> cell in <code>docs/how-to/tile-count-maps.ipynb</code>. The figures above are that cell&#x27;s plot, built from the same styling code on both sides.</p>
+<p>The other five items change text, imports or parameter values that were wrong:</p>
+<table>
+<tr><th>Item</th><th>File</th><th>Defect</th></tr>
+<tr><td>1</td><td><code>docs/reference/symbol_cartogram/index.md</code></td><td><code>preset_tile_map</code> does not exist; presets return a <code>SymbolCartogram</code>, not a kwargs dict</td></tr>
+<tr><td>2</td><td><code>docs/explanations/symbol-cartogram-circle-packing.md</code></td><td>import from <code>symbol_cartogram.placement</code>, a module that does not exist</td></tr>
+<tr><td>3</td><td><code>docs/how-to/tile-count-maps.ipynb</code></td><td>inert <code>group_by</code>; warning in the page, prose false</td></tr>
+<tr><td>4</td><td><code>docs/reference/symbol_cartogram/index.md</code></td><td>same inert <code>group_by</code></td></tr>
+<tr><td>5</td><td><code>docs/explanations/symbol-cartogram-mosaic-layout.md</code></td><td>history and result figures in an explanation; two undocumented behaviors</td></tr>
+<tr><td>6</td><td><code>docs/explanations/symbol-cartogram-pipeline.md</code></td><td>inert-grouping warnings undocumented</td></tr>
+<tr><td>7</td><td><code>docs/explanations/symbol-cartogram-circle-packing.md</code></td><td>how the force weights relate was undocumented; the group force was missing from the force-component list</td></tr>
+</table>
+<h2>Reading the figures</h2>
+<p>Grouping is on in the &quot;after&quot; figure, so the effect to look for is placement, not color or shape — those are identical on both sides.</p>
+<p>With <code>group_weight=0.5</code> each cluster closes up a little: the West diamonds sit in a tighter diagonal band, the Midwest squares pack into a block rather than a loose row, and the seam between Midwest and South is cleaner. Overall geographic arrangement is preserved — the map still reads as the United States, Alaska and Hawaii still sit off to the west — so the grouping pull is not fighting the origin attraction at this weight.</p>
+<p>Nothing about the result looks worse. The change is modest, and the reason is now documented rather than left for the reader to guess: the neighbor force already holds contiguous groups together, and it is summed over each region&#x27;s neighbors while the group pull is applied once per symbol, so a <code>group_weight</code> numerically equal to <code>neighbor_weight</code> is the weaker of the two by roughly the mean neighbor count. On US states that mean is about 4.5 (range 1 to 8), so <code>group_weight=0.5</code> against the default <code>neighbor_weight=1.0</code> is close to a 1:9 contest. It is enough to make the narrative true; it is not enough to rearrange the map, which is the right trade for a how-to whose subject is styling rather than placement.</p>
+<p>The amplification depends on the adjacency values, not on the force: under <code>adjacency_mode=WEIGHTED</code> or <code>AREA_WEIGHTED</code> the pair weights sum to about 1 per region and the pair forces land back on the same scale as the per-circle ones.</p>
+<h2>Verification</h2>
+<ul><li>Notebook executed with nbclient (<code>kernel_name=&quot;python3&quot;</code>, <code>allow_errors=False</code>):</li></ul>
+<p>no errors, and no <code>UserWarning</code> in any cell output.</p>
+<ul><li>Each changed code block executed against the bundled US census dataset.</li><li><code>uv run mkdocs build -s</code>, <code>docs/generated/</code> deleted first.</li><li><code>make check</code> clean, 712 tests pass.</li></ul>
+<div class="figure">
+<img src="after.png" alt="After: `layout=sym.CirclePackingLayout(group_weight=0.5)`. No warning, and same-region states are actually drawn together.">
+<p class="caption">After: <code>layout=sym.CirclePackingLayout(group_weight=0.5)</code>. No warning, and same-region states are actually drawn together.</p>
+</div><div class="figure">
+<img src="before.png" alt="Before: `create_layout(..., group_by=&quot;Region&quot;, layout=&quot;topology&quot;)`. `group_weight` defaults to 0.0, so the grouping never reaches placement and the layout warns. The symbol shapes are grouped; the positions are not.">
+<p class="caption">Before: <code>create_layout(..., group_by=&quot;Region&quot;, layout=&quot;topology&quot;)</code>. <code>group_weight</code> defaults to 0.0, so the grouping never reaches placement and the layout warns. The symbol shapes are grouped; the positions are not.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

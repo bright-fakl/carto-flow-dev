@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flow cartogram performance, 1.1.2 against 2.0.0</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Flow cartogram performance, 1.1.2 against 2.0.0</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">reviewed</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Date</dt><dd>2026-09-25 01:30</dd>
+<dt>Before</dt><dd>1.1.2 (tag, 2026-03-13)</dd>
+<dt>After</dt><dd>main @ 443529a</dd>
+<dt>Inputs</dt><dd>contiguous US states from the bundled census snapshot, exported once to WKB and fed to both versions</dd>
+</dl>
+<p class="desc">One-off comparison for the 2.0.0 release. The flow morph is 3.5x to 11.6x faster than 1.1.2 depending on grid size, with identical iteration counts.</p>
+<p>No figures: the output geometry is unchanged, so before and after images would be identical. The measurement is the result.</p>
+<h2>Why this was run</h2>
+<p><code>docs/explanations/performance.ipynb</code> reports one benchmark run and has no history, so it cannot answer &quot;did 2.0.0 make the flow cartogram faster&quot;. The published results also predated the release work by six months. This is a one-off measurement for the release; no harness was committed, because a cross-version harness rots the moment <code>MorphOptions</code> changes and nobody would notice until it was needed.</p>
+<h2>Method</h2>
+<p><code>MorphOptions</code> gained three fields in 2.0.0 (<code>benchmark</code>, <code>parallel_density</code>, <code>parallel_fft</code>) and lost none, so both versions accept the same call. Both parallel flags default to <code>False</code>, so this compares serial execution.</p>
+<p>Contiguous US states were exported once from the bundled census snapshot to WKB and loaded by both versions, bypassing <code>load_us_census</code>: at 1.1.2 that function required <code>censusdis</code>, a Census API key and network access, and would have fed each version different geometry.</p>
+<p><code>morph_geometries(geoms, values, options=MorphOptions(n_iter=200, grid_size=&lt;grid&gt;, show_progress=False))</code>. Four runs per configuration, the first discarded for numba compilation, best of the remaining three. Same machine, same session, AMD Ryzen 7 5825U under WSL2.</p>
+<h2>Grid-size sweep, 34,510 vertices</h2>
+<table>
+<tr><th>grid</th><th>1.1.2</th><th>2.0.0</th><th>speedup</th><th>iterations, both</th></tr>
+<tr><td>128</td><td>0.438 s</td><td>0.125 s</td><td>3.5x</td><td>63</td></tr>
+<tr><td>256</td><td>1.129 s</td><td>0.212 s</td><td>5.3x</td><td>113</td></tr>
+<tr><td>512</td><td>4.848 s</td><td>0.487 s</td><td>10.0x</td><td>200</td></tr>
+<tr><td>1024</td><td>16.618 s</td><td>1.434 s</td><td>11.6x</td><td>200</td></tr>
+</table>
+<p>**Iteration counts are identical at every grid size.** <code>morph_geometries</code> stops early once its error tolerances are met, so this had to be checked: without it a wall-clock comparison could be measuring convergence behavior rather than speed. 63, 113, 200, 200 in both versions means the two follow the same convergence path and stop at the same point. The numerics did not change; the work per iteration got cheaper.</p>
+<h2>Vertex-count check</h2>
+<table>
+<tr><th>geometry</th><th>vertices</th><th>1.1.2</th><th>2.0.0</th><th>speedup</th></tr>
+<tr><td>states</td><td>34,510</td><td>1.234 s</td><td>0.208 s</td><td>5.9x</td></tr>
+<tr><td>states, segmentized at 500 m</td><td>241,290</td><td>1.321 s</td><td>0.499 s</td><td>2.6x</td></tr>
+</table>
+<p>Run at the default grid size of 256.</p>
+<h2>What the shape of the result says</h2>
+<p>The speedup grows with grid size (3.5x at 128 to 11.6x at 1024) and shrinks with vertex count (5.9x at 34k vertices to 2.6x at 241k). Both point the same way: the optimization is in the per-cell grid work — density rasterization and the FFT solve — rather than in per-vertex advection.</p>
+<p>Practically, the larger the grid the more 2.0.0 helps. At 1024, where 1.1.2 took nearly 17 seconds, 2.0.0 takes 1.4.</p>
+<h2>Caveats</h2>
+<p>Measured on one workstation, not on CI, so these numbers are not comparable with <code>benchmark_results.json</code>, which is measured on a GitHub runner. One input shape (contiguous US states) at one <code>n_iter</code>. Serial only.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #70: Correct the TestPyPI verification command in RELEASING.md</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #70: Correct the TestPyPI verification command in RELEASING.md</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/70">https://github.com/bright-fakl/carto-flow/pull/70</a></dd>
+<dt>Branch</dt><dd>fix/releasing-testpypi-command</dd>
+<dt>Base</dt><dd>origin/main @ c5e4d29</dd>
+<dt>Date</dt><dd>2026-09-27 18:40</dd>
+<dt>Before</dt><dd>origin/main @ c5e4d29</dd>
+<dt>After</dt><dd>fix/releasing-testpypi-command</dd>
+<dt>Inputs</dt><dd>carto-flow 2.0.0rc1 as published to TestPyPI, installed into a clean Python 3.10 venv</dd>
+</dl>
+<p class="desc">Running the documented command against the real 2.0.0-rc1 found three faults, the worst of which silently installed 1.1.2 and verified the previous release while appearing to pass.</p>
+<p>No figures. The change is documentation, verified by executing the command it documents.</p>
+<h2>How the faults were found</h2>
+<p>The command was executed for real against <code>2.0.0rc1</code> on TestPyPI, as part of the release-candidate verification, rather than reviewed by reading. All three faults share a failure mode: the check does not fail loudly, it passes while testing the wrong thing or fails for a reason that looks unrelated.</p>
+<h2>Fault 1 - no version pin</h2>
+<p>TestPyPI carries <code>1.0.0</code>, <code>1.1.1</code>, <code>1.1.2</code> and now <code>2.0.0rc1</code>. The unpinned command installed **1.1.2**:</p>
+<p>``<code> version   : 1.1.2 load_sample_cities            243 rows ImportError: The &#x27;censusdis&#x27; package is required for loading US Census data </code>``</p>
+<p>The verification would have reported the previous release as working and said nothing about the release candidate. The <code>ImportError</code> is itself informative: on 1.1.2 <code>load_us_census</code> needs <code>censusdis</code>, whereas on 2.0.0 the bundled snapshot removes that requirement, so the two versions are clearly distinguishable - and the check was looking at the wrong one.</p>
+<p>The pin is written PEP 440 style: the git tag <code>2.0.0-rc1</code> normalizes to the version <code>2.0.0rc1</code>.</p>
+<h2>Fault 2 - missing index strategy</h2>
+<p><code>--index-strategy unsafe-best-match</code> is required. By default uv takes every version of a package from the first index that offers it, to avoid dependency confusion attacks. With TestPyPI listed first, dependency resolution fails once both indexes carry part of the tree. Pinning the version without the flag fails outright:</p>
+<p>``<code> ModuleNotFoundError: No module named &#x27;carto_flow&#x27; </code>``</p>
+<h2>Fault 3 - uv run without --no-project</h2>
+<p>Without <code>--no-project</code>, <code>uv run</code> picks up the repository&#x27;s own environment, so <code>import carto_flow</code> can resolve against local source rather than the installed wheel. The existing <code>cd /tmp</code> was necessary but not sufficient on its own.</p>
+<h2>Verification of the corrected command</h2>
+<p>``<code> version   : 2.0.0-rc1 location  : /tmp/.../tpypi3/lib/python3.10/site-packages/carto_flow/__init__.py load_sample_cities            243 rows load_us_census                 49 rows load_us_covid_weekly         9184 rows load_us_state_population     6290 rows load_us_states                 51 rows load_world                    177 rows subpackage imports: ok </code>``</p>
+<p>The resolved path confirms the installed wheel was used. <code>load_us_census</code> returning 49 rows with no <code>censusdis</code> present confirms the bundled census snapshot reached the wheel.</p>
+<h2>What this establishes about 2.0.0rc1</h2>
+<p>Beyond the documentation fix, executing the corrected command validated the release candidate itself: the metadata was accepted by the index, trusted publishing over OIDC worked on its first ever use, dependency resolution succeeds from a clean environment, and every bundled dataset loads from the published artifact.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

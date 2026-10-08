@@ -1,0 +1,15 @@
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+{'case': 'africa', 'budget': 150, 'morph': True, 'dropped': [], 'short': [], 'elapsed': 1.454441616020631}
+{'case': 'africa', 'budget': 150, 'morph': False, 'dropped': [], 'short': [], 'elapsed': 0.22068487596698105}
+wrote /home/fakl/carto-flow/visual_checks/mosaic-world-islands/fig_africa_b150.png
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+{'case': 'world', 'budget': 384, 'morph': True, 'dropped': ['Bahamas', 'Timor-Leste', 'North Korea', 'Bhutan', 'Belgium', 'Trinidad and Tobago'], 'short': ['South Korea', 'Germany'], 'elapsed': 3.435170380049385}
+{'case': 'world', 'budget': 384, 'morph': False, 'dropped': ['Fiji', 'Bahamas', 'Falkland Is.', 'Fr. S. Antarctic Lands', 'Puerto Rico', 'Jamaica', 'Mauritania', 'Vanuatu', 'New Caledonia', 'Solomon Is.', 'Taiwan', 'N. Cyprus', 'Cyprus', 'Trinidad and Tobago'], 'short': ['Indonesia', 'Bangladesh', 'Poland', 'Germany'], 'elapsed': 3.537977764965035}
+wrote /home/fakl/carto-flow/visual_checks/mosaic-world-islands/fig_world_b384.png
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (242810.8 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+{'case': 'world_mainland', 'budget': 384, 'morph': True, 'dropped': [], 'short': [], 'elapsed': 2.0408485869993456}
+{'case': 'world_mainland', 'budget': 384, 'morph': False, 'dropped': [], 'short': [], 'elapsed': 2.034562331973575}
+wrote /home/fakl/carto-flow/visual_checks/mosaic-world-islands/fig_world_mainland_b384.png

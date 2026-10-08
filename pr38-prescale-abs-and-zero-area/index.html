@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #38: Fix pre-scale sign handling, zero-area collapse, and the zero-tile-count mosaic crash</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #38: Fix pre-scale sign handling, zero-area collapse, and the zero-tile-count mosaic crash</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/38">https://github.com/bright-fakl/carto-flow/pull/38</a></dd>
+<dt>Branch</dt><dd>fix/prescale-abs-and-zero-area</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-21</dd>
+<dt>Before</dt><dd>origin/main @ af417b6</dd>
+<dt>After</dt><dd>fix/prescale-abs-and-zero-area @ 709b8f8</dd>
+<dt>Inputs</dt><dd>synthetic 3-4 cell grids (unit squares), a genuinely isolated zero-value/zero-tile-count &quot;island&quot; geometry, and small mixed-sign/net-negative/all-zero value arrays</dd>
+</dl>
+<p class="desc">Pre-scaling used raw signed data values (a component like [5, -5] summed to zero and was silently skipped); prescale_connected_components now handles all five current/target-area cases explicitly, including an exact zero-area collapse for genuinely zero-data components and a guard against ZeroDivisionError for all-zero datasets. Also fixes a MosaicLayout crash on an isolated zero-tile-count geometry (morph=False), and replaces shapely&#x27;s internal error with an actionable message for Point-geometry input.</p>
+
+<div class="figure">
+<img src="collapse_before_after.png" alt="A 3-cell mainland (pop 4, 5, 3) plus an isolated zero-population island (g3), size=&quot;pop&quot;, pre_scale toggled. Before: all 4 geometries keep their original unit-square area (total 4.0000). After: the mainland grows to fill the island&#x27;s freed share while g3 collapses to an exact zero-area Polygon (is_valid == False, not shown as a filled shape since it has no area) — the total area is preserved exactly (4.0000 both sides).">
+<p class="caption">A 3-cell mainland (pop 4, 5, 3) plus an isolated zero-population island (g3), size=&quot;pop&quot;, pre_scale toggled. Before: all 4 geometries keep their original unit-square area (total 4.0000). After: the mainland grows to fill the island&#x27;s freed share while g3 collapses to an exact zero-area Polygon (is_valid == False, not shown as a filled shape since it has no area) — the total area is preserved exactly (4.0000 both sides).</p>
+</div><div class="figure">
+<img src="mixed_sign_area.png" alt="Three 2-geometry components run through prescale_connected_components with abs(values). Mixed-sign [5, -5] (naive signed sum 0) and net-negative [-10, 4] (naive signed sum -6) both keep their full area after prescaling — abs() treats them as real, nonzero data (5+5=10 and 10+4=14 respectively), not as zero data. All-zero [0, 0] correctly collapses to zero area — that is the only case with no data to preserve.">
+<p class="caption">Three 2-geometry components run through prescale_connected_components with abs(values). Mixed-sign [5, -5] (naive signed sum 0) and net-negative [-10, 4] (naive signed sum -6) both keep their full area after prescaling — abs() treats them as real, nonzero data (5+5=10 and 10+4=14 respectively), not as zero data. All-zero [0, 0] correctly collapses to zero area — that is the only case with no data to preserve.</p>
+</div><div class="figure">
+<img src="mosaic_zero_tile_fix.png" alt="A 4-cell mainland (tile counts 4, 5, 3, 6) plus an isolated geometry with tile_count=0 (its own geographic component, no neighbours), run through MosaicLayout(morph=False). Before this fix that raised ValueError: zero-size array to reduction operation maximum which has no identity (the isolated component&#x27;s Hungarian cost matrix had zero rows since it needed zero tile slots). After: the mosaic assignment succeeds, the isolated island correctly gets 0 tiles (shown as an empty box, top right), and the mainland&#x27;s 18 tiles are assigned normally.">
+<p class="caption">A 4-cell mainland (tile counts 4, 5, 3, 6) plus an isolated geometry with tile_count=0 (its own geographic component, no neighbours), run through MosaicLayout(morph=False). Before this fix that raised ValueError: zero-size array to reduction operation maximum which has no identity (the isolated component&#x27;s Hungarian cost matrix had zero rows since it needed zero tile slots). After: the mosaic assignment succeeds, the isolated island correctly gets 0 tiles (shown as an empty box, top right), and the mainland&#x27;s 18 tiles are assigned normally.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+states_uniform     morph=0:   1 solve(s)  max passes run=2  IDENTICAL
+states_uniform     morph=1:   1 solve(s)  max passes run=2  IDENTICAL
+states_uniform_sq  morph=0:   1 solve(s)  max passes run=3  IDENTICAL
+states_uniform_sq  morph=1:   1 solve(s)  max passes run=2  IDENTICAL
+states             morph=0:   1 solve(s)  max passes run=4  IDENTICAL
+states             morph=1:   1 solve(s)  max passes run=2  IDENTICAL
+districts          morph=0:   1 solve(s)  max passes run=4  IDENTICAL
+districts          morph=1:   1 solve(s)  max passes run=2  IDENTICAL
+world              morph=0:  12 solve(s)  max passes run=2  IDENTICAL
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+world              morph=1:  21 solve(s)  max passes run=2  IDENTICAL
+
+worst passes run over all inputs = 4 (cap allows 6)

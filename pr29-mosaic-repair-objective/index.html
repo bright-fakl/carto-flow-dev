@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #29: Score mosaic connectivity repair by split regions, not disconnected tiles</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #29: Score mosaic connectivity repair by split regions, not disconnected tiles</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/29">https://github.com/bright-fakl/carto-flow/pull/29</a></dd>
+<dt>Branch</dt><dd>fix/mosaic-repair-objective</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-18</dd>
+<dt>Before</dt><dd>origin/main @ 51cfe31</dd>
+<dt>After</dt><dd>fix/mosaic-repair-objective @ 76cc3ca</dd>
+<dt>Inputs</dt><dd>US states (bundled, tile_count ~ Population, 154 tiles), congressional districts (bundled, 1 tile each, group_by=State Name), 3x3 synthetic fixture</dd>
+</dl>
+<p class="desc">The mosaic repair loop ranked passes by disconnected tiles, which is not monotone in split regions; it now ranks by split regions with the tile score as tie-breaker. US states go from 9 split states to 2.</p>
+<h2>What to look for</h2>
+<p>Tiles are coloured one colour per region (<code>tab20</code> + <code>tab20b</code> + <code>tab20c</code>, 60 distinct colours); districts are coloured by their state. A region whose tiles form more than one block is outlined in black, hatched, and labelled with its name.</p>
+<p>In <code>states_before_after.png</code> the left panel has nine hatched states, several of them badly scattered (California, Texas, Colorado). The right panel has two, both of which are already split in the raw Hungarian solve.</p>
+<h2>Numbers</h2>
+<table>
+<tr><th>Case</th><th>Regions correct</th><th>Non-contiguous regions</th><th>Split groups</th><th>Repair passes</th><th>Wall time</th></tr>
+<tr><td>3x3 synthetic fixture</td><td>9/9 - 9/9</td><td>2 - 2</td><td>-</td><td>15 - 2</td><td>0.07 s - 0.06 s</td></tr>
+<tr><td>US states (154 tiles)</td><td>49/49 - 49/49</td><td>9 - **2**</td><td>-</td><td>15 - 2</td><td>3.07 s - 1.98 s</td></tr>
+<tr><td>Districts (1 tile each)</td><td>432/432 - 432/432</td><td>0 - 0</td><td>-</td><td>15 - 3</td><td>5.36 s - 5.14 s</td></tr>
+<tr><td>Districts + <code>group_by</code></td><td>432/432 - 432/432</td><td>0 - 0</td><td>14 - 14</td><td>15 - 2</td><td>5.35 s - 4.99 s</td></tr>
+</table>
+<p>(Each cell reads &quot;before - after&quot;.)</p>
+<p>Before, US states split Alabama, California, Colorado, Connecticut, Georgia, Michigan, New Jersey, North Carolina and Texas. After, Michigan and Washington. The after set is not a subset of the before set: Washington splits in the raw solve that is now kept.</p>
+<p>&quot;Repair passes&quot; is the new <code>MosaicMetrics.repair_passes</code> for the after column; before, the loop always ran to the <code>max_connectivity_iters</code> cap of 15 (+1 initial solve) because it kept finding a better tile score.</p>
+<div class="figure">
+<img src="districts_group_by_after.png" alt="Districts + group_by, branch, one colour per state.">
+<p class="caption">Districts + group_by, branch, one colour per state.</p>
+</div><div class="figure">
+<img src="districts_group_by_before.png" alt="Districts + group_by, origin/main, one colour per state.">
+<p class="caption">Districts + group_by, origin/main, one colour per state.</p>
+</div><div class="figure">
+<img src="districts_group_by_before_after.png" alt="Congressional districts grouped by state: unchanged at 14 of 48 split states, shown to confirm no regression.">
+<p class="caption">Congressional districts grouped by state: unchanged at 14 of 48 split states, shown to confirm no regression.</p>
+</div><div class="figure">
+<img src="states_after.png" alt="US states, branch, one colour per state.">
+<p class="caption">US states, branch, one colour per state.</p>
+</div><div class="figure">
+<img src="states_before.png" alt="US states, origin/main, one colour per state.">
+<p class="caption">US states, origin/main, one colour per state.</p>
+</div><div class="figure">
+<img src="states_before_after.png" alt="US states: split states outlined, hatched and labelled. 9 of 49 before, 2 of 49 after (Michigan and Washington remain).">
+<p class="caption">US states: split states outlined, hatched and labelled. 9 of 49 before, 2 of 49 after (Michigan and Washington remain).</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

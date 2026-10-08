@@ -1,0 +1,50 @@
+[
+  {
+    "case": "fixture",
+    "split": [
+      "R0",
+      "R2"
+    ],
+    "n_split": 2,
+    "wall_s": 0.07
+  },
+  {
+    "case": "states",
+    "split": [
+      "Michigan",
+      "Washington"
+    ],
+    "n_split": 2,
+    "wall_s": 3.04
+  },
+  {
+    "case": "districts_group_by",
+    "split": [
+      "Alabama",
+      "Arizona",
+      "California",
+      "Florida",
+      "Louisiana",
+      "Massachusetts",
+      "Michigan",
+      "Mississippi",
+      "New Hampshire",
+      "New Jersey",
+      "New Mexico",
+      "New York",
+      "Tennessee",
+      "Virginia"
+    ],
+    "n_split": 14,
+    "wall_s": 5.01
+  },
+  {
+    "case": "michigan",
+    "blocks": 2
+  },
+  {
+    "case": "holes",
+    "n_holes": 0,
+    "n_unassigned_core": 5
+  }
+]

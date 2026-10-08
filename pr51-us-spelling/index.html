@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #51: Use US spelling in prose throughout src/ and docs/</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #51: Use US spelling in prose throughout src/ and docs/</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/51">https://github.com/bright-fakl/carto-flow/pull/51</a></dd>
+<dt>Branch</dt><dd>spelling-us</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-23 15:37</dd>
+</dl>
+<p class="desc">British spellings converted to US in docstrings, comments, Markdown and notebook Markdown cells. Prose only — no identifier, kwarg or API value changed.</p>
+<p>**No figures, by nature of the change.** Nothing that renders is affected: no plotting default, color value, layout parameter or algorithm constant was touched, so a before/after figure pair would be bit-identical by construction. The evidence carried here is textual instead — the token-level scan that proves no identifier moved, plus the full build and test record.</p>
+<h2>What changed</h2>
+<p>246 occurrences across 47 files, all of them inside docstrings, comments, Markdown, or notebook Markdown cells.</p>
+<table>
+<tr><th>term</th><th>n</th><th></th><th>term</th><th>n</th></tr>
+<tr><td><code>colour*</code></td><td>102</td><td></td><td><code>grey</code></td><td>7</td></tr>
+<tr><td><code>neighbour*</code></td><td>47</td><td></td><td><code>serialis*</code></td><td>5</td></tr>
+<tr><td><code>normalis*</code></td><td>31</td><td></td><td><code>honour*</code></td><td>4</td></tr>
+<tr><td><code>centre*</code></td><td>13</td><td></td><td><code>initialis*</code></td><td>4</td></tr>
+<tr><td><code>behaviour*</code></td><td>12</td><td></td><td><code>artefact</code></td><td>3</td></tr>
+<tr><td><code>visualis*</code></td><td>9</td><td></td><td><code>analyse*</code></td><td>3</td></tr>
+<tr><td><code>labelled</code></td><td>2</td><td></td><td><code>minimis</code>, <code>optimis</code>, <code>prioritis</code>, <code>summaris</code></td><td>1 each</td></tr>
+</table>
+<p>The starting estimate of 226 was low: it missed <code>grey</code> (7), <code>honour*</code> (4), <code>initialis*</code> (4), <code>serialis*</code> (5) and <code>minimis*</code> (1), and counted <code>normalis*</code> as 30 rather than 31.</p>
+<p>Searched for and found **zero** occurrences of: <code>licence</code>, <code>defence</code>, <code>practise</code>, <code>modelling</code>, <code>travelling</code>, <code>cancelled</code>, <code>judgement</code>, <code>organis*</code>, <code>recognis*</code>, <code>utilis*</code>, <code>maximis*</code>, <code>specialis*</code>, <code>standardis*</code>, <code>catalogue</code>, <code>dialogue</code>, <code>programme</code>, <code>flavour</code>, <code>favour</code>, <code>armour</code>, <code>archaeo*</code>. <code>analysis</code>/<code>analyses</code> (the noun) is US-correct and was left alone; only the verb forms <code>analyse</code>/<code>Analyse</code>/<code>analyses</code> (3) were changed.</p>
+<h2>Why no identifier could break</h2>
+<p>A tokenize pass over every <code>.py</code> file in <code>src/</code> and <code>docs/</code> listed every token containing a British spelling that was **not** a <code>COMMENT</code> or <code>STRING</code> token. The result was empty: there is no British-spelled name, attribute, parameter or import anywhere in the tracked source. The edit script then applied replacements only inside <code>COMMENT</code> and <code>STRING</code> token spans, so a name could not have been rewritten even if one had existed.</p>
+<p>Markdown was checked the same way: every inline `<code> </code>code<code> </code><code> span in </code>docs/<code> was extracted and searched — none contained a British spelling (the API names in the mosaic explanation are already </code>neighbor_weight<code>, </code>neighbor_bfs<code>). Every fenced-code hit was a </code>#` comment inside the block.</p>
+<h2>Deliberately left alone</h2>
+<ul><li>**All identifiers, everywhere.** <code>neighbor_weight</code>, <code>neighbor_bfs</code>,</li></ul>
+<p><code>size_normalization</code>, <code>normalization</code>, <code>penalize_disconnected</code>, <code>edgecolor</code>, <code>facecolor</code>, <code>colormap</code>, <code>color=</code> kwargs in examples. Renaming any of these is a breaking API change, not a spelling fix.</p>
+<ul><li>**<code>emphasis</code>** (1, <code>docs/tutorials/basic-proportional-cartogram.ipynb</code>) —</li></ul>
+<p>already correct US English, not a British form.</p>
+<ul><li>**<code>analysis</code> / <code>Analysis</code>** (68) — same.</li><li>**<code>tests/</code>** (~33 occurrences, including local variables named</li></ul>
+<p><code>neighbours</code>) — outside the stated <code>src/</code> + <code>docs/</code> scope. Worth a follow-up; the local variables there are private to the tests, so they could be renamed safely, unlike anything in <code>src/</code>.</p>
+<ul><li>**<code>visual_checks/mosaic-distance-normalisation/</code>** — a directory name in</li></ul>
+<p>this review workspace; renaming it would orphan the built index entry.</p>
+<h2>Judgment calls</h2>
+<p>Ten hits were string literals rather than docstrings or comments. All ten are prose a user reads — error and warning message text, and one plot axis label (<code>&quot;Normalised inertia (relative to group mean)&quot;</code>). They were converted. None is an API value, and a grep over <code>tests/</code> confirmed no test asserts on any of these strings (<code>pytest.raises(match=...)</code> included), so nothing was coupled to the old wording.</p>
+<p>One notebook **code**-cell line was changed: <code>plt.suptitle(&quot;Boundary behaviour — …&quot;)</code> → <code>&quot;Boundary behavior — …&quot;</code> in <code>docs/how-to/voronoi_cartogram/boundaries.ipynb</code>. It is a figure title string, not code behavior.</p>
+<p>One substitution artifact was caught and fixed before committing: a substring rule turned <code>centred</code> into <code>center</code> + <code>d</code>. Two occurrences (<code>flow_cartogram/density.py</code>, <code>symbol_cartogram/symbols.py</code>) were repaired to <code>centered</code>. Every resulting word form was then listed and checked by eye — all 37 distinct forms are valid English.</p>
+<h2>Verification</h2>
+<ul><li><code>make check</code> — clean: pre-commit (ruff check, ruff format, nbstripout, JSON</li></ul>
+<p>and YAML validity), mypy on 82 source files, deptry.</p>
+<ul><li>Full test suite — **712 passed**, 0 failed, in 83 s.</li><li><code>uv run mkdocs build -s</code> — **exit 0**, built in 593 s, no warnings promoted</li></ul>
+<p>to errors.</p>
+<ul><li>All four touched notebooks executed end to end with nbclient,</li></ul>
+<p><code>kernel_name=&quot;python3&quot;</code>, <code>allow_errors=False</code>: <code>boundaries.ipynb</code>, <code>inspect-convergence.ipynb</code>, <code>topology.ipynb</code>, <code>basic-voronoi-cartogram.ipynb</code> — all OK.</p>
+<ul><li>Whole <code>git diff</code> read line by line (234 changed lines) before pushing. No</li></ul>
+<p>changed line contains an assignment, a call argument, or an import.</p>
+<ul><li>Pushed tree re-checked with <code>git show origin/spelling-us:&lt;path&gt;</code> on five</li></ul>
+<p>files, including <code>layouts/mosaic/__init__.py</code>, <code>symbol_cartogram/tiling.py</code> and <code>boundaries.ipynb</code>: zero residual British spellings in each.</p>
+<ul><li>No file under <code>docs/examples/</code> was created or modified.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

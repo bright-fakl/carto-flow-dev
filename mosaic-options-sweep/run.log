@@ -1,0 +1,1504 @@
+[run] states_uniform__morph1__baseline
+[done] states_uniform__morph1__baseline 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__outside_penalty=0.0
+[done] states_uniform__morph1__outside_penalty=0.0 0.8s fp=22582a12070adfea
+[run] states_uniform__morph1__outside_penalty=0.25
+[done] states_uniform__morph1__outside_penalty=0.25 0.8s fp=22582a12070adfea
+[run] states_uniform__morph1__outside_penalty=0.5
+[done] states_uniform__morph1__outside_penalty=0.5 0.8s fp=e37ae50ab070ce51
+[run] states_uniform__morph1__outside_penalty=2.0
+[done] states_uniform__morph1__outside_penalty=2.0 1.0s fp=ab65c701e8dcf18e
+[run] states_uniform__morph1__outside_penalty=4.0
+[done] states_uniform__morph1__outside_penalty=4.0 0.9s fp=7e1c688f35b8d805
+[run] states_uniform__morph1__outside_penalty=10.0
+[done] states_uniform__morph1__outside_penalty=10.0 0.8s fp=f42eb5b97042027f
+[run] states_uniform__morph1__max_connectivity_iters=0
+[done] states_uniform__morph1__max_connectivity_iters=0 0.9s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__max_connectivity_iters=1
+[done] states_uniform__morph1__max_connectivity_iters=1 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__max_connectivity_iters=2
+[done] states_uniform__morph1__max_connectivity_iters=2 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__max_connectivity_iters=5
+[done] states_uniform__morph1__max_connectivity_iters=5 0.9s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__max_connectivity_iters=30
+[done] states_uniform__morph1__max_connectivity_iters=30 0.9s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__disconnected_penalty_mult=0.0
+[done] states_uniform__morph1__disconnected_penalty_mult=0.0 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__disconnected_penalty_mult=1.0
+[done] states_uniform__morph1__disconnected_penalty_mult=1.0 0.9s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__disconnected_penalty_mult=2.0
+[done] states_uniform__morph1__disconnected_penalty_mult=2.0 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__disconnected_penalty_mult=5.0
+[done] states_uniform__morph1__disconnected_penalty_mult=5.0 0.9s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__disconnected_penalty_mult=50.0
+[done] states_uniform__morph1__disconnected_penalty_mult=50.0 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__gap_bridge_mult=0.0
+[done] states_uniform__morph1__gap_bridge_mult=0.0 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__gap_bridge_mult=1.0
+[done] states_uniform__morph1__gap_bridge_mult=1.0 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__gap_bridge_mult=2.0
+[done] states_uniform__morph1__gap_bridge_mult=2.0 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__gap_bridge_mult=20.0
+[done] states_uniform__morph1__gap_bridge_mult=20.0 0.9s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__disconnected_score_weight=0
+[done] states_uniform__morph1__disconnected_score_weight=0 0.9s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__disconnected_score_weight=1
+[done] states_uniform__morph1__disconnected_score_weight=1 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__disconnected_score_weight=10
+[done] states_uniform__morph1__disconnected_score_weight=10 0.9s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__disconnected_score_weight=1000
+[done] states_uniform__morph1__disconnected_score_weight=1000 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__swap_repair_passes=0
+[done] states_uniform__morph1__swap_repair_passes=0 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__swap_repair_passes=1
+[done] states_uniform__morph1__swap_repair_passes=1 0.9s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__swap_repair_passes=2
+[done] states_uniform__morph1__swap_repair_passes=2 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__swap_repair_passes=5
+[done] states_uniform__morph1__swap_repair_passes=5 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__swap_repair_passes=30
+[done] states_uniform__morph1__swap_repair_passes=30 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__ring_swapback_max_hops=0
+[done] states_uniform__morph1__ring_swapback_max_hops=0 0.8s fp=c20252c156d06585
+[run] states_uniform__morph1__ring_swapback_max_hops=1
+[done] states_uniform__morph1__ring_swapback_max_hops=1 0.9s fp=8037bc035ea651df
+[run] states_uniform__morph1__ring_swapback_max_hops=2
+[done] states_uniform__morph1__ring_swapback_max_hops=2 0.8s fp=8037bc035ea651df
+[run] states_uniform__morph1__ring_swapback_max_hops=4
+[done] states_uniform__morph1__ring_swapback_max_hops=4 0.8s fp=e2f48b86c43e2912
+[run] states_uniform__morph1__ring_swapback_max_hops=8
+[done] states_uniform__morph1__ring_swapback_max_hops=8 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__ring_swapback_max_hops=32
+[done] states_uniform__morph1__ring_swapback_max_hops=32 0.8s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__dw0.25_op0.0
+[done] states_uniform__morph1__dw0.25_op0.0 1.0s fp=ce0e0f8281fe428a
+[run] states_uniform__morph1__dw0.25_op0.5
+[done] states_uniform__morph1__dw0.25_op0.5 1.1s fp=cffa59fd7b41ccde
+[run] states_uniform__morph1__dw0.25_op1.0
+[done] states_uniform__morph1__dw0.25_op1.0 1.2s fp=d7b9da3534f0e43e
+[run] states_uniform__morph1__dw0.25_op2.0
+[done] states_uniform__morph1__dw0.25_op2.0 1.3s fp=f97ce5697fbbc303
+[run] states_uniform__morph1__dw0.25_op4.0
+[done] states_uniform__morph1__dw0.25_op4.0 1.3s fp=4b6de42ae1642629
+[run] states_uniform__morph1__dw1.0_op0.0
+[done] states_uniform__morph1__dw1.0_op0.0 1.3s fp=22582a12070adfea
+[run] states_uniform__morph1__dw1.0_op0.5
+[done] states_uniform__morph1__dw1.0_op0.5 1.3s fp=e37ae50ab070ce51
+[run] states_uniform__morph1__dw1.0_op2.0
+[done] states_uniform__morph1__dw1.0_op2.0 1.3s fp=ab65c701e8dcf18e
+[run] states_uniform__morph1__dw1.0_op4.0
+[done] states_uniform__morph1__dw1.0_op4.0 1.3s fp=7e1c688f35b8d805
+[run] states_uniform__morph1__dw4.0_op0.0
+[done] states_uniform__morph1__dw4.0_op0.0 1.3s fp=43e2a94d21b38ab7
+[run] states_uniform__morph1__dw4.0_op0.5
+[done] states_uniform__morph1__dw4.0_op0.5 1.3s fp=891bc81d6ae07e1b
+[run] states_uniform__morph1__dw4.0_op1.0
+[done] states_uniform__morph1__dw4.0_op1.0 1.3s fp=6bf7fc4dedb290fa
+[run] states_uniform__morph1__dw4.0_op2.0
+[done] states_uniform__morph1__dw4.0_op2.0 1.3s fp=3510feee84c99588
+[run] states_uniform__morph1__dw4.0_op4.0
+[done] states_uniform__morph1__dw4.0_op4.0 1.3s fp=06f7f1e109482534
+[run] states_uniform__morph1__extra_tile_rings=0
+[done] states_uniform__morph1__extra_tile_rings=0 1.3s fp=40e37a045c9107bc
+[run] states_uniform__morph1__extra_tile_rings=2
+[done] states_uniform__morph1__extra_tile_rings=2 1.3s fp=0b4e7f4e87091d27
+[run] states_uniform__morph1__extra_tile_rings=3
+[done] states_uniform__morph1__extra_tile_rings=3 1.4s fp=e0607f1dc89bc97e
+[run] states_uniform__morph1__extra_tile_rings=5
+[done] states_uniform__morph1__extra_tile_rings=5 1.4s fp=37d31a0a0e11cbca
+[run] states_uniform__morph1__min_overlap_frac=0.02
+[done] states_uniform__morph1__min_overlap_frac=0.02 1.4s fp=de083ec4914c6d2a
+[run] states_uniform__morph1__min_overlap_frac=0.25
+[done] states_uniform__morph1__min_overlap_frac=0.25 1.4s fp=b3b72a5fd6dbc649
+[run] states_uniform__morph1__min_overlap_frac=0.5
+[done] states_uniform__morph1__min_overlap_frac=0.5 1.4s fp=89cdfdbc20511d0a
+[run] states_uniform__morph1__min_overlap_frac=0.75
+[done] states_uniform__morph1__min_overlap_frac=0.75 1.4s fp=ece4a32eba91fcf4
+[run] states_uniform__morph1__min_overlap_frac=1.0
+[done] states_uniform__morph1__min_overlap_frac=1.0 1.9s fp=59e2a321598cd6d2
+[run] states_uniform__morph1__spacing=0.05
+[done] states_uniform__morph1__spacing=0.05 1.3s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__spacing=0.2
+[done] states_uniform__morph1__spacing=0.2 1.3s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__spacing=0.5
+[done] states_uniform__morph1__spacing=0.5 1.3s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__tile_size_x0.8
+[done] states_uniform__morph1__tile_size_x0.8 1.4s fp=38ccd4b526355819
+[run] states_uniform__morph1__tile_size_x0.9
+[done] states_uniform__morph1__tile_size_x0.9 1.3s fp=db1591d29b6b1b21
+[run] states_uniform__morph1__tile_size_x1.0
+[done] states_uniform__morph1__tile_size_x1.0 1.3s fp=d4bfd14357c2d770
+[run] states_uniform__morph1__tile_size_x1.1
+[done] states_uniform__morph1__tile_size_x1.1 1.3s fp=991105f03cd3ac89
+[run] states_uniform__morph1__tile_size_x1.25
+[done] states_uniform__morph1__tile_size_x1.25 1.2s fp=da3b03ab6f2d57e2
+[run] states_uniform__morph0__baseline
+[done] states_uniform__morph0__baseline 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__outside_penalty=0.0
+[done] states_uniform__morph0__outside_penalty=0.0 1.0s fp=d6b44d9220ca6931
+[run] states_uniform__morph0__outside_penalty=0.25
+[done] states_uniform__morph0__outside_penalty=0.25 1.0s fp=899ff9675395aba8
+[run] states_uniform__morph0__outside_penalty=0.5
+[done] states_uniform__morph0__outside_penalty=0.5 1.0s fp=9fab23e25024551a
+[run] states_uniform__morph0__outside_penalty=2.0
+[done] states_uniform__morph0__outside_penalty=2.0 1.0s fp=3685aa9766565ca3
+[run] states_uniform__morph0__outside_penalty=4.0
+[done] states_uniform__morph0__outside_penalty=4.0 1.0s fp=c7b93e09ff873f0d
+[run] states_uniform__morph0__outside_penalty=10.0
+[done] states_uniform__morph0__outside_penalty=10.0 1.0s fp=5a4b3ce35b1d1421
+[run] states_uniform__morph0__max_connectivity_iters=0
+[done] states_uniform__morph0__max_connectivity_iters=0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__max_connectivity_iters=1
+[done] states_uniform__morph0__max_connectivity_iters=1 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__max_connectivity_iters=2
+[done] states_uniform__morph0__max_connectivity_iters=2 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__max_connectivity_iters=5
+[done] states_uniform__morph0__max_connectivity_iters=5 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__max_connectivity_iters=30
+[done] states_uniform__morph0__max_connectivity_iters=30 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__disconnected_penalty_mult=0.0
+[done] states_uniform__morph0__disconnected_penalty_mult=0.0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__disconnected_penalty_mult=1.0
+[done] states_uniform__morph0__disconnected_penalty_mult=1.0 0.8s fp=db2447bcca0101df
+[run] states_uniform__morph0__disconnected_penalty_mult=2.0
+[done] states_uniform__morph0__disconnected_penalty_mult=2.0 0.7s fp=db2447bcca0101df
+[run] states_uniform__morph0__disconnected_penalty_mult=5.0
+[done] states_uniform__morph0__disconnected_penalty_mult=5.0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__disconnected_penalty_mult=50.0
+[done] states_uniform__morph0__disconnected_penalty_mult=50.0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__gap_bridge_mult=0.0
+[done] states_uniform__morph0__gap_bridge_mult=0.0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__gap_bridge_mult=1.0
+[done] states_uniform__morph0__gap_bridge_mult=1.0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__gap_bridge_mult=2.0
+[done] states_uniform__morph0__gap_bridge_mult=2.0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__gap_bridge_mult=20.0
+[done] states_uniform__morph0__gap_bridge_mult=20.0 1.1s fp=db2447bcca0101df
+[run] states_uniform__morph0__disconnected_score_weight=0
+[done] states_uniform__morph0__disconnected_score_weight=0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__disconnected_score_weight=1
+[done] states_uniform__morph0__disconnected_score_weight=1 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__disconnected_score_weight=10
+[done] states_uniform__morph0__disconnected_score_weight=10 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__disconnected_score_weight=1000
+[done] states_uniform__morph0__disconnected_score_weight=1000 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__swap_repair_passes=0
+[done] states_uniform__morph0__swap_repair_passes=0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__swap_repair_passes=1
+[done] states_uniform__morph0__swap_repair_passes=1 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__swap_repair_passes=2
+[done] states_uniform__morph0__swap_repair_passes=2 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__swap_repair_passes=5
+[done] states_uniform__morph0__swap_repair_passes=5 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__swap_repair_passes=30
+[done] states_uniform__morph0__swap_repair_passes=30 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__ring_swapback_max_hops=0
+[done] states_uniform__morph0__ring_swapback_max_hops=0 1.0s fp=fadbdb0f4646ccc0
+[run] states_uniform__morph0__ring_swapback_max_hops=1
+[done] states_uniform__morph0__ring_swapback_max_hops=1 1.0s fp=c619d71b2537c16c
+[run] states_uniform__morph0__ring_swapback_max_hops=2
+[done] states_uniform__morph0__ring_swapback_max_hops=2 1.0s fp=602e49a29cb1d026
+[run] states_uniform__morph0__ring_swapback_max_hops=4
+[done] states_uniform__morph0__ring_swapback_max_hops=4 1.0s fp=6dc984367846ab1d
+[run] states_uniform__morph0__ring_swapback_max_hops=8
+[done] states_uniform__morph0__ring_swapback_max_hops=8 1.0s fp=611b32fb08016ede
+[run] states_uniform__morph0__ring_swapback_max_hops=32
+[done] states_uniform__morph0__ring_swapback_max_hops=32 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__dw0.25_op0.0
+[done] states_uniform__morph0__dw0.25_op0.0 1.1s fp=3bef1639b7152167
+[run] states_uniform__morph0__dw0.25_op0.5
+[done] states_uniform__morph0__dw0.25_op0.5 1.0s fp=c2a1d3ab716ad6f2
+[run] states_uniform__morph0__dw0.25_op1.0
+[done] states_uniform__morph0__dw0.25_op1.0 1.0s fp=851b70462d753481
+[run] states_uniform__morph0__dw0.25_op2.0
+[done] states_uniform__morph0__dw0.25_op2.0 1.0s fp=2746cd04cfcacbba
+[run] states_uniform__morph0__dw0.25_op4.0
+[done] states_uniform__morph0__dw0.25_op4.0 1.0s fp=5a55503650e07a5c
+[run] states_uniform__morph0__dw1.0_op0.0
+[done] states_uniform__morph0__dw1.0_op0.0 1.0s fp=d6b44d9220ca6931
+[run] states_uniform__morph0__dw1.0_op0.5
+[done] states_uniform__morph0__dw1.0_op0.5 1.0s fp=9fab23e25024551a
+[run] states_uniform__morph0__dw1.0_op2.0
+[done] states_uniform__morph0__dw1.0_op2.0 1.0s fp=3685aa9766565ca3
+[run] states_uniform__morph0__dw1.0_op4.0
+[done] states_uniform__morph0__dw1.0_op4.0 1.0s fp=c7b93e09ff873f0d
+[run] states_uniform__morph0__dw4.0_op0.0
+[done] states_uniform__morph0__dw4.0_op0.0 1.0s fp=e5c15a45f6e116cf
+[run] states_uniform__morph0__dw4.0_op0.5
+[done] states_uniform__morph0__dw4.0_op0.5 1.0s fp=d970d65a5504a434
+[run] states_uniform__morph0__dw4.0_op1.0
+[done] states_uniform__morph0__dw4.0_op1.0 1.0s fp=361add1f57fa4a6f
+[run] states_uniform__morph0__dw4.0_op2.0
+[done] states_uniform__morph0__dw4.0_op2.0 1.0s fp=733a931dd718be00
+[run] states_uniform__morph0__dw4.0_op4.0
+[done] states_uniform__morph0__dw4.0_op4.0 1.0s fp=9a5ae8b2622a72c7
+[run] states_uniform__morph0__extra_tile_rings=0
+[done] states_uniform__morph0__extra_tile_rings=0 1.0s fp=7c0290d4076efee1
+[run] states_uniform__morph0__extra_tile_rings=2
+[done] states_uniform__morph0__extra_tile_rings=2 1.0s fp=45fd4a85211013f1
+[run] states_uniform__morph0__extra_tile_rings=3
+[done] states_uniform__morph0__extra_tile_rings=3 1.1s fp=2b19fd0e242f35f3
+[run] states_uniform__morph0__extra_tile_rings=5
+[done] states_uniform__morph0__extra_tile_rings=5 1.1s fp=644655837fdccc81
+[run] states_uniform__morph0__min_overlap_frac=0.02
+[done] states_uniform__morph0__min_overlap_frac=0.02 1.0s fp=a99596d3b1880b62
+[run] states_uniform__morph0__min_overlap_frac=0.25
+[done] states_uniform__morph0__min_overlap_frac=0.25 1.7s fp=03b68f54653d43d7
+[run] states_uniform__morph0__min_overlap_frac=0.5
+[done] states_uniform__morph0__min_overlap_frac=0.5 1.9s fp=e69da9aeb8fe11cd
+[run] states_uniform__morph0__min_overlap_frac=0.75
+[done] states_uniform__morph0__min_overlap_frac=0.75 1.1s fp=bbd227c5c940a41c
+[run] states_uniform__morph0__min_overlap_frac=1.0
+[done] states_uniform__morph0__min_overlap_frac=1.0 1.2s fp=6af1c4fade9c6c19
+[run] states_uniform__morph0__spacing=0.05
+[done] states_uniform__morph0__spacing=0.05 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__spacing=0.2
+[done] states_uniform__morph0__spacing=0.2 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__spacing=0.5
+[done] states_uniform__morph0__spacing=0.5 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__tile_size_x0.8
+[done] states_uniform__morph0__tile_size_x0.8 1.1s fp=ccfa8b8d98a5d781
+[run] states_uniform__morph0__tile_size_x0.9
+[done] states_uniform__morph0__tile_size_x0.9 1.0s fp=354b9711dd80af62
+[run] states_uniform__morph0__tile_size_x1.0
+[done] states_uniform__morph0__tile_size_x1.0 1.0s fp=db2447bcca0101df
+[run] states_uniform__morph0__tile_size_x1.1
+[done] states_uniform__morph0__tile_size_x1.1 0.9s fp=885b438d39825669
+[run] states_uniform__morph0__tile_size_x1.25
+[done] states_uniform__morph0__tile_size_x1.25 0.7s fp=77c5f701767806d1
+[run] states_uniform_sq__morph1__baseline
+[done] states_uniform_sq__morph1__baseline 1.0s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__outside_penalty=0.0
+[done] states_uniform_sq__morph1__outside_penalty=0.0 0.9s fp=cc5407e47a9ab8b5
+[run] states_uniform_sq__morph1__outside_penalty=0.25
+[done] states_uniform_sq__morph1__outside_penalty=0.25 0.9s fp=cc5407e47a9ab8b5
+[run] states_uniform_sq__morph1__outside_penalty=0.5
+[done] states_uniform_sq__morph1__outside_penalty=0.5 0.9s fp=cc5407e47a9ab8b5
+[run] states_uniform_sq__morph1__outside_penalty=2.0
+[done] states_uniform_sq__morph1__outside_penalty=2.0 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__outside_penalty=4.0
+[done] states_uniform_sq__morph1__outside_penalty=4.0 0.9s fp=bc5369883b0c74ba
+[run] states_uniform_sq__morph1__outside_penalty=10.0
+[done] states_uniform_sq__morph1__outside_penalty=10.0 1.0s fp=5ff0cd16a7f243b5
+[run] states_uniform_sq__morph1__max_connectivity_iters=0
+[done] states_uniform_sq__morph1__max_connectivity_iters=0 1.0s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__max_connectivity_iters=1
+[done] states_uniform_sq__morph1__max_connectivity_iters=1 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__max_connectivity_iters=2
+[done] states_uniform_sq__morph1__max_connectivity_iters=2 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__max_connectivity_iters=5
+[done] states_uniform_sq__morph1__max_connectivity_iters=5 1.0s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__max_connectivity_iters=30
+[done] states_uniform_sq__morph1__max_connectivity_iters=30 1.0s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__disconnected_penalty_mult=0.0
+[done] states_uniform_sq__morph1__disconnected_penalty_mult=0.0 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__disconnected_penalty_mult=1.0
+[done] states_uniform_sq__morph1__disconnected_penalty_mult=1.0 1.3s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__disconnected_penalty_mult=2.0
+[done] states_uniform_sq__morph1__disconnected_penalty_mult=2.0 1.1s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__disconnected_penalty_mult=5.0
+[done] states_uniform_sq__morph1__disconnected_penalty_mult=5.0 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__disconnected_penalty_mult=50.0
+[done] states_uniform_sq__morph1__disconnected_penalty_mult=50.0 3.0s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__gap_bridge_mult=0.0
+[done] states_uniform_sq__morph1__gap_bridge_mult=0.0 1.0s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__gap_bridge_mult=1.0
+[done] states_uniform_sq__morph1__gap_bridge_mult=1.0 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__gap_bridge_mult=2.0
+[done] states_uniform_sq__morph1__gap_bridge_mult=2.0 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__gap_bridge_mult=20.0
+[done] states_uniform_sq__morph1__gap_bridge_mult=20.0 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__disconnected_score_weight=0
+[done] states_uniform_sq__morph1__disconnected_score_weight=0 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__disconnected_score_weight=1
+[done] states_uniform_sq__morph1__disconnected_score_weight=1 0.8s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__disconnected_score_weight=10
+[done] states_uniform_sq__morph1__disconnected_score_weight=10 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__disconnected_score_weight=1000
+[done] states_uniform_sq__morph1__disconnected_score_weight=1000 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__swap_repair_passes=0
+[done] states_uniform_sq__morph1__swap_repair_passes=0 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__swap_repair_passes=1
+[done] states_uniform_sq__morph1__swap_repair_passes=1 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__swap_repair_passes=2
+[done] states_uniform_sq__morph1__swap_repair_passes=2 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__swap_repair_passes=5
+[done] states_uniform_sq__morph1__swap_repair_passes=5 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__swap_repair_passes=30
+[done] states_uniform_sq__morph1__swap_repair_passes=30 0.8s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__ring_swapback_max_hops=0
+[done] states_uniform_sq__morph1__ring_swapback_max_hops=0 0.9s fp=2c21ec51e0907a3c
+[run] states_uniform_sq__morph1__ring_swapback_max_hops=1
+[done] states_uniform_sq__morph1__ring_swapback_max_hops=1 0.8s fp=8318275b4130fc44
+[run] states_uniform_sq__morph1__ring_swapback_max_hops=2
+[done] states_uniform_sq__morph1__ring_swapback_max_hops=2 0.9s fp=c7c020965d436b49
+[run] states_uniform_sq__morph1__ring_swapback_max_hops=4
+[done] states_uniform_sq__morph1__ring_swapback_max_hops=4 1.1s fp=d494b687e36905ef
+[run] states_uniform_sq__morph1__ring_swapback_max_hops=8
+[done] states_uniform_sq__morph1__ring_swapback_max_hops=8 1.3s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__ring_swapback_max_hops=32
+[done] states_uniform_sq__morph1__ring_swapback_max_hops=32 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__dw0.25_op0.0
+[done] states_uniform_sq__morph1__dw0.25_op0.0 0.9s fp=11e21159a8d120a6
+[run] states_uniform_sq__morph1__dw0.25_op0.5
+[done] states_uniform_sq__morph1__dw0.25_op0.5 0.9s fp=11e21159a8d120a6
+[run] states_uniform_sq__morph1__dw0.25_op1.0
+[done] states_uniform_sq__morph1__dw0.25_op1.0 0.9s fp=cb5b0cd3a794571b
+[run] states_uniform_sq__morph1__dw0.25_op2.0
+[done] states_uniform_sq__morph1__dw0.25_op2.0 1.0s fp=cb5b0cd3a794571b
+[run] states_uniform_sq__morph1__dw0.25_op4.0
+[done] states_uniform_sq__morph1__dw0.25_op4.0 1.0s fp=8e1b32a463fe82d0
+[run] states_uniform_sq__morph1__dw1.0_op0.0
+[done] states_uniform_sq__morph1__dw1.0_op0.0 0.9s fp=cc5407e47a9ab8b5
+[run] states_uniform_sq__morph1__dw1.0_op0.5
+[done] states_uniform_sq__morph1__dw1.0_op0.5 1.1s fp=cc5407e47a9ab8b5
+[run] states_uniform_sq__morph1__dw1.0_op2.0
+[done] states_uniform_sq__morph1__dw1.0_op2.0 1.8s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__dw1.0_op4.0
+[done] states_uniform_sq__morph1__dw1.0_op4.0 0.8s fp=bc5369883b0c74ba
+[run] states_uniform_sq__morph1__dw4.0_op0.0
+[done] states_uniform_sq__morph1__dw4.0_op0.0 0.8s fp=e407c998cf466c0c
+[run] states_uniform_sq__morph1__dw4.0_op0.5
+[done] states_uniform_sq__morph1__dw4.0_op0.5 6.7s fp=e407c998cf466c0c
+[run] states_uniform_sq__morph1__dw4.0_op1.0
+[done] states_uniform_sq__morph1__dw4.0_op1.0 0.9s fp=6f724635d63d6f94
+[run] states_uniform_sq__morph1__dw4.0_op2.0
+[done] states_uniform_sq__morph1__dw4.0_op2.0 3.6s fp=94f4c709b850acfb
+[run] states_uniform_sq__morph1__dw4.0_op4.0
+[done] states_uniform_sq__morph1__dw4.0_op4.0 0.9s fp=64549a71f7b99d4e
+[run] states_uniform_sq__morph1__extra_tile_rings=0
+[done] states_uniform_sq__morph1__extra_tile_rings=0 0.9s fp=f8430f8fdb6c68a4
+[run] states_uniform_sq__morph1__extra_tile_rings=2
+[done] states_uniform_sq__morph1__extra_tile_rings=2 0.9s fp=fe0c34a6993dd3cd
+[run] states_uniform_sq__morph1__extra_tile_rings=3
+[done] states_uniform_sq__morph1__extra_tile_rings=3 4.1s fp=888a6fe68d77ec1b
+[run] states_uniform_sq__morph1__extra_tile_rings=5
+[done] states_uniform_sq__morph1__extra_tile_rings=5 1.3s fp=8f92d697fd2f89a1
+[run] states_uniform_sq__morph1__min_overlap_frac=0.02
+[done] states_uniform_sq__morph1__min_overlap_frac=0.02 18.7s fp=5769b846ad406099
+[run] states_uniform_sq__morph1__min_overlap_frac=0.25
+[done] states_uniform_sq__morph1__min_overlap_frac=0.25 1.5s fp=bd4501a4ee9b7804
+[run] states_uniform_sq__morph1__min_overlap_frac=0.5
+[done] states_uniform_sq__morph1__min_overlap_frac=0.5 0.9s fp=cc35af4d301e6683
+[run] states_uniform_sq__morph1__min_overlap_frac=0.75
+[done] states_uniform_sq__morph1__min_overlap_frac=0.75 1.4s fp=98bec90642ce65d8
+[run] states_uniform_sq__morph1__min_overlap_frac=1.0
+[done] states_uniform_sq__morph1__min_overlap_frac=1.0 1.5s fp=0bf51115e4d1c39e
+[run] states_uniform_sq__morph1__spacing=0.05
+[done] states_uniform_sq__morph1__spacing=0.05 0.8s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__spacing=0.2
+[done] states_uniform_sq__morph1__spacing=0.2 0.9s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__spacing=0.5
+[done] states_uniform_sq__morph1__spacing=0.5 0.8s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__tile_size_x0.8
+[done] states_uniform_sq__morph1__tile_size_x0.8 0.9s fp=b889a0ef7eee9c1a
+[run] states_uniform_sq__morph1__tile_size_x0.9
+[done] states_uniform_sq__morph1__tile_size_x0.9 1.3s fp=e26812ae69f609b9
+[run] states_uniform_sq__morph1__tile_size_x1.0
+[done] states_uniform_sq__morph1__tile_size_x1.0 1.2s fp=02f6d044a86af782
+[run] states_uniform_sq__morph1__tile_size_x1.1
+[done] states_uniform_sq__morph1__tile_size_x1.1 1.3s fp=3c45873a230e38a5
+[run] states_uniform_sq__morph1__tile_size_x1.25
+[done] states_uniform_sq__morph1__tile_size_x1.25 1.3s fp=40395dac2bf0ec5e
+[run] states_uniform_sq__morph0__baseline
+[done] states_uniform_sq__morph0__baseline 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__outside_penalty=0.0
+[done] states_uniform_sq__morph0__outside_penalty=0.0 1.2s fp=e658eb3c5b6ffefe
+[run] states_uniform_sq__morph0__outside_penalty=0.25
+[done] states_uniform_sq__morph0__outside_penalty=0.25 1.2s fp=3fc64fb4eba39e7e
+[run] states_uniform_sq__morph0__outside_penalty=0.5
+[done] states_uniform_sq__morph0__outside_penalty=0.5 1.5s fp=0c0e98bf6028d6d3
+[run] states_uniform_sq__morph0__outside_penalty=2.0
+[done] states_uniform_sq__morph0__outside_penalty=2.0 1.4s fp=f91ff505d820ed63
+[run] states_uniform_sq__morph0__outside_penalty=4.0
+[done] states_uniform_sq__morph0__outside_penalty=4.0 1.3s fp=163d72141e35db35
+[run] states_uniform_sq__morph0__outside_penalty=10.0
+[done] states_uniform_sq__morph0__outside_penalty=10.0 1.2s fp=86f33ce122a9e831
+[run] states_uniform_sq__morph0__max_connectivity_iters=0
+[done] states_uniform_sq__morph0__max_connectivity_iters=0 1.2s fp=df86ecea2db0edb3
+[run] states_uniform_sq__morph0__max_connectivity_iters=1
+[done] states_uniform_sq__morph0__max_connectivity_iters=1 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__max_connectivity_iters=2
+[done] states_uniform_sq__morph0__max_connectivity_iters=2 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__max_connectivity_iters=5
+[done] states_uniform_sq__morph0__max_connectivity_iters=5 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__max_connectivity_iters=30
+[done] states_uniform_sq__morph0__max_connectivity_iters=30 1.0s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__disconnected_penalty_mult=0.0
+[done] states_uniform_sq__morph0__disconnected_penalty_mult=0.0 0.8s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__disconnected_penalty_mult=1.0
+[done] states_uniform_sq__morph0__disconnected_penalty_mult=1.0 1.3s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__disconnected_penalty_mult=2.0
+[done] states_uniform_sq__morph0__disconnected_penalty_mult=2.0 1.3s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__disconnected_penalty_mult=5.0
+[done] states_uniform_sq__morph0__disconnected_penalty_mult=5.0 1.3s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__disconnected_penalty_mult=50.0
+[done] states_uniform_sq__morph0__disconnected_penalty_mult=50.0 1.3s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__gap_bridge_mult=0.0
+[done] states_uniform_sq__morph0__gap_bridge_mult=0.0 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__gap_bridge_mult=1.0
+[done] states_uniform_sq__morph0__gap_bridge_mult=1.0 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__gap_bridge_mult=2.0
+[done] states_uniform_sq__morph0__gap_bridge_mult=2.0 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__gap_bridge_mult=20.0
+[done] states_uniform_sq__morph0__gap_bridge_mult=20.0 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__disconnected_score_weight=0
+[done] states_uniform_sq__morph0__disconnected_score_weight=0 1.3s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__disconnected_score_weight=1
+[done] states_uniform_sq__morph0__disconnected_score_weight=1 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__disconnected_score_weight=10
+[done] states_uniform_sq__morph0__disconnected_score_weight=10 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__disconnected_score_weight=1000
+[done] states_uniform_sq__morph0__disconnected_score_weight=1000 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__swap_repair_passes=0
+[done] states_uniform_sq__morph0__swap_repair_passes=0 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__swap_repair_passes=1
+[done] states_uniform_sq__morph0__swap_repair_passes=1 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__swap_repair_passes=2
+[done] states_uniform_sq__morph0__swap_repair_passes=2 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__swap_repair_passes=5
+[done] states_uniform_sq__morph0__swap_repair_passes=5 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__swap_repair_passes=30
+[done] states_uniform_sq__morph0__swap_repair_passes=30 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__ring_swapback_max_hops=0
+[done] states_uniform_sq__morph0__ring_swapback_max_hops=0 1.2s fp=f987b6835f0e435c
+[run] states_uniform_sq__morph0__ring_swapback_max_hops=1
+[done] states_uniform_sq__morph0__ring_swapback_max_hops=1 1.2s fp=0dff83c3519278c8
+[run] states_uniform_sq__morph0__ring_swapback_max_hops=2
+[done] states_uniform_sq__morph0__ring_swapback_max_hops=2 1.2s fp=a6114283d88c4cbf
+[run] states_uniform_sq__morph0__ring_swapback_max_hops=4
+[done] states_uniform_sq__morph0__ring_swapback_max_hops=4 1.2s fp=c7e2d6f388faccbf
+[run] states_uniform_sq__morph0__ring_swapback_max_hops=8
+[done] states_uniform_sq__morph0__ring_swapback_max_hops=8 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__ring_swapback_max_hops=32
+[done] states_uniform_sq__morph0__ring_swapback_max_hops=32 1.2s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__dw0.25_op0.0
+[done] states_uniform_sq__morph0__dw0.25_op0.0 1.2s fp=47566c1df163a950
+[run] states_uniform_sq__morph0__dw0.25_op0.5
+[done] states_uniform_sq__morph0__dw0.25_op0.5 1.2s fp=0cc2d6bddcc5177f
+[run] states_uniform_sq__morph0__dw0.25_op1.0
+[done] states_uniform_sq__morph0__dw0.25_op1.0 1.2s fp=5e73b60981ce6802
+[run] states_uniform_sq__morph0__dw0.25_op2.0
+[done] states_uniform_sq__morph0__dw0.25_op2.0 1.2s fp=31ab9c8685cd20c0
+[run] states_uniform_sq__morph0__dw0.25_op4.0
+[done] states_uniform_sq__morph0__dw0.25_op4.0 1.2s fp=00a0818416717cd4
+[run] states_uniform_sq__morph0__dw1.0_op0.0
+[done] states_uniform_sq__morph0__dw1.0_op0.0 1.2s fp=e658eb3c5b6ffefe
+[run] states_uniform_sq__morph0__dw1.0_op0.5
+[done] states_uniform_sq__morph0__dw1.0_op0.5 1.2s fp=0c0e98bf6028d6d3
+[run] states_uniform_sq__morph0__dw1.0_op2.0
+[done] states_uniform_sq__morph0__dw1.0_op2.0 1.2s fp=f91ff505d820ed63
+[run] states_uniform_sq__morph0__dw1.0_op4.0
+[done] states_uniform_sq__morph0__dw1.0_op4.0 1.2s fp=163d72141e35db35
+[run] states_uniform_sq__morph0__dw4.0_op0.0
+[done] states_uniform_sq__morph0__dw4.0_op0.0 1.2s fp=293604da4e0640c7
+[run] states_uniform_sq__morph0__dw4.0_op0.5
+[done] states_uniform_sq__morph0__dw4.0_op0.5 1.2s fp=aeb1ecc1fdef93fa
+[run] states_uniform_sq__morph0__dw4.0_op1.0
+[done] states_uniform_sq__morph0__dw4.0_op1.0 1.2s fp=2faab1156d10a995
+[run] states_uniform_sq__morph0__dw4.0_op2.0
+[done] states_uniform_sq__morph0__dw4.0_op2.0 1.2s fp=a739464912ae3e70
+[run] states_uniform_sq__morph0__dw4.0_op4.0
+[done] states_uniform_sq__morph0__dw4.0_op4.0 1.2s fp=17a5afb61b2c54fa
+[run] states_uniform_sq__morph0__extra_tile_rings=0
+[done] states_uniform_sq__morph0__extra_tile_rings=0 1.2s fp=fde096e33dea1e5f
+[run] states_uniform_sq__morph0__extra_tile_rings=2
+[done] states_uniform_sq__morph0__extra_tile_rings=2 1.3s fp=6a3fdb08f78413de
+[run] states_uniform_sq__morph0__extra_tile_rings=3
+[done] states_uniform_sq__morph0__extra_tile_rings=3 1.3s fp=79bbe58fffbb788b
+[run] states_uniform_sq__morph0__extra_tile_rings=5
+[done] states_uniform_sq__morph0__extra_tile_rings=5 1.3s fp=f381463444be4546
+[run] states_uniform_sq__morph0__min_overlap_frac=0.02
+[done] states_uniform_sq__morph0__min_overlap_frac=0.02 0.9s fp=95ffe57e309ebf6e
+[run] states_uniform_sq__morph0__min_overlap_frac=0.25
+[done] states_uniform_sq__morph0__min_overlap_frac=0.25 1.0s fp=66bd22aa482be176
+[run] states_uniform_sq__morph0__min_overlap_frac=0.5
+[done] states_uniform_sq__morph0__min_overlap_frac=0.5 1.0s fp=01e1e55beeaefd94
+[run] states_uniform_sq__morph0__min_overlap_frac=0.75
+[done] states_uniform_sq__morph0__min_overlap_frac=0.75 5.3s fp=b8465f545180c30b
+[run] states_uniform_sq__morph0__min_overlap_frac=1.0
+[done] states_uniform_sq__morph0__min_overlap_frac=1.0 1.3s fp=8049777bd6fe96a1
+[run] states_uniform_sq__morph0__spacing=0.05
+[done] states_uniform_sq__morph0__spacing=0.05 0.9s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__spacing=0.2
+[done] states_uniform_sq__morph0__spacing=0.2 0.9s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__spacing=0.5
+[done] states_uniform_sq__morph0__spacing=0.5 1.0s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__tile_size_x0.8
+[done] states_uniform_sq__morph0__tile_size_x0.8 0.8s fp=501d86b0748799d6
+[run] states_uniform_sq__morph0__tile_size_x0.9
+[done] states_uniform_sq__morph0__tile_size_x0.9 0.8s fp=c5725642ce1f54c5
+[run] states_uniform_sq__morph0__tile_size_x1.0
+[done] states_uniform_sq__morph0__tile_size_x1.0 0.7s fp=0fae835f3e619736
+[run] states_uniform_sq__morph0__tile_size_x1.1
+[done] states_uniform_sq__morph0__tile_size_x1.1 0.6s fp=2ed9160a889e085c
+[run] states_uniform_sq__morph0__tile_size_x1.25
+[done] states_uniform_sq__morph0__tile_size_x1.25 0.7s fp=5af3e5402768b9ea
+[run] states__morph1__baseline
+[done] states__morph1__baseline 1.3s fp=febe8eb0adf6fb8b
+[run] states__morph1__outside_penalty=0.0
+[done] states__morph1__outside_penalty=0.0 1.3s fp=0c68531eb67113d5
+[run] states__morph1__outside_penalty=0.25
+[done] states__morph1__outside_penalty=0.25 1.3s fp=ca580b5191ba1f23
+[run] states__morph1__outside_penalty=0.5
+[done] states__morph1__outside_penalty=0.5 1.5s fp=07a773e09a6e1edc
+[run] states__morph1__outside_penalty=2.0
+[done] states__morph1__outside_penalty=2.0 1.3s fp=53ecf80ff10e8575
+[run] states__morph1__outside_penalty=4.0
+[done] states__morph1__outside_penalty=4.0 1.4s fp=115a9e9fbb9379af
+[run] states__morph1__outside_penalty=10.0
+[done] states__morph1__outside_penalty=10.0 1.5s fp=ab9cd67ee2520e80
+[run] states__morph1__max_connectivity_iters=0
+[done] states__morph1__max_connectivity_iters=0 2.0s fp=febe8eb0adf6fb8b
+[run] states__morph1__max_connectivity_iters=1
+[done] states__morph1__max_connectivity_iters=1 1.4s fp=febe8eb0adf6fb8b
+[run] states__morph1__max_connectivity_iters=2
+[done] states__morph1__max_connectivity_iters=2 1.4s fp=febe8eb0adf6fb8b
+[run] states__morph1__max_connectivity_iters=5
+[done] states__morph1__max_connectivity_iters=5 1.4s fp=febe8eb0adf6fb8b
+[run] states__morph1__max_connectivity_iters=30
+[done] states__morph1__max_connectivity_iters=30 5.1s fp=febe8eb0adf6fb8b
+[run] states__morph1__disconnected_penalty_mult=0.0
+[done] states__morph1__disconnected_penalty_mult=0.0 1.4s fp=febe8eb0adf6fb8b
+[run] states__morph1__disconnected_penalty_mult=1.0
+[done] states__morph1__disconnected_penalty_mult=1.0 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__disconnected_penalty_mult=2.0
+[done] states__morph1__disconnected_penalty_mult=2.0 1.4s fp=febe8eb0adf6fb8b
+[run] states__morph1__disconnected_penalty_mult=5.0
+[done] states__morph1__disconnected_penalty_mult=5.0 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__disconnected_penalty_mult=50.0
+[done] states__morph1__disconnected_penalty_mult=50.0 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__gap_bridge_mult=0.0
+[done] states__morph1__gap_bridge_mult=0.0 1.3s fp=febe8eb0adf6fb8b
+[run] states__morph1__gap_bridge_mult=1.0
+[done] states__morph1__gap_bridge_mult=1.0 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__gap_bridge_mult=2.0
+[done] states__morph1__gap_bridge_mult=2.0 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__gap_bridge_mult=20.0
+[done] states__morph1__gap_bridge_mult=20.0 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__disconnected_score_weight=0
+[done] states__morph1__disconnected_score_weight=0 1.3s fp=febe8eb0adf6fb8b
+[run] states__morph1__disconnected_score_weight=1
+[done] states__morph1__disconnected_score_weight=1 1.3s fp=febe8eb0adf6fb8b
+[run] states__morph1__disconnected_score_weight=10
+[done] states__morph1__disconnected_score_weight=10 1.3s fp=febe8eb0adf6fb8b
+[run] states__morph1__disconnected_score_weight=1000
+[done] states__morph1__disconnected_score_weight=1000 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__swap_repair_passes=0
+[done] states__morph1__swap_repair_passes=0 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__swap_repair_passes=1
+[done] states__morph1__swap_repair_passes=1 1.3s fp=febe8eb0adf6fb8b
+[run] states__morph1__swap_repair_passes=2
+[done] states__morph1__swap_repair_passes=2 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__swap_repair_passes=5
+[done] states__morph1__swap_repair_passes=5 1.3s fp=febe8eb0adf6fb8b
+[run] states__morph1__swap_repair_passes=30
+[done] states__morph1__swap_repair_passes=30 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__ring_swapback_max_hops=0
+[done] states__morph1__ring_swapback_max_hops=0 1.2s fp=e8f351269d664ef3
+[run] states__morph1__ring_swapback_max_hops=1
+[done] states__morph1__ring_swapback_max_hops=1 1.2s fp=b1e5c33d26f43a72
+[run] states__morph1__ring_swapback_max_hops=2
+[done] states__morph1__ring_swapback_max_hops=2 1.2s fp=68cbd79f58d008db
+[run] states__morph1__ring_swapback_max_hops=4
+[done] states__morph1__ring_swapback_max_hops=4 1.2s fp=ae28694d65b7a78b
+[run] states__morph1__ring_swapback_max_hops=8
+[done] states__morph1__ring_swapback_max_hops=8 1.2s fp=4df76d8c0555b270
+[run] states__morph1__ring_swapback_max_hops=32
+[done] states__morph1__ring_swapback_max_hops=32 1.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__dw0.25_op0.0
+[done] states__morph1__dw0.25_op0.0 1.2s fp=8d8dfd9037910f2e
+[run] states__morph1__dw0.25_op0.5
+[done] states__morph1__dw0.25_op0.5 1.2s fp=856e268dca42ac9a
+[run] states__morph1__dw0.25_op1.0
+[done] states__morph1__dw0.25_op1.0 1.2s fp=b9ec78ca48ffcbc2
+[run] states__morph1__dw0.25_op2.0
+[done] states__morph1__dw0.25_op2.0 1.2s fp=c9f433741f394fd8
+[run] states__morph1__dw0.25_op4.0
+[done] states__morph1__dw0.25_op4.0 4.5s fp=c55ccad449a0c7d8
+[run] states__morph1__dw1.0_op0.0
+[done] states__morph1__dw1.0_op0.0 1.2s fp=0c68531eb67113d5
+[run] states__morph1__dw1.0_op0.5
+[done] states__morph1__dw1.0_op0.5 1.2s fp=07a773e09a6e1edc
+[run] states__morph1__dw1.0_op2.0
+[done] states__morph1__dw1.0_op2.0 1.2s fp=53ecf80ff10e8575
+[run] states__morph1__dw1.0_op4.0
+[done] states__morph1__dw1.0_op4.0 1.2s fp=115a9e9fbb9379af
+[run] states__morph1__dw4.0_op0.0
+[done] states__morph1__dw4.0_op0.0 1.2s fp=d195f924206b3e28
+[run] states__morph1__dw4.0_op0.5
+[done] states__morph1__dw4.0_op0.5 1.2s fp=dccac5f288b75053
+[run] states__morph1__dw4.0_op1.0
+[done] states__morph1__dw4.0_op1.0 1.2s fp=b115e763b59ea0d4
+[run] states__morph1__dw4.0_op2.0
+[done] states__morph1__dw4.0_op2.0 1.2s fp=c68bd1705c0d4d0d
+[run] states__morph1__dw4.0_op4.0
+[done] states__morph1__dw4.0_op4.0 1.2s fp=9ee88a5cf0649ddf
+[run] states__morph1__extra_tile_rings=0
+[done] states__morph1__extra_tile_rings=0 1.1s fp=efdeccb162599b73
+[run] states__morph1__extra_tile_rings=2
+[done] states__morph1__extra_tile_rings=2 1.2s fp=e5bd26c167296868
+[run] states__morph1__extra_tile_rings=3
+[done] states__morph1__extra_tile_rings=3 1.5s fp=bea8575ef64d572c
+[run] states__morph1__extra_tile_rings=5
+[done] states__morph1__extra_tile_rings=5 1.4s fp=1e6369ecbed2e2cf
+[run] states__morph1__min_overlap_frac=0.02
+[done] states__morph1__min_overlap_frac=0.02 1.2s fp=c523b97df3a979b2
+[run] states__morph1__min_overlap_frac=0.25
+[done] states__morph1__min_overlap_frac=0.25 2.2s fp=1a39936a8f4902f7
+[run] states__morph1__min_overlap_frac=0.5
+[done] states__morph1__min_overlap_frac=0.5 2.5s fp=d1e93ec7c7daf7ce
+[run] states__morph1__min_overlap_frac=0.75
+[done] states__morph1__min_overlap_frac=0.75 3.2s fp=443331ff1c15116b
+[run] states__morph1__min_overlap_frac=1.0
+[done] states__morph1__min_overlap_frac=1.0 7.4s fp=320c6b69ccecae4d
+[run] states__morph1__spacing=0.05
+[done] states__morph1__spacing=0.05 2.2s fp=febe8eb0adf6fb8b
+[run] states__morph1__spacing=0.2
+[done] states__morph1__spacing=0.2 1.9s fp=febe8eb0adf6fb8b
+[run] states__morph1__spacing=0.5
+[done] states__morph1__spacing=0.5 1.9s fp=febe8eb0adf6fb8b
+[run] states__morph1__tile_size_x0.8
+[done] states__morph1__tile_size_x0.8 2.1s fp=f9b10888b33bb70d
+[run] states__morph1__tile_size_x0.9
+[done] states__morph1__tile_size_x0.9 2.0s fp=6550e31c924a1c2a
+[run] states__morph1__tile_size_x1.0
+[done] states__morph1__tile_size_x1.0 1.8s fp=febe8eb0adf6fb8b
+[run] states__morph1__tile_size_x1.1
+[done] states__morph1__tile_size_x1.1 1.7s fp=046785de26ee3209
+[run] states__morph1__tile_size_x1.25
+[done] states__morph1__tile_size_x1.25 1.6s fp=f37b6d957334cee4
+[run] states__morph0__baseline
+[done] states__morph0__baseline 6.7s fp=02c46d4a551b0a8e
+[run] states__morph0__outside_penalty=0.0
+[done] states__morph0__outside_penalty=0.0 1.6s fp=52f7e137a6b1140f
+[run] states__morph0__outside_penalty=0.25
+[done] states__morph0__outside_penalty=0.25 1.5s fp=5659d7b17957f35a
+[run] states__morph0__outside_penalty=0.5
+[done] states__morph0__outside_penalty=0.5 1.5s fp=a3f021420837a8b9
+[run] states__morph0__outside_penalty=2.0
+[done] states__morph0__outside_penalty=2.0 1.6s fp=ad8bcea5983be126
+[run] states__morph0__outside_penalty=4.0
+[done] states__morph0__outside_penalty=4.0 6.1s fp=d52306df23d4b354
+[run] states__morph0__outside_penalty=10.0
+[done] states__morph0__outside_penalty=10.0 1.6s fp=f855b4890d4e359c
+[run] states__morph0__max_connectivity_iters=0
+[done] states__morph0__max_connectivity_iters=0 1.5s fp=3a13c029cc4160ea
+[run] states__morph0__max_connectivity_iters=1
+[done] states__morph0__max_connectivity_iters=1 1.6s fp=84d8183d7bf067d6
+[run] states__morph0__max_connectivity_iters=2
+[done] states__morph0__max_connectivity_iters=2 6.7s fp=02c46d4a551b0a8e
+[run] states__morph0__max_connectivity_iters=5
+[done] states__morph0__max_connectivity_iters=5 6.8s fp=02c46d4a551b0a8e
+[run] states__morph0__max_connectivity_iters=30
+[done] states__morph0__max_connectivity_iters=30 6.9s fp=02c46d4a551b0a8e
+[run] states__morph0__disconnected_penalty_mult=0.0
+[done] states__morph0__disconnected_penalty_mult=0.0 1.5s fp=97819335f8623227
+[run] states__morph0__disconnected_penalty_mult=1.0
+[done] states__morph0__disconnected_penalty_mult=1.0 6.4s fp=02c46d4a551b0a8e
+[run] states__morph0__disconnected_penalty_mult=2.0
+[done] states__morph0__disconnected_penalty_mult=2.0 6.7s fp=02c46d4a551b0a8e
+[run] states__morph0__disconnected_penalty_mult=5.0
+[done] states__morph0__disconnected_penalty_mult=5.0 7.1s fp=02c46d4a551b0a8e
+[run] states__morph0__disconnected_penalty_mult=50.0
+[done] states__morph0__disconnected_penalty_mult=50.0 5.8s fp=02c46d4a551b0a8e
+[run] states__morph0__gap_bridge_mult=0.0
+[done] states__morph0__gap_bridge_mult=0.0 4.9s fp=02c46d4a551b0a8e
+[run] states__morph0__gap_bridge_mult=1.0
+[done] states__morph0__gap_bridge_mult=1.0 5.4s fp=02c46d4a551b0a8e
+[run] states__morph0__gap_bridge_mult=2.0
+[done] states__morph0__gap_bridge_mult=2.0 11.5s fp=02c46d4a551b0a8e
+[run] states__morph0__gap_bridge_mult=20.0
+[done] states__morph0__gap_bridge_mult=20.0 7.4s fp=02c46d4a551b0a8e
+[run] states__morph0__disconnected_score_weight=0
+[done] states__morph0__disconnected_score_weight=0 7.1s fp=02c46d4a551b0a8e
+[run] states__morph0__disconnected_score_weight=1
+[done] states__morph0__disconnected_score_weight=1 4.2s fp=02c46d4a551b0a8e
+[run] states__morph0__disconnected_score_weight=10
+[done] states__morph0__disconnected_score_weight=10 4.6s fp=02c46d4a551b0a8e
+[run] states__morph0__disconnected_score_weight=1000
+[done] states__morph0__disconnected_score_weight=1000 6.4s fp=02c46d4a551b0a8e
+[run] states__morph0__swap_repair_passes=0
+[done] states__morph0__swap_repair_passes=0 1.5s fp=322788f742037d24
+[run] states__morph0__swap_repair_passes=1
+[done] states__morph0__swap_repair_passes=1 4.2s fp=49692f3f7477c3c0
+[run] states__morph0__swap_repair_passes=2
+[done] states__morph0__swap_repair_passes=2 7.1s fp=5d74dafb93ad95d0
+[run] states__morph0__swap_repair_passes=5
+[done] states__morph0__swap_repair_passes=5 6.9s fp=02c46d4a551b0a8e
+[run] states__morph0__swap_repair_passes=30
+[done] states__morph0__swap_repair_passes=30 7.0s fp=02c46d4a551b0a8e
+[run] states__morph0__ring_swapback_max_hops=0
+[done] states__morph0__ring_swapback_max_hops=0 1.5s fp=ebef5e765d3b4667
+[run] states__morph0__ring_swapback_max_hops=1
+[done] states__morph0__ring_swapback_max_hops=1 7.1s fp=7d53d570041c91c7
+[run] states__morph0__ring_swapback_max_hops=2
+[done] states__morph0__ring_swapback_max_hops=2 7.0s fp=e9ef727762042e21
+[run] states__morph0__ring_swapback_max_hops=4
+[done] states__morph0__ring_swapback_max_hops=4 6.6s fp=0b3d53cba6928eec
+[run] states__morph0__ring_swapback_max_hops=8
+[done] states__morph0__ring_swapback_max_hops=8 6.5s fp=5527de251e76c641
+[run] states__morph0__ring_swapback_max_hops=32
+[done] states__morph0__ring_swapback_max_hops=32 5.0s fp=02c46d4a551b0a8e
+[run] states__morph0__dw0.25_op0.0
+[done] states__morph0__dw0.25_op0.0 1.1s fp=9cca12788e34fa5f
+[run] states__morph0__dw0.25_op0.5
+[done] states__morph0__dw0.25_op0.5 1.1s fp=269bbe194ad236bd
+[run] states__morph0__dw0.25_op1.0
+[done] states__morph0__dw0.25_op1.0 1.3s fp=cc5db3be4d4c1123
+[run] states__morph0__dw0.25_op2.0
+[done] states__morph0__dw0.25_op2.0 1.2s fp=a012ab3c4a2b4163
+[run] states__morph0__dw0.25_op4.0
+[done] states__morph0__dw0.25_op4.0 1.1s fp=eed0c94aae5ff904
+[run] states__morph0__dw1.0_op0.0
+[done] states__morph0__dw1.0_op0.0 1.1s fp=52f7e137a6b1140f
+[run] states__morph0__dw1.0_op0.5
+[done] states__morph0__dw1.0_op0.5 1.3s fp=a3f021420837a8b9
+[run] states__morph0__dw1.0_op2.0
+[done] states__morph0__dw1.0_op2.0 1.0s fp=ad8bcea5983be126
+[run] states__morph0__dw1.0_op4.0
+[done] states__morph0__dw1.0_op4.0 13.9s fp=d52306df23d4b354
+[run] states__morph0__dw4.0_op0.0
+[done] states__morph0__dw4.0_op0.0 1.0s fp=6a040e00b2a2698d
+[run] states__morph0__dw4.0_op0.5
+[done] states__morph0__dw4.0_op0.5 1.0s fp=b038fdf36b06e84a
+[run] states__morph0__dw4.0_op1.0
+[done] states__morph0__dw4.0_op1.0 1.0s fp=9800dda189537682
+[run] states__morph0__dw4.0_op2.0
+[done] states__morph0__dw4.0_op2.0 1.0s fp=06f27eb2629680ee
+[run] states__morph0__dw4.0_op4.0
+[done] states__morph0__dw4.0_op4.0 4.8s fp=491c69413a2ae0c7
+[run] states__morph0__extra_tile_rings=0
+[done] states__morph0__extra_tile_rings=0 1.1s fp=bce61e6df5cf24d6
+[run] states__morph0__extra_tile_rings=2
+[done] states__morph0__extra_tile_rings=2 1.3s fp=ff79ed9cf188afc9
+[run] states__morph0__extra_tile_rings=3
+[done] states__morph0__extra_tile_rings=3 2.0s fp=4637153514221834
+[run] states__morph0__extra_tile_rings=5
+[done] states__morph0__extra_tile_rings=5 3.3s fp=b07fa558dd20433b
+[run] states__morph0__min_overlap_frac=0.02
+[done] states__morph0__min_overlap_frac=0.02 1.6s fp=e8fcfd609b4475a8
+[run] states__morph0__min_overlap_frac=0.25
+[done] states__morph0__min_overlap_frac=0.25 1.9s fp=194282315a5380a4
+[run] states__morph0__min_overlap_frac=0.5
+[done] states__morph0__min_overlap_frac=0.5 1.5s fp=f50acc32a87fe3a4
+[run] states__morph0__min_overlap_frac=0.75
+[done] states__morph0__min_overlap_frac=0.75 1.7s fp=2c0571a9594fa26c
+[run] states__morph0__min_overlap_frac=1.0
+[done] states__morph0__min_overlap_frac=1.0 3.6s fp=858bde726f674a91
+[run] states__morph0__spacing=0.05
+[done] states__morph0__spacing=0.05 6.8s fp=02c46d4a551b0a8e
+[run] states__morph0__spacing=0.2
+[done] states__morph0__spacing=0.2 6.8s fp=02c46d4a551b0a8e
+[run] states__morph0__spacing=0.5
+[done] states__morph0__spacing=0.5 7.0s fp=02c46d4a551b0a8e
+[run] states__morph0__tile_size_x0.8
+[done] states__morph0__tile_size_x0.8 5.0s fp=c0c737a4a000007e
+[run] states__morph0__tile_size_x0.9
+[done] states__morph0__tile_size_x0.9 1.3s fp=6b6c26ede33985c3
+[run] states__morph0__tile_size_x1.0
+[done] states__morph0__tile_size_x1.0 5.4s fp=02c46d4a551b0a8e
+[run] states__morph0__tile_size_x1.1
+[done] states__morph0__tile_size_x1.1 1.1s fp=1c9a5099e47a7709
+[run] states__morph0__tile_size_x1.25
+[done] states__morph0__tile_size_x1.25 0.9s fp=f2f0ac6e6724b763
+[run] districts__morph1__baseline
+[done] districts__morph1__baseline 6.0s fp=df64c383b5858b49
+[run] districts__morph1__outside_penalty=0.0
+[done] districts__morph1__outside_penalty=0.0 7.3s fp=0e8329de42d104b8
+[run] districts__morph1__outside_penalty=0.25
+[done] districts__morph1__outside_penalty=0.25 4.2s fp=2e799df705693d6d
+[run] districts__morph1__outside_penalty=0.5
+[done] districts__morph1__outside_penalty=0.5 4.5s fp=6576b640dbf03870
+[run] districts__morph1__outside_penalty=2.0
+[done] districts__morph1__outside_penalty=2.0 4.1s fp=8587df0fcae10f02
+[run] districts__morph1__outside_penalty=4.0
+[done] districts__morph1__outside_penalty=4.0 6.2s fp=aab07e1f72f83368
+[run] districts__morph1__outside_penalty=10.0
+[done] districts__morph1__outside_penalty=10.0 6.9s fp=f277473339fce807
+[run] districts__morph1__max_connectivity_iters=0
+[done] districts__morph1__max_connectivity_iters=0 5.8s fp=df64c383b5858b49
+[run] districts__morph1__max_connectivity_iters=1
+[done] districts__morph1__max_connectivity_iters=1 6.0s fp=df64c383b5858b49
+[run] districts__morph1__max_connectivity_iters=2
+[done] districts__morph1__max_connectivity_iters=2 6.1s fp=df64c383b5858b49
+[run] districts__morph1__max_connectivity_iters=5
+[done] districts__morph1__max_connectivity_iters=5 6.1s fp=df64c383b5858b49
+[run] districts__morph1__max_connectivity_iters=30
+[done] districts__morph1__max_connectivity_iters=30 6.2s fp=df64c383b5858b49
+[run] districts__morph1__disconnected_penalty_mult=0.0
+[done] districts__morph1__disconnected_penalty_mult=0.0 6.1s fp=df64c383b5858b49
+[run] districts__morph1__disconnected_penalty_mult=1.0
+[done] districts__morph1__disconnected_penalty_mult=1.0 4.6s fp=df64c383b5858b49
+[run] districts__morph1__disconnected_penalty_mult=2.0
+[done] districts__morph1__disconnected_penalty_mult=2.0 4.2s fp=df64c383b5858b49
+[run] districts__morph1__disconnected_penalty_mult=5.0
+[done] districts__morph1__disconnected_penalty_mult=5.0 19.2s fp=df64c383b5858b49
+[run] districts__morph1__disconnected_penalty_mult=50.0
+[done] districts__morph1__disconnected_penalty_mult=50.0 4.4s fp=df64c383b5858b49
+[run] districts__morph1__gap_bridge_mult=0.0
+[done] districts__morph1__gap_bridge_mult=0.0 3.9s fp=df64c383b5858b49
+[run] districts__morph1__gap_bridge_mult=1.0
+[done] districts__morph1__gap_bridge_mult=1.0 4.1s fp=df64c383b5858b49
+[run] districts__morph1__gap_bridge_mult=2.0
+[done] districts__morph1__gap_bridge_mult=2.0 4.0s fp=df64c383b5858b49
+[run] districts__morph1__gap_bridge_mult=20.0
+[done] districts__morph1__gap_bridge_mult=20.0 4.1s fp=df64c383b5858b49
+[run] districts__morph1__disconnected_score_weight=0
+[done] districts__morph1__disconnected_score_weight=0 16.7s fp=df64c383b5858b49
+[run] districts__morph1__disconnected_score_weight=1
+[done] districts__morph1__disconnected_score_weight=1 4.2s fp=df64c383b5858b49
+[run] districts__morph1__disconnected_score_weight=10
+[done] districts__morph1__disconnected_score_weight=10 3.9s fp=df64c383b5858b49
+[run] districts__morph1__disconnected_score_weight=1000
+[done] districts__morph1__disconnected_score_weight=1000 4.0s fp=df64c383b5858b49
+[run] districts__morph1__swap_repair_passes=0
+[done] districts__morph1__swap_repair_passes=0 3.8s fp=76942e4df78c40fa
+[run] districts__morph1__swap_repair_passes=1
+[done] districts__morph1__swap_repair_passes=1 4.9s fp=ba709fb15bf22719
+[run] districts__morph1__swap_repair_passes=2
+[done] districts__morph1__swap_repair_passes=2 3.8s fp=df64c383b5858b49
+[run] districts__morph1__swap_repair_passes=5
+[done] districts__morph1__swap_repair_passes=5 3.7s fp=df64c383b5858b49
+[run] districts__morph1__swap_repair_passes=30
+[done] districts__morph1__swap_repair_passes=30 3.9s fp=df64c383b5858b49
+[run] districts__morph1__ring_swapback_max_hops=0
+[done] districts__morph1__ring_swapback_max_hops=0 3.8s fp=1805d87e64ce6acd
+[run] districts__morph1__ring_swapback_max_hops=1
+[done] districts__morph1__ring_swapback_max_hops=1 4.2s fp=1ce9421f07691b1c
+[run] districts__morph1__ring_swapback_max_hops=2
+[done] districts__morph1__ring_swapback_max_hops=2 5.8s fp=f738129ef7493ab2
+[run] districts__morph1__ring_swapback_max_hops=4
+[done] districts__morph1__ring_swapback_max_hops=4 5.8s fp=27530fdb617db9fb
+[run] districts__morph1__ring_swapback_max_hops=8
+[done] districts__morph1__ring_swapback_max_hops=8 5.9s fp=46d677e7aba0061c
+[run] districts__morph1__ring_swapback_max_hops=32
+[done] districts__morph1__ring_swapback_max_hops=32 6.4s fp=70978597d8d837e7
+[run] districts__morph1__dw0.25_op0.0
+[done] districts__morph1__dw0.25_op0.0 6.0s fp=7e3f66fee776d1f0
+[run] districts__morph1__dw0.25_op0.5
+[done] districts__morph1__dw0.25_op0.5 7.3s fp=493eb6202f933b2e
+[run] districts__morph1__dw0.25_op1.0
+[done] districts__morph1__dw0.25_op1.0 8.0s fp=6a486c1e267d6fae
+[run] districts__morph1__dw0.25_op2.0
+[done] districts__morph1__dw0.25_op2.0 13.3s fp=a0d6b413766d9e4c
+[run] districts__morph1__dw0.25_op4.0
+[done] districts__morph1__dw0.25_op4.0 4.4s fp=8d8d04105cba5c8e
+[run] districts__morph1__dw1.0_op0.0
+[done] districts__morph1__dw1.0_op0.0 3.8s fp=0e8329de42d104b8
+[run] districts__morph1__dw1.0_op0.5
+[done] districts__morph1__dw1.0_op0.5 3.9s fp=6576b640dbf03870
+[run] districts__morph1__dw1.0_op2.0
+[done] districts__morph1__dw1.0_op2.0 4.2s fp=8587df0fcae10f02
+[run] districts__morph1__dw1.0_op4.0
+[done] districts__morph1__dw1.0_op4.0 5.0s fp=aab07e1f72f83368
+[run] districts__morph1__dw4.0_op0.0
+[done] districts__morph1__dw4.0_op0.0 6.3s fp=5a12fedec354407c
+[run] districts__morph1__dw4.0_op0.5
+[done] districts__morph1__dw4.0_op0.5 6.0s fp=551b0eec9c69e4cf
+[run] districts__morph1__dw4.0_op1.0
+[done] districts__morph1__dw4.0_op1.0 6.5s fp=30454e161ff8618d
+[run] districts__morph1__dw4.0_op2.0
+[done] districts__morph1__dw4.0_op2.0 6.6s fp=f51806622321f63d
+[run] districts__morph1__dw4.0_op4.0
+[done] districts__morph1__dw4.0_op4.0 6.5s fp=03b00215ba2be483
+[run] districts__morph1__extra_tile_rings=0
+[done] districts__morph1__extra_tile_rings=0 5.5s fp=620940d096e4d316
+[run] districts__morph1__extra_tile_rings=2
+[done] districts__morph1__extra_tile_rings=2 7.3s fp=f2d1267591d95a3b
+[run] districts__morph1__extra_tile_rings=3
+[done] districts__morph1__extra_tile_rings=3 26.1s fp=9756a3166c2d3758
+[run] districts__morph1__extra_tile_rings=5
+[done] districts__morph1__extra_tile_rings=5 41.3s fp=d177a3f64277ac63
+[run] districts__morph1__min_overlap_frac=0.02
+[done] districts__morph1__min_overlap_frac=0.02 13.6s fp=4eb10a4cd6c651fc
+[run] districts__morph1__min_overlap_frac=0.25
+[done] districts__morph1__min_overlap_frac=0.25 6.2s fp=7ee753893a456376
+[run] districts__morph1__min_overlap_frac=0.5
+[done] districts__morph1__min_overlap_frac=0.5 6.0s fp=c768f43b4ccc92b0
+[run] districts__morph1__min_overlap_frac=0.75
+[done] districts__morph1__min_overlap_frac=0.75 6.4s fp=8a405d165bd685c3
+[run] districts__morph1__min_overlap_frac=1.0
+[done] districts__morph1__min_overlap_frac=1.0 10.1s fp=de71d3f1da3a73c4
+[run] districts__morph1__spacing=0.05
+[done] districts__morph1__spacing=0.05 4.3s fp=df64c383b5858b49
+[run] districts__morph1__spacing=0.2
+[done] districts__morph1__spacing=0.2 4.2s fp=df64c383b5858b49
+[run] districts__morph1__spacing=0.5
+[done] districts__morph1__spacing=0.5 6.0s fp=df64c383b5858b49
+[run] districts__morph1__tile_size_x0.8
+[done] districts__morph1__tile_size_x0.8 6.3s fp=b780d134d2981075
+[run] districts__morph1__tile_size_x0.9
+[done] districts__morph1__tile_size_x0.9 7.8s fp=33f3b1cc91d7f9f9
+[run] districts__morph1__tile_size_x1.0
+[done] districts__morph1__tile_size_x1.0 3.8s fp=df64c383b5858b49
+[run] districts__morph1__tile_size_x1.1
+[done] districts__morph1__tile_size_x1.1 4.1s fp=7b6d14d5e3ba6c23
+[run] districts__morph1__tile_size_x1.25
+[done] districts__morph1__tile_size_x1.25 3.6s fp=d8472725d5576022
+[run] districts__morph0__baseline
+[done] districts__morph0__baseline 3.5s fp=485616d81cee96ad
+[run] districts__morph0__outside_penalty=0.0
+[done] districts__morph0__outside_penalty=0.0 4.3s fp=6ae019e028d12102
+[run] districts__morph0__outside_penalty=0.25
+[done] districts__morph0__outside_penalty=0.25 10.2s fp=8f82c0079190d7eb
+[run] districts__morph0__outside_penalty=0.5
+[done] districts__morph0__outside_penalty=0.5 6.0s fp=1d7c28521a163cbe
+[run] districts__morph0__outside_penalty=2.0
+[done] districts__morph0__outside_penalty=2.0 3.6s fp=b7566a830511da5f
+[run] districts__morph0__outside_penalty=4.0
+[done] districts__morph0__outside_penalty=4.0 5.4s fp=8db2a9be8bd6fed6
+[run] districts__morph0__outside_penalty=10.0
+[done] districts__morph0__outside_penalty=10.0 24.3s fp=6250b403d84d37bf
+[run] districts__morph0__max_connectivity_iters=0
+[done] districts__morph0__max_connectivity_iters=0 16.1s fp=351e8ee592043e74
+[run] districts__morph0__max_connectivity_iters=1
+[done] districts__morph0__max_connectivity_iters=1 5.4s fp=14d3431ca690e538
+[run] districts__morph0__max_connectivity_iters=2
+[done] districts__morph0__max_connectivity_iters=2 5.1s fp=485616d81cee96ad
+[run] districts__morph0__max_connectivity_iters=5
+[done] districts__morph0__max_connectivity_iters=5 5.4s fp=485616d81cee96ad
+[run] districts__morph0__max_connectivity_iters=30
+[done] districts__morph0__max_connectivity_iters=30 5.3s fp=485616d81cee96ad
+[run] districts__morph0__disconnected_penalty_mult=0.0
+[done] districts__morph0__disconnected_penalty_mult=0.0 5.1s fp=1f0801de35664907
+[run] districts__morph0__disconnected_penalty_mult=1.0
+[done] districts__morph0__disconnected_penalty_mult=1.0 5.2s fp=485616d81cee96ad
+[run] districts__morph0__disconnected_penalty_mult=2.0
+[done] districts__morph0__disconnected_penalty_mult=2.0 5.4s fp=485616d81cee96ad
+[run] districts__morph0__disconnected_penalty_mult=5.0
+[done] districts__morph0__disconnected_penalty_mult=5.0 5.3s fp=485616d81cee96ad
+[run] districts__morph0__disconnected_penalty_mult=50.0
+[done] districts__morph0__disconnected_penalty_mult=50.0 5.3s fp=485616d81cee96ad
+[run] districts__morph0__gap_bridge_mult=0.0
+[done] districts__morph0__gap_bridge_mult=0.0 5.3s fp=485616d81cee96ad
+[run] districts__morph0__gap_bridge_mult=1.0
+[done] districts__morph0__gap_bridge_mult=1.0 5.4s fp=485616d81cee96ad
+[run] districts__morph0__gap_bridge_mult=2.0
+[done] districts__morph0__gap_bridge_mult=2.0 5.3s fp=485616d81cee96ad
+[run] districts__morph0__gap_bridge_mult=20.0
+[done] districts__morph0__gap_bridge_mult=20.0 5.3s fp=485616d81cee96ad
+[run] districts__morph0__disconnected_score_weight=0
+[done] districts__morph0__disconnected_score_weight=0 4.8s fp=485616d81cee96ad
+[run] districts__morph0__disconnected_score_weight=1
+[done] districts__morph0__disconnected_score_weight=1 3.7s fp=485616d81cee96ad
+[run] districts__morph0__disconnected_score_weight=10
+[done] districts__morph0__disconnected_score_weight=10 3.6s fp=485616d81cee96ad
+[run] districts__morph0__disconnected_score_weight=1000
+[done] districts__morph0__disconnected_score_weight=1000 3.4s fp=485616d81cee96ad
+[run] districts__morph0__swap_repair_passes=0
+[done] districts__morph0__swap_repair_passes=0 3.3s fp=5fbe23f38eb3a1c0
+[run] districts__morph0__swap_repair_passes=1
+[done] districts__morph0__swap_repair_passes=1 3.4s fp=47247c667800df29
+[run] districts__morph0__swap_repair_passes=2
+[done] districts__morph0__swap_repair_passes=2 3.4s fp=2cba0e94e41636e7
+[run] districts__morph0__swap_repair_passes=5
+[done] districts__morph0__swap_repair_passes=5 3.5s fp=55b75a780fadb1ca
+[run] districts__morph0__swap_repair_passes=30
+[done] districts__morph0__swap_repair_passes=30 3.5s fp=485616d81cee96ad
+[run] districts__morph0__ring_swapback_max_hops=0
+[done] districts__morph0__ring_swapback_max_hops=0 3.4s fp=e0e7656a5e5004ba
+[run] districts__morph0__ring_swapback_max_hops=1
+[done] districts__morph0__ring_swapback_max_hops=1 3.9s fp=827a3f931e922652
+[run] districts__morph0__ring_swapback_max_hops=2
+[done] districts__morph0__ring_swapback_max_hops=2 3.8s fp=6d0af02d59d7af51
+[run] districts__morph0__ring_swapback_max_hops=4
+[done] districts__morph0__ring_swapback_max_hops=4 3.8s fp=8a5939181652a32b
+[run] districts__morph0__ring_swapback_max_hops=8
+[done] districts__morph0__ring_swapback_max_hops=8 4.2s fp=b33849dc03f9e291
+[run] districts__morph0__ring_swapback_max_hops=32
+[done] districts__morph0__ring_swapback_max_hops=32 3.5s fp=ca3fd5c250c760b5
+[run] districts__morph0__dw0.25_op0.0
+[done] districts__morph0__dw0.25_op0.0 3.3s fp=b0a5d2c73fc6b56e
+[run] districts__morph0__dw0.25_op0.5
+[done] districts__morph0__dw0.25_op0.5 10.1s fp=089099e524e8cd6c
+[run] districts__morph0__dw0.25_op1.0
+[done] districts__morph0__dw0.25_op1.0 3.7s fp=a6ed7f12e59cf67f
+[run] districts__morph0__dw0.25_op2.0
+[done] districts__morph0__dw0.25_op2.0 5.2s fp=fb76ecbe62e1b053
+[run] districts__morph0__dw0.25_op4.0
+[done] districts__morph0__dw0.25_op4.0 10.1s fp=37a381c49df70738
+[run] districts__morph0__dw1.0_op0.0
+[done] districts__morph0__dw1.0_op0.0 4.2s fp=6ae019e028d12102
+[run] districts__morph0__dw1.0_op0.5
+[done] districts__morph0__dw1.0_op0.5 5.8s fp=1d7c28521a163cbe
+[run] districts__morph0__dw1.0_op2.0
+[done] districts__morph0__dw1.0_op2.0 3.8s fp=b7566a830511da5f
+[run] districts__morph0__dw1.0_op4.0
+[done] districts__morph0__dw1.0_op4.0 5.9s fp=8db2a9be8bd6fed6
+[run] districts__morph0__dw4.0_op0.0
+[done] districts__morph0__dw4.0_op0.0 3.5s fp=e7ee64f476251324
+[run] districts__morph0__dw4.0_op0.5
+[done] districts__morph0__dw4.0_op0.5 3.7s fp=9ccf596d111a1d04
+[run] districts__morph0__dw4.0_op1.0
+[done] districts__morph0__dw4.0_op1.0 3.3s fp=b402626930e7baa9
+[run] districts__morph0__dw4.0_op2.0
+[done] districts__morph0__dw4.0_op2.0 11.8s fp=74cc40b3c3d4ac0a
+[run] districts__morph0__dw4.0_op4.0
+[done] districts__morph0__dw4.0_op4.0 3.5s fp=36c50735e8e9d4f2
+[run] districts__morph0__extra_tile_rings=0
+[done] districts__morph0__extra_tile_rings=0 14.9s fp=4e2769821d582434
+[run] districts__morph0__extra_tile_rings=2
+[done] districts__morph0__extra_tile_rings=2 5.0s fp=5618a01bc747e87f
+[run] districts__morph0__extra_tile_rings=3
+[done] districts__morph0__extra_tile_rings=3 16.9s fp=62915d74880749b4
+[run] districts__morph0__extra_tile_rings=5
+[done] districts__morph0__extra_tile_rings=5 23.6s fp=0f4ce250cf7bc067
+[run] districts__morph0__min_overlap_frac=0.02
+[done] districts__morph0__min_overlap_frac=0.02 18.0s fp=c77b9af699601e30
+[run] districts__morph0__min_overlap_frac=0.25
+[done] districts__morph0__min_overlap_frac=0.25 10.7s fp=103e57537c20600b
+[run] districts__morph0__min_overlap_frac=0.5
+[done] districts__morph0__min_overlap_frac=0.5 9.9s fp=c5c7ad5213641248
+[run] districts__morph0__min_overlap_frac=0.75
+[done] districts__morph0__min_overlap_frac=0.75 64.3s fp=68de91ca1aa82304
+[run] districts__morph0__min_overlap_frac=1.0
+[done] districts__morph0__min_overlap_frac=1.0 60.5s fp=30fa02cb31ccf080
+[run] districts__morph0__spacing=0.05
+[done] districts__morph0__spacing=0.05 4.8s fp=485616d81cee96ad
+[run] districts__morph0__spacing=0.2
+[done] districts__morph0__spacing=0.2 5.4s fp=485616d81cee96ad
+[run] districts__morph0__spacing=0.5
+[done] districts__morph0__spacing=0.5 5.0s fp=485616d81cee96ad
+[run] districts__morph0__tile_size_x0.8
+[done] districts__morph0__tile_size_x0.8 18.5s fp=81b30e6b09ab6727
+[run] districts__morph0__tile_size_x0.9
+[done] districts__morph0__tile_size_x0.9 10.0s fp=69ba10288eddeae4
+[run] districts__morph0__tile_size_x1.0
+[done] districts__morph0__tile_size_x1.0 5.5s fp=485616d81cee96ad
+[run] districts__morph0__tile_size_x1.1
+[done] districts__morph0__tile_size_x1.1 4.9s fp=56a0797f6632a72a
+[run] districts__morph0__tile_size_x1.25
+[done] districts__morph0__tile_size_x1.25 4.1s fp=aa296c5c06da52d6
+Traceback (most recent call last):
+  File "/home/fakl/carto-flow/visual_checks/mosaic-options-sweep/run.py", line 263, in <module>
+    main()
+  File "/home/fakl/carto-flow/visual_checks/mosaic-options-sweep/run.py", line 258, in main
+    sweep_case(case, morph=bool(int(m)), only_knobs=knobs)
+  File "/home/fakl/carto-flow/visual_checks/mosaic-options-sweep/run.py", line 172, in sweep_case
+    ctx = IN.input_context(gdf, tile_count=tile_count, group_by=group_by)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fakl/carto-flow/visual_checks/mosaic-options-sweep/inputs.py", line 66, in input_context
+    "study_union": build_study_union(gdf),
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fakl/carto-flow/visual_checks/grid-vs-mosaic-similarity/metrics.py", line 560, in build_study_union
+    return unary_union(list(gdf.geometry))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fakl/carto-flow/.venv/lib/python3.12/site-packages/shapely/ops.py", line 117, in unary_union
+    return shapely.union_all(geoms, axis=None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fakl/carto-flow/.venv/lib/python3.12/site-packages/shapely/decorators.py", line 173, in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fakl/carto-flow/.venv/lib/python3.12/site-packages/shapely/decorators.py", line 88, in wrapped
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/fakl/carto-flow/.venv/lib/python3.12/site-packages/shapely/set_operations.py", line 553, in union_all
+    return lib.unary_union(collections, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+shapely.errors.GEOSException: TopologyException: side location conflict at -10274814.682513239 7409719.5369396824. This can occur if the input geometry is invalid.
+/home/fakl/carto-flow/visual_checks/mosaic-options-sweep/run.py:116: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  res = morph_geometries(
+[run] world__morph1__baseline
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__baseline 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__outside_penalty=0.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__outside_penalty=0.0 1.6s fp=2c753852cc71d0eb
+[run] world__morph1__outside_penalty=0.25
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__outside_penalty=0.25 1.7s fp=26a11503317105bb
+[run] world__morph1__outside_penalty=0.5
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__outside_penalty=0.5 1.7s fp=9e0f4c270d192e39
+[run] world__morph1__outside_penalty=2.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__outside_penalty=2.0 1.7s fp=26ec7e564b4615eb
+[run] world__morph1__outside_penalty=4.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__outside_penalty=4.0 1.8s fp=13bad6899322530a
+[run] world__morph1__outside_penalty=10.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__outside_penalty=10.0 1.8s fp=334db0b918d64e46
+[run] world__morph1__max_connectivity_iters=0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__max_connectivity_iters=0 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__max_connectivity_iters=1
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__max_connectivity_iters=1 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__max_connectivity_iters=2
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__max_connectivity_iters=2 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__max_connectivity_iters=5
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__max_connectivity_iters=5 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__max_connectivity_iters=30
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__max_connectivity_iters=30 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__disconnected_penalty_mult=0.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__disconnected_penalty_mult=0.0 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__disconnected_penalty_mult=1.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__disconnected_penalty_mult=1.0 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__disconnected_penalty_mult=2.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__disconnected_penalty_mult=2.0 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__disconnected_penalty_mult=5.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__disconnected_penalty_mult=5.0 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__disconnected_penalty_mult=50.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__disconnected_penalty_mult=50.0 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__gap_bridge_mult=0.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__gap_bridge_mult=0.0 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__gap_bridge_mult=1.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__gap_bridge_mult=1.0 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__gap_bridge_mult=2.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__gap_bridge_mult=2.0 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__gap_bridge_mult=20.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__gap_bridge_mult=20.0 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__disconnected_score_weight=0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__disconnected_score_weight=0 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__disconnected_score_weight=1
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__disconnected_score_weight=1 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__disconnected_score_weight=10
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__disconnected_score_weight=10 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__disconnected_score_weight=1000
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__disconnected_score_weight=1000 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__swap_repair_passes=0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__swap_repair_passes=0 1.8s fp=e592d2ae2cc646ac
+[run] world__morph1__swap_repair_passes=1
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__swap_repair_passes=1 1.8s fp=a3ca0b25b79ad187
+[run] world__morph1__swap_repair_passes=2
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__swap_repair_passes=2 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__swap_repair_passes=5
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__swap_repair_passes=5 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__swap_repair_passes=30
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__swap_repair_passes=30 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__ring_swapback_max_hops=0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__ring_swapback_max_hops=0 1.6s fp=753b93a26d7c764c
+[run] world__morph1__ring_swapback_max_hops=1
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__ring_swapback_max_hops=1 1.6s fp=ef40cdb284e9b851
+[run] world__morph1__ring_swapback_max_hops=2
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__ring_swapback_max_hops=2 1.8s fp=a6b666e20132de77
+[run] world__morph1__ring_swapback_max_hops=4
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__ring_swapback_max_hops=4 2.0s fp=730871811518c9d8
+[run] world__morph1__ring_swapback_max_hops=8
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__ring_swapback_max_hops=8 1.8s fp=819ab073c2ac1b90
+[run] world__morph1__ring_swapback_max_hops=32
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__ring_swapback_max_hops=32 1.8s fp=602eb8c7b312020d
+[run] world__morph1__dw0.25_op0.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw0.25_op0.0 1.7s fp=4959bc5e4c5e1bd8
+[run] world__morph1__dw0.25_op0.5
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw0.25_op0.5 1.7s fp=32b33034a6374f24
+[run] world__morph1__dw0.25_op1.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw0.25_op1.0 2.0s fp=8d4734a5d349b045
+[run] world__morph1__dw0.25_op2.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw0.25_op2.0 2.3s fp=9955a071e1d2ddc0
+[run] world__morph1__dw0.25_op4.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw0.25_op4.0 2.0s fp=562bc78ae6ada744
+[run] world__morph1__dw1.0_op0.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw1.0_op0.0 1.7s fp=2c753852cc71d0eb
+[run] world__morph1__dw1.0_op0.5
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw1.0_op0.5 1.7s fp=9e0f4c270d192e39
+[run] world__morph1__dw1.0_op2.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw1.0_op2.0 1.8s fp=26ec7e564b4615eb
+[run] world__morph1__dw1.0_op4.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw1.0_op4.0 1.7s fp=13bad6899322530a
+[run] world__morph1__dw4.0_op0.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw4.0_op0.0 1.6s fp=e955c154f7611de2
+[run] world__morph1__dw4.0_op0.5
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw4.0_op0.5 1.8s fp=7374fcb11ccf6bcd
+[run] world__morph1__dw4.0_op1.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw4.0_op1.0 1.9s fp=9ebaa14c4301bb36
+[run] world__morph1__dw4.0_op2.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw4.0_op2.0 2.0s fp=a85853e9a58febc0
+[run] world__morph1__dw4.0_op4.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__dw4.0_op4.0 3.0s fp=8240b6aa8faecd47
+[run] world__morph1__extra_tile_rings=0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__extra_tile_rings=0 1.4s fp=3f167f8651368b33
+[run] world__morph1__extra_tile_rings=2
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__extra_tile_rings=2 2.5s fp=72f29387dc1b47e1
+[run] world__morph1__extra_tile_rings=3
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__extra_tile_rings=3 3.6s fp=a0df99642fc2e139
+[run] world__morph1__extra_tile_rings=5
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__extra_tile_rings=5 3.0s fp=ec3da22be3433fae
+[run] world__morph1__min_overlap_frac=0.02
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__min_overlap_frac=0.02 2.5s fp=625cdb9172defa9c
+[run] world__morph1__min_overlap_frac=0.25
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__min_overlap_frac=0.25 1.6s fp=6f6f67720e870e78
+[run] world__morph1__min_overlap_frac=0.5
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__min_overlap_frac=0.5 2.0s fp=f224a99e85a3afdd
+[run] world__morph1__min_overlap_frac=0.75
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__min_overlap_frac=0.75 3.3s fp=71ff4a0c58089e31
+[run] world__morph1__min_overlap_frac=1.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__min_overlap_frac=1.0 7.2s fp=f9687a5648295528
+[run] world__morph1__spacing=0.05
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__spacing=0.05 1.8s fp=0360cc0a1baf91e1
+[run] world__morph1__spacing=0.2
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__spacing=0.2 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__spacing=0.5
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__spacing=0.5 1.9s fp=0360cc0a1baf91e1
+[run] world__morph1__tile_size_x0.8
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__tile_size_x0.8 1.9s fp=833e1a402a2264c1
+[run] world__morph1__tile_size_x0.9
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__tile_size_x0.9 1.7s fp=def915db743913b2
+[run] world__morph1__tile_size_x1.0
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__tile_size_x1.0 1.6s fp=0360cc0a1baf91e1
+[run] world__morph1__tile_size_x1.1
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__tile_size_x1.1 1.2s fp=66fddcafe718d53e
+[run] world__morph1__tile_size_x1.25
+/home/fakl/cf-sweep-main/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[done] world__morph1__tile_size_x1.25 1.1s fp=3f5916fbc4e0b5eb
+[run] world__morph0__baseline
+[done] world__morph0__baseline 3.6s fp=2944bb0cc1e3f947
+[run] world__morph0__outside_penalty=0.0
+[done] world__morph0__outside_penalty=0.0 1.6s fp=8a7e7a6f1169f135
+[run] world__morph0__outside_penalty=0.25
+[done] world__morph0__outside_penalty=0.25 1.8s fp=88acd09b3da5f5e9
+[run] world__morph0__outside_penalty=0.5
+[done] world__morph0__outside_penalty=0.5 3.7s fp=b6735d622482ff86
+[run] world__morph0__outside_penalty=2.0
+[done] world__morph0__outside_penalty=2.0 4.7s fp=0489d0753483cccb
+[run] world__morph0__outside_penalty=4.0
+[done] world__morph0__outside_penalty=4.0 3.8s fp=f7db9b59d766ed79
+[run] world__morph0__outside_penalty=10.0
+[done] world__morph0__outside_penalty=10.0 5.2s fp=d2fa99b863553b6e
+[run] world__morph0__max_connectivity_iters=0
+[done] world__morph0__max_connectivity_iters=0 3.5s fp=2944bb0cc1e3f947
+[run] world__morph0__max_connectivity_iters=1
+[done] world__morph0__max_connectivity_iters=1 3.9s fp=2944bb0cc1e3f947
+[run] world__morph0__max_connectivity_iters=2
+[done] world__morph0__max_connectivity_iters=2 3.6s fp=2944bb0cc1e3f947
+[run] world__morph0__max_connectivity_iters=5
+[done] world__morph0__max_connectivity_iters=5 3.6s fp=2944bb0cc1e3f947
+[run] world__morph0__max_connectivity_iters=30
+[done] world__morph0__max_connectivity_iters=30 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__disconnected_penalty_mult=0.0
+[done] world__morph0__disconnected_penalty_mult=0.0 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__disconnected_penalty_mult=1.0
+[done] world__morph0__disconnected_penalty_mult=1.0 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__disconnected_penalty_mult=2.0
+[done] world__morph0__disconnected_penalty_mult=2.0 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__disconnected_penalty_mult=5.0
+[done] world__morph0__disconnected_penalty_mult=5.0 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__disconnected_penalty_mult=50.0
+[done] world__morph0__disconnected_penalty_mult=50.0 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__gap_bridge_mult=0.0
+[done] world__morph0__gap_bridge_mult=0.0 4.1s fp=2944bb0cc1e3f947
+[run] world__morph0__gap_bridge_mult=1.0
+[done] world__morph0__gap_bridge_mult=1.0 3.6s fp=2944bb0cc1e3f947
+[run] world__morph0__gap_bridge_mult=2.0
+[done] world__morph0__gap_bridge_mult=2.0 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__gap_bridge_mult=20.0
+[done] world__morph0__gap_bridge_mult=20.0 3.6s fp=2944bb0cc1e3f947
+[run] world__morph0__disconnected_score_weight=0
+[done] world__morph0__disconnected_score_weight=0 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__disconnected_score_weight=1
+[done] world__morph0__disconnected_score_weight=1 3.6s fp=2944bb0cc1e3f947
+[run] world__morph0__disconnected_score_weight=10
+[done] world__morph0__disconnected_score_weight=10 3.6s fp=2944bb0cc1e3f947
+[run] world__morph0__disconnected_score_weight=1000
+[done] world__morph0__disconnected_score_weight=1000 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__swap_repair_passes=0
+[done] world__morph0__swap_repair_passes=0 1.5s fp=b8e4da9eb1f31a67
+[run] world__morph0__swap_repair_passes=1
+[done] world__morph0__swap_repair_passes=1 2.1s fp=85a26dd77739f2ae
+[run] world__morph0__swap_repair_passes=2
+[done] world__morph0__swap_repair_passes=2 2.6s fp=369517866cec2fa0
+[run] world__morph0__swap_repair_passes=5
+[done] world__morph0__swap_repair_passes=5 3.6s fp=2944bb0cc1e3f947
+[run] world__morph0__swap_repair_passes=30
+[done] world__morph0__swap_repair_passes=30 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__ring_swapback_max_hops=0
+[done] world__morph0__ring_swapback_max_hops=0 3.6s fp=97b2c606e8b35fc9
+[run] world__morph0__ring_swapback_max_hops=1
+[done] world__morph0__ring_swapback_max_hops=1 3.0s fp=2848066857b3c34b
+[run] world__morph0__ring_swapback_max_hops=2
+[done] world__morph0__ring_swapback_max_hops=2 3.2s fp=ab36746b28046e08
+[run] world__morph0__ring_swapback_max_hops=4
+[done] world__morph0__ring_swapback_max_hops=4 3.0s fp=a22e0e5eb7c8fc14
+[run] world__morph0__ring_swapback_max_hops=8
+[done] world__morph0__ring_swapback_max_hops=8 3.1s fp=cb5dfeb41bdbb76d
+[run] world__morph0__ring_swapback_max_hops=32
+[done] world__morph0__ring_swapback_max_hops=32 3.3s fp=dcb8d77a872180ff
+[run] world__morph0__dw0.25_op0.0
+[done] world__morph0__dw0.25_op0.0 1.5s fp=364cd5055fbd4e51
+[run] world__morph0__dw0.25_op0.5
+[done] world__morph0__dw0.25_op0.5 1.6s fp=b8c42d4c81e9f0b6
+[run] world__morph0__dw0.25_op1.0
+[done] world__morph0__dw0.25_op1.0 2.7s fp=ea5923a560d3c89c
+[run] world__morph0__dw0.25_op2.0
+[done] world__morph0__dw0.25_op2.0 1.7s fp=0995344445f93ac5
+[run] world__morph0__dw0.25_op4.0
+[done] world__morph0__dw0.25_op4.0 3.7s fp=ef8ea9d892e7e808
+[run] world__morph0__dw1.0_op0.0
+[done] world__morph0__dw1.0_op0.0 1.7s fp=8a7e7a6f1169f135
+[run] world__morph0__dw1.0_op0.5
+[done] world__morph0__dw1.0_op0.5 3.6s fp=b6735d622482ff86
+[run] world__morph0__dw1.0_op2.0
+[done] world__morph0__dw1.0_op2.0 4.9s fp=0489d0753483cccb
+[run] world__morph0__dw1.0_op4.0
+[done] world__morph0__dw1.0_op4.0 4.1s fp=f7db9b59d766ed79
+[run] world__morph0__dw4.0_op0.0
+[done] world__morph0__dw4.0_op0.0 2.5s fp=2934c7f39a74df7b
+[run] world__morph0__dw4.0_op0.5
+[done] world__morph0__dw4.0_op0.5 7.0s fp=9c35ccae21e70d29
+[run] world__morph0__dw4.0_op1.0
+[done] world__morph0__dw4.0_op1.0 5.6s fp=7c5150b659bdd978
+[run] world__morph0__dw4.0_op2.0
+[done] world__morph0__dw4.0_op2.0 2.0s fp=7666a7cfe771a0ba
+[run] world__morph0__dw4.0_op4.0
+[done] world__morph0__dw4.0_op4.0 2.4s fp=b54ba38aec898fd7
+[run] world__morph0__extra_tile_rings=0
+[done] world__morph0__extra_tile_rings=0 5.8s fp=8ed05f6d589db6f5
+[run] world__morph0__extra_tile_rings=2
+[done] world__morph0__extra_tile_rings=2 23.0s fp=27664e15d93a8712
+[run] world__morph0__extra_tile_rings=3
+[done] world__morph0__extra_tile_rings=3 10.0s fp=f7de96902b45a119
+[run] world__morph0__extra_tile_rings=5
+[done] world__morph0__extra_tile_rings=5 9.9s fp=37f3cee196a2d1db
+[run] world__morph0__min_overlap_frac=0.02
+[done] world__morph0__min_overlap_frac=0.02 4.5s fp=f0106e94a2199f88
+[run] world__morph0__min_overlap_frac=0.25
+[done] world__morph0__min_overlap_frac=0.25 4.8s fp=db3974849fbb820d
+[run] world__morph0__min_overlap_frac=0.5
+[done] world__morph0__min_overlap_frac=0.5 1.3s fp=bccd5db1d1b86aad
+[run] world__morph0__min_overlap_frac=0.75
+[done] world__morph0__min_overlap_frac=0.75 6.2s fp=161fd4595a33d353
+[run] world__morph0__min_overlap_frac=1.0
+[done] world__morph0__min_overlap_frac=1.0 129.6s fp=bfc25362c6b28300
+[run] world__morph0__spacing=0.05
+[done] world__morph0__spacing=0.05 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__spacing=0.2
+[done] world__morph0__spacing=0.2 3.9s fp=2944bb0cc1e3f947
+[run] world__morph0__spacing=0.5
+[done] world__morph0__spacing=0.5 3.7s fp=2944bb0cc1e3f947
+[run] world__morph0__tile_size_x0.8
+[done] world__morph0__tile_size_x0.8 1.8s fp=7dd68bb1e20556c8
+[run] world__morph0__tile_size_x0.9
+[done] world__morph0__tile_size_x0.9 3.0s fp=7762302f60150170
+[run] world__morph0__tile_size_x1.0
+[done] world__morph0__tile_size_x1.0 4.1s fp=2944bb0cc1e3f947
+[run] world__morph0__tile_size_x1.1
+[done] world__morph0__tile_size_x1.1 4.8s fp=89e2bfd5a4014eed
+[run] world__morph0__tile_size_x1.25
+[done] world__morph0__tile_size_x1.25 1.8s fp=d46a6a75fd4104f6
+[all done]

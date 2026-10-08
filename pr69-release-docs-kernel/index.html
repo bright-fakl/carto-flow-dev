@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #69: Register the Jupyter kernel before the release docs build</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #69: Register the Jupyter kernel before the release docs build</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/69">https://github.com/bright-fakl/carto-flow/pull/69</a></dd>
+<dt>Branch</dt><dd>fix/release-docs-kernel</dd>
+<dt>Base</dt><dd>origin/main @ 9c65b90</dd>
+<dt>Date</dt><dd>2026-09-27 18:05</dd>
+<dt>Before</dt><dd>origin/main @ 9c65b90</dd>
+<dt>After</dt><dd>fix/release-docs-kernel @ fa09ecd</dd>
+<dt>Inputs</dt><dd>n/a - CI workflow change</dd>
+</dl>
+<p class="desc">Cutting 2.0.0-rc1 failed with &quot;No such kernel named carto-flow&quot;. release.yml never registered the kernel that its own docs build needs, so every release would have failed the same way. Also aligns release.yml and deploy-docs.yml to the strict build that gates every pull request.</p>
+<p>No figures. The change is a CI workflow fix with no rendered output.</p>
+<h2>The failure</h2>
+<p><code>gh workflow run release.yml -f version=2.0.0-rc1</code> failed at step 10 of 14:</p>
+<p>``<code> jupyter_client.kernelspec.NoSuchKernel: No such kernel named carto-flow </code>``</p>
+<p>The documentation executes notebooks through mkdocs-jupyter, which needs the project kernel registered first. Two workflows already do it:</p>
+<table>
+<tr><th>workflow</th><th>registers the kernel</th></tr>
+<tr><td><code>main.yml</code> (<code>check-docs</code>)</td><td>yes</td></tr>
+<tr><td><code>deploy-docs.yml</code></td><td>yes</td></tr>
+<tr><td><code>release.yml</code></td><td>**no**</td></tr>
+</table>
+<p>So every release would have failed at the same step. The bug is pre-existing and unrelated to anything merged on 2026-09-27; <code>2.0.0</code> would have hit it identically.</p>
+<h2>Why no earlier signal</h2>
+<p>The kernel is registered in the local development environment and in <code>check-docs</code>, so local builds and every pull request build passed. Only <code>release.yml</code> ran without it, and <code>release.yml</code> had not been run since the kernel requirement was introduced. The failure was reachable only by cutting a release, which is what the release candidate did.</p>
+<p>For the same reason the failure cannot be reproduced locally without unregistering the kernel from the developer&#x27;s own environment, which was not done. The CI log is the evidence.</p>
+<h2>Strict-mode inconsistency, fixed in the same change</h2>
+<p><code>check-docs</code> gates every pull request into main with <code>mkdocs build -s</code>. Neither <code>release.yml</code> nor <code>deploy-docs.yml</code> used <code>-s</code>:</p>
+<table>
+<tr><th>workflow</th><th>before</th><th>after</th></tr>
+<tr><td><code>main.yml</code></td><td><code>mkdocs build -s</code></td><td>unchanged</td></tr>
+<tr><td><code>release.yml</code></td><td><code>mkdocs build -d site</code></td><td><code>mkdocs build -s -d site</code></td></tr>
+<tr><td><code>deploy-docs.yml</code></td><td><code>mkdocs build -d site</code></td><td><code>mkdocs build -s -d site</code></td></tr>
+</table>
+<p>Both accepted warnings that the pull request producing the commit would have rejected, and <code>deploy-docs.yml</code> publishes to the production site. Aligning them is a slight widening beyond the reported failure and can be split out if the narrower change is preferred.</p>
+<h2>What the failed release run left behind</h2>
+<p>The run completed nine steps before failing, so several effects are permanent:</p>
+<table>
+<tr><th></th><th>state</th></tr>
+<tr><td>version files on <code>main</code></td><td>bumped to <code>2.0.0-rc1</code> (commit <code>9c65b90</code>)</td></tr>
+<tr><td>tag <code>2.0.0-rc1</code></td><td>created</td></tr>
+<tr><td>GitHub release</td><td>created, marked Pre-release</td></tr>
+<tr><td>documentation</td><td>build failed; deploy skipped, as it is for any pre-release</td></tr>
+<tr><td>TestPyPI</td><td>unchanged</td></tr>
+<tr><td>real PyPI</td><td>unchanged - still only <code>1.1.2</code></td></tr>
+</table>
+<p>Nothing was published. The irreversible surface was never touched, which is the protection the release-candidate flow exists to provide.</p>
+<h2>Verification</h2>
+<ul><li><code>mkdocs build -s</code> on <code>main</code> at <code>2.0.0-rc1</code>: succeeds, 269.85 s. The strict</li></ul>
+<p>flag does not break the release.</p>
+<ul><li>All three workflows register the kernel, confirmed by grep.</li><li>Both modified workflow files parse as YAML.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

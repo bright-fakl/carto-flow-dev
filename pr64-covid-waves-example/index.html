@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #64: Add a COVID-19 waves flow cartogram example</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #64: Add a COVID-19 waves flow cartogram example</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/64">https://github.com/bright-fakl/carto-flow/pull/64</a></dd>
+<dt>Branch</dt><dd>feat/covid-waves-example</dd>
+<dt>Base</dt><dd>origin/main @ ba87610</dd>
+<dt>Date</dt><dd>2026-09-26 11:20</dd>
+<dt>Before</dt><dd>n/a - new example, nothing to compare against</dd>
+<dt>After</dt><dd>feat/covid-waves-example @ 58fdf93</dd>
+<dt>Inputs</dt><dd>US census snapshot (49 contiguous geographies, bundled) densified to 1 km; bundled JHU CSSE weekly case series, keyframes every second week from 2020-03-22 to 2020-12-27 (21 frames); multiresolution_morph(min_resolution=128, levels=4)</dd>
+</dl>
+<p class="desc">A new bundled weekly case series and a gallery animation of the 2020 waves, where area is cases per 100k and color is the raw case count. Check the early keyframes - at 300:1 area ratios several states compress into lens-shaped slivers.</p>
+<h2>What this adds</h2>
+<ul><li><code>src/carto_flow/data/us_covid_weekly.parquet</code> (35 KB) - weekly new confirmed</li></ul>
+<p>cases per state, 2020-01-26 to 2023-03-12, 9,184 rows.</p>
+<ul><li><code>load_us_covid_weekly()</code> and its entry in the data reference table.</li><li><code>scripts/download_covid_cases.py</code> - regenerates the parquet from the JHU</li></ul>
+<p>source, documenting the derivation (county rows summed to states, cumulative differenced to daily, negative corrections clipped to zero, summed into weeks ending Sunday).</p>
+<ul><li><code>docs/examples/flow_cartogram/plot_flow_covid_waves.py</code> - the animation.</li><li>Four tests in <code>tests/test_data_validity.py</code>, which previously covered only</li></ul>
+<p>geometry validity and now also checks the tabular loaders. One of them reproduces JHU&#x27;s reported US total: the series sums to 103.9 million confirmed cases.</p>
+<h2>Open question for review</h2>
+<p>The early keyframes are degenerate. Every frame converges - <code>MorphStatus</code> is <code>CONVERGED</code> for all 21 - but converging on a 303:1 area ratio means the smallest states become slivers, and in the 2020-04-05 and 2020-05-17 panels above the result no longer reads as a map of the United States.</p>
+<table>
+<tr><th>keyframe</th><th>min per 100k</th><th>max per 100k</th><th>ratio</th></tr>
+<tr><td>2020-03-22</td><td>0.89 (West Virginia)</td><td>74.6</td><td>84:1</td></tr>
+<tr><td>2020-04-05</td><td>7.71 (Minnesota)</td><td>374.3</td><td>49:1</td></tr>
+<tr><td>2020-04-19</td><td>4.33 (Montana)</td><td>263.9</td><td>61:1</td></tr>
+<tr><td>2020-05-03</td><td>0.66 (Montana)</td><td>199.5</td><td>303:1</td></tr>
+<tr><td>2020-05-17</td><td>0.94 (Montana)</td><td>144.0</td><td>153:1</td></tr>
+<tr><td>2020-05-31</td><td>3.39 (Montana)</td><td>107.1</td><td>32:1</td></tr>
+</table>
+<p>The zero problem raised earlier is already handled, but by choosing the start date rather than by flooring: the series starts at 2020-03-22, the first week in which every contiguous geography had recorded a case, so no state is ever sized zero. What is left is the spread among the non-zero values.</p>
+<p>Three ways to tame it, none applied:</p>
+<p>1. Leave it. The distortion is the data, and the animation recovers after May. 2. Floor the sizing column, for example at a small percentile of each week&#x27;s values, so no state falls below a readable area. Costs fidelity in exactly the weeks where the contrast is the story. 3. Start the animation later, at the cost of losing the Northeast wave, which is the clearest of the three.</p>
+<p>This is a judgment call about what the example should teach, so it is left for you rather than decided here.</p>
+<h2>Corrections made to the agent&#x27;s draft</h2>
+<p>The example&#x27;s prose asserted several numbers that the data does not support:</p>
+<ul><li>&quot;North and South Dakota are the largest shapes on the map from October into</li></ul>
+<p>December.&quot; Only North Dakota is ever the largest in a keyframe, and only from 2020-10-04 to 2020-11-29. South Dakota peaks at second. Tennessee leads on 2020-12-13 and California on 2020-12-27.</p>
+<ul><li>&quot;California, which recorded roughly eighteen times as many cases that week.&quot;</li></ul>
+<p>In the week ending 2020-11-15 California recorded 60,704 cases against North Dakota&#x27;s 9,682 and South Dakota&#x27;s 9,977 - 6.3 times North Dakota alone, 3.1 times the two combined.</p>
+<ul><li>&quot;Each keyframe is a cartogram sized to that fortnight&#x27;s confirmed cases.&quot; The</li></ul>
+<p>keyframes are sampled every second week, but each is sized to one week&#x27;s cases, not two weeks&#x27; worth.</p>
+<p>The Sun Belt claim does hold: Arizona, Florida, Louisiana and Mississippi all exceed 250 per 100k within the June-August keyframes.</p>
+<p><code>densify_coverage(us_states, max_segment_length=5000)</code> was a no-op - the bundled boundaries already carry a vertex every 5 km. Lowering it to 1 km cuts the &quot;straight segment&quot; warnings from 12 to 3 over the 21 keyframes.</p>
+<h2>The residual warnings</h2>
+<p>No input densification removes them entirely:</p>
+<table>
+<tr><th>max_segment_length</th><th>warnings across 21 keyframes</th></tr>
+<tr><td>none (5 km as bundled)</td><td>12</td></tr>
+<tr><td>2 km</td><td>5</td></tr>
+<tr><td>1 km</td><td>3</td></tr>
+</table>
+<p>They are raised at <code>workflow.py:259</code>, where each multiresolution level is handed the previous level&#x27;s output. A heavily stretched state can leave a long straight edge in an intermediate result, which the next, finer level then reports. The input is not at fault and densifying it further cannot fix it; re-densifying between levels would, which is the deferred item that changes vertex counts and so breaks keyframe animations. The example now says this in a comment.</p>
+<h2>Verification</h2>
+<ul><li><code>make check</code>: pre-commit, ruff, mypy (80 files), deptry all clean.</li><li><code>pytest tests/test_data_validity.py</code>: 32 passed.</li><li>The example runs end to end in 27.6 s under <code>MPLBACKEND=Agg</code>.</li><li>Loader claims checked against the file: shape (9184, 3), pivot (164, 56),</li></ul>
+<p>every state present in every week, weeks all ending Sunday, last week 2023-03-12, no negative counts.</p>
+<div class="figure">
+<img src="after-covid-keyframes.png" alt="Six of the 21 keyframes. Area is that week&#x27;s cases per 100k, color is the raw weekly count on a log10 scale. The three waves are legible: the Northeast alone in April, the Sun Belt in July and August, the Upper Midwest from September. Note the first two panels - at high area ratios several states are squeezed into lens-shaped slivers and the national outline stops being recognizable. This is the item for review.">
+<p class="caption">Six of the 21 keyframes. Area is that week&#x27;s cases per 100k, color is the raw weekly count on a log10 scale. The three waves are legible: the Northeast alone in April, the Sun Belt in July and August, the Upper Midwest from September. Note the first two panels - at high area ratios several states are squeezed into lens-shaped slivers and the national outline stops being recognizable. This is the item for review.</p>
+</div><div class="figure">
+<img src="after-geography-vs-cartogram.png" alt="The week ending 2020-11-15 as geography and as cartogram, both shaded by cases per 100k. This is the example working as intended: the Dakotas swell to dominate the map while the outline stays readable. The area ratio that week is well under 100:1.">
+<p class="caption">The week ending 2020-11-15 as geography and as cartogram, both shaded by cases per 100k. This is the example working as intended: the Dakotas swell to dominate the map while the outline stays readable. The area ratio that week is well under 100:1.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

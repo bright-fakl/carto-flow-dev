@@ -1,0 +1,10 @@
+states_uniform morph=0 92864b3b62c39fc7c533
+states_uniform morph=1 7f844f176c59e61ef85b
+states_uniform_sq morph=0 cb598098cc103e6a1571
+states_uniform_sq morph=1 816e13b4dc64f49e650e
+states morph=0 0a38432ff5a3106c570e
+states morph=1 f102bd8a7ce62d714e80
+districts morph=0 108b4f5ec4e2b9215e93
+districts morph=1 c8ed7cde424754ad92c0
+world morph=0 f2c02e1e61b1ce7d3a94
+world morph=1 583f84791cad178ce94c

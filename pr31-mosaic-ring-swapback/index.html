@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #31: Pull stranded mosaic ring tiles back into empty core tiles</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #31: Pull stranded mosaic ring tiles back into empty core tiles</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/31">https://github.com/bright-fakl/carto-flow/pull/31</a></dd>
+<dt>Branch</dt><dd>fix/mosaic-ring-swapback</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-19</dd>
+<dt>Before</dt><dd>main @ 6a5de8b</dd>
+<dt>After</dt><dd>fix/mosaic-ring-swapback @ d93d7e9</dd>
+<dt>Inputs</dt><dd>3x3 synthetic fixture (hexagon, morph=False), US states (bundled census, tile_count ~ Population, 154 tiles), congressional districts (bundled, 1 tile each), congressional districts with group_by=&quot;State Name&quot;</dd>
+</dl>
+<p class="desc">The extra-ring swap-back only looked at tiles directly adjacent to a stranded ring tile, so a hole two rows away — Michigan&#x27;s, on US states — was unreachable. Generalising it to a guarded BFS relocation that shifts ownership along a path takes US states from 5 protruding ring tiles and 5 empty core tiles to 2 and 2, and congressional districts from 17 to 6, with no split-region or split-group regression anywhere.</p>
+<h2>The defect</h2>
+<p>Calibration matches the core tile count to the tile budget exactly — on US states, 154 and 154. So every tile the solver places outside the core leaves a core tile empty **one for one**. The protruding tails the user saw near Florida, Texas and the north-west tip, and the four unassigned tiles near Michigan, are not two problems. They are the same problem, and <code>swapback_before_after.png</code> shows the pairing directly: five orange tiles, five red ones.</p>
+<p>(What read as &quot;Texas&quot; is Louisiana&#x27;s ring tile on the bottom edge.)</p>
+<p>The cause is in <code>MosaicLayout</code>&#x27;s extra-ring swap-back, which only ever considered tiles **immediately adjacent** to the stranded ring tile. Michigan&#x27;s ring tile sits at y ~ 1,208,955 and its nearest empty core tile at y ~ 751,735, with a row spacing of ~ 228,610 — two rows away, so the loop never saw it. The greedy <code>while changed</code> loop chains distance-1 moves but could never make the first hop.</p>
+<p>This is not a regression from PR #30; it is visible in that PR&#x27;s before panel too, and #30&#x27;s chain-swap repair cannot address it by design — it permutes *which region owns* an occupied tile and never changes the occupied set. That invariant is untouched here.</p>
+<h2>How many are genuinely fixable</h2>
+<p>Measured before changing anything, by enumerating BFS paths from each of the five ring tiles to each reachable empty core tile and scoring the resulting relocation:</p>
+<table>
+<tr><th>Ring tile</th><th>Shortest legal path</th><th>Verdict</th></tr>
+<tr><td>Michigan</td><td>2 hops</td><td>fixable</td></tr>
+<tr><td>Louisiana</td><td>4 hops</td><td>fixable</td></tr>
+<tr><td>Maine</td><td>8 hops</td><td>fixable</td></tr>
+<tr><td>Florida</td><td>none</td><td>**not fixable** — nearest empties are 11 hops away; relocating splits Indiana + North Carolina, or Ohio</td></tr>
+<tr><td>Washington</td><td>none</td><td>**not fixable** — nearest empties are 10-11 hops away; relocating splits California + Oregon, or Michigan + Wisconsin</td></tr>
+</table>
+<p>**3 of 5, not 5 of 5.** Florida and Washington sit at map extremities whose only reachable empty core tiles are clear across the country; shifting ownership along those chains breaks the contiguity of states in between, so the accept-guard correctly declines. Raising the hop bound to 24 does not change this.</p>
+<p>In the shipped pipeline the swap-back runs *before* the chain-swap repair, so the greedy order differs slightly from the offline replay above and the pair left standing is Washington and Maine rather than Washington and Florida. The count — three recovered, two not — is the same.</p>
+<h2>Hop bound</h2>
+<p>The bound was measured, not picked. Ring tiles left on US states as a function of <code>ring_swapback_max_hops</code>:</p>
+<table>
+<tr><th>max_hops</th><th>1</th><th>2</th><th>4</th><th>6</th><th>8</th><th>10</th><th>12</th><th>16</th><th>24</th></tr>
+<tr><td>ring tiles left</td><td>5</td><td>4</td><td>3</td><td>3</td><td>**2**</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+</table>
+<p>It saturates at 8 and nothing above 8 buys anything, so 8 is the default. Wall time is unchanged within noise at that bound (see the table below) because BFS stops at the first empty tile it reaches and the first path is almost always accepted.</p>
+<h2>Numbers</h2>
+<p>Each cell reads &quot;before - after&quot;.</p>
+<table>
+<tr><th>Case</th><th>Ring tiles used</th><th>Empty core tiles</th><th>Split regions</th><th>Split groups</th><th>Regions correct</th><th>Wall time</th></tr>
+<tr><td>3x3 synthetic fixture</td><td>0 - 0</td><td>1 - 1</td><td>0 - 0</td><td>-</td><td>9/9 - 9/9</td><td>0.06 s - 0.06 s</td></tr>
+<tr><td>US states (154 tiles)</td><td>5 - **2**</td><td>5 - **2**</td><td>0 - 0</td><td>-</td><td>49/49 - 49/49</td><td>1.53 s - 1.53 s</td></tr>
+<tr><td>Districts (1 tile each)</td><td>17 - **6**</td><td>21 - **10**</td><td>0 - 0</td><td>0 - 0</td><td>432/432 - 432/432</td><td>5.30 s - 5.20 s</td></tr>
+<tr><td>Districts + <code>group_by</code></td><td>18 - **8**</td><td>22 - **12**</td><td>0 - 0</td><td>0 - 0</td><td>432/432 - 432/432</td><td>5.41 s - 5.13 s</td></tr>
+</table>
+<p>No metric regresses on any case. The districts cases were not the reported defect but improve the most in absolute terms. The 3x3 fixture is unchanged: its single empty core tile is a calibration rounding artefact with no ring tile to trade against, so there is nothing to reclaim — which is also why &quot;empty core tiles&quot; and &quot;ring tiles used&quot; are not equal on every row. The one-for-one identity holds when calibration lands exactly on the budget, as it does on US states.</p>
+<h2>The mechanism</h2>
+<p>BFS runs from each assigned ring tile over *occupied* tiles until it reaches an unassigned core tile, then ownership shifts one step along the path <code>t -&gt; n1 -&gt; ... -&gt; nk -&gt; empty</code>: the empty tile takes <code>n_k</code>&#x27;s geometry, each <code>n_i</code> takes <code>n_{i-1}</code>&#x27;s, <code>n_1</code> takes the ring tile&#x27;s, and the ring tile is freed. Every geometry on the path loses one tile and gains one, so **per-region tile counts are preserved exactly** — structurally, not by correction. Asserted in the tests.</p>
+<p>Unassigned core tiles strictly decrease by construction, because the path always ends on an empty core tile and the tile freed is outside the core. The only thing needing an explicit guard is topology: a relocation is applied only when it increases neither the split-region nor the split-group count, mirroring PR #30&#x27;s accept-if-better test. &quot;Never regress&quot; is therefore structural rather than tuned.</p>
+<p>This **replaces** the old adjacent-only loop rather than stacking on top of it: the new search at <code>max_hops=1</code> is exactly the old behaviour. One mechanism, one knob (<code>HungarianOptions.ring_swapback_max_hops</code>, default 8; <code>0</code> disables the step entirely), and removing the feature means deleting one function and one call.</p>
+<h2>New metric</h2>
+<p><code>MosaicMetrics.n_unassigned_core_tiles</code> counts every core tile left empty. PR #30&#x27;s hole check counted only *enclosed* unassigned tiles and reported 0 on US states — all five sit in concave boundary pockets, so they passed the check while being plainly visible on the map. The wider count is the honest one; the enclosed count is kept in the figure as the hatched overlay and is 0 in both panels.</p>
+<h2>Open question, deliberately not decided</h2>
+<p>Should <code>converged</code> account for <code>n_unassigned_core_tiles</code>? It is currently left out, because that is a public behaviour change: with it folded in, US states would report <code>converged=False</code> where it reports True today, and on inputs where a region genuinely extends past the core there may be no legal relocation that could ever clear it. Flagged for a decision rather than taken.</p>
+<div class="figure">
+<img src="districts_group_by_after.png" alt="districts_group_by_after.png">
+<p class="caption">districts_group_by_after.png</p>
+</div><div class="figure">
+<img src="districts_group_by_before.png" alt="districts_group_by_before.png">
+<p class="caption">districts_group_by_before.png</p>
+</div><div class="figure">
+<img src="districts_group_by_before_after.png" alt="Districts grouped by state. 0 split groups before and after; ring tiles used drop from 18 to 8.">
+<p class="caption">Districts grouped by state. 0 split groups before and after; ring tiles used drop from 18 to 8.</p>
+</div><div class="figure">
+<img src="fixture_after.png" alt="fixture_after.png">
+<p class="caption">fixture_after.png</p>
+</div><div class="figure">
+<img src="fixture_before.png" alt="fixture_before.png">
+<p class="caption">fixture_before.png</p>
+</div><div class="figure">
+<img src="fixture_before_after.png" alt="3x3 synthetic fixture, unchanged (it has no ring tiles to reclaim).">
+<p class="caption">3x3 synthetic fixture, unchanged (it has no ring tiles to reclaim).</p>
+</div><div class="figure">
+<img src="greatlakes_after.png" alt="greatlakes_after.png">
+<p class="caption">greatlakes_after.png</p>
+</div><div class="figure">
+<img src="greatlakes_before.png" alt="greatlakes_before.png">
+<p class="caption">greatlakes_before.png</p>
+</div><div class="figure">
+<img src="greatlakes_before_after.png" alt="Great Lakes zoom, the cluster the user spotted. 4 empty core tiles before, 1 after.">
+<p class="caption">Great Lakes zoom, the cluster the user spotted. 4 empty core tiles before, 1 after.</p>
+</div><div class="figure">
+<img src="states_after.png" alt="states_after.png">
+<p class="caption">states_after.png</p>
+</div><div class="figure">
+<img src="states_before.png" alt="states_before.png">
+<p class="caption">states_before.png</p>
+</div><div class="figure">
+<img src="states_before_after.png" alt="US states coloured by state. 0 split states before and after: the relocation buys back tiles without breaking contiguity.">
+<p class="caption">US states coloured by state. 0 split states before and after: the relocation buys back tiles without breaking contiguity.</p>
+</div><div class="figure">
+<img src="swapback_after.png" alt="swapback_after.png">
+<p class="caption">swapback_after.png</p>
+</div><div class="figure">
+<img src="swapback_before.png" alt="swapback_before.png">
+<p class="caption">swapback_before.png</p>
+</div><div class="figure">
+<img src="swapback_before_after.png" alt="The defect and the fix. Orange = tiles the solver took from an extra ring (labelled with their owner state); red = core tiles left empty. Before: 5 and 5. After: 2 and 2.">
+<p class="caption">The defect and the fix. Orange = tiles the solver took from an extra ring (labelled with their owner state); red = core tiles left empty. Before: 5 and 5. After: 2 and 2.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

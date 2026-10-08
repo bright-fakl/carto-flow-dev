@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #62: Fix the multiresolution tutorial&#x27;s progress output, grid sizes and comparison fairness</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #62: Fix the multiresolution tutorial&#x27;s progress output, grid sizes and comparison fairness</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/62">https://github.com/bright-fakl/carto-flow/pull/62</a></dd>
+<dt>Branch</dt><dd>docs/multires-tutorial-fixes</dd>
+<dt>Base</dt><dd>origin/main @ ba87610</dd>
+<dt>Date</dt><dd>2026-09-25 18:00</dd>
+<dt>Before</dt><dd>origin/main @ ba87610</dd>
+<dt>After</dt><dd>docs/multires-tutorial-fixes @ b75d7dd</dd>
+<dt>Inputs</dt><dd>US states (bundled), densified with max_segment_length=2000 before the 1024 comparison; congressional districts (bundled) for the closing section</dd>
+</dl>
+<p class="desc">The tutorial compared a non-converging dt against another non-converging dt, labeled 1024-grid figures as 512, and held the single and multiresolution runs to different tolerances, which made multiresolution look better than it is. No figures here - the changes are notebook outputs, reviewed in the rendered page itself.</p>
+<p>No figures are attached. Every change here is a notebook output, so the review surface is the rendered tutorial, built locally from this branch, rather than a pair of PNGs extracted from it.</p>
+<h2>What was wrong</h2>
+<p>**The dt sweep compared two non-converging runs.** The closing comparison put <code>dt=0.1</code> against <code>dt=0.5</code>. Neither converged - <code>dt=0.1</code> simply needed more iterations than the sweep allowed - so the figure showed two failures and attributed the difference to the step size. It now contrasts <code>dt=0.5</code> against <code>dt=0.2</code>, which is the default and does converge, so the comparison isolates the step size.</p>
+<p>**Figure labels hardcoded 512.** The single-versus-multiresolution comparison ran at grid 1024 but its titles read 512. The labels now read <code>result_single.grid.sx</code>, so they follow whatever the cell actually ran.</p>
+<p>**The two runs were held to different tolerances.** The single-resolution run used <code>max_tol=0.01</code> and the multiresolution run <code>max_tol=0.02</code>. The single run then stalled while the multiresolution run converged, and the tutorial presented that as evidence for multiresolution. Both now use <code>max_tol=0.02</code>. The stall was the tolerance mismatch, not the method.</p>
+<p>**A user warning went unexplained.** The <code>CartogramWorkflow</code> cell emitted a &quot;straight segment&quot; warning because the input was not densified enough for a 1024 grid. The notebook now calls <code>densify_coverage(us_states, max_segment_length=2000)</code> before that comparison and says why.</p>
+<h2>What was added</h2>
+<ul><li>A grid sweep at 256, 512 and 1024 showing how cost scales with resolution.</li><li>A districts section with a comparison table and an error map, so the tutorial</li></ul>
+<p>demonstrates the method on a second, harder input rather than on states alone.</p>
+<ul><li>Both reasons multiresolution is worth using are now shown, rather than only</li></ul>
+<p>the speed argument: it is faster at equal tolerance, and it reaches tolerances a single-resolution run stalls before.</p>
+<h2>On the remaining densification question</h2>
+<p>Densifying more is a workaround, not a fix. The warning originates where each multiresolution level is handed the previous level&#x27;s output, so a heavily stretched region can leave a long straight edge that the next, finer level reports. Re-densifying between levels would address it at source but changes vertex counts between keyframes, which breaks the animation helpers. That tension is unresolved and deliberately left open.</p>
+<h2>Verification</h2>
+<ul><li>The tutorial executes end to end with <code>nbclient</code>, <code>allow_errors=False</code>.</li><li><code>show_progress=False</code> on every morph call, so no tqdm fragments reach the</li></ul>
+<p>rendered page.</p>
+<ul><li><code>make check</code> clean.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

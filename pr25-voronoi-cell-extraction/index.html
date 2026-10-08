@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #25: Fix raster cell extraction losing whole cells</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #25: Fix raster cell extraction losing whole cells</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/25">https://github.com/bright-fakl/carto-flow/pull/25</a></dd>
+<dt>Branch</dt><dd>fix/voronoi-cell-extraction</dd>
+<dt>Base</dt><dd>fix/voronoi-degenerate-cells</dd>
+<dt>Date</dt><dd>2026-09-18</dd>
+<dt>Before</dt><dd>origin/fix/voronoi-degenerate-cells</dd>
+<dt>After</dt><dd>fix/voronoi-cell-extraction @ 9dcda79</dd>
+<dt>Inputs</dt><dd>congressional districts (simplify_coverage tolerance=5000, min_island_size=50000; group_by=State Name; R=64, 128); states (R=300, group_by=Region)</dd>
+</dl>
+<p class="desc">shapely.intersection(cell, boundary) collapsed a valid cell polygon to a zero-area LineString whenever the boundary carried a coordinate-noise-floor spike ring; drop_sliver_holes() removes those rings before clipping.</p>
+<h1>Visual check: raster Voronoi cell extraction</h1>
+<p>Branch <code>fix/voronoi-cell-extraction</code> (this PR) vs <code>fix/voronoi-degenerate-cells</code> (PR #24).</p>
+<p>Setup: <code>load_us_census(level=&quot;congressional_district&quot;, population=True)</code> -&gt; <code>simplify_coverage(tolerance=5000, min_island_size=50000)</code> -&gt; <code>RasterBackend(resolution=R)</code>, <code>VoronoiOptions(n_iter=30, area_cv_tol=0.1)</code>, <code>group_by=&quot;State Name&quot;</code>; states: <code>level=&quot;state&quot;, contiguous_only=True</code>, <code>group_by=&quot;Region&quot;</code>, R=300.</p>
+<p>Each PNG: left = before (PR #24), right = after. Cells coloured by state (<code>tab20</code>+<code>tab20b</code>+<code>tab20c</code>, 49 colours). Red X + label = degenerate cell (Point or area &lt;= 1e-9 x mean cell area). Red hatch = hole in the coverage (input union minus the union of the polygonal cells).</p>
+<table>
+<tr><th>Figure</th><th>Before</th><th>After</th></tr>
+<tr><td><code>districts_r64_before_after.png</code></td><td>3 degenerate (MI CD-12, MO CD-7, FL CD-19), 48,402 km2 uncovered</td><td>0 degenerate, 0 km2 uncovered</td></tr>
+<tr><td><code>districts_r128_before_after.png</code></td><td>2 degenerate (PA CD-10, PA CD-15), 22,113 km2 uncovered</td><td>0 degenerate, 0 km2 uncovered</td></tr>
+<tr><td><code>states_r300_before_after.png</code></td><td>0 degenerate, 16 km2 uncovered</td><td>identical (0 degenerate, 16 km2)</td></tr>
+</table>
+<p>The 16 km2 of uncovered area on the states run is pre-existing sliver (coverage_simplify rounding along shared edges), unchanged by this PR.</p>
+<p>Root cause: the outer boundary (union of the input coverage) carries near-collinear &quot;spike&quot; interior rings with areas at the coordinate noise floor (1e-11 .. 2e-6 m2). GEOS <code>intersection(cell, boundary)</code> collapses a cell that contains such a ring to a zero-area LineString even though <code>boundary.covers(cell)</code> is True. <code>drop_sliver_holes()</code> removes those rings before any clipping.</p>
+<div class="figure">
+<img src="districts_r128_before_after.png" alt="Districts at R=128: 2 degenerate cells and 22,113 km2 uncovered before, 0 and 0 after.">
+<p class="caption">Districts at R=128: 2 degenerate cells and 22,113 km2 uncovered before, 0 and 0 after.</p>
+</div><div class="figure">
+<img src="districts_r64_before_after.png" alt="Districts at R=64: 3 degenerate cells and 48,402 km2 uncovered before, 0 and 0 after.">
+<p class="caption">Districts at R=64: 3 degenerate cells and 48,402 km2 uncovered before, 0 and 0 after.</p>
+</div><div class="figure">
+<img src="states_r300_before_after.png" alt="States at R=300: 0 degenerate cells and 16 km2 uncovered before and after (pre-existing sliver, unrelated to this fix).">
+<p class="caption">States at R=300: 0 degenerate cells and 16 km2 uncovered before and after (pre-existing sliver, unrelated to this fix).</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

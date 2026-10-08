@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #43: Remove two inert HungarianOptions knobs from the mosaic layout</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #43: Remove two inert HungarianOptions knobs from the mosaic layout</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">reviewed</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/43">https://github.com/bright-fakl/carto-flow/pull/43</a></dd>
+<dt>Branch</dt><dd>agent/mosaic-inert-knobs</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-22</dd>
+<dt>Before</dt><dd>origin/main @ a095187</dd>
+<dt>After</dt><dd>agent/mosaic-inert-knobs</dd>
+<dt>Inputs</dt><dd>US states (uniform, and 154 tiles), congressional districts grouped by State Name, world countries (Natural Earth, Mollweide, 384 tiles)</dd>
+</dl>
+<p class="desc">Evidence that gap_bridge_mult and disconnected_score_weight never change a result, and that removing them is bit-identical.</p>
+<p>No before/after figures: the change is bit-identical by construction, so side-by-side panels would be two identical images. The evidence below is the point of this PR.</p>
+<h2>Fingerprint</h2>
+<p>A full-layout fingerprint, not a summary metric: per-tile centre as raw float64 bytes, per-tile scale, symbol sizes, base size, bounds, <code>source_indices</code>, <code>group_ids</code>, <code>valid_mask</code>, plus the reported metrics.</p>
+<table>
+<tr><th>parameter</th><th>values swept</th><th>combinations</th><th>result</th></tr>
+<tr><td><code>gap_bridge_mult</code></td><td>0.0, 1.0, 5.0, 20.0</td><td>4 inputs x 2 morph = 8</td><td>identical</td></tr>
+<tr><td><code>disconnected_score_weight</code></td><td>0, 1, 10, 100, 1000</td><td>3 inputs x 2 morph = 6</td><td>identical</td></tr>
+</table>
+<p>The <code>states</code> case at <code>morph=False</code> was targeted deliberately: it is the only input where the repair loop runs four passes AND two passes tie on split-region count, so it is where a tie-break weight would bite if it ever did. Still identical.</p>
+<h2>Insensitive, not dead</h2>
+<p>Neither code path is unreachable. The repair loop runs 2-4 passes on every input and the gap count at pass 0 is non-zero everywhere (26-189), so the bridge bonus really executes and really does change later passes&#x27; candidate assignments (pass-1 score moves 28 -&gt; 32 on US states).</p>
+<ul><li><code>gap_bridge_mult</code>: altered candidates are rejected for not improving on the incumbent;</li></ul>
+<p>where a later pass does win, the same pass wins at every multiplier.</p>
+<ul><li><code>disconnected_score_weight</code>: only separates passes with equal split-region count, and the</li></ul>
+<p>disconnected-tile and gap counts rank those passes the same way at any weight in [0, 1000]. At weight 0 the score does not collapse, because the gap term survives.</p>
+<p>Both were therefore removed by hard-coding their former defaults as module constants in <code>_assignment.py</code> (<code>_GAP_BRIDGE_MULT = 5.0</code>, <code>_DISCONNECTED_SCORE_WEIGHT = 100</code>). The branches are untouched, so no behaviour was removed.</p>
+<h2>The nondeterminism trap</h2>
+<p>A naive end-to-end before/after comparison LOOKS like a regression and is not one. At <code>morph=False</code> all five inputs are bit-identical to the a095187 baseline. At <code>morph=True</code> all five differ -- but a baseline-against-ITSELF comparison also differs on all five at <code>morph=True</code> while agreeing everywhere at <code>morph=False</code>, and <code>morph_geometries</code> alone produces a different centroid hash on every run in a single unmodified worktree. One baseline-vs-baseline pair happened to agree; a third run broke it.</p>
+<p>The change was isolated from that noise by loading the old and new <code>hungarian_morphed_assignment</code> into ONE process and calling both on identical captured inputs, so the morph runs once and feeds both, with the old one given a shim options object carrying the two removed fields at their old defaults.</p>
+<p>``<code> states_uniform     morph=0/1:  1 solve   IDENTICAL states_uniform_sq  morph=0/1:  1 solve   IDENTICAL states             morph=0/1:  1 solve   IDENTICAL districts          morph=0/1:  1 solve   IDENTICAL world              morph=0:   12 solves  IDENTICAL world              morph=1:   21 solves  IDENTICAL </code>``</p>
+<p>39 assignment solves across 10 input x morph combinations, every returned array equal.</p>
+<h2>Reported in passing, not acted on</h2>
+<ul><li><code>max_connectivity_iters</code> (default 15): the cap never binds. Most passes observed is 4</li></ul>
+<p>(<code>states</code> and <code>districts</code> at <code>morph=False</code>); at <code>morph=True</code> it is always 2. Any cap &gt;= 3 is equivalent to 15. It does real work at <code>morph=False</code>, where 0, 1 and &gt;=2 give three distinct results, so it is not a deletion candidate -- but 15 is dead headroom.</p>
+<ul><li><code>disconnected_penalty_mult</code> (default 10.0): effectively boolean. Only 0 vs non-zero</li></ul>
+<p>separates, and only on <code>states</code> and <code>districts</code> at <code>morph=False</code>; 1.0 through 50.0 are indistinguishable. The penalty is a multiple of the static cost maximum, so once it exceeds that maximum the tile is out of contention regardless of magnitude.</p>
+<h2>Scripts</h2>
+<p><code>verify.py</code> (sweep + fingerprint), <code>probe.py</code> (repair-loop trace), <code>same_proc.py</code> (old-vs-new in one process), <code>cmpall.py</code> (end-to-end comparison), <code>morphhash.py</code> (nondeterminism demonstration), <code>pin.py</code> (pinned-test values). Raw dumps in <code>base*.txt</code> and <code>mod*.txt</code>.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

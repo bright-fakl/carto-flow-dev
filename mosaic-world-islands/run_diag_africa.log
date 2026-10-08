@@ -1,0 +1,12 @@
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/carto-flow/visual_checks/mosaic-world-islands/trace_loss.py:43: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  r = morph_geometries(geometries, values=counts.astype(np.float64),
+[done] africa_b150_morph1 1.5s short=0 zero=0 overwrites=0
+[done] africa_b150_morph0 0.2s short=0 zero=0 overwrites=0
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:544: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+/home/fakl/carto-flow/visual_checks/mosaic-world-islands/trace_loss.py:43: UserWarning: Input geometries contain a straight segment of length 524263.1 (grid units), which exceeds 4 grid cells (68259.2 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  r = morph_geometries(geometries, values=counts.astype(np.float64),
+[done] africa_b300_morph1 0.5s short=0 zero=0 overwrites=0
+[done] africa_b300_morph0 0.6s short=0 zero=0 overwrites=0

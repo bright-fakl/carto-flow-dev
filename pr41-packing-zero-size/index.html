@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #41: Keep packing convergence metrics finite for zero-size symbols</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #41: Keep packing convergence metrics finite for zero-size symbols</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/41">https://github.com/bright-fakl/carto-flow/pull/41</a></dd>
+<dt>Branch</dt><dd>fix/zero-radius-symbols</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-22</dd>
+<dt>Before</dt><dd>main @ a095187</dd>
+<dt>After</dt><dd>fix/zero-radius-symbols @ e2f1e05</dd>
+<dt>Inputs</dt><dd>US states (bundled census, Population, ESRI:102008) with Kentucky set to 0; the same states unmodified as a control; a synthetic 4x4 unit grid with two regions set to 0. All at CirclePackingLayout(max_iterations=500), default options otherwise.</dd>
+</dl>
+<p class="desc">A zero sizing value gives a zero-radius symbol. The packing simulator measures drift and jitter in units of symbol radius, so those averages became inf/nan for the whole run, convergence could never be detected, and the loop ran to max_iterations while emitting ~2000 divide-by-zero warnings. Zero-radius symbols are now excluded from the drift/jitter averages, and radius-relative distances go through a helper that yields inf without warning. Look for the packed layout being essentially the same, but the run now stopping when it has settled instead of jittering on to iteration 501.</p>
+<h2>What to look for</h2>
+<p>The zero-value symbol is drawn as a zero-area polygon, so it is invisible; its position is marked with a red dot. It sits at the same place before and after — the change is in when the loop stops, not in where a zero-size symbol goes.</p>
+<p>The control pair (<code>states_baseline</code>) is the important one for regression: the positions are bit-identical, confirming that inputs without a zero sizing value are untouched.</p>
+<h2>Not covered here</h2>
+<p>An input where *every* sizing value is zero is still degenerate: the <code>grid</code> layout does not terminate, <code>flow_density</code> raises <code>ZeroDivisionError</code>, and <code>centroid</code>, <code>physics</code> and <code>packing</code> each still emit a divide-by-zero warning. That case is unchanged by this branch.</p>
+<div class="figure">
+<img src="grid_zero_after.png" alt="Same input, this branch. converged=True at iteration 126, no warnings. Positions differ from before by at most 0.077 on a grid of extent 4 (~2%) — the extra 375 iterations were jitter around the same equilibrium.">
+<p class="caption">Same input, this branch. converged=True at iteration 126, no warnings. Positions differ from before by at most 0.077 on a grid of extent 4 (~2%) — the extra 375 iterations were jitter around the same equilibrium.</p>
+</div><div class="figure">
+<img src="grid_zero_before.png" alt="Synthetic 4x4 grid, two zero-value regions (red dots). converged=False, 501 iterations, 2000 RuntimeWarnings.">
+<p class="caption">Synthetic 4x4 grid, two zero-value regions (red dots). converged=False, 501 iterations, 2000 RuntimeWarnings.</p>
+</div><div class="figure">
+<img src="states_baseline_after.png" alt="Same input, this branch. Bit-identical positions to before, same iteration count.">
+<p class="caption">Same input, this branch. Bit-identical positions to before, same iteration count.</p>
+</div><div class="figure">
+<img src="states_baseline_before.png" alt="US states, unmodified populations. converged=True at iteration 334, no warnings.">
+<p class="caption">US states, unmodified populations. converged=True at iteration 334, no warnings.</p>
+</div><div class="figure">
+<img src="states_zero_after.png" alt="Same input, this branch. converged=True at iteration 380, no warnings. Largest position change 49 km against a layout extent of ~1980 km (~2.5%).">
+<p class="caption">Same input, this branch. converged=True at iteration 380, no warnings. Largest position change 49 km against a layout extent of ~1980 km (~2.5%).</p>
+</div><div class="figure">
+<img src="states_zero_before.png" alt="US states, Kentucky&#x27;s population set to 0 (red dot). converged=False, 501 iterations, 2000 RuntimeWarnings.">
+<p class="caption">US states, Kentucky&#x27;s population set to 0 (red dot). converged=False, 501 iterations, 2000 RuntimeWarnings.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

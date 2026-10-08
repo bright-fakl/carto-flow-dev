@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #33: Lay out multi-part regions as sub-regions</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #33: Lay out multi-part regions as sub-regions</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">closed</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/33">https://github.com/bright-fakl/carto-flow/pull/33</a></dd>
+<dt>Branch</dt><dd>feat/mosaic-multipart-regions</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-20</dd>
+<dt>Before</dt><dd>main @ 9c664f9</dd>
+<dt>After</dt><dd>feat/mosaic-multipart-regions @ 7253e5b</dd>
+<dt>Inputs</dt><dd>3x3 synthetic fixture (40 tiles), US states (bundled census, tile_count ~ Population, 154 tiles), congressional districts (bundled, 1 tile each), districts with group_by=&quot;State Name&quot;, world (bundled Natural Earth, Mollweide ESRI:54009, tile_count ~ pop_est, 660-tile budget) -- each with morph=True and morph=False</dd>
+</dl>
+<p class="desc">A MultiPolygon whose parts are genuinely separated had to form one connected tile block, so the solver spent repair effort on a constraint it could not satisfy. Each geometry is now split into sub-regions, one per part of at least half a tile area, with its tile count apportioned by original-geometry area; the relocation reach moves 8 to 16 hops in the same PR. Census configurations are unchanged or better; on the world dataset the predicted reduction in neighbour damage does NOT appear, which is reported rather than tuned away.</p>
+<h2>What this PR does</h2>
+<p>Two changes, deliberately reported separately in every table below.</p>
+<p>**1. Multi-part regions become sub-regions.** The mosaic solver&#x27;s unit was the geometry, so a MultiPolygon whose parts are genuinely separated on the ground had to form a single connected tile block. After calibration — where the tile size becomes known — each geometry is split into sub-regions, one per part of at least <code>multipart_min_tiles</code> (default **0.5**) tile areas. Sub-threshold parts are attached to the nearest qualifying part, so no area is discarded. The tile count is apportioned across sub-regions **by area on the original geometry** — never the morphed one — by largest remainder, so totals stay exact; a sub-region allotted zero tiles is folded back in.</p>
+<p>**Sub-regions of one geometry still belong to one region and may sit adjacent.** The split exists only to remove a constraint the solver cannot satisfy, so it stops spending repair effort — and damaging neighbours — trying. There is no separation term and none is wanted.</p>
+<p><code>G</code> is untouched: the sub-region index is mapped back through <code>part_to_geom</code> before any output table is built, so counts, sizes, positions, <code>source_indices</code> and <code>group_ids</code> are unchanged. With no qualifying multi-part geometry <code>P == G</code> and the mapping is the identity.</p>
+<p>**2. <code>ring_swapback_max_hops</code> 8 → 16.** The old default was justified by &quot;on US states the fixable count saturates at 8 hops&quot;. Sub-regions invalidate that: the freed core cell on US states is ringed by Illinois, Indiana, Michigan and Wisconsin while the nearest stranded ring tile is in Vermont. 16 closes what 8 leaves; 30 is identical to 16. The docstring, the algorithm docs and a test now say why it must not be lowered back.</p>
+<h2>The metric changed</h2>
+<p><code>MosaicMetrics.n_noncontiguous_regions</code> counts **sub-regions**, not geometries — a per-geometry count would report every multi-part region as broken for ever. <code>n_subregions</code> and <code>n_split_geometries</code> report the decomposition. The tables give the split count three ways (per geometry, per sub-region, and per *single-part* region), all measured in the harness from the tile tables so the three variants are measured identically.</p>
+<h2>Ten configurations, three variants</h2>
+<table>
+<tr><th>Configuration</th><th>split (geom)</th><th>split (sub-region)</th><th>split single-part</th><th>split groups</th><th>ring used</th><th>empty core</th><th>enclosed</th><th>pp min</th><th>pp mean</th><th>regions correct</th><th>converged</th></tr>
+<tr><td>fixture/morph=True</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>2</td><td>0</td><td>0.4047</td><td>0.5773</td><td>9/9</td><td>True</td></tr>
+<tr><td>fixture/morph=False</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0.4047</td><td>0.607</td><td>9/9</td><td>True</td></tr>
+<tr><td>states/morph=True</td><td>0</td><td>0</td><td>0</td><td>0</td><td>2 → 3 → **2**</td><td>2 → 3 → **2**</td><td>0 → 1 → **0**</td><td>0.3401 → 0.4081 → 0.4047</td><td>0.6969 → 0.6997 → 0.6959</td><td>49/49</td><td>True</td></tr>
+<tr><td>states/morph=False</td><td>0</td><td>0</td><td>0</td><td>0</td><td>4 → 5 → **4**</td><td>3 → 4 → **3**</td><td>0</td><td>0.2519 → 0.2041 → 0.2041</td><td>0.6858 → 0.6774 → 0.6828</td><td>49/49</td><td>True</td></tr>
+<tr><td>districts/morph=True</td><td>0</td><td>0</td><td>0</td><td>0</td><td>6 → 6 → **0**</td><td>10 → 10 → **4**</td><td>1 → 1 → **0**</td><td>0.1526 → 0.1526 → **0.1165**</td><td>0.4813 → 0.4813 → 0.4672</td><td>432/432</td><td>True</td></tr>
+<tr><td>districts/morph=False</td><td>0</td><td>0</td><td>0</td><td>0</td><td>6 → 6 → **2**</td><td>16 → 16 → **12**</td><td>1 → 1 → **0**</td><td>0.1192 → 0.1192 → **0.1088**</td><td>0.4497 → 0.4497 → 0.4453</td><td>432/432</td><td>True</td></tr>
+<tr><td>districts_group_by/morph=True</td><td>0</td><td>0</td><td>0</td><td>0</td><td>8 → 8 → **3**</td><td>12 → 12 → **7**</td><td>0</td><td>0.1747 → 0.1747 → 0.17</td><td>0.4699 → 0.4699 → 0.4717</td><td>432/432</td><td>True</td></tr>
+<tr><td>districts_group_by/morph=False</td><td>0</td><td>0</td><td>0</td><td>1 → 1 → **0**</td><td>6 → 6 → **3**</td><td>16 → 16 → **13**</td><td>1 → 1 → **0**</td><td>0.1311 → 0.1311 → 0.1449</td><td>0.4785 → 0.4785 → 0.4913</td><td>432/432</td><td>False → False → **True**</td></tr>
+<tr><td>**world/morph=True**</td><td>6 → **7** → **7**</td><td>6 → 8 → **7**</td><td>5</td><td>0</td><td>8 → 8 → **2**</td><td>34 → 34 → **28**</td><td>5 → 6 → **4**</td><td>0.1187 → **0.1127** → 0.1127</td><td>0.7608 → 0.7591 → 0.7567</td><td>166/176</td><td>False</td></tr>
+<tr><td>**world/morph=False**</td><td>4 → **5** → **5**</td><td>4 → **7** → **7**</td><td>3</td><td>0</td><td>23 → 23 → **21**</td><td>49 → 49 → **47**</td><td>4 → 3 → **1**</td><td>0.1323 → **0.1071** → 0.1071</td><td>0.746 → 0.7462 → 0.7418</td><td>156/176 → **157/176** → 157/176</td><td>False</td></tr>
+</table>
+<p>Each cell is <code>before → mid → after</code>, collapsed to one value where all three agree. **before** = <code>main @ 9c664f9</code>. **mid** = sub-regions only, relocation reach still 8. **after** = shipping: sub-regions + reach 16. <code>pp</code> is discrete Polsby-Popper on the tile adjacency graph. &quot;split single-part&quot; counts split regions that are **not** multi-part — the collateral damage measure, identical in all three variants everywhere.</p>
+<h3>The two checks that were asked for</h3>
+<ul><li>**Does US states return to exactly the before numbers?** **Yes for every defect counter**:</li></ul>
+<p>ring 2→3→**2**, empty core 2→3→**2**, enclosed 0→1→**0** (morph=True); ring 4→5→**4**, empty core 3→4→**3** (morph=False). Compactness lands on a different layout rather than the identical one: <code>pp_min</code> 0.3401 → 0.4047 (better) with the morph, 0.2519 → 0.2041 (worse) without it — the documented cost of the 0.5 threshold.</p>
+<ul><li>**Does districts+group_by/morph=False converge?** **Yes.** Split groups 1 → 0, <code>converged</code></li></ul>
+<p>False → **True**, the first time that configuration has converged. Entirely attributable to the reach change: the middle column is unchanged from before.</p>
+<h3>A regression the reach change introduces</h3>
+<p>On districts the wider search trades compactness for holes: <code>pp_min</code> 0.1526 → **0.1165** and <code>pp_mean</code> 0.4813 → 0.4672 (morph=True), <code>pp_min</code> 0.1192 → **0.1088** (morph=False), while ring tiles fall 6 → 0 and empty core 10 → 4. Recorded, not tuned away.</p>
+<h2>The world dataset — the predicted benefit does not appear</h2>
+<p><code>load_world()</code> (Natural Earth, 176 countries after dropping Antarctica and zero-population rows, reprojected to **Mollweide / ESRI:54009** so equal-area tile comparisons are meaningful, tile count from <code>pop_est</code> normalised to a 660-tile budget) is the regime this feature targets: Malaysia&#x27;s two parts are ~600 km apart across the South China Sea, Indonesia&#x27;s span thousands of kilometres. At <code>multipart_min_tiles=0.5</code> the split candidates are Canada (4 parts), the USA (2), **Indonesia (5)** and **Malaysia (2)**.</p>
+<p>A clean within-version isolation — shipping code, only <code>multipart_min_tiles</code> differing, so the relocation reach is held constant:</p>
+<table>
+<tr><th></th><th>morph=True forced</th><th>morph=True sub-regions</th><th>morph=False forced</th><th>morph=False sub-regions</th></tr>
+<tr><td>split **single-part** regions (collateral damage)</td><td>4</td><td>**4**</td><td>2</td><td>**3**</td></tr>
+<tr><td>which</td><td>India, Morocco, Nigeria, Peru</td><td>same 4</td><td>Bangladesh, South Africa</td><td>+ **Poland**</td></tr>
+<tr><td>ring tiles used</td><td>6</td><td>8</td><td>20</td><td>21</td></tr>
+<tr><td>empty core</td><td>29</td><td>31</td><td>46</td><td>47</td></tr>
+<tr><td>enclosed</td><td>4</td><td>5</td><td>1</td><td>1</td></tr>
+<tr><td>regions correct</td><td>163/176</td><td>**164/176**</td><td>156/176</td><td>**157/176**</td></tr>
+<tr><td>Indonesia blocks</td><td>4</td><td>4</td><td>3</td><td>4</td></tr>
+<tr><td>Malaysia blocks</td><td>1</td><td>1</td><td>1</td><td>**2**</td></tr>
+</table>
+<p>**Neighbour damage does not fall.** It is unchanged with the morph and one *worse* without it (Poland becomes split). Hole counters move slightly the wrong way. Only exact-count accuracy improves, by one region in each mode.</p>
+<p>**Why.** The old code never actually *forced* the parts together — the contiguity repair is best-effort, and every acceptance is guarded against making splits worse. On world it simply gives up: <code>forced/morph=True</code> already leaves **Indonesia in 4 blocks**. So there was no destructive forcing left to remove; sub-regions largely re-label an outcome the solver had already conceded, while perturbing the assignment enough to move a few tiles around.</p>
+<p>The destructive case is real — the synthetic fixture in <code>neighbour_distortion.png</code> shows the neighbour being broken into 3 blocks — but it needs a *small, tight* instance where reaching across the gap is cheap enough for the solver to keep trying. On a 176-country, 660-tile map it gives up first.</p>
+<h2>Threshold: 0.5 confirmed, now on two datasets</h2>
+<p>Sub-regions created at each threshold, as a multiple of one tile area:</p>
+<table>
+<tr><th>threshold</th><th>states m=T</th><th>states m=F</th><th>districts</th><th>world (unmorphed)</th></tr>
+<tr><td>0.25</td><td>1</td><td>1</td><td>12 / 4</td><td>Canada 6, USA 2, Indonesia 5, Russia 4, France 2, Philippines 2, Malaysia 2, Japan 2</td></tr>
+<tr><td>**0.50**</td><td>**1**</td><td>**1**</td><td>**1**</td><td>**Canada 4, USA 2, Indonesia 5, Malaysia 2**</td></tr>
+<tr><td>0.75</td><td>1</td><td>0</td><td>0 / 1</td><td>Canada 4, USA 2, Indonesia 3</td></tr>
+<tr><td>1.00</td><td>1</td><td>0</td><td>0 / 1</td><td>Canada 2, USA 2, Indonesia 3</td></tr>
+<tr><td>2.00</td><td>0</td><td>0</td><td>0</td><td>USA 2 only</td></tr>
+</table>
+<p>World **reinforces** 0.5 rather than changing it: at 1.0, Malaysia — whose two parts are 600 km apart across open sea, the clearest impossible constraint in the data — stops qualifying entirely, along with two of Indonesia&#x27;s five parts. Michigan&#x27;s Upper Peninsula is 1.08 tile areas morphed but only 0.72 unmorphed, so 1.0 would also split it only with the morph. No re-surfacing needed.</p>
+<h2>Where exact counts do and do not hold</h2>
+<p>Exact counts are structural and hold on every census configuration (fixture 40/40, states 154/154, districts 432/432). **World never fits its pool** — 166/176 and 156/176 regions correct in the *before* column — because 176 countries at a 660-tile budget include many that cannot be placed. This is pre-existing and unrelated to this PR; the change leaves it unchanged with the morph and improves it by one region without (156/176 → 157/176).</p>
+<h2>Rhode Island — why it cannot split, so nobody repeats the mistake</h2>
+<p>The brief predicted RI as the second census case, screening on share-of-area (a second part at ~8% of its area). That screening does not survive contact with the tile budget: **RI receives one tile in total** at 150 tiles for 49 states. A one-tile region can never be two sub-regions, whatever the threshold — the zero-allotment rule folds every part back in. What matters for candidacy is a part&#x27;s share of the region&#x27;s **tile count**, not of its area. The figure and a test pin the behaviour.</p>
+<h2>Implementation notes</h2>
+<ul><li>Parts are matched between original and morphed geometry **by index**, guarded by equal part</li></ul>
+<p>counts — <code>make_valid</code> changes the part count for 7 of 432 districts under the morph, and a silent mismatch would attribute one part&#x27;s area to another. Such a geometry is left whole.</p>
+<ul><li>Area is the only per-part quantity the pipeline has: <code>flow_cartogram/density.py</code> sets</li></ul>
+<p><code>pop_density = value / poly.area</code> and writes that one number into every cell, so integrating it over a part is exactly area-proportional. Users with genuine per-part values should split upstream and pass a per-part <code>tile_count</code>, documented in the option, the module and <code>docs/explanations/symbol-cartogram-mosaic-layout.md</code>.</p>
+<ul><li>Only <code>tile_count</code> inputs can split: with <code>group_by</code> every geometry carries one symbol.</li><li>#30&#x27;s occupied-set invariant, #31&#x27;s relocation guards and #32&#x27;s enclosed-cell handling are</li></ul>
+<p>untouched; they now score units at sub-region granularity.</p>
+<ul><li>Easy to remove: one module, one option. <code>multipart_min_tiles=1e9</code> restores the previous</li></ul>
+<p>behaviour exactly, asserted in a test.</p>
+<h2>Tests</h2>
+<p>21 new in <code>tests/test_symbol_cartogram_mosaic.py</code>: exact totals; apportionment sums and follows area shares deterministically under ties; threshold on and off; sub-threshold parts rejected; one-tile regions never split; <code>group_by</code> never splits; Michigan under both morph settings; Rhode Island stays whole; the reach default pinned at 16 with a case that needs more than 8 hops.</p>
+<p><code>uv run pytest -q</code> → **472 passed**. <code>make check</code> clean.</p>
+<h2>Status: draft, pending a decision</h2>
+<p>The world result is worse on several metrics and does not show the benefit the feature was built for. Per the standing rule I have not adjusted anything to improve it and have left the PR as a draft. Options:</p>
+<p>1. **Merge as-is.** Census configurations are unchanged or clearly better (districts+group_by/ morph=False converges for the first time); world is neutral-to-slightly-worse and was already non-converged and non-exact before. 2. **Split the two changes.** Land the reach change alone — it carries every district win and the new convergence — and hold sub-regions until there is an input where they demonstrably help beyond the synthetic fixture. 3. **Drop sub-regions.** The destructive forcing they remove is real but appears only on small tight instances; on realistic maps the repair already gives up on its own.</p>
+<p>My recommendation is **2**, because the reach change is unambiguously positive and independently measurable, while the sub-region benefit is currently evidenced only by a synthetic fixture.</p>
+<div class="figure">
+<img src="districts_group_by_3way.png" alt="Districts grouped by state, morph=True. Unchanged by sub-regions; ring tiles 8 to 3 and empty core 12 to 7 from the reach change.">
+<p class="caption">Districts grouped by state, morph=True. Unchanged by sub-regions; ring tiles 8 to 3 and empty core 12 to 7 from the reach change.</p>
+</div><div class="figure">
+<img src="fixture_3way.png" alt="3x3 fixture. Bit-identical in all three variants.">
+<p class="caption">3x3 fixture. Bit-identical in all three variants.</p>
+</div><div class="figure">
+<img src="indonesia_3way.png" alt="**Indonesia, morph=True.** 5 qualifying parts. Note the before panel already shows Indonesia in **4 blocks**: the old repair had already given up on the impossible constraint rather than satisfying it destructively, which is why the world numbers below do not improve.">
+<p class="caption">**Indonesia, morph=True.** 5 qualifying parts. Note the before panel already shows Indonesia in **4 blocks**: the old repair had already given up on the impossible constraint rather than satisfying it destructively, which is why the world numbers below do not improve.</p>
+</div><div class="figure">
+<img src="indonesia_nomorph_3way.png" alt="indonesia_nomorph_3way.png">
+<p class="caption">indonesia_nomorph_3way.png</p>
+</div><div class="figure">
+<img src="malaysia_3way.png" alt="malaysia_3way.png">
+<p class="caption">malaysia_3way.png</p>
+</div><div class="figure">
+<img src="malaysia_nomorph_3way.png" alt="**Malaysia, morph=False.** Two parts ~600 km apart. Before: one forced block with an enclosed hole inside it. After: two blocks matching the real geography, no enclosed cell in view. Sibling sub-regions sitting near each other is correct — they are still one region.">
+<p class="caption">**Malaysia, morph=False.** Two parts ~600 km apart. Before: one forced block with an enclosed hole inside it. After: two blocks matching the real geography, no enclosed cell in view. Sibling sub-regions sitting near each other is correct — they are still one region.</p>
+</div><div class="figure">
+<img src="michigan_3way.png" alt="**Michigan, morph=True.** The census case. Its two peninsulas nearly touch at the Straits, so the constraint it violated was mild; the two sub-region blocks end up adjacent, which is the correct outcome, not a partial one.">
+<p class="caption">**Michigan, morph=True.** The census case. Its two peninsulas nearly touch at the Straits, so the constraint it violated was mild; the two sub-region blocks end up adjacent, which is the correct outcome, not a partial one.</p>
+</div><div class="figure">
+<img src="michigan_nomorph_3way.png" alt="Michigan, morph=False, and the reason the threshold is 0.5 rather than 1.0 tile areas: unmorphed, the Upper Peninsula is only 0.72 tile areas.">
+<p class="caption">Michigan, morph=False, and the reason the threshold is 0.5 rather than 1.0 tile areas: unmorphed, the Upper Peninsula is only 0.72 tile areas.</p>
+</div><div class="figure">
+<img src="neighbour_distortion.png" alt="**The headline result, and the clearest evidence in this PR.** Same input, same code, only `multipart_min_tiles` differs. Forced to make its two parts one block, region B reaches across the gap and breaks its single-part neighbour A into 3 blocks; the layout cannot converge. With sub-regions, A is left intact, B occupies two blocks matching its geography, and the layout converges. This is what the feature is for: removing an impossible constraint so the solver stops damaging whatever is in the way.">
+<p class="caption">**The headline result, and the clearest evidence in this PR.** Same input, same code, only <code>multipart_min_tiles</code> differs. Forced to make its two parts one block, region B reaches across the gap and breaks its single-part neighbour A into 3 blocks; the layout cannot converge. With sub-regions, A is left intact, B occupies two blocks matching its geography, and the layout converges. This is what the feature is for: removing an impossible constraint so the solver stops damaging whatever is in the way.</p>
+</div><div class="figure">
+<img src="newzealand_3way.png" alt="newzealand_3way.png">
+<p class="caption">newzealand_3way.png</p>
+</div><div class="figure">
+<img src="newzealand_nomorph_3way.png" alt="newzealand_nomorph_3way.png">
+<p class="caption">newzealand_nomorph_3way.png</p>
+</div><div class="figure">
+<img src="nomorph_3way.png" alt="Districts grouped by state, morph=False. The one configuration that was never converged: split groups 1 to 0 and **converged False to True**, entirely from the reach change.">
+<p class="caption">Districts grouped by state, morph=False. The one configuration that was never converged: split groups 1 to 0 and **converged False to True**, entirely from the reach change.</p>
+</div><div class="figure">
+<img src="rhodeisland_3way.png" alt="Rhode Island. It receives **one tile in total** at this budget, so it can never be two sub-regions whatever the threshold. Identical in all three variants.">
+<p class="caption">Rhode Island. It receives **one tile in total** at this budget, so it can never be two sub-regions whatever the threshold. Identical in all three variants.</p>
+</div><div class="figure">
+<img src="states_3way.png" alt="US states, morph=True. The middle panel shows the cost of sub-regions alone (one extra ring tile, one extra empty core tile, one enclosed cell); the right panel shows the reach change returning every defect counter to exactly its before value.">
+<p class="caption">US states, morph=True. The middle panel shows the cost of sub-regions alone (one extra ring tile, one extra empty core tile, one enclosed cell); the right panel shows the reach change returning every defect counter to exactly its before value.</p>
+</div><div class="figure">
+<img src="states_nomorph_3way.png" alt="US states, morph=False. Same story: defect counters return exactly to before.">
+<p class="caption">US states, morph=False. Same story: defect counters return exactly to before.</p>
+</div><div class="figure">
+<img src="world_3way.png" alt="Whole world, morph=True. Ring tiles 8 to 2 and empty core 34 to 28 across the three variants, almost all of it from the relocation reach (middle panel is unchanged from before).">
+<p class="caption">Whole world, morph=True. Ring tiles 8 to 2 and empty core 34 to 28 across the three variants, almost all of it from the relocation reach (middle panel is unchanged from before).</p>
+</div><div class="figure">
+<img src="world_nomorph_3way.png" alt="Whole world, morph=False — the harder case. Split counts rise; see the world section below.">
+<p class="caption">Whole world, morph=False — the harder case. Split counts rise; see the world section below.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

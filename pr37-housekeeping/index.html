@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #37: &quot;chore: fastmath determinism investigation, Voronoi docs convergence, symbol_cartogram leftovers&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #37: &quot;chore: fastmath determinism investigation, Voronoi docs convergence, symbol_cartogram leftovers&quot;</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/37">https://github.com/bright-fakl/carto-flow/pull/37</a></dd>
+<dt>Branch</dt><dd>chore/housekeeping-determinism-docs</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-09-20</dd>
+<dt>Before</dt><dd>00f758b (origin/main)</dd>
+<dt>After</dt><dd>4e1d107 (branch HEAD at PR open)</dd>
+<dt>Inputs</dt><dd>&gt;</dd>
+</dl>
+<p class="desc">&gt;</p>
+<h1>Piece 1 - fastmath determinism</h1>
+<p>See <code>fastmath_findings.md</code> for the full writeup. Short version:</p>
+<ul><li>Harness: <code>det_harness.py</code> in this directory.</li><li>45 runs across 5 configurations (states/districts, undensified and</li></ul>
+<p>densified to 391,644 coords - bracketing the reported 364,086-coord repro), at <code>n_iter</code> 60/100/500. **Zero divergence in any run** - every run&#x27;s coordinate checksum was bit-identical to every other run of the same configuration.</p>
+<ul><li>Code review: both flagged kernels (<code>flow_cartogram/displacement.py:88</code>,</li></ul>
+<p><code>geo_utils/geometry.py:132</code>) write strictly independent per-index outputs under <code>prange</code>; any cross-thread accumulation happens in an explicit sequential loop afterward. Neither performs a thread-shared floating-point reduction, so there is no mechanism by which parallel scheduling order (with or without <code>fastmath</code>) could change the result.</p>
+<ul><li>**Decision: held back.** Could not reproduce the problem this fix is</li></ul>
+<p>meant to solve, so the fix cannot be verified. No code change shipped for this piece. See <code>fastmath_findings.md</code> for recommended next steps if a human wants to re-open this on the original repro environment.</p>
+<ul><li>Raw logs: <code>fastmath_repro_districts_n100.txt</code> (districts, n_iter=100,</li></ul>
+<p>20 runs), <code>fastmath_repro_states_n500.txt</code> (states densified to 391,644 coords, n_iter=500, 5 runs).</p>
+<h1>Piece 2 - Voronoi docs convergence</h1>
+<p><code>n_iter</code> raised 100-&gt;300 (30-&gt;300 in <code>choose-backend.ipynb</code>) in:</p>
+<ul><li><code>docs/examples/voronoi_cartogram/plot_voronoi_districts.py</code></li><li><code>docs/examples/voronoi_cartogram/plot_voronoi_custom_boundary.py</code></li><li><code>docs/examples/voronoi_cartogram/plot_voronoi_elastic_boundary.py</code></li><li><code>docs/how-to/voronoi_cartogram/choose-backend.ipynb</code></li></ul>
+<p><code>area_cv_tol</code> self-stops each script early once converged, so cost is well below the full 300 iterations in every case that has a tolerance set.</p>
+<h2>Districts (docs config: RasterBackend(512, ElasticBoundary(0.02)), area_cv_tol=0.1, tol=2500)</h2>
+<table>
+<tr><th>n_iter</th><th>iterations used</th><th>final area_cv</th><th>mean area error</th><th>wall time</th></tr>
+<tr><td>100 (before)</td><td>100 (did not converge)</td><td>0.306</td><td>26%</td><td>baseline</td></tr>
+<tr><td>300 (after)</td><td>176 (self-stopped)</td><td>0.099</td><td>8.1%</td><td>+12s</td></tr>
+</table>
+<p>![districts before](voronoi_districts_before.png) ![districts after](voronoi_districts_after.png)</p>
+<h2>Custom boundary (RasterBackend(256), circle boundary, area_cv_tol=0.05)</h2>
+<table>
+<tr><th>n_iter</th><th>final area_cv</th><th>wall time</th></tr>
+<tr><td>100 (before)</td><td>0.0647</td><td>baseline</td></tr>
+<tr><td>300 (after)</td><td>0.0639</td><td>+1.6s</td></tr>
+</table>
+<p>Already close to <code>area_cv_tol</code> at n_iter=100, so the visual/metric change here is small - included for completeness.</p>
+<p>![custom boundary before](voronoi_custom_boundary_before.png) ![custom boundary after](voronoi_custom_boundary_after.png)</p>
+<h2>Elastic boundary example (RasterBackend(256), area_cv_tol=0.05)</h2>
+<p>Measured directly (not full mkdocs build):</p>
+<table>
+<tr><th>variant</th><th>n_iter=100 final area_cv</th><th>n_iter=300 final area_cv</th><th>added wall time</th></tr>
+<tr><td>fixed boundary</td><td>0.1946</td><td>0.1677</td><td>+1.7s</td></tr>
+<tr><td>elastic boundary</td><td>0.0473 (already converged)</td><td>0.0473</td><td>~0s</td></tr>
+</table>
+<p>The fixed-boundary variant does not reach <code>area_cv_tol=0.05</code> even at n_iter=300 - expected, since the whole point of the example is to show that a fixed boundary converges worse than an elastic one at the periphery.</p>
+<h2>choose-backend.ipynb (RasterBackend(300) and ExactBackend, no area_cv_tol set)</h2>
+<p>No <code>area_cv_tol</code>, so these always run the full <code>n_iter</code>:</p>
+<table>
+<tr><th>backend</th><th>n_iter=30</th><th>n_iter=300</th><th>added wall time</th></tr>
+<tr><td>Raster</td><td>1.2s, cv=0.0772</td><td>3.2s, cv=0.0246</td><td>+2.0s</td></tr>
+<tr><td>Exact</td><td>1.6s, cv=0.3866</td><td>14.5s, cv=0.1288</td><td>+12.9s</td></tr>
+</table>
+<p>Total added cost for this notebook: ~+15s. <code>ExactBackend</code> still doesn&#x27;t reach a tight cv even at n_iter=300 (0.1288) - matches the notebook&#x27;s own narrative that <code>ExactBackend</code> &quot;converges slowly,&quot; so this is expected and not a problem to fix here.</p>
+<h2>check-docs</h2>
+<p><code>uv run mkdocs build -s</code> (the <code>check-docs</code> CI job) passes locally with all of the above changes applied. See the docs-build-flake note below for an unrelated, pre-existing intermittent failure encountered while verifying this.</p>
+<h1>Piece 3 - leftovers</h1>
+<h2>pre_scale ordering</h2>
+<p><code>prepare_layout_data</code> (<code>src/carto_flow/symbol_cartogram/layouts/data_prep.py</code>) computes <code>mean_area</code>/<code>unit_cell_radius</code> from the original geometries (step 1) before <code>pre_scale</code> rescales connected components (step 4b). <code>geometry_areas</code> used for <code>size_normalization=&quot;total&quot;</code> is recomputed after prescaling, but <code>mean_area</code> (returned on <code>LayoutData</code>) and <code>unit_cell_radius</code> (used for <code>size_normalization=&quot;max&quot;</code>, the *default*) are not - so <code>pre_scale</code> silently has no effect on non-mosaic layout sizing under the default settings.</p>
+<p>**Decision: documented, not reordered.** Reordering changes non-mosaic layout output and needs its own measurement/decision per the standing rules; documenting is the safe, non-behavior-changing option. Added <code>TestPreScale.test_pre_scale_does_not_change_mean_area_or_max_normalized_sizes</code> in <code>tests/test_symbol_cartogram_mosaic.py</code> pinning the current, documented behavior so a future reordering change is a deliberate, visible diff.</p>
+<h2>tile-count-maps.ipynb cleanup</h2>
+<p>Dropped cells calling <code>geographic_grouped_cartogram</code> / <code>.placement_metrics</code> (exploratory, disconnected from the guide&#x27;s <code>tile_count</code>/<code>group_by</code> narrative) and a trailing empty cell.</p>
+<h2>Docs build flake - OverflowError in mkdocs_gallery</h2>
+<p>Reproduced on a clean <code>mkdocs build -s</code>:</p>
+<p>``<code> File &quot;.../mkdocs_gallery/gen_gallery.py&quot;, line 633, in _sec_to_readable t = datetime(1, 1, 1) + timedelta(seconds=t) OverflowError: date value out of range </code>``</p>
+<p>Re-ran the identical build immediately after (same code, same machine) and it succeeded - confirmed intermittent, not a deterministic failure tied to our changes. <code>_sec_to_readable</code> is upstream <code>mkdocs-gallery==0.10.4</code> code (<code>gen_gallery.py:627-635</code>); most likely a rare negative or otherwise malformed <code>exec_time</code> for one script pushes the <code>timedelta</code> below <code>datetime.min</code>. Fixing it would require patching third-party <code>site-packages</code>, which is invasive and not durable across dependency updates - reporting per the standing rule rather than working around it. No code change made for this item; flagging for a human to consider reporting upstream or pinning a version if/when one fixes it.</p>
+<h2>FlowDensityLayout docstring caveats</h2>
+<p>Documented on <code>FlowDensityLayoutOptions</code> (<code>src/carto_flow/symbol_cartogram/layouts/flow/__init__.py</code>) and in <code>docs/explanations/symbol-cartogram-flow-density-layout.md</code>:</p>
+<ul><li><code>cross_group_pull_scale=0</code> removes cross-group *pull* but does not</li></ul>
+<p>isolate groups - the density field is built from all pairs together and covers the full domain, so groups still interact through push forces and shared field geometry.</p>
+<ul><li><code>convergence_tolerance</code> is checked against the *mean* relative NN</li></ul>
+<p>spacing error across all pairs, not a per-pair bound, so individual pairs (including some residual overlap) can remain above tolerance when the layout reports convergence.</p>
+<h1>Verification</h1>
+<ul><li><code>make check</code> (pre-commit/ruff/mypy/deptry, lock check): clean</li><li><code>uv run pytest -q</code>: 487 passed</li><li><code>uv run mkdocs build -s</code>: succeeds (see flake note above)</li><li>Pushed tree verified: <code>git log --oneline -1</code> on the branch equals the</li></ul>
+<p>commit referenced above; PR #37 opened against <code>main</code>.</p>
+<div class="figure">
+<img src="voronoi_custom_boundary_after.png" alt="voronoi_custom_boundary_after.png">
+<p class="caption">voronoi_custom_boundary_after.png</p>
+</div><div class="figure">
+<img src="voronoi_custom_boundary_before.png" alt="voronoi_custom_boundary_before.png">
+<p class="caption">voronoi_custom_boundary_before.png</p>
+</div><div class="figure">
+<img src="voronoi_districts_after.png" alt="voronoi_districts_after.png">
+<p class="caption">voronoi_districts_after.png</p>
+</div><div class="figure">
+<img src="voronoi_districts_before.png" alt="voronoi_districts_before.png">
+<p class="caption">voronoi_districts_before.png</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

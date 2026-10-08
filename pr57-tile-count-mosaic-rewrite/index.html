@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #57: Rewrite the tile-count how-to around the mosaic layout</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #57: Rewrite the tile-count how-to around the mosaic layout</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/57">https://github.com/bright-fakl/carto-flow/pull/57</a></dd>
+<dt>Branch</dt><dd>docs/tile-count-mosaic</dd>
+<dt>Base</dt><dd>origin/main @ 78060af</dd>
+<dt>Date</dt><dd>2026-09-24 14:38</dd>
+<dt>Before</dt><dd>origin/main @ 78060af</dd>
+<dt>After</dt><dd>docs/tile-count-mosaic @ eb29c1a</dd>
+<dt>Inputs</dt><dd>US states (49, bundled) with House seats apportioned by the Hamilton method (435 tiles); US congressional districts (432) grouped by state; Natural Earth world countries (177) with tile_count = max(1, round(population share x 200)) = 304 tiles</dd>
+</dl>
+<p class="desc">The how-to showed grid, mosaic and circle packing side by side; mosaic is now the spine, three exploratory cells are gone, and min_one_tile_per_region and the missing-region warning are documented for the first time. Compare the old lead figure (a 435-tile grid blob) with the new one.</p>
+<h2>What changed</h2>
+<ul><li>Rewritten: <code>docs/how-to/tile-count-maps.ipynb</code>.</li><li>Updated: its entry in <code>docs/how-to/index.md</code>.</li><li>Fixed: <code>SymbolCartogram.to_geodataframe(level=&quot;group&quot;)</code> in</li></ul>
+<p><code>src/carto_flow/symbol_cartogram/result.py</code>, with a test in <code>tests/test_symbol_cartogram_group_by_support.py</code>.</p>
+<h2>Claims in the old notebook that were false</h2>
+<p>**<code>result.symbols</code> always carries <code>group_index</code> when <code>tile_count</code> is used.** Mosaic does not set it. <code>MosaicLayout</code> passes the G-level user grouping, which is None unless <code>group_by</code> was given, so <code>to_geodataframe(level=&quot;group&quot;)</code> raises <code>level=&#x27;group&#x27; requires group_by or tile_count to have been set</code> on a mosaic tile-count result. Grid passes the N-level grouping and does carry it. The rewritten page uses <code>layout.regions_gdf</code> for the tile-count case instead, which is mosaic-native and also reports <code>target_count</code> next to the delivered <code>tile_count</code>.</p>
+<p>**<code>to_geodataframe(level=&quot;group&quot;)</code> returns one row per group with that group&#x27;s attributes.** The geometry was right; the attributes were not. The join read <code>valid_source.iloc[group_index]</code> — a source *row* index, not a group — so with <code>group_by</code> every group whose first member is not at row <code>group_index</code> was labeled from the wrong region. The old notebook&#x27;s closing table printed the wrong <code>Region</code> for three of its four rows. With <code>tile_count</code> on grid, group index equals row index, so that path was correct and stays byte-identical. The fix reads the group&#x27;s lowest <code>original_index</code>.</p>
+<p>Two further claims — that grid &quot;treats each tile-count value as a symbol size&quot; and that mosaic is slower — were already corrected on main before this branch.</p>
+<h2>Measurements</h2>
+<table>
+<tr><th></th><th>before</th><th>after</th></tr>
+<tr><td>notebook runtime (nbclient, cold kernel)</td><td>47.3 s</td><td>13.7 s</td></tr>
+<tr><td>code cells</td><td>15</td><td>11</td></tr>
+<tr><td>layouts run</td><td>packing, grid, mosaic</td><td>mosaic</td></tr>
+</table>
+<p>The 33 s saved is almost all the 500-iteration circle packing on 432 districts. The world tilegram added by the new section costs about 5 s of the remainder.</p>
+<h2>Was <code>min_one_tile_per_region</code> demonstrated on a contrived input?</h2>
+<p>No. The library&#x27;s own test for the option uses a synthetic speck 1/2500th of a tile. The notebook uses Natural Earth world countries with tile counts proportional to population, which is what a reader would actually write, and four real regions fall out of the mosaic unprompted. US data does not reach the case: even at one tile per state with Alaska and Hawaii included, Hawaii&#x27;s islands still clear <code>min_overlap_frac</code>, so the notebook switches datasets for this section rather than shrinking a US state to force it.</p>
+<h2>Verification</h2>
+<ul><li><code>nbclient</code> end to end, <code>allow_errors=False</code>: no errors and no stderr stream in</li></ul>
+<p>any output. The deliberate &quot;received no tile&quot; warning is captured with <code>warnings.catch_warnings(record=True)</code> and printed to stdout, matching how the grid-vs-mosaic guide prints its <code>ValueError</code>.</p>
+<ul><li><code>uv run mkdocs build -s</code>: built in 388 s, no warnings-as-errors.</li><li><code>make check</code>: pre-commit, ruff, mypy (80 files), deptry all clean.</li><li><code>pytest</code>: 711 passed.</li></ul>
+<div class="figure">
+<img src="after_group_by_districts.png" alt="New group_by figure: 432 congressional districts, one tile each, grouped by state. Fill color is the state, the dark outline is regions_gdf — the union of each group&#x27;s tiles — which shows that every group is a single connected block.">
+<p class="caption">New group_by figure: 432 congressional districts, one tile each, grouped by state. Fill color is the state, the dark outline is regions_gdf — the union of each group&#x27;s tiles — which shows that every group is a single connected block.</p>
+</div><div class="figure">
+<img src="after_min_one_tile_world.png" alt="New section. A 200-tile world population tilegram drops Jamaica, Vanuatu, Cyprus and N. Cyprus: no lattice cell overlaps their land mass by min_overlap_frac, so their geographic components have empty tile pools. With min_one_tile_per_region=True they are seeded onto unclaimed cells (red) and all 177 countries reach their exact count.">
+<p class="caption">New section. A 200-tile world population tilegram drops Jamaica, Vanuatu, Cyprus and N. Cyprus: no lattice cell overlaps their land mass by min_overlap_frac, so their geographic components have empty tile pools. With min_one_tile_per_region=True they are seeded onto unclaimed cells (red) and all 177 countries reach their exact count.</p>
+</div><div class="figure">
+<img src="after_mosaic_435.png" alt="New lead figure: the same 435 seats on the mosaic layout, colored by census region. Every state&#x27;s tiles form one block and the footprint keeps the outline of the country. The old notebook produced this figure too, as an afterthought in its last cell.">
+<p class="caption">New lead figure: the same 435 seats on the mosaic layout, colored by census region. Every state&#x27;s tiles form one block and the footprint keeps the outline of the country. The old notebook produced this figure too, as an afterthought in its last cell.</p>
+</div><div class="figure">
+<img src="before_grid_435.png" alt="Old lead figure: 435 seats on the grid layout. The lattice is sized from the largest symbol on an oversized grid, so the tilegram reads as an oval blob rather than the United States. Population density also collapses to one bright hexagon (DC) against a uniform purple field.">
+<p class="caption">Old lead figure: 435 seats on the grid layout. The lattice is sized from the largest symbol on an oversized grid, so the tilegram reads as an oval blob rather than the United States. Population density also collapses to one bright hexagon (DC) against a uniform purple field.</p>
+</div><div class="figure">
+<img src="before_group_symbol_shapes.png" alt="Removed: per-group symbol shapes via Styling.set_group_symbol(). Per-group styling is the subject of style-symbols-by-category.ipynb, which the rewritten page links to.">
+<p class="caption">Removed: per-group symbol shapes via Styling.set_group_symbol(). Per-group styling is the subject of style-symbols-by-category.ipynb, which the rewritten page links to.</p>
+</div><div class="figure">
+<img src="before_packing_districts.png" alt="Removed: a 500-iteration CirclePackingLayout run on congressional districts with eight hand-tuned weights and no explanation of any of them. Exploration, not teaching, and 30 s of the notebook&#x27;s runtime.">
+<p class="caption">Removed: a 500-iteration CirclePackingLayout run on congressional districts with eight hand-tuned weights and no explanation of any of them. Exploration, not teaching, and 30 s of the notebook&#x27;s runtime.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

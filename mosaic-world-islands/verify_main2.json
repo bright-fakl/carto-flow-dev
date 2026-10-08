@@ -1,0 +1,57 @@
+{
+ "_carto_flow": "/home/fakl/cf-verify/src/carto_flow/__init__.py",
+ "world_b800_morph1": {
+  "fingerprint": "ba7120159c505530",
+  "wall_clock_s": 37.59,
+  "tile_size": 282103.31361039006,
+  "noncontig": 6,
+  "split_groups": 0,
+  "regions_correct": 170,
+  "unassigned_core": 32
+ },
+ "world_b800_morph0": {
+  "fingerprint": "54f434ebfcdb3b13",
+  "wall_clock_s": 17.74,
+  "tile_size": 278935.3423270758,
+  "noncontig": 4,
+  "split_groups": 0,
+  "regions_correct": 159,
+  "unassigned_core": 81
+ },
+ "districts_b0_morph1": {
+  "fingerprint": "72cd3f2aa88537ba",
+  "wall_clock_s": 4.31,
+  "tile_size": 88352.86425678768,
+  "noncontig": 0,
+  "split_groups": 0,
+  "regions_correct": 432,
+  "unassigned_core": 10
+ },
+ "districts_b0_morph0": {
+  "fingerprint": "b34667996c9cfeed",
+  "wall_clock_s": 3.75,
+  "tile_size": 87618.99153964566,
+  "noncontig": 0,
+  "split_groups": 0,
+  "regions_correct": 432,
+  "unassigned_core": 14
+ },
+ "states_b0_morph1": {
+  "fingerprint": "1c55ddfe3283dc0c",
+  "wall_clock_s": 1.32,
+  "tile_size": 152406.55758039767,
+  "noncontig": 0,
+  "split_groups": 0,
+  "regions_correct": 49,
+  "unassigned_core": 2
+ },
+ "states_b0_morph0": {
+  "fingerprint": "2878b87f73a17d9b",
+  "wall_clock_s": 4.13,
+  "tile_size": 151407.07687548813,
+  "noncontig": 0,
+  "split_groups": 0,
+  "regions_correct": 49,
+  "unassigned_core": 3
+ }
+}

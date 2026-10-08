@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #56: Document each mosaic option by its measured effect</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #56: Document each mosaic option by its measured effect</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/56">https://github.com/bright-fakl/carto-flow/pull/56</a></dd>
+<dt>Branch</dt><dd>docs/mosaic-option-behavior</dd>
+<dt>Base</dt><dd>origin/main @ 78060af</dd>
+<dt>Date</dt><dd>2026-09-24 14:30</dd>
+<dt>Before</dt><dd>docs/explanations/symbol-cartogram-mosaic-layout.md @ 78060af</dd>
+<dt>After</dt><dd>docs/mosaic-option-behavior</dd>
+<dt>Inputs</dt><dd>no new runs — this PR re-reads two existing measurement workspaces: visual_checks/mosaic-options-sweep (670 runs, 11 parameters x 4-7 values x 5 inputs x 2 morph settings) and visual_checks/grid-vs-mosaic-similarity (including the 238-run interior_bonus gating check, section 6)</dd>
+</dl>
+<p class="desc">Rewrites the MosaicLayoutOptions / HungarianOptions documentation on the mosaic explanation page so every option is described by what it does to a result, not by what it was intended to do. This page records the measurements each claim rests on, since the explanation page itself carries no numbers.</p>
+<h2>What changed</h2>
+<p><code>docs/explanations/symbol-cartogram-mosaic-layout.md</code> described <code>MosaicLayoutOptions</code> and <code>HungarianOptions</code> by intent. Two measurement workspaces now show that several options do not behave as described. The page&#x27;s parameter tables gain a <code>Type</code> column and a new section, **How Each Option Behaves**, describes each option by its effect.</p>
+<p><code>docs/explanations/</code> explains algorithms only: no result tables, no measurements, no PR references, no decision history. Every claim on the page is therefore stated as behavior. The table below is the audit trail: claim on the left, measured basis on the right.</p>
+<p>Three docstrings in <code>src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py</code> (<code>distance_weight</code>, <code>outside_penalty</code>, <code>spacing</code>, <code>extra_tile_rings</code>, <code>min_overlap_frac</code>) were corrected in the same way. <code>distance_weight</code>&#x27;s was actively wrong, not merely incomplete.</p>
+<p>No behavior changed. No source logic was touched.</p>
+<h2>Claim-to-evidence map</h2>
+<p>Sources: **S** = <code>visual_checks/mosaic-options-sweep/summary.md</code> (with <code>tables.md</code>, <code>results.jsonl</code>); **G** = <code>visual_checks/grid-vs-mosaic-similarity/summary.md</code>.</p>
+<table>
+<tr><th>Claim on the explanation page</th><th>Measured basis</th></tr>
+<tr><td><code>spacing</code> draws a gap by shrinking each symbol inside its tile: the lattice is calibrated first, then <code>Transform.scale</code> is divided by <code>1 + spacing</code>. The grid layout does the same, so leaving the assignment unchanged is correct, not anomalous</td><td>S, &quot;spacing&quot;: fingerprint, tile size and all ~40 metrics identical for 0.0 / 0.05 / 0.2 / 0.5 on all five inputs at both morph settings. <code>spacing_check.json</code>: symbol-area ratio matches <code>1/(1+s)²</code> to machine precision; <code>tiles_gdf</code> total area unchanged</td></tr>
+<tr><td><code>outside_penalty</code>&#x27;s sign is input-dependent; on grouped inputs at <code>morph=False</code> every non-default value splits a group</td><td>S, &quot;outside_penalty&quot;: world/morph=True 0.0 beats default on displacement (3.30 vs 3.85) and adjacency (0.631 vs 0.544); states/morph=True 0.0 is worse on displacement (2.56 vs 2.10). Integrity screen: districts/morph=False disqualifies 0.0, 0.25, 0.5, 2.0, 4.0, 10.0</td></tr>
+<tr><td>The cost function is not scale-free in <code>distance_weight</code> x <code>outside_penalty</code>; equal-ratio pairs do not agree</td><td>S, joint grid: 32 of 32 equal-ratio comparisons gave different placements. Cost is <code>distance_weight*dist + outside_penalty*outside - interior_bonus*connectivity + neighbor_weight*neighbor</code>; <code>interior_bonus</code> (2.0) and the neighbor term (0.3) are absolute</td></tr>
+<tr><td><code>distance_weight</code> off 1.0 splits regions more often than not</td><td>S: <code>distance_weight != 1.0</code> disqualified in 24 of 40 off-default cells on districts and world</td></tr>
+<tr><td><code>max_connectivity_iters</code> is inert at <code>morph=True</code>; at <code>morph=False</code> it converges within a few passes; 0 or 1 splits a group and can be slower</td><td>S: values 0/1/2/5/15/30 byte-identical on all five inputs at <code>morph=True</code>. At <code>morph=False</code> identity groups <code>{0} {1} {2,5,15,30}</code>. districts/morph=False at 0: 1 split group, adjacency 0.485 → 0.352, 16.1 s against 3.5 s at the default</td></tr>
+<tr><td><code>penalize_disconnected</code> is a switch, not a magnitude; on/off separates only at <code>morph=False</code></td><td>S, &quot;disconnected_penalty_mult&quot; (the field this replaced): byte-identical on 8 of 10 combos; on the other two the identity groups are <code>{0.0}</code> and <code>{1.0, 2.0, 5.0, 10.0, 50.0}</code>. No integrity defect from disabling it on any input</td></tr>
+<tr><td><code>swap_repair_passes</code> affects integrity only; monotone to zero defects; saturation point moves with the input; inert at one tile per region</td><td>S, &quot;swap_repair_passes&quot;: largest median-displacement change across the sweep 0.08 tiles. Defect counts fall monotonically 0 → 10 on states/districts/world; saturation at 2 (districts/morph=True), 5 (world/morph=False), 10 (districts/morph=False); inert on both states_uniform tilings; 30 never differs from 10</td></tr>
+<tr><td><code>ring_swapback_max_hops</code>: defects at both ends; low values best on fidelity at one tile per region, disqualified on grouped/world; a much larger reach reintroduces a split</td><td>S, &quot;ring_swapback_max_hops&quot;: states_uniform/morph=False hops 0-4 give displacement 1.46 / adjacency 0.74 against 2.24 / 0.52 at the default, with zero defects on that input; silhouette IoU goes the other way (0.735 vs 0.819). districts/morph=True needs &gt;= 2, world/morph=True &gt;= 4. districts/morph=False at 32: 1 split group the default does not have, adjacency 0.464 vs 0.485</td></tr>
+<tr><td><code>extra_tile_rings</code> is non-monotone; 0 starves the pool; &gt;= 2 splits regions everywhere; runtime grows sharply</td><td>S, &quot;extra_tile_rings&quot;: world/morph=False 30 tiles unplaced at 0 (18 at the default), world/morph=True 24 (11). Only the default 1 is clean on all five inputs at both morph settings. states_uniform/morph=True displacement 1.30, 1.53, 1.77, 1.19, 1.77. districts/morph=True 6.0 s at default, 41.3 s at 5</td></tr>
+<tr><td><code>min_overlap_frac</code> is non-monotone in both directions; the best-fidelity values split regions; 1.0 degenerates</td><td>S, &quot;min_overlap_frac&quot;: world/morph=False IoU 0.497, 0.542, 0.654, 0.656, 0.523, 0.341 across 0.02-1.0; districts/morph=False peaks at 0.5 (0.926 vs 0.857 at the default) — both optima disqualified. 0.02 also disqualified on districts/morph=True and world/morph=True. world/morph=True at 1.0: 1138 unassigned core tiles, IoU 0.209</td></tr>
+<tr><td><code>tile_size</code> at the calibrated value reproduces calibration exactly; no off-calibration value is cleanly better</td><td>S, &quot;tile_size&quot;: x1.0 reproduces the baseline fingerprint on all ten combos. x1.25 on districts/morph=False: displacement 7.29 → 4.22, adjacency 0.485 → 0.560, by leaving 62 requested tiles unplaced. x0.8 on districts/morph=False: 2 split groups, 244 unassigned core tiles</td></tr>
+<tr><td><code>interior_bonus</code> is strongly non-monotone; the default is one of the few values clean on every input; it is the worse choice at one tile per region with <code>morph=False</code></td><td>G section 6 (238 runs): integrity screen admits only 0.5 and 2.0 of the seven values tested; adjacency on states_uniform hexagon/morph=True runs 0.651, 0.761, 0.697, 0.569, 0.725, 0.716, 0.771 — a trough at 1.0 between two peaks. 2.0 wins 6 of 8 panels; the 2 losses are exactly the one-tile-per-region morph=False panels on both tilings</td></tr>
+<tr><td>The square tiling&#x27;s calibrated tile set is not fixed at one tile per region, unlike hexagon</td><td>G section 6, &quot;Incidental correction&quot;: square morph=True IoU 0.635 → 0.701 across <code>interior_bonus</code> values; hexagon flat at 0.713</td></tr>
+<tr><td><code>neighbor_bfs=True</code> does not close the mosaic-vs-grid gap at one tile per region</td><td>G section 5, &quot;REFUTED: <code>neighbor_bfs=True</code> is not the explanation&quot;</td></tr>
+<tr><td>Best-fidelity values are repeatedly the disqualified ones</td><td>S, &quot;Integrity screen&quot;: the pattern holds for <code>min_overlap_frac</code>, <code>tile_size</code>, <code>extra_tile_rings</code> and <code>interior_bonus</code></td></tr>
+<tr><td>Most defects appear at <code>morph=False</code></td><td>S: 9 of the 10 combos with baseline defects or the most disqualifications are <code>morph=False</code>. G section 6: every <code>interior_bonus</code> failure but one is on districts or at <code>morph=False</code></td></tr>
+</table>
+<h2>Where the sweeps predate current main</h2>
+<p>The sweep workspaces were run against older revisions. Three of their parameters no longer exist under the names they were measured under, and two defaults have moved. The page describes current main; the mapping is:</p>
+<table>
+<tr><th>In the sweep</th><th>On current main</th></tr>
+<tr><td><code>disconnected_penalty_mult</code> (float, default 10.0)</td><td><code>penalize_disconnected</code> (bool, default True). The sweep&#x27;s finding — only 0 vs non-zero separates — is the reason for the type change, and <code>_DISCONNECTED_PENALTY_MULT = 10.0</code> is now a module constant</td></tr>
+<tr><td><code>gap_bridge_mult</code> (float, default 5.0)</td><td>removed; <code>_GAP_BRIDGE_MULT = 5.0</code> is a module constant. Byte-identical results 0.0-20.0 on all ten combos</td></tr>
+<tr><td><code>disconnected_score_weight</code> (int, default 100)</td><td>removed; <code>_DISCONNECTED_SCORE_WEIGHT = 100</code> is a module constant. Byte-identical results 0-1000 on all ten combos</td></tr>
+<tr><td><code>max_connectivity_iters</code> default 15</td><td>default 5. The sweep found it saturating at 2 and never binding above 4 passes</td></tr>
+<tr><td><code>interior_bonus</code> default 0.5</td><td>default 2.0 (the gating check in G section 6)</td></tr>
+</table>
+<p>Neither removed option is mentioned anywhere in <code>src/</code> or <code>docs/</code> any more (verified by grep). The explanation page&#x27;s repair section already describes both constants inline, without naming them as options.</p>
+<h2>Parameter table audit</h2>
+<p>Every row of both tables was checked field by field against the dataclass definitions in <code>src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py</code>. All nine <code>MosaicLayoutOptions</code> fields and all nine <code>HungarianOptions</code> fields are present, with matching names and defaults, and no row names a field that no longer exists. No mismatch was found — the earlier PRs that removed, renamed and re-defaulted fields had already updated both tables. The <code>Type</code> column is new.</p>
+<h2>Checks</h2>
+<ul><li><code>uv run mkdocs build -s</code> — passes (437 s, 26 of 26 gallery files, clean</li></ul>
+<p><code>docs/generated/</code> and <code>site/</code>)</p>
+<ul><li><code>make check</code> — ruff, ruff format, mypy (80 files), deptry all pass</li><li><code>uv run pytest</code> — 710 passed</li></ul>
+<h2>Correction and default change (2026-09-24)</h2>
+<p>The first draft of this page described <code>spacing</code> as an option that &quot;never reaches the layout&quot; and suggested removing it. That was wrong. <code>GridBasedLayout</code> implements <code>spacing</code> the same way — <code>grid/__init__.py:210-214</code> calibrates <code>tile_size</code> with <code>spacing=0</code> and then divides symbol sizes by <code>1 + spacing</code>, exactly as <code>mosaic/__init__.py:1051</code> does. Leaving the assignment unchanged is the correct semantics for a lattice layout: the gap drawn between symbols must not decide which tile a region gets. <code>CirclePackingLayout</code> differs only because it has no lattice.</p>
+<p>The real inconsistency was the default. <code>GridBasedLayoutOptions.spacing</code> defaulted to 0.05 and <code>MosaicLayoutOptions.spacing</code> to 0.0, so switching layouts changed the drawn gap with no stated reason. <code>MosaicLayoutOptions.spacing</code> now defaults to 0.05.</p>
+<p>Verified that the default change is rendering-only, on US states at 150 tiles:</p>
+<p>assignment identical : True tile_size identical  : True   (152406.55758) metrics identical    : True   (regions_correct, n_noncontiguous_regions) mean symbol scale    : 1.0 -&gt; 0.952381   (ratio 1/1.05 exactly)</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

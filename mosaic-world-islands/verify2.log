@@ -1,0 +1,25 @@
+Saved working directory and index state On perf/contiguity-path-reachability-precheck: ab
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[main2] world_b800_morph1   37.6s fp=ba7120159c505530
+[main2] world_b800_morph0   17.7s fp=54f434ebfcdb3b13
+[main2] districts_b0_morph1    4.3s fp=72cd3f2aa88537ba
+[main2] districts_b0_morph0    3.7s fp=b34667996c9cfeed
+[main2] states_b0_morph1    1.3s fp=1c55ddfe3283dc0c
+[main2] states_b0_morph0    4.1s fp=2878b87f73a17d9b
+On branch perf/contiguity-path-reachability-precheck
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/carto_flow/geo_utils/contiguity.py
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (c0139ee882165752e1233bb163f4fa8ee427e1ed)
+/home/fakl/cf-verify/src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py:538: UserWarning: Input geometries contain a straight segment of length 1199069.0 (grid units), which exceeds 4 grid cells (276349.0 each). Segments with no interior vertices cannot bend during the morph and may prevent convergence. Consider densifying the input with carto_flow.geo_utils.densify_coverage before morphing.
+  flow_result = morph_geometries(
+[patched2] world_b800_morph1    9.5s fp=ba7120159c505530
+[patched2] world_b800_morph0   14.6s fp=54f434ebfcdb3b13
+[patched2] districts_b0_morph1    4.2s fp=72cd3f2aa88537ba
+[patched2] districts_b0_morph0    3.6s fp=b34667996c9cfeed
+[patched2] states_b0_morph1    1.3s fp=1c55ddfe3283dc0c
+[patched2] states_b0_morph0    1.1s fp=2878b87f73a17d9b
