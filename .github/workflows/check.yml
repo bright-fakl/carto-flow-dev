@@ -1,0 +1,40 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v6
+
+      - name: Check out the builder script
+        uses: actions/checkout@v6
+        with:
+          repository: bright-fakl/carto-flow
+          path: carto-flow
+          sparse-checkout: scripts
+
+      - name: Build the index in a scratch copy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rsync -a --exclude=.git --exclude=carto-flow ./ "$RUNNER_TEMP/site/"
+          python3 carto-flow/scripts/build_visual_checks_index.py --root "$RUNNER_TEMP/site" | tee build.log
+          if grep -q "warning(s)" build.log; then
+            echo "The builder reported warnings (missing title or description, unknown status)."
+            exit 1
+          fi
+
+      - name: Check file sizes
+        run: |
+          # GitHub rejects files over 100 MB and Pages sites should stay under 1 GB.
+          if find . -path ./.git -prune -o -type f -size +50M -print | grep .; then
+            echo "Files above 50 MB found; host them elsewhere."
+            exit 1
+          fi
+          du -sh --exclude=.git .

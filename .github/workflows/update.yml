@@ -1,0 +1,54 @@
+name: Update
+
+# Review status comes from the state of each PR in bright-fakl/carto-flow, so
+# the index goes stale when a PR is merged or closed. Rebuild it on a schedule,
+# on request, and when carto-flow sends a `pr-closed` dispatch event.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [pr-closed]
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v6
+
+      - name: Check out the builder script
+        uses: actions/checkout@v6
+        with:
+          repository: bright-fakl/carto-flow
+          path: carto-flow
+          sparse-checkout: scripts
+
+      - name: Rebuild the index
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 carto-flow/scripts/build_visual_checks_index.py --root .
+
+      - name: Commit and publish if anything changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add -A -- . ':!carto-flow'
+          if git diff --cached --quiet; then
+            echo "Index is up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update review status from PR states"
+          git push
+          # Pushes made with GITHUB_TOKEN may not start a Pages build.
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
