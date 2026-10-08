@@ -22,6 +22,7 @@ jobs:
       - name: Build the index in a scratch copy
         env:
           GH_TOKEN: ${{ github.token }}
+          VISUAL_CHECKS_TZ: America/New_York
         run: |
           rsync -a --exclude=.git --exclude=carto-flow ./ "$RUNNER_TEMP/site/"
           python3 carto-flow/scripts/build_visual_checks_index.py --root "$RUNNER_TEMP/site" | tee build.log
