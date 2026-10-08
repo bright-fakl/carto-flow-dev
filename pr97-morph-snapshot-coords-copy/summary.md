@@ -1,11 +1,12 @@
 ---
 pr: 97
+issue: 73
 title: Copy displaced coordinates into each morph snapshot
 description: With displacement_coords and snapshot_every, each snapshot's coords now holds the positions at its own iteration instead of the final positions; geometry output is unchanged.
 url: https://github.com/bright-fakl/carto-flow/pull/97
 branch: fix/morph-snapshot-coords-copy
 base: main
-date: 2026-10-08
+date: 2026-10-08 15:05
 before: main (every snapshot's coords equal the final positions)
 after: fix/morph-snapshot-coords-copy
 inputs: US census (bundled), 9x6 grid via displacement_coords=(X, Y), preset_balanced, area_scale=1e-6, snapshot_every=10, n_iter=400 (13 snapshots)

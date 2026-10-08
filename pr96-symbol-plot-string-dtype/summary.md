@@ -1,11 +1,12 @@
 ---
 pr: 96
+issue: 88
 title: Fix SymbolCartogram.plot column styling for pandas extension dtypes
 description: plot(edgecolor="<column>") no longer raises TypeError for pandas string-dtype columns; the fixed plot is shown for object and string dtypes.
 url: https://github.com/bright-fakl/carto-flow/pull/96
 branch: fix/symbol-plot-string-dtype
 base: main
-date: 2026-10-08
+date: 2026-10-08 15:05
 before: main (TypeError: Cannot interpret 'string[python]' as a data type)
 after: fix/symbol-plot-string-dtype
 inputs: US census (bundled), layout="packing", edgecolor="Region" with Region as object and as string dtype

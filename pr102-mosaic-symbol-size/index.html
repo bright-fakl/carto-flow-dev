@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #102: Fix MosaicLayout symbol size for non-hexagon tilings</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #102: Fix MosaicLayout symbol size for non-hexagon tilings</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/102">https://github.com/bright-fakl/carto-flow/pull/102</a></dd>
+<dt>Branch</dt><dd>fix/mosaic-symbol-size</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Date</dt><dd>2026-10-08 16:54</dd>
+<dt>Before</dt><dd>main</dd>
+<dt>After</dt><dd>fix/mosaic-symbol-size @ 400d72f</dd>
+<dt>Inputs</dt><dd>US states (bundled census; tile_count = round(Population / 2e6), min 1), congressional districts grouped by state (bundled), spacing=0.0, morph=False</dd>
+</dl>
+<p class="desc">Mosaic symbols are now drawn at the tile&#x27;s size for every tiling, so they no longer overlap; HexagonTiling output is unchanged. Left is main, right is the fix.</p>
+<p><code>MosaicLayout</code> set <code>base_size</code> to the tiling&#x27;s <code>tile_size</code>, which is only the symbol size for <code>HexagonTiling</code>. It now uses <code>Tiling.symbol_size_for_tile_size(tile_size)</code>, the inverse of <code>tile_size_for_symbol_size</code>. <code>HexagonTiling</code> output is bit-identical (max coordinate difference 0.0 in all three modes).</p>
+<p>Overlapping symbol pairs (pairwise intersection area above 1e-6 of the mean symbol area):</p>
+<table>
+<tr><th>Tiling</th><th>one tile/region before</th><th>after</th><th><code>tile_count</code> before</th><th>after</th><th><code>group_by</code> before</th><th>after</th></tr>
+<tr><td>HexagonTiling</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>SquareTiling</td><td>152</td><td>0</td><td>577</td><td>0</td><td>1571</td><td>0</td></tr>
+<tr><td>TriangleTiling.equilateral</td><td>216</td><td>0</td><td>845</td><td>0</td><td>not run</td><td>not run</td></tr>
+<tr><td>QuadrilateralTiling.rhombus</td><td>148</td><td>0</td><td>573</td><td>0</td><td>not run</td><td>not run</td></tr>
+<tr><td>Isohedral scalloped_hexagon</td><td>213</td><td>0</td><td>830</td><td>0</td><td>2312</td><td>0</td></tr>
+<tr><td>Isohedral wavy_square</td><td>149</td><td>0</td><td>578</td><td>0</td><td>not run</td><td>not run</td></tr>
+</table>
+<p>Each figure shows main on the left and the fix on the right. <code>group_by</code> figures use congressional districts grouped by state.</p>
+<div class="figure">
+<img src="group_by_HexagonTiling.png" alt="group_by on congressional districts, HexagonTiling (unchanged)">
+<p class="caption">group_by on congressional districts, HexagonTiling (unchanged)</p>
+</div><div class="figure">
+<img src="group_by_Isohedral_scalloped_hexagon.png" alt="group_by on congressional districts, IsohedralTiling scalloped_hexagon">
+<p class="caption">group_by on congressional districts, IsohedralTiling scalloped_hexagon</p>
+</div><div class="figure">
+<img src="group_by_SquareTiling.png" alt="group_by on congressional districts, SquareTiling">
+<p class="caption">group_by on congressional districts, SquareTiling</p>
+</div><div class="figure">
+<img src="one_tile_HexagonTiling.png" alt="one tile per region, HexagonTiling (unchanged)">
+<p class="caption">one tile per region, HexagonTiling (unchanged)</p>
+</div><div class="figure">
+<img src="one_tile_Isohedral_scalloped_hexagon.png" alt="one tile per region, IsohedralTiling scalloped_hexagon">
+<p class="caption">one tile per region, IsohedralTiling scalloped_hexagon</p>
+</div><div class="figure">
+<img src="one_tile_Isohedral_wavy_square.png" alt="one tile per region, IsohedralTiling wavy_square">
+<p class="caption">one tile per region, IsohedralTiling wavy_square</p>
+</div><div class="figure">
+<img src="one_tile_QuadrilateralTiling_rhombus.png" alt="one tile per region, QuadrilateralTiling.rhombus()">
+<p class="caption">one tile per region, QuadrilateralTiling.rhombus()</p>
+</div><div class="figure">
+<img src="one_tile_SquareTiling.png" alt="one tile per region, SquareTiling">
+<p class="caption">one tile per region, SquareTiling</p>
+</div><div class="figure">
+<img src="one_tile_TriangleTiling_equilateral.png" alt="one tile per region, TriangleTiling.equilateral()">
+<p class="caption">one tile per region, TriangleTiling.equilateral()</p>
+</div><div class="figure">
+<img src="tile_count_HexagonTiling.png" alt="tile_count, HexagonTiling (unchanged)">
+<p class="caption">tile_count, HexagonTiling (unchanged)</p>
+</div><div class="figure">
+<img src="tile_count_Isohedral_scalloped_hexagon.png" alt="tile_count, IsohedralTiling scalloped_hexagon">
+<p class="caption">tile_count, IsohedralTiling scalloped_hexagon</p>
+</div><div class="figure">
+<img src="tile_count_Isohedral_wavy_square.png" alt="tile_count, IsohedralTiling wavy_square">
+<p class="caption">tile_count, IsohedralTiling wavy_square</p>
+</div><div class="figure">
+<img src="tile_count_QuadrilateralTiling_rhombus.png" alt="tile_count, QuadrilateralTiling.rhombus()">
+<p class="caption">tile_count, QuadrilateralTiling.rhombus()</p>
+</div><div class="figure">
+<img src="tile_count_SquareTiling.png" alt="tile_count, SquareTiling">
+<p class="caption">tile_count, SquareTiling</p>
+</div><div class="figure">
+<img src="tile_count_TriangleTiling_equilateral.png" alt="tile_count, TriangleTiling.equilateral()">
+<p class="caption">tile_count, TriangleTiling.equilateral()</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
