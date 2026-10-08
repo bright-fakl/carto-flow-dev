@@ -1,4 +1,4 @@
-# Produces area_error_per_state.png, map.png and tol_sweep.png next to this file:
+# Produces area_error_per_state.png, map.png, tol_sweep.png and isotropic.png next to this file:
 # every US state shrunk to its population density relative to the densest state
 # (DC excluded), with shrink() from main and from the current checkout. Run from
 # a carto-flow checkout: `uv run python make_figures.py`.
@@ -103,3 +103,52 @@ for a in ax:
     a.tick_params(axis="x", rotation=30)
 plt.tight_layout()
 plt.savefig(HERE / "tol_sweep.png", dpi=110)
+plt.close()
+
+# isotropic option: plain erosion, isotropic=True and plain scaling about the centroid
+from shapely import affinity  # noqa: E402
+
+full = data.load_us_census(population=True).set_index("State Abbreviation").geometry
+
+
+def aspect(geom):
+    """Long over short side of the minimum rotated rectangle."""
+    xy = np.asarray(geom.minimum_rotated_rectangle.exterior.coords)
+    sides = sorted(np.hypot(*(xy[1:3] - xy[:2]).T))
+    return sides[1] / sides[0]
+
+
+states = ["WY", "CO", "TN", "FL", "NM", "OK"]
+f0 = 0.05
+fig, ax = plt.subplots(3, 6, figsize=(20, 10))
+table = []
+for j, k in enumerate(states):
+    geom = full[k]
+    cores = {
+        "plain erosion": shrink_fix(geom, f0)[0],
+        "isotropic": shrink_fix(geom, f0, isotropic=True)[0],
+        "scaling": affinity.scale(geom, f0**0.5, f0**0.5, origin="centroid"),
+    }
+    inside = cores["scaling"].within(geom.buffer(1e-6))
+    table.append((k, aspect(geom), *(aspect(c) for c in cores.values()), inside))
+    for i, (name, core) in enumerate(cores.items()):
+        outside = name == "scaling" and not inside
+        a = ax[i, j]
+        gpd.GeoSeries([geom]).plot(ax=a, color="#edf0f2", edgecolor="#7a8590", lw=0.8)
+        gpd.GeoSeries([core]).plot(ax=a, color="#2e7fb8", edgecolor="none")
+        a.set_title(
+            f"{k}: {name}\narea {core.area / geom.area:.3f}, aspect {aspect(core):.1f} (orig {aspect(geom):.1f})"
+            + (" OUTSIDE" if outside else ""),
+            fontsize=9,
+            color="red" if outside else "black",
+        )
+        a.axis("off")
+plt.tight_layout()
+plt.savefig(HERE / "isotropic.png", dpi=100)
+plt.close()
+
+print("| state | original | plain erosion | isotropic | scaling | scaling inside |\n|---|---|---|---|---|---|")
+for k, o, p, q, s, ok in table:
+    print(f"| {k} | {o:.1f} | {p:.1f} | {q:.1f} | {s:.1f} | {'yes' if ok else 'no'} |")
+for iso in (False, True):
+    print(f"all states, isotropic={iso}: {median_time(shrink_fix, isotropic=iso):.1f} s")

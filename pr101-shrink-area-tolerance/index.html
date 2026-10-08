@@ -76,12 +76,11 @@
 <dl class="meta-list">
 <dt>Status</dt><dd><span class="status todo">needs review</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/101">https://github.com/bright-fakl/carto-flow/pull/101</a></dd>
-<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/74">#74</a></dd>
 <dt>Branch</dt><dd>fix/shrink-area-tolerance</dd>
 <dt>Base</dt><dd>main</dd>
-<dt>Created</dt><dd>2026-10-08 16:53</dd>
+<dt>Date</dt><dd>2026-10-08 16:53</dd>
 <dt>Before</dt><dd>main</dd>
-<dt>After</dt><dd>fix/shrink-area-tolerance @ 4790a3b</dd>
+<dt>After</dt><dd>fix/shrink-area-tolerance @ bead3dc</dd>
 <dt>Inputs</dt><dd>states (bundled), each shrunk to its population density relative to the densest state (DC kept whole)</dd>
 </dl>
 <p class="desc">shrink() now bounds the relative area error of the shrunken core by tol (default 0.01); before, tol applied to the buffer distance and small targets missed by up to 72%.</p>
@@ -90,7 +89,7 @@
 <p>Each state is shrunk to its density ratio relative to the densest state (the non-contiguous cartogram construction in issue #74). DC is excluded from the measurements. <code>make_figures.py</code> regenerates every figure from a carto-flow checkout.</p>
 <ul><li><code>area_error_per_state.png</code>: area error of every shrunken core, main (left)</li></ul>
 <p>and fix at the default tol (right), states sorted by target fraction. Same x range on both.</p>
-<ul><li><code>map.png</code>: the shrunken cores over the original states, main and fix.</li><li><code>tol_sweep.png</code>: maximum area error and runtime for main and for several <code>tol</code>.</li></ul>
+<ul><li><code>map.png</code>: the shrunken cores over the original states, main and fix.</li><li><code>tol_sweep.png</code>: maximum area error and runtime for main and for several <code>tol</code>.</li><li><code>isotropic.png</code>: the <code>isotropic</code> option, described below.</li></ul>
 <table>
 <tr><th>State (target)</th><th>main</th><th>fix (tol=0.01)</th></tr>
 <tr><td>SD (1.0%)</td><td>-23.9%</td><td>-0.222%</td></tr>
@@ -105,16 +104,33 @@
 <p>Area error over the 50 states and runtime for all of them (median of 3 runs). Runtimes were measured while other jobs shared the machine and differ by about 10% between runs, so differences between neighboring rows are within noise.</p>
 <table>
 <tr><th>version</th><th>max error</th><th>mean error</th><th>time (s)</th></tr>
-<tr><td>main</td><td>71.700%</td><td>6.043%</td><td>7.3</td></tr>
-<tr><td>fix tol=0.05</td><td>4.792%</td><td>1.496%</td><td>5.9</td></tr>
-<tr><td>fix tol=0.01 (default)</td><td>0.874%</td><td>0.252%</td><td>6.8</td></tr>
-<tr><td>fix tol=1e-3</td><td>0.094%</td><td>0.016%</td><td>7.4</td></tr>
-<tr><td>fix tol=1e-4</td><td>0.008%</td><td>0.001%</td><td>6.9</td></tr>
+<tr><td>main</td><td>71.700%</td><td>6.043%</td><td>7.1</td></tr>
+<tr><td>fix tol=0.05</td><td>4.792%</td><td>1.496%</td><td>6.4</td></tr>
+<tr><td>fix tol=0.01 (default)</td><td>0.874%</td><td>0.252%</td><td>5.6</td></tr>
+<tr><td>fix tol=1e-3</td><td>0.094%</td><td>0.016%</td><td>6.3</td></tr>
+<tr><td>fix tol=1e-4</td><td>0.008%</td><td>0.001%</td><td>6.7</td></tr>
 </table>
-<p>A looser tol is faster; at the default the runtime is about that of main.</p>
+<p>Runtime is about the same as main for every tol; the differences are within the run-to-run noise.</p>
+<h2>Isotropic erosion</h2>
+<p><code>shrink(geom, f, isotropic=True)</code> maps the geometry by the inverse square root of its area covariance about its centroid, runs the same area-residual solve, and maps the core back. The shell is still the original minus the core, so the outer boundary is unchanged. The default is <code>False</code> and leaves results as above.</p>
+<p><code>isotropic.png</code> shows WY, CO, TN, FL, NM and OK at fraction 0.05 with the real <code>shrink()</code>: plain erosion (top), <code>isotropic=True</code> (middle) and plain scaling of the geometry about its centroid (bottom). Titles give the core&#x27;s aspect ratio (long over short side of the minimum rotated rectangle) against the original. Scaling leaves the geometry for FL (marked OUTSIDE).</p>
+<table>
+<tr><th>state</th><th>original</th><th>plain erosion</th><th>isotropic</th><th>scaling</th><th>scaling inside</th></tr>
+<tr><td>WY</td><td>1.2</td><td>1.8</td><td>1.2</td><td>1.2</td><td>yes</td></tr>
+<tr><td>CO</td><td>1.2</td><td>2.3</td><td>1.3</td><td>1.2</td><td>yes</td></tr>
+<tr><td>TN</td><td>3.7</td><td>14.2</td><td>3.3</td><td>3.7</td><td>yes</td></tr>
+<tr><td>FL</td><td>1.9</td><td>8.8</td><td>6.7</td><td>1.9</td><td>no</td></tr>
+<tr><td>NM</td><td>1.2</td><td>1.5</td><td>1.0</td><td>1.2</td><td>yes</td></tr>
+<tr><td>OK</td><td>1.9</td><td>2.7</td><td>1.2</td><td>1.9</td><td>yes</td></tr>
+</table>
+<p>Isotropic erosion keeps the core close to the original proportions for WY, CO, TN, NM and OK. FL, which is curved and concave, still gives a thin core (6.7 against 8.8 for plain erosion).</p>
+<p>Runtime of <code>shrink</code> on all 50 states (density fractions as above, default tol, median of 3): 5.8 s with <code>isotropic=False</code>, 6.1 s with <code>isotropic=True</code>.</p>
 <div class="figure">
 <img src="area_error_per_state.png" alt="area_error_per_state.png">
 <p class="caption">area_error_per_state.png</p>
+</div><div class="figure">
+<img src="isotropic.png" alt="isotropic.png">
+<p class="caption">isotropic.png</p>
 </div><div class="figure">
 <img src="map.png" alt="map.png">
 <p class="caption">map.png</p>

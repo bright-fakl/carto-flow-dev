@@ -7,8 +7,9 @@ description: shrink() now bounds the relative area error of the shrunken core by
 branch: fix/shrink-area-tolerance
 base: main
 date: 2026-10-08 16:53
+updated: 2026-10-08 18:07
 before: main
-after: fix/shrink-area-tolerance @ 4790a3b
+after: fix/shrink-area-tolerance @ bead3dc
 inputs: states (bundled), each shrunk to its population density relative to the densest state (DC kept whole)
 ---
 
@@ -31,6 +32,7 @@ checkout.
   x range on both.
 - `map.png`: the shrunken cores over the original states, main and fix.
 - `tol_sweep.png`: maximum area error and runtime for main and for several `tol`.
+- `isotropic.png`: the `isotropic` option, described below.
 
 | State (target) | main | fix (tol=0.01) |
 |---|---|---|
@@ -54,10 +56,41 @@ Runtimes were measured while other jobs shared the machine and differ by about
 
 | version | max error | mean error | time (s) |
 |---|---|---|---|
-| main | 71.700% | 6.043% | 7.3 |
-| fix tol=0.05 | 4.792% | 1.496% | 5.9 |
-| fix tol=0.01 (default) | 0.874% | 0.252% | 6.8 |
-| fix tol=1e-3 | 0.094% | 0.016% | 7.4 |
-| fix tol=1e-4 | 0.008% | 0.001% | 6.9 |
+| main | 71.700% | 6.043% | 7.1 |
+| fix tol=0.05 | 4.792% | 1.496% | 6.4 |
+| fix tol=0.01 (default) | 0.874% | 0.252% | 5.6 |
+| fix tol=1e-3 | 0.094% | 0.016% | 6.3 |
+| fix tol=1e-4 | 0.008% | 0.001% | 6.7 |
 
-A looser tol is faster; at the default the runtime is about that of main.
+Runtime is about the same as main for every tol; the differences are within
+the run-to-run noise.
+
+## Isotropic erosion
+
+`shrink(geom, f, isotropic=True)` maps the geometry by the inverse square root
+of its area covariance about its centroid, runs the same area-residual solve,
+and maps the core back. The shell is still the original minus the core, so the
+outer boundary is unchanged. The default is `False` and leaves results as
+above.
+
+`isotropic.png` shows WY, CO, TN, FL, NM and OK at fraction 0.05 with the real
+`shrink()`: plain erosion (top), `isotropic=True` (middle) and plain scaling of
+the geometry about its centroid (bottom). Titles give the core's aspect ratio
+(long over short side of the minimum rotated rectangle) against the original.
+Scaling leaves the geometry for FL (marked OUTSIDE).
+
+| state | original | plain erosion | isotropic | scaling | scaling inside |
+|---|---|---|---|---|---|
+| WY | 1.2 | 1.8 | 1.2 | 1.2 | yes |
+| CO | 1.2 | 2.3 | 1.3 | 1.2 | yes |
+| TN | 3.7 | 14.2 | 3.3 | 3.7 | yes |
+| FL | 1.9 | 8.8 | 6.7 | 1.9 | no |
+| NM | 1.2 | 1.5 | 1.0 | 1.2 | yes |
+| OK | 1.9 | 2.7 | 1.2 | 1.9 | yes |
+
+Isotropic erosion keeps the core close to the original proportions for WY, CO,
+TN, NM and OK. FL, which is curved and concave, still gives a thin core (6.7
+against 8.8 for plain erosion).
+
+Runtime of `shrink` on all 50 states (density fractions as above, default
+tol, median of 3): 5.8 s with `isotropic=False`, 6.1 s with `isotropic=True`.
