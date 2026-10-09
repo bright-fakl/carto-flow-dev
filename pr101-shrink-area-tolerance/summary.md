@@ -7,9 +7,9 @@ description: shrink() now bounds the relative area error of the shrunken core by
 branch: fix/shrink-area-tolerance
 base: main
 date: 2026-10-08 16:53
-updated: 2026-10-08 18:07
+updated: 2026-10-08 22:01
 before: main
-after: fix/shrink-area-tolerance @ bead3dc
+after: fix/shrink-area-tolerance @ 87a95e6
 inputs: states (bundled), each shrunk to its population density relative to the densest state (DC kept whole)
 ---
 
