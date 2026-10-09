@@ -100,6 +100,10 @@ uv run python scripts/build_visual_checks_index.py --root /path/to/carto-flow-de
 
 Regenerates `index.html` and every `<subdir>/index.html`, plus this file.
 
+Close times from GitHub are shown in the zone named by `VISUAL_CHECKS_TZ` (an IANA name, for
+example `America/New_York`), else the system zone. Set it wherever pages are rebuilt on a machine
+in another zone, so the generated files do not differ between machines.
+
 ## Publishing
 
 Commit the page directory together with the regenerated `index.html` files
