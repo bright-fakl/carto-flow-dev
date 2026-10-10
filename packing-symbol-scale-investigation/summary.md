@@ -1,7 +1,6 @@
 ---
 title: Why packed circles cover only a small part of the map
 description: Investigation, no code change. Symbol coverage under the default size_normalization="max" is exactly mean(value)/max(value) of the sizing column — 0.168 for US states by Population. The neighbour tangency force then contracts the layout to the configuration where those small circles touch, which is about sqrt(coverage) of the map's linear size. Both effects are by design; neither is specific to packing.
-url: https://github.com/bright-fakl/carto-flow/pull/41
 date: 2026-09-22
 inputs: US states (bundled census, Population, ESRI:102008); Europe and Africa from load_world by pop_est; a 6x6 unit grid with uniform and mildly varying values.
 kind: exploration
