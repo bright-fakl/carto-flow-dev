@@ -8,7 +8,7 @@ inputs: contiguous US states from the bundled census snapshot, exported once to 
 kind: exploration
 topic: flow
 status: no-action
-outcome: performance comparison for reference; no change follows
+outcome: the speedups were recorded in the 2.0.0 changelog (#61); nothing else follows
 ---
 
 No figures: the output geometry is unchanged, so before and after images would

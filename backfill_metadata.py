@@ -27,11 +27,11 @@ PAGES = {
     "exploration-gsm-scale": ("flow", "on-hold", "-", "exploration-overview"),
     "exploration-overview": ("flow", "on-hold", "-", "-"),
     "exploration-voronoi-options": ("voronoi", "open", "-", "pr111-voronoi-power-weights, pr112-voronoi-premorph"),
-    "flow-1.1.2-vs-2.0.0": ("flow", "no-action", "performance comparison for reference; no change follows", "-"),
+    "flow-1.1.2-vs-2.0.0": ("flow", "no-action", "the speedups were recorded in the 2.0.0 changelog (#61); nothing else follows", "-"),
     "grid-vs-mosaic-similarity": ("symbol", "led-to", "-", "pr55-docs-grid-vs-mosaic-guidance"),
     "mosaic-distance-normalisation": ("symbol", "on-hold", "-", "-"),
     "mosaic-options-sweep": ("symbol", "led-to", "-", "pr56-mosaic-option-behavior-docs"),
-    "mosaic-world-islands": ("symbol", "no-action", "explains a known limitation; documented, no change", "-"),
+    "mosaic-world-islands": ("symbol", "led-to", "-", "pr44-contiguity-reachability-precheck, pr46-mosaic-component-pool-overlap, pr47-mosaic-min-one-tile, pr48-mosaic-honest-hungarian-defaults"),
     "packing-symbol-scale-investigation": ("symbol", "led-to", "-", "pr42-size-normalization-total"),
     "pr-TBD-voronoi-weights-extraction": ("voronoi", "superseded", "-", "pr111-voronoi-power-weights"),
     # PR pages: topic only

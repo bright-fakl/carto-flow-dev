@@ -9,8 +9,8 @@ after: the four branches above
 inputs: africa (Natural Earth, Mollweide ESRI:54009), world countries (same), world mainland only, US states, congressional districts grouped by State Name
 kind: exploration
 topic: symbol
-status: no-action
-outcome: explains a known limitation; documented, no change
+status: led-to
+related: pr44-contiguity-reachability-precheck, pr46-mosaic-component-pool-overlap, pr47-mosaic-min-one-tile, pr48-mosaic-honest-hungarian-defaults
 ---
 
 figure: fig_africa_b150.png — africa, the clean control: no region loses a tile at either morph setting
