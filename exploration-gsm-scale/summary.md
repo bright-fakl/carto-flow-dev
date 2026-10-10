@@ -9,6 +9,10 @@ before: fix/stall-detection @ 8441681
 after: investigate/gsm-scale @ bfb4253 (prototype, not for merging)
 updated: 2026-10-09 22:15
 inputs: US states (49 incl. DC), congressional districts (432), 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6), the three strong-anisotropy runs of the adaptive-recompute page (preset_balanced settings, area_scale 1e-6), the multiresolution coarse level of the states; MorphOptions defaults of fix/stall-detection (stall rule on, recompute_every 10, dt 0.2), n_iter 400 (counties 300), each run with refresh_on_rise off (None) and on (0.01); NUMBA_NUM_THREADS=4
+kind: exploration
+topic: flow
+status: on-hold
+related: exploration-overview
 ---
 
 An investigation, not a change. The prototype adds four `MorphOptions` fields (`step_scale_mode`, `step_scale_floor`, `step_scale_precompute`, `step_scale_max_cells`) and a module `step_scale.py`; the default (constant) mode reproduces the stored baseline trace for states 256 (113 iterations). One run per cell; load average 0.3 to 1.6; wall times are indicative and the cost model (iterations plus recomputes times the ratio) is the primary metric. `tables.md` has every variant; the patch is in `code/gsm_scale.patch`.

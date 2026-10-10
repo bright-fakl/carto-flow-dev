@@ -11,6 +11,8 @@ updated: 2026-10-10 04:00
 before: main @ 0124245
 after: feat/voronoi-premorph @ c57925a
 inputs: 49 contiguous US states with population (bundled); the same with lognormal weights (seed 1, 1399x range); 432 congressional districts with population (bundled); RasterBackend resolution 256, n_iter 300, area_cv_tol 0.05; flow pre-morph with MorphOptions.preset_balanced(area_scale=1e-6, n_iter=400)
+kind: pr
+topic: voronoi
 ---
 
 ## Setup

@@ -6,6 +6,8 @@ url: https://github.com/bright-fakl/carto-flow/pull/51
 branch: spelling-us
 base: main
 date: 2026-09-23 15:37
+kind: pr
+topic: infra
 ---
 
 **No figures, by nature of the change.** Nothing that renders is affected: no

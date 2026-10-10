@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #41: All-zero sizing column across every symbol layout</title>
+<title>PR #114: Kinds, topics, outcomes and related links for the report pages</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,32 +72,27 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #41: All-zero sizing column across every symbol layout</h1>
+<h1>PR #114: Kinds, topics, outcomes and related links for the report pages</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
-<dt>Topic</dt><dd>symbol</dd>
-<dt>Status</dt><dd><span class="status done">merged</span></dd>
-<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/41">https://github.com/bright-fakl/carto-flow/pull/41</a></dd>
-<dt>Branch</dt><dd>fix/zero-radius-symbols</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/114">https://github.com/bright-fakl/carto-flow/pull/114</a></dd>
+<dt>Branch</dt><dd>feat/visual-checks-kinds</dd>
 <dt>Base</dt><dd>main</dd>
-<dt>Created</dt><dd>2026-09-22</dd>
-<dt>Closed</dt><dd>2026-09-22 21:06</dd>
-<dt>Before</dt><dd>not renderable — grid did not terminate and flow_density raised ZeroDivisionError</dd>
-<dt>After</dt><dd>fix/zero-radius-symbols, second commit</dd>
-<dt>Inputs</dt><dd>US states (bundled census, ESRI:102008) with the whole Population column set to 0; default layout options.</dd>
+<dt>Created</dt><dd>2026-10-10 15:00</dd>
+<dt>After</dt><dd>feat/visual-checks-kinds @ c81825b</dd>
+<dt>Inputs</dt><dd>the 69 pages of carto-flow-dev after running backfill_metadata.py</dd>
 </dl>
-<p class="desc">Second commit on PR 41. An all-zero sizing column used to hang the grid layout (zero tile size gives a zero lattice step), crash flow_density with ZeroDivisionError, and warn from centroid, physics and packing. Every layout now returns a well-formed result with all symbols at zero size, row count and index alignment preserved, no exception and no warning. Look for zero-area symbols sitting on their geometry centroids (red dots) in the force-based layouts.</p>
-<h2>What to look for</h2>
-<p><code>centroid</code>, <code>flow_density</code>, <code>packing</code> and <code>physics</code> are a no-op: every symbol has zero area and sits exactly on its geometry centroid, which is the natural limit of the per-symbol zero behaviour. <code>grid</code> still assigns lattice cells, using the mean geometry area for the cell size in place of the largest symbol (which is zero); its symbols are zero-area, so only the red dots are visible.</p>
-<p><code>mosaic</code> is the exception, and it is unchanged by this commit: a mosaic cartogram gives every region at least one tile whatever its value, so the tiles stay at full size. That was already its behaviour before.</p>
-<h2>Before</h2>
-<p>No before figure exists for the whole set: on main the <code>grid</code> layout does not terminate (the lattice step is zero, so tile generation walks the bounds forever and the process is killed on memory), and <code>flow_density</code> raises <code>ZeroDivisionError</code> from the numba density kernel.</p>
-<h2>Regression</h2>
-<p>Results are bit-identical to the first commit of this PR for inputs with only *some* zero values, and bit-identical to main for inputs with no zero values.</p>
-<div class="figure">
-<img src="all_zero_states_after.png" alt="All six layouts on an all-zero Population column. Red dots mark the rendered symbol centroids. Row count 49 and zero RuntimeWarnings everywhere.">
-<p class="caption">All six layouts on an all-zero Population column. Red dots mark the rendered symbol centroids. Row count 49 and zero RuntimeWarnings everywhere.</p>
-</div>
+<p class="desc">Builder change with no cartogram output; the evidence is the test results and the rebuilt index of the 69 existing pages.</p>
+<p>This change alters only the report builder; no cartogram output changes.</p>
+<h2>Evidence</h2>
+<ul><li><code>tests/test_visual_checks_index.py</code>: 61 passed (18 new).</li><li>Rebuilding carto-flow-dev with the backfilled headers prints no warnings and writes 69 pages.</li><li>Statuses after the backfill: 49 merged, 4 open, 4 on-hold, 4 led-to, 3 needs review (PRs 110 to 112), 2 no-action, 1 closed, 1 reviewed, 1 superseded.</li></ul>
+<h2>Review the backfill</h2>
+<p><code>backfill_metadata.py</code> in the repository root holds one row per page (topic, status, outcome, related). The rows for explorations are guesses from the page titles and history; running it without <code>--apply</code> prints the table.</p>
+<h2>Design notes</h2>
+<ul><li>A directory name is the page&#x27;s permanent identifier. A proposal that becomes a PR is converted in place with <code>--convert</code>, so links keep working; an exploration stays as it is and the proposal or PR is a new page that lists it under <code>related</code>.</li><li>New pages are named for their subject, without a <code>pr&lt;N&gt;-</code> prefix; existing names are unchanged.</li></ul>
+
 <a class="back" href="../index.html">&larr; back to index</a>
 
 </body>

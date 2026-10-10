@@ -9,6 +9,8 @@ date: 2026-09-23
 before: origin/main @ 8b197eb
 after: fix/world-dataset-validity
 inputs: world (bundled), Mollweide ESRI:54009
+kind: pr
+topic: data
 ---
 
 figure: russia-chukotka-mollweide.png — The failure that started this. Chukotka is clipped at lon -180 and closed with a single straight edge; reprojection maps vertices, not edges, so in Mollweide that chord cuts across the coastline (circled). Densifying makes the edge follow the projected curve.

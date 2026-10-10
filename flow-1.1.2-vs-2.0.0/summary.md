@@ -1,11 +1,14 @@
 ---
 title: Flow cartogram performance, 1.1.2 against 2.0.0
 description: One-off comparison for the 2.0.0 release. The flow morph is 3.5x to 11.6x faster than 1.1.2 depending on grid size, with identical iteration counts.
-status: reviewed
 date: 2026-09-25 01:30
 before: 1.1.2 (tag, 2026-03-13)
 after: main @ 443529a
 inputs: contiguous US states from the bundled census snapshot, exported once to WKB and fed to both versions
+kind: exploration
+topic: flow
+status: no-action
+outcome: performance comparison for reference; no change follows
 ---
 
 No figures: the output geometry is unchanged, so before and after images would

@@ -9,6 +9,8 @@ date: 2026-09-26 16:40
 before: origin/main @ 99ca4f4
 after: fix/population-example-densify
 inputs: US census snapshot joined to annual state population estimates, 48 contiguous states plus DC, 22 keyframe years 1920-2024, multiresolution_morph(min_resolution=128, levels=4)
+kind: pr
+topic: flow
 ---
 
 figure: before-after-keyframes.png — Three of the 22 keyframes, before and after. The cartograms are substantively identical: the fix removes warnings and repairs geometry without changing what the example shows.

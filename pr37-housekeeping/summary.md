@@ -19,6 +19,8 @@ inputs: >
   US states and congressional districts via carto_flow.data.load_us_census
   (population=True), optionally densified with
   carto_flow.geo_utils.densify_coverage for the fastmath repro harness.
+kind: pr
+topic: infra
 ---
 
 # Piece 1 - fastmath determinism

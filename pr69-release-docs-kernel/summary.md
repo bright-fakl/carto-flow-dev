@@ -9,6 +9,8 @@ date: 2026-09-27 18:05
 before: origin/main @ 9c65b90
 after: fix/release-docs-kernel @ fa09ecd
 inputs: n/a - CI workflow change
+kind: pr
+topic: infra
 ---
 
 No figures. The change is a CI workflow fix with no rendered output.

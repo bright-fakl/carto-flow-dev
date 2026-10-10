@@ -7,6 +7,8 @@ branch: fix/group-by-unsupported-error
 base: main
 date: 2026-09-22
 after: e562d14 (merged)
+kind: pr
+topic: symbol
 ---
 
 ## No figures, and why

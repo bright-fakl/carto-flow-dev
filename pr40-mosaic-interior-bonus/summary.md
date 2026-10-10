@@ -9,6 +9,8 @@ date: 2026-09-22
 before: interior_bonus=0.5 (previous default)
 after: interior_bonus=2.0 (new default)
 inputs: US states 1 tile/region (hexagon and square), US states 154 tiles via tile_count, US congressional districts grouped by State Name
+kind: pr
+topic: symbol
 ---
 
 figure: 01_uniform_hex_morphTrue.png — IMPROVED. One tile per region, hexagon, morph=True. Adjacency preserved 0.697 -> 0.725, reversed >90 deg 0.092 -> 0.064.

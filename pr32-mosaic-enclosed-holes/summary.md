@@ -9,6 +9,8 @@ date: 2026-09-19
 before: fix/mosaic-ring-swapback @ d93d7e9
 after: fix/mosaic-enclosed-holes @ HEAD
 inputs: 3x3 synthetic fixture, US states (bundled census, tile_count ~ Population, 154 tiles), congressional districts (bundled, 1 tile each), congressional districts with group_by="State Name" -- each with morph=True and morph=False -- plus a donut fixture (4x4 boxes with the 2x2 centre missing) used to characterise inner-sea behaviour
+kind: pr
+topic: symbol
 ---
 
 figure: northeast_before_after.png — The reported defect and the fix. Blue = the enclosed non-core cell, the new third marker; orange = tiles taken from an extra ring, labelled with their owner. Before: the hole is ringed by two **New York** ring tiles — the dendrite wrapping the hole. After: the cell is filled by New Hampshire / Connecticut and New York's arm is gone.

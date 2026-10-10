@@ -9,6 +9,8 @@ date: 2026-09-26 11:20
 before: n/a - new example, nothing to compare against
 after: feat/covid-waves-example @ 58fdf93
 inputs: US census snapshot (49 contiguous geographies, bundled) densified to 1 km; bundled JHU CSSE weekly case series, keyframes every second week from 2020-03-22 to 2020-12-27 (21 frames); multiresolution_morph(min_resolution=128, levels=4)
+kind: pr
+topic: flow
 ---
 
 figure: after-covid-keyframes.png — Six of the 21 keyframes. Area is that week's cases per 100k, color is the raw weekly count on a log10 scale. The three waves are legible: the Northeast alone in April, the Sun Belt in July and August, the Upper Midwest from September. Note the first two panels - at high area ratios several states are squeezed into lens-shaped slivers and the national outline stops being recognizable. This is the item for review.

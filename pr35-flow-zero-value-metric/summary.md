@@ -9,6 +9,8 @@ date: 2026-09-20
 before: main @ 72ba382
 after: fix/flow-zero-value-error-metric @ a8bfb18
 inputs: US states (bundled census, Population), congressional districts (bundled census, Population), all at default MorphOptions (grid_size=256, n_iter=500); a synthetic 3x3 grid with one region's value set to 0 (grid_size=64, mean_tol=0.02, max_tol=0.05)
+kind: pr
+topic: flow
 ---
 
 figure: states_before.png — US states, default settings, eps=0 (historical unclamped ratio, monkeypatched in). Converged at iteration 113.

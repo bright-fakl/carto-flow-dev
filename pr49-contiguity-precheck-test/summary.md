@@ -9,6 +9,8 @@ date: 2026-09-23
 before: origin/main @ 2bae205
 after: test/contiguity-precheck-invariant
 inputs: hand-built adjacency graphs (chains, cycles, stars, a 4x4 grid) and 300 seeded random small graphs - no geodata
+kind: pr
+topic: symbol
 ---
 
 ## No figures, and why

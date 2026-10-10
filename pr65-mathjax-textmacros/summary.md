@@ -9,6 +9,8 @@ date: 2026-09-26 15:10
 before: origin/main @ 0e49fff
 after: fix/mathjax-textmacros
 inputs: the 12 equations in docs/explanations/ containing \_ inside \text{...}, rendered with mathjax-full 3 tex-svg at the site's package set
+kind: pr
+topic: infra
 ---
 
 figure: before-after-tile-size-equation.png — The equation this was reported against, under "Analytical estimate" in the mosaic layout page. Before: "tile\_size" and "ref\_size" with a visible backslash. After: "tile_size" and "ref_size".

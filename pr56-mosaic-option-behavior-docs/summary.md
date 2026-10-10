@@ -9,6 +9,8 @@ date: 2026-09-24 14:30
 before: docs/explanations/symbol-cartogram-mosaic-layout.md @ 78060af
 after: docs/mosaic-option-behavior
 inputs: no new runs — this PR re-reads two existing measurement workspaces: visual_checks/mosaic-options-sweep (670 runs, 11 parameters x 4-7 values x 5 inputs x 2 morph settings) and visual_checks/grid-vs-mosaic-similarity (including the 238-run interior_bonus gating check, section 6)
+kind: pr
+topic: symbol
 ---
 
 ## What changed

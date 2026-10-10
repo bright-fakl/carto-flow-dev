@@ -9,6 +9,8 @@ date: 2026-09-23
 before: origin/main @ 8b197eb
 after: fix/mosaic-component-pool-overlap @ bd2e76e
 inputs: world countries (Natural Earth, Mollweide ESRI:54009) at 384 nominal / 460 actual and 800 nominal / 848 actual tiles, africa, world mainland only, US states, congressional districts grouped by State Name
+kind: pr
+topic: symbol
 ---
 
 figure: m2_world_b384_morph1.png — world, 384 nominal / 460 actual tiles, morph=True. Before above, after below. Red regions receive no symbol, amber ones are short, both labelled got/wanted.

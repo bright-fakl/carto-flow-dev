@@ -5,7 +5,10 @@ date: 2026-09-21
 branch: (none — measurement workspace, no library source changed)
 base: origin/main @ 0e917a8
 inputs: states_uniform (49 US states, no size/tile_count/group_by — one tile per region; hexagon and square), states (same 49 states, tile_count="tiles" = round(pop share x 150) -> 154 tiles), districts (432 congressional districts, group_by="State Name")
-status: reviewed
+kind: exploration
+topic: symbol
+status: led-to
+related: pr55-docs-grid-vs-mosaic-guidance
 ---
 
 `pr:` and `url:` are intentionally absent — this is not a PR review page. The

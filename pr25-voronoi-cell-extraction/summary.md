@@ -9,6 +9,8 @@ date: 2026-09-18
 before: origin/fix/voronoi-degenerate-cells
 after: fix/voronoi-cell-extraction @ 9dcda79
 inputs: congressional districts (simplify_coverage tolerance=5000, min_island_size=50000; group_by=State Name; R=64, 128); states (R=300, group_by=Region)
+kind: pr
+topic: voronoi
 ---
 
 # Visual check: raster Voronoi cell extraction

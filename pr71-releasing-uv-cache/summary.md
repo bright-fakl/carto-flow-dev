@@ -9,6 +9,8 @@ date: 2026-09-27 19:55
 before: origin/main @ b793093
 after: docs/releasing-uv-cache
 inputs: carto-flow 2.0.0rc2 as published to TestPyPI
+kind: pr
+topic: infra
 ---
 
 No figures. The change is documentation, found by running the procedure rather

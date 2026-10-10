@@ -9,6 +9,8 @@ date: 2026-09-24 21:26
 before: origin/main @ 5020fe5
 after: docs/changelog-2.0 @ 165efe3
 inputs: none (no computation)
+kind: pr
+topic: infra
 ---
 
 # PR58 - 2.0.0 changelog, migration guide, version bump

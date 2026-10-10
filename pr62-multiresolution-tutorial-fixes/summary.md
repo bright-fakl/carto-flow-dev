@@ -9,6 +9,8 @@ date: 2026-09-25 18:00
 before: origin/main @ ba87610
 after: docs/multires-tutorial-fixes @ b75d7dd
 inputs: US states (bundled), densified with max_segment_length=2000 before the 1024 comparison; congressional districts (bundled) for the closing section
+kind: pr
+topic: flow
 ---
 
 No figures are attached. Every change here is a notebook output, so the review

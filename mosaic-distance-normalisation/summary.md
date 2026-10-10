@@ -7,7 +7,9 @@ date: 2026-09-23
 before: origin/main @ 7ea877e (squared normalisation, as shipped)
 after: the same checkout with a linear-normalisation copy of _build_cost_matrix patched in
 inputs: US states (uniform hexagon, uniform square, 154 tiles), congressional districts grouped by State Name, world countries (Natural Earth, Mollweide ESRI:54009, 384 nominal / 460 actual tiles), africa, world mainland only — each at both morph settings
-status: deferred
+kind: exploration
+topic: symbol
+status: on-hold
 ---
 
 figure: norm_world_morph1.png — world, morph=True. Current normalisation above, variant below. Each tile is coloured by how far it sits from the centroid of the region owning it; dark tiles are symbols a long way from their land.

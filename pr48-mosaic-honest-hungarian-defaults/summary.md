@@ -9,6 +9,8 @@ date: 2026-09-23
 before: origin/main @ 8b197eb
 after: refactor/mosaic-honest-hungarian-defaults @ 14947cf
 inputs: US states (uniform hexagon, uniform square, 154 tiles), congressional districts grouped by State Name, world countries (Natural Earth, Mollweide ESRI:54009, 384 nominal / 460 actual tiles) — each at both morph settings
+kind: pr
+topic: symbol
 ---
 
 **No figures, deliberately.** The change is bit-identical by construction and verified so

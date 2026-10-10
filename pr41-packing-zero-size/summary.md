@@ -9,6 +9,8 @@ date: 2026-09-22
 before: main @ a095187
 after: fix/zero-radius-symbols @ e2f1e05
 inputs: US states (bundled census, Population, ESRI:102008) with Kentucky set to 0; the same states unmodified as a control; a synthetic 4x4 unit grid with two regions set to 0. All at CirclePackingLayout(max_iterations=500), default options otherwise.
+kind: pr
+topic: symbol
 ---
 
 figure: grid_zero_before.png — Synthetic 4x4 grid, two zero-value regions (red dots). converged=False, 501 iterations, 2000 RuntimeWarnings.

@@ -8,6 +8,10 @@ date: 2026-10-09 02:20
 before: main @ 0124245
 after: fix/voronoi-weights-extraction @ 3631404
 inputs: 49 contiguous US states with population (bundled), RasterBackend resolution 256 unless stated
+kind: exploration
+topic: voronoi
+status: superseded
+related: pr111-voronoi-power-weights
 ---
 
 ## What changed

@@ -6,6 +6,8 @@ url: https://github.com/bright-fakl/carto-flow/pull/50
 branch: fix/visual-checks-index-sort
 base: main
 date: 2026-09-23 14:26
+kind: pr
+topic: infra
 ---
 
 No figures: this changes the index that lists the other pages, so the evidence

@@ -11,6 +11,8 @@ updated: 2026-10-09 10:50
 before: main
 after: fix/stall-detection @ 8441681
 inputs: US states (bundled, 49 incl. DC) with preset_balanced, area_scale=1e-6, n_iter=400 for the anisotropy runs; default options and grid_size=512 as unchanged controls; forced non-converging runs; US states and congressional districts (bundled) for multiresolution
+kind: pr
+topic: flow
 ---
 
 ## What changed

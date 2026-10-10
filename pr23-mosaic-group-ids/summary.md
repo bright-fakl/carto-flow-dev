@@ -9,6 +9,8 @@ date: 2026-09-18
 before: origin/main
 after: fix/mosaic-group-ids @ 0605514
 inputs: US states (tile_count~Population), congressional districts (tile_count=1 and group_by=State Name), 3x3 synthetic fixture
+kind: pr
+topic: symbol
 ---
 
 # PR23 (MosaicLayout group ids) — before vs after

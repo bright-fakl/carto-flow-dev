@@ -4,7 +4,10 @@ description: Investigation, no code change. Symbol coverage under the default si
 url: https://github.com/bright-fakl/carto-flow/pull/41
 date: 2026-09-22
 inputs: US states (bundled census, Population, ESRI:102008); Europe and Africa from load_world by pop_est; a 6x6 unit grid with uniform and mildly varying values.
-status: reviewed
+kind: exploration
+topic: symbol
+status: led-to
+related: pr42-size-normalization-total
 ---
 
 figure: packing_scale_panels.png — Four packings of US states by Population. Top left is the default. Top right is the same run with size_normalization="total". Bottom left removes the neighbour tangency force. Bottom right is stage 1 only (overlap resolution, before any contraction).

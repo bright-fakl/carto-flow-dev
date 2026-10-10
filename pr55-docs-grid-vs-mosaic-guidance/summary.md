@@ -9,6 +9,8 @@ date: 2026-09-24 14:00
 before: (docs only — no library source changed)
 after: docs/grid-vs-mosaic-guidance @ 59a4be8
 inputs: US states (49, bundled, hexagon) one tile per region; the same states with tile_count = round(population share x 150) = 154 tiles; US states grouped by Region; US congressional districts (432) for the timing and group_by checks
+kind: pr
+topic: symbol
 ---
 
 figure: one_tile_per_region.png — One tile per state, grid vs mosaic, same axis limits, state abbreviations labeled. Grid's arrangement reads more accurately state by state; mosaic's footprint reads more accurately as the United States. This is the figure the "per-region fidelity vs silhouette" sentence in the guide is written from.

@@ -8,6 +8,8 @@ base: main
 date: 2026-09-23
 after: 2bae205 (merged)
 inputs: world (bundled, 800 and 1500 nominal tiles), congressional districts, US states; morph True and False
+kind: pr
+topic: symbol
 ---
 
 ## No figures, and why

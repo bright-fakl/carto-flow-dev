@@ -5,7 +5,10 @@ branch: (measurement only - no source changes)
 base: origin/main @ a095187
 date: 2026-09-22
 inputs: states_uniform (49 US states, 1 tile each, hexagon), states_uniform_sq (same, square), states (49 states, 154 tiles via tile_count), districts (432 congressional districts, group_by="State Name"), world (176 Natural Earth countries in Mollweide, 384 tiles via pop_est, Antarctica and zero-population rows dropped)
-status: reviewed
+kind: exploration
+topic: symbol
+status: led-to
+related: pr56-mosaic-option-behavior-docs
 ---
 
 figure: knob_outside_penalty.png — outside_penalty, all five inputs, both morph settings

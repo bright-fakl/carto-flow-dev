@@ -9,6 +9,8 @@ date: 2026-09-23
 before: fix/mosaic-component-pool-overlap @ bd2e76e (this PR's own parent, so the numbers isolate this change)
 after: feat/mosaic-min-one-tile @ e5343e4
 inputs: world countries (Natural Earth, Mollweide ESRI:54009) at 384 nominal / 460 actual and 800 nominal / 848 actual tiles, africa, world mainland only, US states, congressional districts grouped by State Name
+kind: pr
+topic: symbol
 ---
 
 figure: m1_world_b384_morph1.png — world, 384 nominal / 460 actual tiles, morph=True. min_one_tile_per_region=False (the default) above, True below. Regions with no symbol are red.

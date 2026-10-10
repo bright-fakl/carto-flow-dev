@@ -9,6 +9,8 @@ date: 2026-09-24 14:38
 before: origin/main @ 78060af
 after: docs/tile-count-mosaic @ eb29c1a
 inputs: US states (49, bundled) with House seats apportioned by the Hamilton method (435 tiles); US congressional districts (432) grouped by state; Natural Earth world countries (177) with tile_count = max(1, round(population share x 200)) = 304 tiles
+kind: pr
+topic: symbol
 ---
 
 figure: before_grid_435.png — Old lead figure: 435 seats on the grid layout. The lattice is sized from the largest symbol on an oversized grid, so the tilegram reads as an oval blob rather than the United States. Population density also collapses to one bright hexagon (DC) against a uniform purple field.

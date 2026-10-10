@@ -10,6 +10,8 @@ date: 2026-10-08 22:35
 before: main
 after: fix/census-hispanic-total @ 3386c8b
 inputs: states (bundled, ACS 2020 5-year), proportional gallery example (simplify 1000), flow how-to (grid_size 512)
+kind: pr
+topic: data
 ---
 
 `load_us_census(race=True)` now maps `Hispanic or Latino` to `B03002_012E` (all races). `White`, `Black or African American` and `Asian` stay the non-Hispanic alone counts, so the four columns do not overlap. Both bundled snapshots had only that column replaced, using the Census API (ACS 2020 5-year, same geographies); all other columns, geometry, row order, schema metadata and zstd compression are unchanged.

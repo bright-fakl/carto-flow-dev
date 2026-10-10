@@ -9,6 +9,8 @@ date: 2026-09-22
 before: origin/main @ a095187 (size_normalization="max")
 after: feat/size-normalization-total @ 5f18adf (size_normalization="total")
 inputs: US states (bundled census, Population, ESRI:102008); Europe (load_world pop_est, EPSG:3035); Africa (load_world pop_est, ESRI:102022); US states with a constant sizing column as a control
+kind: pr
+topic: symbol
 ---
 
 figure: packing_before_after.png — Circle packing on four inputs. Left column is the old default ("max"), right column the new one ("total"). Both panels of a row share axis limits, so the size change is real and not a zoom. The bottom row is the control: a uniform sizing column, where the two modes are mathematically identical.

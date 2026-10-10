@@ -9,6 +9,8 @@ date: 2026-09-27 02:01
 before: origin/main @ bafb662
 after: fix/release-prerelease-routing @ d74246c
 inputs: n/a - CI workflow and documentation change
+kind: pr
+topic: infra
 ---
 
 ## What would happen today if `2.0.0-rc1` were cut

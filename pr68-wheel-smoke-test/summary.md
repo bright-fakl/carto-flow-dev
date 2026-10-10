@@ -9,6 +9,8 @@ date: 2026-09-27 06:02
 before: origin/main @ bafb662
 after: ci/wheel-smoke-test @ 66835e0
 inputs: the built carto_flow wheel, installed into a clean Python 3.10 venv
+kind: pr
+topic: infra
 ---
 
 ## What this guards against

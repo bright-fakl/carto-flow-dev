@@ -9,6 +9,8 @@ date: 2026-09-18
 before: origin/fix/voronoi-cell-extraction
 after: fix/voronoi-smoothing-tolerance @ 1fb5aa6
 inputs: districts (bundled, simplify 5000 m, min_island 50000); states (bundled); RasterBackend R=64/128/256/300
+kind: pr
+topic: voronoi
 ---
 
 # Visual check: raster Voronoi coverage_simplify tolerance units

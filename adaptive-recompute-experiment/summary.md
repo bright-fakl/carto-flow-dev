@@ -8,6 +8,10 @@ date: 2026-10-09 02:58
 before: main @ 0124245
 after: investigate/adaptive-recompute @ 2650f6a (prototype, not for merging)
 inputs: US states (49 incl. DC), congressional districts, 3,108 counties (Census 500k boundaries, 2020 total votes as sizing variable, ESRI:102008, simplified 1 km, densified 5 km); preset_balanced-like defaults, stall rule off, n_iter 400 (counties 300)
+kind: exploration
+topic: flow
+status: led-to
+related: pr110-stall-detection
 ---
 
 An investigation, not a change: the prototype lives on the branch above (new `MorphOptions` fields `adaptive_tol_rise`, `adaptive_min_interval`, `step_control`, `step_rollback`, `step_dt_floor`, `step_dt_restore`; defaults reproduce current behavior). Scripts are in `scripts/` (they import the prototype from its worktree path, so check out commit 2650f6a to rerun them). One run per cell, on a machine with load average 0.1 to 5, so wall times are fairly reliable, but the cost model below is the primary metric.

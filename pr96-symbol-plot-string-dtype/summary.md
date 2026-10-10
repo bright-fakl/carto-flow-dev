@@ -10,6 +10,8 @@ date: 2026-10-08 15:05
 before: main (TypeError: Cannot interpret 'string[python]' as a data type)
 after: fix/symbol-plot-string-dtype
 inputs: US census (bundled), layout="packing", edgecolor="Region" with Region as object and as string dtype
+kind: pr
+topic: symbol
 ---
 
 figure: edgecolor_region.png — edgecolor="Region" with an object column (left) and a string-dtype column (right), after the fix. Both give identical colors.

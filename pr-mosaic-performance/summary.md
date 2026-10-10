@@ -9,6 +9,8 @@ date: 2026-09-20
 before: main @ 9064d77
 after: perf/mosaic-calibration @ 997c725
 inputs: US states (bundled, ~150 tiles via load_us_census(level="state") population), congressional districts (bundled, 432, 1 tile each), congressional districts with group_by="State Name"; each with and without morph
+kind: pr
+topic: symbol
 ---
 
 ## No before/after figures - this is a pure performance change

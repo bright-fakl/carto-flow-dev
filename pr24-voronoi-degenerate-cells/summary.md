@@ -9,6 +9,8 @@ date: 2026-09-18
 before: origin/main
 after: fix/voronoi-degenerate-cells @ 8c0a1d6
 inputs: congressional districts (group_by=State Name, R=32..256), states (R=300)
+kind: pr
+topic: voronoi
 ---
 
 # PR24 (Voronoi degenerate cells) — before vs after

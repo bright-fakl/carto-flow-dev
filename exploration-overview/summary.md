@@ -8,6 +8,9 @@ date: 2026-10-10 09:30
 before: fix/stall-detection @ 8441681
 after: investigate/gsm-scale @ bfb4253 (prototype, not for merging)
 inputs: the tables of exploration-gsm-scale (states at grids 128, 256 and 512, the multiresolution coarse level, three anisotropy runs, districts at 256 and 512, counties at 256 and 512); each case with refresh on rise off and on; cost = iterations + field recomputes x the case's recompute / step cost ratio
+kind: exploration
+topic: flow
+status: on-hold
 ---
 
 How to read the figures: the baseline A is one in every case. Cost is in plain-step units (iterations plus field recomputes times the ratio of one recompute to one step, 9 to 47 depending on case). Iteration counts alone mislead: variant B4i takes 5 to 25 iterations because each iteration is a complete round with a recompute, so its cost is 0.3 to 0.7 of A, not 0.05.

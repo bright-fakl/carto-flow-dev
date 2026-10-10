@@ -9,6 +9,8 @@ date: 2026-09-20
 before: main @ 9c664f9
 after: fix/mosaic-ring-swapback-reach @ 825aee8
 inputs: US states (bundled census, tile_count ~ Population, 154 tiles), congressional districts (bundled, 1 tile each), congressional districts with group_by="State Name", and the bundled world dataset (Natural Earth, Mollweide ESRI:54009, tile_count ~ pop_est, 600-tile budget) -- each with morph=True and morph=False. The world configuration is NOT deterministic across separate process runs (confirmed, root cause not identified -- see STATUS.md); its figures and numbers below are one run each, generated with PYTHONHASHSEED=0 pinned only for internal consistency across this PR's own regenerations, not as a fix. States/districts/districts_group_by were stable across every run in this investigation.
+kind: pr
+topic: symbol
 ---
 
 figure: districts_before.png — Congressional districts, morph=True, before (hops=8). orange = ring tiles used (6), red = empty core (10), blue hatch = enclosed (1).

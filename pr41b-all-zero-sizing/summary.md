@@ -9,6 +9,8 @@ date: 2026-09-22
 before: not renderable — grid did not terminate and flow_density raised ZeroDivisionError
 after: fix/zero-radius-symbols, second commit
 inputs: US states (bundled census, ESRI:102008) with the whole Population column set to 0; default layout options.
+kind: pr
+topic: symbol
 ---
 
 figure: all_zero_states_after.png — All six layouts on an all-zero Population column. Red dots mark the rendered symbol centroids. Row count 49 and zero RuntimeWarnings everywhere.

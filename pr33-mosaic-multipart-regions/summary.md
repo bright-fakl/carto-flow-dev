@@ -10,6 +10,8 @@ before: main @ 9c664f9
 after: feat/mosaic-multipart-regions @ 7253e5b
 inputs: 3x3 synthetic fixture (40 tiles), US states (bundled census, tile_count ~ Population, 154 tiles), congressional districts (bundled, 1 tile each), districts with group_by="State Name", world (bundled Natural Earth, Mollweide ESRI:54009, tile_count ~ pop_est, 660-tile budget) -- each with morph=True and morph=False
 status: closed
+kind: pr
+topic: symbol
 ---
 
 figure: neighbour_distortion.png — **The headline result, and the clearest evidence in this PR.** Same input, same code, only `multipart_min_tiles` differs. Forced to make its two parts one block, region B reaches across the gap and breaks its single-part neighbour A into 3 blocks; the layout cannot converge. With sub-regions, A is left intact, B occupies two blocks matching its geography, and the layout converges. This is what the feature is for: removing an impossible constraint so the solver stops damaging whatever is in the way.

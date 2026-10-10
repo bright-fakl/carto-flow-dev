@@ -9,6 +9,8 @@ date: 2026-09-19
 before: fix/mosaic-repair-objective @ 76cc3ca
 after: feat/mosaic-chain-swap-repair @ f22c96c
 inputs: 3x3 synthetic fixture (hexagon, morph=False), US states (bundled, tile_count ~ Population, ~154 tiles), congressional districts (bundled, 1 tile each), congressional districts with group_by="State Name"
+kind: pr
+topic: symbol
 ---
 
 figure: districts_group_by_before_after.png — Districts grouped by state, the hardest case: 14 of 48 split before, 0 after. Split states are outlined, hatched and labelled.

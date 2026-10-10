@@ -7,7 +7,10 @@ date: 2026-09-23
 before: origin/main @ a095187 (investigation) and @ 8b197eb (before/after measurements)
 after: the four branches above
 inputs: africa (Natural Earth, Mollweide ESRI:54009), world countries (same), world mainland only, US states, congressional districts grouped by State Name
-status: reviewed
+kind: exploration
+topic: symbol
+status: no-action
+outcome: explains a known limitation; documented, no change
 ---
 
 figure: fig_africa_b150.png — africa, the clean control: no region loses a tile at either morph setting

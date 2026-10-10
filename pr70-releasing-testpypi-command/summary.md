@@ -9,6 +9,8 @@ date: 2026-09-27 18:40
 before: origin/main @ c5e4d29
 after: fix/releasing-testpypi-command
 inputs: carto-flow 2.0.0rc1 as published to TestPyPI, installed into a clean Python 3.10 venv
+kind: pr
+topic: infra
 ---
 
 No figures. The change is documentation, verified by executing the command it

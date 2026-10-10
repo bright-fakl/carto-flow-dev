@@ -10,6 +10,8 @@ date: 2026-10-08 15:05
 before: main (every snapshot's coords equal the final positions)
 after: fix/morph-snapshot-coords-copy
 inputs: US census (bundled), 9x6 grid via displacement_coords=(X, Y), preset_balanced, area_scale=1e-6, snapshot_every=10, n_iter=400 (13 snapshots)
+kind: pr
+topic: flow
 ---
 
 figure: grid_snapshots.png — co-displaced grid at snapshots 0, 3, 6 and 12 over the original state outlines. Top row: before, the grid is identical in every snapshot (final positions). Bottom row: after, the grid progresses with the iteration.

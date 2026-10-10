@@ -9,6 +9,8 @@ date: 2026-09-18
 before: origin/main
 after: fix/simplify-coverage-sliver-rings @ fe10f3a
 inputs: districts (bundled, 1000 m + 5 km densify; also simplify_coverage(5000, min_island_size=50000)); states (bundled)
+kind: pr
+topic: voronoi
 ---
 
 # simplify_coverage: sliver interior rings removed at the source

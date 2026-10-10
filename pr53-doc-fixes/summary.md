@@ -9,6 +9,8 @@ date: 2026-09-24 00:28
 before: origin/main @ b9794bb
 after: docs/fix-broken-docs @ bedc517
 inputs: states (bundled US census)
+kind: pr
+topic: infra
 ---
 
 figure: before.png — Before: `create_layout(..., group_by="Region", layout="topology")`. `group_weight` defaults to 0.0, so the grouping never reaches placement and the layout warns. The symbol shapes are grouped; the positions are not.

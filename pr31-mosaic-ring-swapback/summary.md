@@ -9,6 +9,8 @@ date: 2026-09-19
 before: main @ 6a5de8b
 after: fix/mosaic-ring-swapback @ d93d7e9
 inputs: 3x3 synthetic fixture (hexagon, morph=False), US states (bundled census, tile_count ~ Population, 154 tiles), congressional districts (bundled, 1 tile each), congressional districts with group_by="State Name"
+kind: pr
+topic: symbol
 ---
 
 figure: swapback_before_after.png — The defect and the fix. Orange = tiles the solver took from an extra ring (labelled with their owner state); red = core tiles left empty. Before: 5 and 5. After: 2 and 2.

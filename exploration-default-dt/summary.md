@@ -8,6 +8,10 @@ date: 2026-10-10 03:34
 before: fix/stall-detection @ 8441681 (refresh_on_rise=0.01, stall rule, best-iterate return)
 after: investigate/default-dt @ a4f0aea (scratch commit: preset_balanced dt 0.3, preset_high_quality dt 0.2; library otherwise unchanged)
 inputs: US states (49 incl. DC), congressional districts (432), 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6), the three strong-anisotropy runs of the adaptive-recompute page (preset_balanced settings, area_scale 1e-6), states with poverty counts and dot-density landmarks (issue 86, seeds 7 to 11); MorphOptions defaults of fix/stall-detection (grid 256, mean_tol 0.05, max_tol 0.10, recompute_every 10, refresh_on_rise 0.01, stall rule on), n_iter 400 (counties 300); dt swept as an option value; NUMBA_NUM_THREADS=4
+kind: exploration
+topic: flow
+status: open
+related: exploration-overview
 ---
 
 An investigation, not a change. Only `dt` (and in a few blocks `refresh_on_rise`, `recompute_every`, the tolerances and the grid) is swept; the library code is the base commit, plus a scratch commit that edits two preset values. Scripts are in `scripts/` (`run_all.sh <group>` for `run_sweep.py`, `run_extra.sh <pipeline|presets|landmarks|landmarks2>` for `run_extra.py`, `shape_compare.py`, `timing.py`, `analyze.py`; they import the library, so check out the branch); results are in `data/*.jsonl` (one run per line with the full score trace), `data/shape.json`, `data/timing.json`; `data/tables.md` has every table (about 40, including refresh_on_rise 0.2 and off, the grid 512 and 1024 blocks and the fine dt sweep at 0.1, 0.15, 0.25, 0.35, 0.45, 0.55, 0.7, 1.0). The runs are deterministic, so neighboring dt values act as the replicates: a result that jumps between 0.30, 0.35 and 0.40 is chaotic in dt, not noise.

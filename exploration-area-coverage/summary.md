@@ -8,6 +8,10 @@ date: 2026-10-09 15:22
 before: fix/stall-detection @ 8441681
 after: investigate/area-coverage @ 3284c33
 inputs: US states (49 incl. DC), 432 congressional districts, 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6); default options and three strong-anisotropy setups (DirectionalTensor Dpar=4, Dperp=0.3: horizontal, tangential, tilted pi/6, preset_balanced values, area_scale 1e-6); grids 128, 256, 512 (1024 for timing and one counties run); n_iter 400 (counties 300)
+kind: exploration
+topic: flow
+status: open
+related: exploration-overview
 ---
 
 An investigation, not a change. The prototype is on `investigate/area-coverage` (from `fix/stall-detection`, local commit 3284c33). Unless a row says "off", results use `refresh_on_rise=0.01` (the setting of 8441681); "off" is the setting of b0657b5. Full tables are in `tables_all.md`; scripts and per-run data are in `scripts/` and `data/`.

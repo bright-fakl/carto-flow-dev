@@ -9,6 +9,8 @@ date: 2026-09-23 15:46
 before: origin/main @ 58f3cc2 (no mosaic example in the gallery at all)
 after: docs/mosaic-gallery-examples @ 2a7e10b
 inputs: US states (bundled census, population/2e6 tile counts), US congressional districts (bundled census, one tile each, grouped by State Name)
+kind: pr
+topic: symbol
 ---
 
 figure: mosaic_layout.png — basic tilegram: US states, one hexagon per two million people, colored by census region

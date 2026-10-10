@@ -9,6 +9,8 @@ date: 2026-09-18
 before: origin/main @ 51cfe31
 after: fix/mosaic-repair-objective @ 76cc3ca
 inputs: US states (bundled, tile_count ~ Population, 154 tiles), congressional districts (bundled, 1 tile each, group_by=State Name), 3x3 synthetic fixture
+kind: pr
+topic: symbol
 ---
 
 figure: states_before_after.png — US states: split states outlined, hatched and labelled. 9 of 49 before, 2 of 49 after (Michigan and Washington remain).

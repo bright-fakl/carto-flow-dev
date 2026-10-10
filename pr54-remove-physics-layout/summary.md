@@ -9,6 +9,8 @@ date: 2026-09-24 01:31
 before: layout="physics" (the old default)
 after: layout="packing" (the new default) @ e41edf2
 inputs: US states by population (bundled load_us_census, 49 rows), all other options at defaults
+kind: pr
+topic: symbol
 ---
 
 figure: default-layout-physics-vs-packing.png — Same call, `create_symbol_cartogram(us_states, "Population")`, under the old default (left) and the new one (right).

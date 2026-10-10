@@ -9,6 +9,8 @@ date: 2026-09-26 11:20
 before: origin/main @ ba87610
 after: docs/suppress-progress-and-mosaic-quickstart @ f03f0ae
 inputs: US census snapshot (49 contiguous geographies, bundled), one tile per two million people with a floor of one tile (168 tiles)
+kind: pr
+topic: infra
 ---
 
 figure: before-last-section-flow-density.png — Where the quick start used to end: the flow density layout, the last of its four sections. A reader finished the tutorial without meeting the mosaic layout.

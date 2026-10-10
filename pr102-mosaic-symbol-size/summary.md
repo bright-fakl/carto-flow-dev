@@ -10,6 +10,8 @@ date: 2026-10-08 16:54
 before: main
 after: fix/mosaic-symbol-size @ 400d72f
 inputs: US states (bundled census; tile_count = round(Population / 2e6), min 1), congressional districts grouped by state (bundled), spacing=0.0, morph=False
+kind: pr
+topic: symbol
 ---
 
 `MosaicLayout` set `base_size` to the tiling's `tile_size`, which is only the

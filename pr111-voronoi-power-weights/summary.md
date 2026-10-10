@@ -11,6 +11,8 @@ before: main @ 0124245
 after: feat/voronoi-power-weights @ 02c94c9
 updated: 2026-10-09 15:30
 inputs: 49 contiguous US states with population (bundled), 432 congressional districts with population (bundled), lognormal weights (seed 1) on the states; RasterBackend resolution 256, n_iter 300, area_cv_tol 0.05
+kind: pr
+topic: voronoi
 ---
 
 ## What changed

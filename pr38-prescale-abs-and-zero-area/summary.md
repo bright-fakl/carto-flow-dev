@@ -9,6 +9,8 @@ date: 2026-09-21
 before: origin/main @ af417b6
 after: fix/prescale-abs-and-zero-area @ 709b8f8
 inputs: synthetic 3-4 cell grids (unit squares), a genuinely isolated zero-value/zero-tile-count "island" geometry, and small mixed-sign/net-negative/all-zero value arrays
+kind: pr
+topic: flow
 ---
 
 figure: collapse_before_after.png — A 3-cell mainland (pop 4, 5, 3) plus an isolated zero-population island (g3), size="pop", pre_scale toggled. Before: all 4 geometries keep their original unit-square area (total 4.0000). After: the mainland grows to fill the island's freed share while g3 collapses to an exact zero-area Polygon (is_valid == False, not shown as a filled shape since it has no area) — the total area is preserved exactly (4.0000 both sides).

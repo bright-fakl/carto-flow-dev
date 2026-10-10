@@ -10,6 +10,8 @@ before: origin/main @ a095187
 after: agent/mosaic-inert-knobs
 inputs: US states (uniform, and 154 tiles), congressional districts grouped by State Name, world countries (Natural Earth, Mollweide, 384 tiles)
 status: reviewed
+kind: pr
+topic: symbol
 ---
 
 No before/after figures: the change is bit-identical by construction, so side-by-side

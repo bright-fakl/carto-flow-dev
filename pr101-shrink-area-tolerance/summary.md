@@ -11,6 +11,8 @@ updated: 2026-10-08 22:01
 before: main
 after: fix/shrink-area-tolerance @ 87a95e6
 inputs: states (bundled), each shrunk to its population density relative to the densest state (DC kept whole)
+kind: pr
+topic: proportional
 ---
 
 # Shrink area tolerance
