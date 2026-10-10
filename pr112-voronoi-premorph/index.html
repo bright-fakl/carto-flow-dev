@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #112: Weighted Voronoi with a flow pre-morph instead of an elastic boundary</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #112: Weighted Voronoi with a flow pre-morph instead of an elastic boundary</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/112">https://github.com/bright-fakl/carto-flow/pull/112</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/83">#83</a></dd>
+<dt>Branch</dt><dd>feat/voronoi-premorph</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-09 15:45</dd>
+<dt>Updated</dt><dd>2026-10-10 04:00</dd>
+<dt>Before</dt><dd>main @ 0124245</dd>
+<dt>After</dt><dd>feat/voronoi-premorph @ c57925a</dd>
+<dt>Inputs</dt><dd>49 contiguous US states with population (bundled); the same with lognormal weights (seed 1, 1399x range); 432 congressional districts with population (bundled); RasterBackend resolution 256, n_iter 300, area_cv_tol 0.05; flow pre-morph with MorphOptions.preset_balanced(area_scale=1e-6, n_iter=400)</dd>
+</dl>
+<p class="desc">Compares a fixed outline, the elastic boundary co-evolving with the relaxation, and a flow-cartogram pre-morph followed by a rigid (or slightly elastic) Voronoi run, on states and districts. The pre-morph keeps regions closer to their flow-cartogram positions and is 4-7x faster. Plain Lloyd relaxation after the pre-morph still moves Louisiana into south Texas; a generator anchor (new option, 0.5 with the new premorph option) keeps Texas on the Gulf coast and cuts the median offset from the flow cartogram from 0.44 to 0.16 cell radii.</p>
+<h2>Setup</h2>
+<ul><li>(a) fixed outline: original regions, rigid boundary.</li><li>(b) elastic co-evolution: original regions, <code>ElasticBoundary(0.05)</code>.</li><li>(c) flow pre-morph + rigid: <code>flow_cartogram.morph_gdf</code> on the same weights, then the weighted Voronoi run on the morphed regions (generators at the morphed centroids, rigid boundary = union of the morphed regions). Morphed rings are repaired with <code>make_valid</code> first: the flow output contained a self-intersection that made the union fail.</li><li>(d) flow pre-morph + <code>ElasticBoundary(0.02)</code>.</li><li>(e) as (c) with <code>RasterBackend(generator_anchor=0.5)</code> (new, see below). This is what <code>create_voronoi_cartogram(..., premorph=True)</code> runs; the new option gives the same metrics on the states (median offset vs flow 0.16 R, TX 0.14 R, 53 iterations).</li></ul>
+<p>Metrics: offset = cell centroid to original region centroid after scaling the map to the original area, in mean cell radii R (median; R = 399 km for the states, 134 km for the districts); offset vs flow = the same against the flow-morphed centroid; own = share of each morphed region covered by its own cell (mean); Procrustes disparity between original and cell centroids; rank = mean Spearman correlation of x and y; outline vs flow / original = symmetric difference after scaling to equal area, relative to the area; lag = generator-to-centroid distance in own cell radii (median); compact = mean 4 pi A / P^2; split = cells with a second part above 1 %; time = morph plus Voronoi (NUMBA_NUM_THREADS=8). Mean area error is below 0.12 % in every run (max below 1 %).</p>
+<h2>Results</h2>
+<table>
+<tr><th>dataset</th><th>variant</th><th>offset (R)</th><th>offset vs flow (R)</th><th>own</th><th>Procrustes</th><th>rank</th><th>outline vs flow</th><th>outline vs orig</th><th>lag</th><th>compact</th><th>split</th><th>iterations</th><th>time (s)</th></tr>
+<tr><td>states, population</td><td>(a) fixed</td><td>1.84</td><td>1.14</td><td>-</td><td>0.179</td><td>0.916</td><td>0.41</td><td>0</td><td>0.014</td><td>0.62</td><td>0</td><td>250</td><td>2.4</td></tr>
+<tr><td>states, population</td><td>(b) elastic 0.05</td><td>1.96</td><td>0.72</td><td>-</td><td>0.137</td><td>0.915</td><td>0.06</td><td>0.39</td><td>0.040</td><td>0.61</td><td>5</td><td>183</td><td>9.7</td></tr>
+<tr><td>states, population</td><td>(c) pre-morph + rigid</td><td>1.56</td><td>0.44</td><td>0.38</td><td>0.086</td><td>0.961</td><td>0</td><td>0.41</td><td>0.029</td><td>0.58</td><td>3</td><td>53</td><td>1.8 (morph 1.0)</td></tr>
+<tr><td>states, population</td><td>(d) pre-morph + elastic 0.02</td><td>1.72</td><td>0.51</td><td>0.35</td><td>0.092</td><td>0.955</td><td>0.03</td><td>0.40</td><td>0.042</td><td>0.62</td><td>2</td><td>84</td><td>4.5</td></tr>
+<tr><td>states, population</td><td>(e) pre-morph + rigid + anchor 0.5</td><td>1.50</td><td>0.16</td><td>0.67</td><td>0.070</td><td>0.974</td><td>0</td><td>0.41</td><td>0.206</td><td>0.55</td><td>5</td><td>53</td><td>1.8</td></tr>
+<tr><td>states, lognormal 1.5</td><td>(a) fixed</td><td>1.49</td><td>1.65</td><td>-</td><td>0.272</td><td>0.835</td><td>0.48</td><td>0</td><td>0.018</td><td>0.58</td><td>6</td><td>131</td><td>1.5</td></tr>
+<tr><td>states, lognormal 1.5</td><td>(b) elastic 0.05</td><td>2.20</td><td>0.86</td><td>-</td><td>0.279</td><td>0.835</td><td>0.16</td><td>0.45</td><td>0.099</td><td>0.57</td><td>4</td><td>300</td><td>14.6</td></tr>
+<tr><td>states, lognormal 1.5</td><td>(c) pre-morph + rigid</td><td>1.62</td><td>0.72</td><td>0.25</td><td>0.142</td><td>0.917</td><td>0</td><td>0.48</td><td>0.031</td><td>0.51</td><td>7</td><td>126</td><td>2.5 (morph 0.3, stalled)</td></tr>
+<tr><td>states, lognormal 1.5</td><td>(d) pre-morph + elastic 0.02</td><td>1.80</td><td>0.63</td><td>0.28</td><td>0.133</td><td>0.934</td><td>0.03</td><td>0.47</td><td>0.069</td><td>0.57</td><td>3</td><td>164</td><td>7.9</td></tr>
+<tr><td>states, lognormal 1.5</td><td>(e) pre-morph + rigid + anchor 0.5</td><td>1.81</td><td>0.19</td><td>0.58</td><td>0.087</td><td>0.966</td><td>0</td><td>0.48</td><td>0.174</td><td>0.50</td><td>7</td><td>97</td><td>1.5</td></tr>
+<tr><td>districts, population</td><td>(a) fixed</td><td>6.14</td><td>2.05</td><td>-</td><td>0.134</td><td>0.927</td><td>0.44</td><td>0</td><td>0.372</td><td>0.81</td><td>15</td><td>185</td><td>12.9</td></tr>
+<tr><td>districts, population</td><td>(b) elastic 0.05</td><td>5.42</td><td>1.45</td><td>-</td><td>0.104</td><td>0.954</td><td>0.28</td><td>0.27</td><td>0.314</td><td>0.79</td><td>25</td><td>300</td><td>17.7</td></tr>
+<tr><td>districts, population</td><td>(c) pre-morph + rigid</td><td>5.10</td><td>0.35</td><td>0.47</td><td>0.070</td><td>0.980</td><td>0</td><td>0.44</td><td>0.130</td><td>0.74</td><td>36</td><td>12</td><td>2.7 (morph 0.7)</td></tr>
+<tr><td>districts, population</td><td>(d) pre-morph + elastic 0.02</td><td>5.17</td><td>0.44</td><td>0.40</td><td>0.072</td><td>0.980</td><td>0.04</td><td>0.43</td><td>0.084</td><td>0.77</td><td>30</td><td>300</td><td>22.8</td></tr>
+<tr><td>districts, population</td><td>(e) pre-morph + rigid + anchor 0.5</td><td>5.12</td><td>0.21</td><td>0.56</td><td>0.069</td><td>0.981</td><td>0</td><td>0.44</td><td>0.183</td><td>0.69</td><td>43</td><td>9</td><td>2.4</td></tr>
+</table>
+<p>Offsets from the original centroids are large for districts in every variant because the dense urban districts must grow; offset vs flow and Procrustes show how well each variant keeps the arrangement of a density-equalizing map.</p>
+<h2>Findings</h2>
+<ul><li>Position fidelity: among the unanchored variants the pre-morph (c) keeps regions closest to the flow cartogram (offset vs flow 0.35-0.72 R against 0.72-1.45 R for the elastic co-evolution and 1.1-2.1 R for the fixed outline) and closest to the original arrangement (Procrustes 0.07-0.14 against 0.10-0.28; rank 0.92-0.98 against 0.83-0.95). With the anchor (e) the offset vs flow falls to 0.16-0.21 R and each cell covers 56-67 % of its morphed region on average (25-47 % in (c)).</li><li>Cost: (c) and (e) need far fewer Voronoi iterations (states 53 vs 183-250, districts 9-12 vs 185-300) and are the fastest end to end (1.5-2.7 s including the morph, against 9.7-17.7 s for the elastic co-evolution).</li><li>Outline: by construction (c) and (e) have the flow cartogram&#x27;s outline; the co-evolving elastic boundary approaches it on the states (0.06) but less on the lognormal weights (0.16) and districts (0.28).</li><li>Shape: (c) has slightly lower compactness and more split cells (districts 36 vs 15 for the fixed outline and 25 for the elastic one), because the morphed outline has narrow necks and bays where a convex cell is cut in two. The anchor lowers compactness a little more (states 0.58 to 0.55, districts 0.74 to 0.69) and adds split cells on the districts (36 to 43). A small elastic boundary on top (d) smooths the outline and reduces splits a little (30) but costs most of the time advantage.</li><li>Robustness: with the 1399x lognormal weights the flow morph stalls (does not reach its tolerance) but still gives a useful starting layout; Voronoi then fixes the areas exactly.</li></ul>
+<h2>Why Texas moves in (c)</h2>
+<p>Maintainer feedback: even with the pre-morph, Texas moves away from its characteristic location (Gulf coast and Mexican border to the south). In (c) Texas itself moves only moderately (0.46 R, 182 km from its flow-morphed centroid), but its cell no longer reaches the Gulf coast: Louisiana&#x27;s cell sits on the south-Texas coast and covers 16 % of Texas&#x27; morphed region, Mississippi&#x27;s 8 %, and Texas&#x27; own cell covers 73 % of it. The cells of Louisiana, Oklahoma and Mississippi do not overlap their own morphed regions at all.</p>
+<p>Per state, offset vs flow / vs original (R and km); own = share of the morphed region covered by its own cell:</p>
+<table>
+<tr><th>state</th><th>(a) fixed</th><th>(b) elastic 0.05</th><th>(c) pre-morph + rigid</th><th>(e) + anchor 0.5</th></tr>
+<tr><td>TX</td><td>0.72 R 286 km / 1.52 R 606 km</td><td>0.95 R 379 km / 1.20 R 480 km</td><td>0.46 R 182 km / 1.84 R 733 km, own 0.73</td><td>0.14 R 54 km / 1.50 R 600 km, own 0.89</td></tr>
+<tr><td>LA</td><td>1.20 R 479 km / 1.69 R 675 km</td><td>1.31 R 521 km / 2.85 R 1136 km</td><td>1.39 R 554 km / 2.93 R 1169 km, own 0.00</td><td>0.16 R 66 km / 1.66 R 663 km, own 0.74</td></tr>
+<tr><td>OK</td><td>1.82 R 728 km / 3.31 R 1321 km</td><td>0.46 R 182 km / 2.22 R 887 km</td><td>1.58 R 630 km / 0.41 R 165 km, own 0.00</td><td>0.46 R 185 km / 2.45 R 978 km, own 0.41</td></tr>
+<tr><td>MS</td><td>1.17 R 467 km / 1.46 R 582 km</td><td>0.84 R 336 km / 1.50 R 600 km</td><td>0.91 R 363 km / 2.73 R 1090 km, own 0.00</td><td>0.28 R 110 km / 2.14 R 855 km, own 0.59</td></tr>
+<tr><td>AR</td><td>1.45 R 580 km / 3.25 R 1297 km</td><td>1.08 R 432 km / 2.53 R 1011 km</td><td>0.87 R 346 km / 1.43 R 569 km, own 0.06</td><td>0.31 R 122 km / 1.90 R 760 km, own 0.42</td></tr>
+<tr><td>FL</td><td>1.42 R 569 km / 0.94 R 374 km</td><td>0.24 R 97 km / 1.07 R 427 km</td><td>0.20 R 79 km / 1.11 R 441 km, own 0.85</td><td>0.15 R 61 km / 1.15 R 458 km, own 0.89</td></tr>
+<tr><td>CA</td><td>1.03 R 413 km / 1.01 R 402 km</td><td>0.46 R 183 km / 0.17 R 68 km</td><td>0.22 R 88 km / 0.45 R 180 km, own 0.83</td><td>0.07 R 28 km / 0.47 R 189 km, own 0.92</td></tr>
+<tr><td>NM</td><td>1.39 R 555 km / 0.95 R 381 km</td><td>0.71 R 284 km / 0.89 R 354 km</td><td>0.17 R 67 km / 1.55 R 619 km, own 0.47</td><td>0.12 R 49 km / 1.39 R 555 km, own 0.61</td></tr>
+<tr><td>AZ</td><td>0.77 R 306 km / 1.11 R 443 km</td><td>0.61 R 243 km / 0.39 R 155 km</td><td>0.54 R 217 km / 0.85 R 340 km, own 0.57</td><td>0.24 R 95 km / 0.69 R 276 km, own 0.77</td></tr>
+<tr><td>NY</td><td>2.25 R 896 km / 1.97 R 785 km</td><td>0.72 R 287 km / 0.97 R 386 km</td><td>0.41 R 162 km / 1.26 R 502 km, own 0.72</td><td>0.05 R 21 km / 1.48 R 589 km, own 0.84</td></tr>
+</table>
+<p>Ten worst states against the flow-morphed centroids (R): (a) NJ 2.71, SC 2.62, NC 2.25, NY 2.25, DC 1.96, OK 1.82, VA 1.72, AL 1.64, CO 1.50, AR 1.45; (b) CO 2.52, MT 2.20, MA 2.18, SC 1.54, SD 1.53, WV 1.52, ID 1.43, VT 1.37, IA 1.37, KY 1.37; (c) OK 1.58, LA 1.39, CT 1.38, OR 0.99, VA 0.95, MS 0.91, AR 0.87, SD 0.81, NV 0.81, DC 0.79; (e) NV 0.49, OK 0.46, NC 0.43, WV 0.41, DE 0.41, VA 0.38, ID 0.35, OR 0.33, GA 0.31, AR 0.31. Against the original centroids every variant is dominated by the cartogram distortion itself (worst 2.2-4.0 R: IA, IL, MO, SD, SC, AL and others), which the Voronoi step cannot undo.</p>
+<p>Cause, from the per-iteration trace without the anchor:</p>
+<ul><li>The relaxation starts with zero power offsets and ramps the target areas over 10 iterations, so the first steps act on cells with the wrong areas: Texas&#x27; raster cell has 0.55, 0.20 and 0.78 of its target at iterations 1, 3 and 10, while Louisiana&#x27;s has 1.79 and 1.84 at iterations 1 and 3 and Oklahoma&#x27;s 1.53 and 2.01. Louisiana&#x27;s plain Voronoi cell includes south Texas.</li><li>The over-relaxed Lloyd steps (factor 1.9, decaying) move each generator toward the centroid of that oversized cell: Louisiana&#x27;s generator is 293, 483 and 532 km from its seed at iterations 1, 3 and 10; Oklahoma&#x27;s 121, 272 and 598 km (733 km at most). Texas&#x27; generator moves 208 km at the first step, returns to 72 km by iteration 10 and ends 179 km from its seed (its cell centroid 182 km).</li><li>By iteration 20 the offsets have caught up (TX, LA and OK within 6 % of their targets), but the arrangement is a centroidal power diagram and stays: a power cell is convex, so Texas&#x27; large cell cannot reach into its own southern tail, and Louisiana, now at the centroid of a cell on the Texas coast, has no reason to go back. The run stops at iteration 53 (area_cv_tol); the exact final solve changes only the offsets, not the generators.</li><li>Starting from offsets that already give exact areas (a power fit at the seeds, no ramp) removes the early-phase error but not the drift: run for 200 iterations without a stopping rule, the median offset vs flow is 0.50 R, TX 0.59 R, OK 1.42 R (own 0). A centroidal arrangement of convex cells is generally not the morphed arrangement, so plain Lloyd relaxation moves away from it from any start. This variant was not adopted (scratch-script measurement, not in make_figures.py).</li></ul>
+<h2>Fix: generator anchor</h2>
+<p><code>RasterBackend(generator_anchor=a)</code> (new, <code>a</code> in [0, 1]) moves each generator toward <code>(1 - a) * cell centroid + a * starting position</code> instead of the cell centroid. A power diagram realizes any target areas for any generator positions, so the areas stay exact; the anchor trades cell compactness for staying near the starting layout. With an <code>ElasticBoundary</code> the starting positions are advected with the boundary flow. <code>a = 0</code> is the current relaxation; <code>generator_anchor=None</code> (the default) means 0.5 with the new <code>premorph</code> option and 0 otherwise, so existing runs are unchanged (positions and cells hash identically to 02c94c9 on six weighted and unweighted configurations).</p>
+<p>Anchor sweep after the pre-morph (rigid boundary; TX = the state, or the union of its districts):</p>
+<table>
+<tr><th>dataset</th><th>anchor</th><th>offset vs flow med / max (R)</th><th>own mean / min</th><th>TX offset (R) / own</th><th>lag med / max</th><th>compact</th><th>split</th><th>iterations</th><th>time (s)</th><th>mean / max area error</th></tr>
+<tr><td>states, population</td><td>0</td><td>0.44 / 1.58</td><td>0.38 / 0.00</td><td>0.46 / 0.73</td><td>0.03 / 0.21</td><td>0.58</td><td>3</td><td>53</td><td>1.0</td><td>0.09 / 0.66 %</td></tr>
+<tr><td>states, population</td><td>0.25</td><td>0.19 / 0.62</td><td>0.64 / 0.10</td><td>0.17 / 0.88</td><td>0.15 / 0.54</td><td>0.57</td><td>4</td><td>43</td><td>0.7</td><td>0.08 / 0.99 %</td></tr>
+<tr><td>states, population</td><td>0.5</td><td>0.16 / 0.49</td><td>0.68 / 0.18</td><td>0.14 / 0.89</td><td>0.21 / 0.92</td><td>0.55</td><td>5</td><td>53</td><td>0.8</td><td>0.00 / 0.00 %</td></tr>
+<tr><td>states, population</td><td>0.75</td><td>0.13 / 0.43</td><td>0.70 / 0.20</td><td>0.12 / 0.89</td><td>0.25 / 1.48</td><td>0.53</td><td>5</td><td>67</td><td>0.8</td><td>0.11 / 0.99 %</td></tr>
+<tr><td>states, population</td><td>1</td><td>0.12 / 0.42</td><td>0.72 / 0.25</td><td>0.10 / 0.90</td><td>0.29 / 1.95</td><td>0.51</td><td>6</td><td>77</td><td>0.9</td><td>0.00 / 0.01 %</td></tr>
+<tr><td>states, lognormal 1.5</td><td>0</td><td>0.72 / 3.82</td><td>0.25 / 0.00</td><td>0.39 / 0.74</td><td>0.03 / 0.31</td><td>0.51</td><td>7</td><td>126</td><td>2.1</td><td>0.00 / 0.00 %</td></tr>
+<tr><td>states, lognormal 1.5</td><td>0.25</td><td>0.21 / 1.14</td><td>0.54 / 0.00</td><td>0.13 / 0.88</td><td>0.14 / 1.20</td><td>0.52</td><td>6</td><td>127</td><td>1.3</td><td>0.04 / 0.87 %</td></tr>
+<tr><td>states, lognormal 1.5</td><td>0.5</td><td>0.19 / 1.11</td><td>0.58 / 0.00</td><td>0.12 / 0.90</td><td>0.17 / 5.53</td><td>0.50</td><td>7</td><td>97</td><td>1.0</td><td>0.00 / 0.02 %</td></tr>
+<tr><td>states, lognormal 1.5</td><td>1</td><td>0.13 / 0.77</td><td>0.62 / 0.00</td><td>0.09 / 0.91</td><td>0.24 / 7.14</td><td>0.46</td><td>8</td><td>138</td><td>1.2</td><td>0.08 / 0.66 %</td></tr>
+<tr><td>districts, population</td><td>0</td><td>0.35 / 1.38</td><td>0.47 / 0.00</td><td>0.06 / 0.94</td><td>0.13 / 0.41</td><td>0.74</td><td>36</td><td>12</td><td>1.7</td><td>0.00 / 0.03 %</td></tr>
+<tr><td>districts, population</td><td>0.25</td><td>0.24 / 1.24</td><td>0.54 / 0.09</td><td>0.04 / 0.95</td><td>0.12 / 0.52</td><td>0.72</td><td>38</td><td>9</td><td>1.6</td><td>0.00 / 0.07 %</td></tr>
+<tr><td>districts, population</td><td>0.5</td><td>0.21 / 1.20</td><td>0.56 / 0.09</td><td>0.04 / 0.96</td><td>0.18 / 0.74</td><td>0.69</td><td>43</td><td>9</td><td>1.5</td><td>0.00 / 0.13 %</td></tr>
+<tr><td>districts, population</td><td>1</td><td>0.17 / 1.19</td><td>0.58 / 0.10</td><td>0.03 / 0.97</td><td>0.29 / 1.24</td><td>0.65</td><td>45</td><td>300</td><td>18.2</td><td>0.00 / 0.02 %</td></tr>
+</table>
+<ul><li>Most of the gain comes with the first 0.25: on the states the median offset vs flow drops from 0.44 to 0.19 R, the worst from 1.58 to 0.62 R, and Texas&#x27; cell covers 88 % of its morphed region (73 % without). 0.5 adds a little (0.16 R; Louisiana and Oklahoma no longer leave their regions) and is the premorph default. 1 (generators fixed at the seeds) is the most faithful but least compact, and on the districts the area-CV stopping rule does not fire within 300 iterations (the exact final solve still gives exact areas).</li><li>Costs: compactness drops by 0.03-0.05, generators sit 0.15-0.3 own radii from their cell centroids (median), and the districts gain 2-9 split cells. With the lognormal weights a few tiny cells have their generator several own radii from their centroid (max lag 5.5 at 0.5).</li><li>On the lognormal weights one small state&#x27;s cell does not overlap its morphed region at any anchor (own min 0); on the districts Texas is kept in place with or without the anchor (own 0.94-0.97), because the morph-first run stops after 9-12 iterations.</li><li>Areas stay exact (mean error at most 0.11 %, max below 1 %); iterations and time are unchanged or lower except at anchor 1 on the districts.</li><li>On the original outline the anchor does not help: (a) with anchor 0.5 has median offset vs original 1.77 R instead of 1.84 R, but a median lag of 1.9 own radii and compactness 0.57 instead of 0.62 (300 iterations). With the elastic boundary (b) it helps (Texas 0.92 to 0.59 R, median 1.26 to 0.91 R against the original centroids). These two runs come from a scratch script, not make_figures.py.</li></ul>
+<h2>The premorph option</h2>
+<p><code>create_voronoi_cartogram(gdf, weights=..., premorph=True)</code> (or a <code>MorphOptions</code>) calls <code>flow_cartogram.morph_gdf</code> with the same weights (no weights: equal values, an equal-area morph), repairs invalid morphed rings with <code>make_valid</code> keeping the polygonal parts, and runs the Voronoi relaxation on the morphed regions: generators at the morphed centroids, the boundary built from the morphed regions (rigid unless the backend has an <code>ElasticBoundary</code>), and with <code>RasterBackend</code> the generator anchor 0.5 unless <code>generator_anchor</code> is set. <code>True</code> uses <code>MorphOptions.preset_balanced()</code> with <code>n_iter=400</code> and no progress output. The flow result is kept in <code>result.premorph</code>. The algorithm explanation has a new section, and a gallery example (<code>plot_voronoi_premorph.py</code>) shows the flow cartogram next to the Voronoi cartogram.</p>
+<h2>Recommendation</h2>
+<p>Use the flow pre-morph with the anchor (the new <code>premorph=True</code>) as the way to get a cartogram-like outline and arrangement, and keep the elastic boundary as an option rather than the default route to that goal. It is the fastest variant, converges in a fraction of the iterations, keeps regions closest to the density-equalizing layout and keeps Texas on the Gulf coast and the Mexican border. The elastic boundary remains useful when the outline should stay close to the original. Caveats: one dataset family, one flow preset, the morphed outline produces more split cells, and the anchor makes cells somewhat less compact.</p>
+<p>Regenerate all figures and tables with <code>NUMBA_NUM_THREADS=8 uv run python make_figures.py</code> from a carto-flow checkout of feat/voronoi-premorph (about 4 minutes).</p>
+<div class="figure">
+<img src="premorph_districts.png" alt="Districts, population.">
+<p class="caption">Districts, population.</p>
+</div><div class="figure">
+<img src="premorph_lognormal.png" alt="States, lognormal weights (1399x).">
+<p class="caption">States, lognormal weights (1399x).</p>
+</div><div class="figure">
+<img src="premorph_states.png" alt="States, population: the five variants, cells colored by the original longitude of their state.">
+<p class="caption">States, population: the five variants, cells colored by the original longitude of their state.</p>
+</div><div class="figure">
+<img src="premorph_tx.png" alt="Flow cartogram, (c) and (e) side by side with Texas (or its districts) in orange, for the three datasets.">
+<p class="caption">Flow cartogram, (c) and (e) side by side with Texas (or its districts) in orange, for the three datasets.</p>
+</div><div class="figure">
+<img src="premorph_tx_arrows.png" alt="States, population: arrows from the flow-morphed (top) and original (bottom) centroids to the cell centroids for (a), (b), (c), (e); cells scaled to the original area; red arrows exceed one mean cell radius; Texas in orange.">
+<p class="caption">States, population: arrows from the flow-morphed (top) and original (bottom) centroids to the cell centroids for (a), (b), (c), (e); cells scaled to the original area; red arrows exceed one mean cell radius; Texas in orange.</p>
+</div><div class="figure">
+<img src="premorph_tx_trace.png" alt="Rigid run on the morphed states, stepped by hand: generator paths (gray; TX, LA, OK colored; dot = seed) and the final cells of TX, LA and OK without (left) and with the anchor (middle); right: distance of each generator from its seed and raster cell area / target per iteration, without the anchor.">
+<p class="caption">Rigid run on the morphed states, stepped by hand: generator paths (gray; TX, LA, OK colored; dot = seed) and the final cells of TX, LA and OK without (left) and with the anchor (middle); right: distance of each generator from its seed and raster cell area / target per iteration, without the anchor.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

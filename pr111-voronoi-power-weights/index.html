@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #111: Weighted Voronoi cartograms as power diagrams with exact areas</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #111: Weighted Voronoi cartograms as power diagrams with exact areas</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/111">https://github.com/bright-fakl/carto-flow/pull/111</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/83">#83</a></dd>
+<dt>Branch</dt><dd>feat/voronoi-power-weights</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-09 03:55</dd>
+<dt>Updated</dt><dd>2026-10-09 15:30</dd>
+<dt>Before</dt><dd>main @ 0124245</dd>
+<dt>After</dt><dd>feat/voronoi-power-weights @ 02c94c9</dd>
+<dt>Inputs</dt><dd>49 contiguous US states with population (bundled), 432 congressional districts with population (bundled), lognormal weights (seed 1) on the states; RasterBackend resolution 256, n_iter 300, area_cv_tol 0.05</dd>
+</dl>
+<p class="desc">With weights, RasterBackend cells are now straight-edged power-diagram cells whose areas match the weight-proportional targets (mean error 72-84 % on main, 0.00-0.04 % now on the 49 states); weighted runs above the new area_error_tol are reported as not converged; the elastic boundary is driven by the advected input density.</p>
+<h2>What changed</h2>
+<ul><li>With <code>weights</code> and euclidean labeling, <code>RasterBackend</code> assigns pixels by the power distance <code>|x - p_i|^2 - lambda_i</code> instead of <code>|x - p_i|^2 / w_i</code>. Cell borders are straight lines; each cell is the intersection of half-planes (convex before clipping to the boundary).</li><li>During relaxation the offsets integrate the pixel-area deficit toward weight-proportional targets (rate <code>area_equalizer_rate</code>, default 0.1). They also leak while the generators are still far from their cell centroids; without that leak the offsets oscillate on inputs with many clustered generators (432 districts).</li><li>The final cells are exact polygons: a damped Newton solve on the exact clipped areas fits the offsets until every cell is within <code>VoronoiOptions.area_error_tol</code> (new, default 0.01) of its weight-proportional share of the final boundary area. It starts from the relaxation&#x27;s offsets and needs 2-5 area evaluations.</li><li>With weights, the elastic boundary is driven by the input density carried along by the boundary flow: one particle per active pixel carries its input region&#x27;s density (weight divided by region area), moves with the same velocity and step as the boundary vertices, and its grid histogram is the pressure density. The pressure computed from cells (multiplicatively weighted, power or plain) pulled the northeastern states inward, because once every cell is on target no direction remains in the cell densities (see the elastic boundary section).</li><li>Weighted runs whose mean area error exceeds <code>area_error_tol</code> are reported as <code>converged=False</code> with a <code>RuntimeWarning</code> (for example <code>ExactBackend</code> and <code>distance_mode=&quot;geodesic&quot;</code>, which still ignore weights). Unweighted runs are unchanged: positions, cells and metrics hash identically to main on seven unweighted configurations (the elastic one differs from main only by the run-to-run noise that main also shows).</li></ul>
+<h2>Before and after</h2>
+<p>Mean and max are <code>|area / target - 1|</code> of the output polygons; k is the slope of log area against log weight (1.0 is proportional); &quot;it&quot; is the number of iterations; times are wall-clock seconds on one machine (the runtime printed on the first &quot;before&quot; panel, 0.0 s, is not reliable; a separate run took 4.2 s).</p>
+<table>
+<tr><th>case</th><th>weight range</th><th>mean before</th><th>max before</th><th>k before</th><th>mean after</th><th>max after</th><th>k after</th><th>it before / after</th><th>s before / after</th><th>converged before / after</th></tr>
+<tr><td>fixed boundary</td><td>68x</td><td>77.6 %</td><td>552 %</td><td>0.55</td><td>0.04 %</td><td>0.69 %</td><td>1.00</td><td>300 / 250</td><td>4.2 / 2.8</td><td>False / True</td></tr>
+<tr><td>ElasticBoundary(0.05)</td><td>68x</td><td>72.2 %</td><td>628 %</td><td>0.57</td><td>0.00 %</td><td>0.002 %</td><td>1.00</td><td>28 / 222</td><td>5.6 / 25.8</td><td>True / True</td></tr>
+<tr><td>gallery: ElasticBoundary(0.02) + adjacency_spring 0.2</td><td>68x</td><td>71.5 %</td><td>519 %</td><td>-</td><td>0.006 %</td><td>0.07 %</td><td>1.00</td><td>- / 100</td><td>10.6 / 10.4</td><td>-</td></tr>
+<tr><td>circular boundary</td><td>68x</td><td>84.4 %</td><td>393 %</td><td>0.49</td><td>0.00 %</td><td>0.003 %</td><td>1.00</td><td>300 / 65</td><td>2.7 / 0.6</td><td>False / True</td></tr>
+<tr><td>lognormal sigma 1.5</td><td>1399x</td><td>525 %</td><td>15579 %</td><td>0.30</td><td>0.004 %</td><td>0.09 %</td><td>1.00</td><td>300 / 131</td><td>3.7 / 1.5</td><td>False / True</td></tr>
+<tr><td>lognormal sigma 2</td><td>15646x</td><td>3946 %</td><td>144566 %</td><td>0.22</td><td>0.02 %</td><td>0.89 %</td><td>1.00</td><td>300 / 300</td><td>2.8 / 2.8</td><td>False / False</td></tr>
+<tr><td>432 districts, population</td><td>2x</td><td>49.2 %</td><td>174 %</td><td>2.11</td><td>0.00 %</td><td>0.05 %</td><td>1.00</td><td>300 / 185</td><td>17.9 / 11.0</td><td>False / True</td></tr>
+</table>
+<p>&quot;converged False&quot; for sigma 2 means the <code>area_cv_tol</code> stopping rule did not fire within 300 iterations; the output areas are within tolerance and no warning is raised.</p>
+<h2>Elastic boundary direction</h2>
+<p>With weights the boundary should move outward near states whose weight share exceeds their area share (NY, NJ, PA, MA, CT, RI) and inward near sparse states (MT, ND, WY). &quot;Rank corr&quot; is the Spearman correlation between log(weight share / area share) and the outward-minus-inward boundary area within 150 km of each of the 34 coastal states; &quot;NE outward&quot; is the same area summed over NY, NJ, PA, MA, CT and RI.</p>
+<table>
+<tr><th>configuration</th><th>main: rank corr / NE outward</th><th>branch before the fix: rank corr / NE outward</th><th>after the fix: rank corr / NE outward</th></tr>
+<tr><td>ElasticBoundary(0.05)</td><td>0.59 / +294k km2</td><td>-0.25 / -269k km2</td><td>0.54 / +295k km2</td></tr>
+<tr><td>ElasticBoundary(0.02) + adjacency_spring 0.2 (gallery)</td><td>0.49 / +286k km2</td><td>0.02 / -111k km2</td><td>0.56 / +302k km2</td></tr>
+</table>
+<p>Per state after the fix, ElasticBoundary(0.05), outward displacement in km: NY +510, NJ +416, PA +184, MA +457, CT +301, RI +680 (between -430 and -1000 before the fix); MT -696 (main -428), ND -539 (main -345), ID -261, WY -155, SD -138.</p>
+<p>The boundary keeps its initial area within 0.4 % (main: +1 %; see the next section). In the ElasticBoundary(0.05) configuration the push is slightly weaker than on main; in the gallery configuration it is stronger. That run takes about 220 iterations before the stopping rule fires (75 before the elastic fixes), about 12.5 s after the speed-up below; the gallery configuration takes about 4 s. The figures were generated at 671f7b0; the speed-up commit does not change results at fixed iteration counts.</p>
+<h2>Boundary area</h2>
+<p>The first particle-driven version shrank the boundary by 4 to 5 % and, in long runs, collapsed it. Two causes:</p>
+<ul><li>Mass was lost. Particles that drift just outside the vertex-sampled boundary polygon land on pixels outside the active mask, where the histogram is overwritten with the exterior target. The mass inside the polygon fell to 0.966 of the total at iteration 200 and the boundary area to 0.954; the lower interior density pushed the boundary further inward, which lost more particles. Main does not drift because its cell-based density holds the total weight by construction. The interior histogram is now scaled to hold the total weight, and the exterior reference is the mean over the initial active pixels (total weight / (initial pixel count x pixel area)) instead of total weight / polygon area. This also removes main&#x27;s systematic +1 % (+2.4 % at resolution 128), which comes from pixel-count versus polygon-area mismatch.</li><li>The boundary collapsed to 0.09 % of its area at iteration 258. In <code>_deform_boundary</code>&#x27;s slow rebuild path, <code>make_valid</code> of a self-intersecting mainland ring returns a GeometryCollection of a MultiPolygon, a MultiLineString and a MultiPoint, and the loop kept only items of type Polygon, so the mainland was dropped. It now keeps every polygonal part. This bug exists on main too and appears only when a ring self-intersects in that way, which long elastic runs make likely.</li></ul>
+<p>Boundary area change over 300 forced iterations: ElasticBoundary(0.05): main about +1.0 %, first particle version -4.8 % at iteration 250 and then the collapse, now +0.0 to +0.4 % (final +0.05 %). Gallery configuration: main +1.0 %, first particle version -4.3 %, now -0.1 to +0.4 %.</p>
+<h2>Compute cost of the elastic boundary</h2>
+<p>49 states, population weights, resolution 256, NUMBA_NUM_THREADS=8, numba warm, wall time of <code>create_voronoi_cartogram</code>. &quot;Before&quot; is 671f7b0, &quot;after&quot; is 02c94c9 (vectorized ring advection and rebuild, <code>make_valid</code> only on invalid rings, union only of overlapping parts, sliver-hole check only on parts with holes, single-threaded FFT plan).</p>
+<table>
+<tr><th>run</th><th>before</th><th>after</th></tr>
+<tr><td>ElasticBoundary(0.05), 100 iterations</td><td>10.6 s</td><td>4.9 s</td></tr>
+<tr><td>gallery (ElasticBoundary(0.02) + spring 0.2), 100 iterations</td><td>10.0 s</td><td>4.0 s</td></tr>
+<tr><td>gallery, 300 iterations</td><td>29.6 s</td><td>13.7 s</td></tr>
+<tr><td>ElasticBoundary(0.05), to convergence (area_cv_tol 0.05)</td><td>18.4 s (183 it)</td><td>12.5 s (222 it)</td></tr>
+<tr><td>fixed boundary, 100 iterations</td><td>1.1 s</td><td>1.2 s</td></tr>
+</table>
+<p>At fixed iteration counts the results are unchanged: final boundaries identical (symmetric difference 0), generators within 2e-15 cell radii, weighted cells within 1e-12 of their area. The iteration count at convergence differs between runs because of the existing run-to-run noise of the elastic kernels. Remaining cost per elastic iteration (about 37 ms): the overlap query of the boundary parts, <code>make_valid</code> of the self-intersecting mainland ring, the union of overlapping parts and the generator clamp.</p>
+<p>The multithreaded FFTW plan used before took about 100 ms per velocity solve on this 256 x 164 grid (2 ms single-threaded); the flow cartogram chooses its own FFT thread count and is not affected. The first call in a fresh environment compiles the numba displacement kernels, which are cached (<code>cache=True</code>); the FFT velocity solve itself uses no numba.</p>
+<h2>Cell checks (after)</h2>
+<p>Measured on every configuration above plus resolution 128 and 512, <code>AdhesiveBoundary(0.3)</code>, the main gallery example (ElasticBoundary(0.02), adjacency_spring 0.2) and districts with lognormal sigma 1.5 weights:</p>
+<ul><li>Every vertex of cell i is at least as close to generator i in power distance as to any other generator (largest violation 1e-14 of the squared cell radius; 3e-8 where two generators coincided and were moved apart by 1e-9 of the extent).</li><li>Cells that do not touch the boundary are convex (area equals convex-hull area to 1e-15).</li><li><code>shapely.coverage_is_valid</code> holds (no gaps or overlaps), the cell areas sum to the boundary area, no cell is empty.</li><li>A convex cell clipped to the non-convex US outline can split into parts across a bay or lake: 0-6 of 49 state cells have a second part larger than 1 % of the cell (main: 0-6); 14 of 432 district cells (main: 24).</li></ul>
+<h2>Where it degrades</h2>
+<ul><li>Lognormal sigma 2 on the states (15646x): areas are exact, but the smallest cell (a target of a few pixels at resolution 256) ends with its generator 6 cell radii from its centroid (8 at resolution 512); visible as small slivers in weighted_extremes.png. The accuracy gate does not flag this, because areas are correct.</li><li>Districts with lognormal sigma 1.5 weights (432 cells, many targets below one pixel at resolution 256): areas are exact (mean 0.006 %), but the median generator sits 0.4 cell radii from its centroid (max 11.5), and 34 cells have a second part.</li><li>When the exact solve cannot reach the tolerance (forced in the tests by limiting it to zero Newton steps), the run is reported as not converged with a warning that gives mean and max error.</li></ul>
+<h2>Tests</h2>
+<p><code>tests/test_voronoi_cartogram.py::TestWeightedPowerCells</code> (11 tests, about 25 s together, all fail on main; the elastic-direction test also fails on the branch before the fix): 1 % mean error on the states with population weights (union and circle boundary) plus the power-cell, convexity and coverage checks; ElasticBoundary(0.05); weights spanning 1399x; custom <code>area_error_tol</code>; reporting of a failed solve; ExactBackend and geodesic labeling with weights reported as not converged; no gate for unweighted runs; option validation. The new elastic test checks (49 states, ElasticBoundary(0.05), resolution 128, 60 iterations) that the boundary moves outward next to NY, NJ, MA, CT and RI and inward next to MT, ND and WY, that the coastal rank correlation exceeds 0.5, that the mean area error is at most 1 %, and that the final boundary area is within 2 % of the original. The voronoi test file (65 tests) and the full suite (804 tests) pass; pre-commit and mypy pass.</p>
+<p>Regenerate the figures with <code>uv run python make_figures.py</code> from a carto-flow checkout of the branch (it exports main @ 0124245 with <code>git archive</code> for the &quot;before&quot; half; set <code>BEFORE_REF</code> to override).</p>
+<div class="figure">
+<img src="elastic_area.png" alt="Boundary area relative to the original over 300 forced iterations (main, the cell-driven branch, the first particle version, the current version) for both elastic configurations.">
+<p class="caption">Boundary area relative to the original over 300 forced iterations (main, the cell-driven branch, the first particle version, the current version) for both elastic configurations.</p>
+</div><div class="figure">
+<img src="elastic_displacement.png" alt="Boundary displacement, main / branch before the fix / after the fix, for both elastic configurations; the northeastern states are highlighted.">
+<p class="caption">Boundary displacement, main / branch before the fix / after the fix, for both elastic configurations; the northeastern states are highlighted.</p>
+</div><div class="figure">
+<img src="weighted_detail.png" alt="Northeast, fixed boundary: curved multiplicatively weighted borders before, straight power-diagram borders after.">
+<p class="caption">Northeast, fixed boundary: curved multiplicatively weighted borders before, straight power-diagram borders after.</p>
+</div><div class="figure">
+<img src="weighted_districts.png" alt="432 congressional districts with population weights (about 2x range).">
+<p class="caption">432 congressional districts with population weights (about 2x range).</p>
+</div><div class="figure">
+<img src="weighted_extremes.png" alt="Lognormal weights spanning about 1400x (sigma 1.5) and 15600x (sigma 2).">
+<p class="caption">Lognormal weights spanning about 1400x (sigma 1.5) and 15600x (sigma 2).</p>
+</div><div class="figure">
+<img src="weighted_states.png" alt="The three weighted gallery configurations (fixed boundary, ElasticBoundary(0.05), circular boundary): cells colored by area / target, black dots are the generators. After: all cells white (on target) with straight edges.">
+<p class="caption">The three weighted gallery configurations (fixed boundary, ElasticBoundary(0.05), circular boundary): cells colored by area / target, black dots are the generators. After: all cells white (on target) with straight edges.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

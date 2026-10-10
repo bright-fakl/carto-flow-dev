@@ -1,0 +1,360 @@
+diff --git a/src/carto_flow/flow_cartogram/algorithm.py b/src/carto_flow/flow_cartogram/algorithm.py
+index 70b47a6..76c6c92 100644
+--- a/src/carto_flow/flow_cartogram/algorithm.py
++++ b/src/carto_flow/flow_cartogram/algorithm.py
+@@ -34,7 +34,7 @@ from ..geo_utils.geometry import (
+ )
+ from .cartogram import Cartogram
+ from .density import DensityModulator, compute_density_field_from_geometries
+-from .displacement import displace_coords_numba, max_abs_velocity, max_velocity_magnitude
++from .displacement import max_abs_velocity, max_velocity_magnitude
+ from .errors import compute_error_metrics
+ from .history import (
+     CartogramInternalsSnapshot,
+@@ -45,6 +45,8 @@ from .history import (
+ from .options import MorphOptions, MorphStatus, StopReason
+ from .refresh import score_rose, should_refresh
+ from .stall import StallMonitor, cycle_length
++from . import step_scale as _ss
++from .step_scale import displace_scaled, integral_field, max_scaled_abs, scaled_field, vertex_means
+ from .velocity import VelocityComputerFFTW
+ 
+ __all__ = [
+@@ -480,9 +482,17 @@ def morph_geometries(
+         options.n_iter, desc=msg, disable=not options.show_progress, miniters=20, mininterval=2.0, maxinterval=5.0
+     )
+ 
++    mode = options.step_scale_mode
++    physical = mode in ("gsm_physical", "integral_physical", "integral_oneshot", "const_physical")
++    round_len = options.recompute_every or 10
++    refresh_every = 1 if mode == "integral_oneshot" else options.recompute_every
++    rho_mean = float(target_density)
++    max_disp = options.step_scale_max_cells * min(grid.dx, grid.dy) if options.step_scale_max_cells else 0.0
++    rho0 = None
++
+     for step in pbar:
+         # 1. Compute density field
+-        if should_refresh(step, since_refresh, rose, options.recompute_every, options.refresh_on_rise):
++        if should_refresh(step, since_refresh, rose, refresh_every, options.refresh_on_rise):
+             since_refresh = 0
+             # 1a. Reconstruct Shapely geometries from the current displaced
+             # coordinates and compute the density field.
+@@ -525,9 +535,11 @@ def morph_geometries(
+             if _pt is not None:
+                 _pt.velocity_s += _time.perf_counter() - _t0
+ 
++            rho0 = rho
++
+             # 1d. Normalize for stability
+             vmax = max_velocity_magnitude(vx, vy)
+-            if vmax > 1e-12:
++            if vmax > 1e-12 and not physical:
+                 vx /= vmax
+                 vy /= vmax
+ 
+@@ -539,13 +551,24 @@ def morph_geometries(
+             # 1d. Optional velocity modulation + re-normalize
+             if options.anisotropy is not None:
+                 vx, vy = options.anisotropy(vx, vy, grid, geom_mask)
+-                vmax = max_velocity_magnitude(vx, vy)
+-                if vmax > 1e-12:
+-                    vx /= vmax
+-                    vy /= vmax
+-
+-            vx *= vmax_scale
+-            vy *= vmax_scale
++                vmax_mod = max_velocity_magnitude(vx, vy)
++                if vmax_mod > 1e-12:
++                    if physical:
++                        vx = vx * (vmax / vmax_mod)
++                        vy = vy * (vmax / vmax_mod)
++                    else:
++                        vx = vx / vmax_mod
++                        vy = vy / vmax_mod
++
++            if not physical:
++                vx *= vmax_scale
++                vy *= vmax_scale
++
++            if mode.startswith("integral"):
++                vx, vy = integral_field(vx, vy, rho0, rho_mean, options.step_scale_floor)
++                if physical:
++                    vx = vx / rho_mean
++                    vy = vy / rho_mean
+ 
+             # 1f. Cache internal state if requested
+             if options.save_internals and internals is not None:
+@@ -561,52 +584,71 @@ def morph_geometries(
+         # 2. Displace geometries
+         if _pt is not None:
+             _t0 = _time.perf_counter()
+-        max_v = max(max_abs_velocity(vx, vy), 1e-8)
+-        dt_prime = options.dt * min(grid.dx, grid.dy) / max_v
++        cell = min(grid.dx, grid.dy)
++        t_round = min(since_refresh / round_len, 1.0)
++        floor = options.step_scale_floor
++        if mode in ("gsm_normalized", "gsm_physical"):
++            if options.step_scale_precompute:
++                wx, wy, wmax = scaled_field(vx, vy, rho0, t_round, rho_mean, floor)
++                c = options.dt * cell / max(wmax, 1e-8) if mode == "gsm_normalized" else 1.0 / (round_len * rho_mean)
++                use_ratio = False
++            else:
++                wx, wy, use_ratio = vx, vy, True
++                if mode == "gsm_normalized":
++                    c = options.dt * cell / max(max_scaled_abs(vx, vy, rho0, t_round, rho_mean, floor), 1e-8)
++                else:
++                    c = 1.0 / (round_len * rho_mean)
++        elif mode == "const_physical":
++            wx, wy, use_ratio = vx, vy, False
++            c = 1.0 / (round_len * rho_mean)
++        elif mode == "gsm_equal_step":
++            ma, mb = vertex_means(flat_geoms.coords, grid.x_coords, grid.y_coords, vx, vy, rho0, t_round, rho_mean, floor)
++            wx, wy, use_ratio = vx, vy, True
++            c = options.dt * cell / max(max_abs_velocity(vx, vy), 1e-8) * ma / max(mb, 1e-12)
++        elif mode == "constant_errprop":
++            wx, wy, use_ratio = vx, vy, False
++            dt_eff = options.dt * (1.0 if not np.isfinite(prev_score) else min(max(prev_score / options.step_scale_ref, 0.1), 1.0))
++            c = dt_eff * cell / max(max_abs_velocity(vx, vy), 1e-8)
++        elif mode in ("integral_physical", "integral_oneshot"):
++            wx, wy, use_ratio = vx, vy, False
++            c = 1.0 / (1 if mode == "integral_oneshot" else round_len)
++        else:  # constant, integral_normalized
++            wx, wy, use_ratio = vx, vy, False
++            c = options.dt * cell / max(max_abs_velocity(vx, vy), 1e-8)
+         since_refresh += 1
+ 
+-        # 2a. Displace geometry coordinates using the velocity field
+-        flat_geoms.coords = displace_coords_numba(
+-            flat_geoms.coords,
+-            grid.x_coords,
+-            grid.y_coords,
+-            vx,
+-            vy,
+-            dt_prime,
+-            grid.dx,
+-            grid.dy,
+-            use_parallel=False,
+-        )
+-        flat_geoms.invalidate_cache()
+-
+-        # 2b. Displace landmarks if provided (using same velocity field)
+-        if landmarks is not None and flat_landmarks_geoms is not None:
+-            flat_landmarks_geoms.coords = displace_coords_numba(
+-                flat_landmarks_geoms.coords,
++        def _displace(pts):
++            return displace_scaled(
++                pts,
+                 grid.x_coords,
+                 grid.y_coords,
+-                vx,
+-                vy,
+-                dt_prime,
++                wx,
++                wy,
++                rho0 if rho0 is not None else wx,
++                c,
+                 grid.dx,
+                 grid.dy,
+-                use_parallel=False,
++                t_round,
++                rho_mean,
++                floor,
++                use_ratio,
++                max_disp,
+             )
+-            # no need to invalidate cache, because we do not compute the areas
++
++        # 2a. Displace geometry coordinates using the velocity field
++        _old = flat_geoms.coords if _ss.MEASURE_ON else None
++        flat_geoms.coords = _displace(flat_geoms.coords)
++        if _old is not None:
++            _ss.MEASURE.append(float(np.hypot(*(flat_geoms.coords - _old).T).mean() / cell))
++        flat_geoms.invalidate_cache()
++
++        # 2b. Displace landmarks if provided (using same velocity field)
++        if landmarks is not None and flat_landmarks_geoms is not None:
++            flat_landmarks_geoms.coords = _displace(flat_landmarks_geoms.coords)
+ 
+         # 2c. Displace displacement field coordinates
+         if flat_coords is not None:
+-            flat_coords[:] = displace_coords_numba(
+-                flat_coords,
+-                grid.x_coords,
+-                grid.y_coords,
+-                vx,
+-                vy,
+-                dt_prime,
+-                grid.dx,
+-                grid.dy,
+-                use_parallel=False,
+-            )
++            flat_coords[:] = _displace(flat_coords)
+ 
+         if _pt is not None:
+             _pt.displacement_s += _time.perf_counter() - _t0
+diff --git a/src/carto_flow/flow_cartogram/options.py b/src/carto_flow/flow_cartogram/options.py
+index 53800d4..272b115 100644
+--- a/src/carto_flow/flow_cartogram/options.py
++++ b/src/carto_flow/flow_cartogram/options.py
+@@ -169,6 +169,17 @@ class MorphOptions:
+     iteration. ``recompute_every`` stays the maximum interval between refreshes. The window used for
+     stall detection does not depend on when refreshes happen.
+     """
++    step_scale_mode: str = "constant"
++    """Per-step velocity scale (experiment): "constant" (fastest point moves ``dt`` cells), "gsm_normalized",
++    "gsm_physical", "integral_normalized", "integral_physical", "integral_oneshot"."""
++    step_scale_floor: float = 0.02
++    """Lower clamp of rho(x, t) as a fraction of the target density in the GSM modes."""
++    step_scale_precompute: bool = False
++    """Interpolate a precomputed per-step field v * f (instead of v and rho separately) in the gsm_* modes."""
++    step_scale_max_cells: float | None = None
++    """Cap of the displacement per step in cells (physical and integral_physical modes)."""
++    step_scale_ref: float = 3.0
++    """Reference score of the constant_errprop mode: step = dt * clip(score / ref, 0.1, 1)."""
+     snapshot_every: int | None = None
+     mean_tol: float = 0.05  # Percentage tolerance, e.g., 0.05 = 5%
+     max_tol: float = 0.10  # Percentage tolerance, e.g., 0.10 = 10%
+diff --git a/src/carto_flow/flow_cartogram/step_scale.py b/src/carto_flow/flow_cartogram/step_scale.py
+new file mode 100644
+index 0000000..daa697b
+--- /dev/null
++++ b/src/carto_flow/flow_cartogram/step_scale.py
+@@ -0,0 +1,138 @@
++"""Per-step velocity scale of the GSM family (experiment, see the exploration-gsm-scale page).
++
++GSM moves each vertex with ``v / rho(x, t)`` along the density path ``rho(x, t) = (1 - t) rho0(x) + t rho_mean``.
++"""
++
++import numpy as np
++from numba import njit
++
++MODES = (
++    "constant",
++    "gsm_normalized",
++    "gsm_physical",
++    "integral_normalized",
++    "integral_physical",
++    "integral_oneshot",
++)
++
++
++@njit(cache=True, fastmath=True)
++def max_scaled_abs(vx, vy, rho0, t, rho_mean, floor):
++    """max(|vx f|, |vy f|) over the grid for f = rho_mean / max(rho(x, t), floor rho_mean)."""
++    lo = floor * rho_mean
++    m = 0.0
++    for i in range(vx.shape[0]):
++        for j in range(vx.shape[1]):
++            r = max((1.0 - t) * rho0[i, j] + t * rho_mean, lo)
++            f = rho_mean / r
++            a = max(abs(vx[i, j]), abs(vy[i, j])) * f
++            if a > m:
++                m = a
++    return m
++
++
++@njit(cache=True, fastmath=True)
++def scaled_field(vx, vy, rho0, t, rho_mean, floor):
++    """Grid fields v * rho_mean / max(rho(x, t), floor rho_mean) and their max abs component."""
++    lo = floor * rho_mean
++    wx = np.empty_like(vx)
++    wy = np.empty_like(vy)
++    m = 0.0
++    for i in range(vx.shape[0]):
++        for j in range(vx.shape[1]):
++            r = max((1.0 - t) * rho0[i, j] + t * rho_mean, lo)
++            f = rho_mean / r
++            wx[i, j] = vx[i, j] * f
++            wy[i, j] = vy[i, j] * f
++            a = max(abs(wx[i, j]), abs(wy[i, j]))
++            if a > m:
++                m = a
++    return wx, wy, m
++
++
++def integral_field(vx, vy, rho0, rho_mean, floor):
++    """Grid fields v * rho_mean * int_0^1 dt / rho(x, t) = v * ln(rho_mean/rho0)/(rho_mean - rho0) * rho_mean."""
++    r = np.maximum(rho0 / rho_mean, floor)
++    u = 1.0 - r
++    small = np.abs(u) < 1e-4
++    safe = np.where(small, 1.0, u)
++    g = np.where(small, 1.0 + u / 2 + u * u / 3, -np.log(r) / safe)
++    return vx * g, vy * g
++
++
++@njit(cache=True, fastmath=True)
++def displace_scaled(coords, x_coords, y_coords, vx, vy, rho0, c, dx, dy, t, rho_mean, floor, use_ratio, max_disp):
++    """Displace vertices by interp(v) * c, times rho_mean / rho(x, t) if ``use_ratio`` (rho0 interpolated).
++
++    The displacement length is capped at ``max_disp`` if it is positive.
++    """
++    n = coords.shape[0]
++    out = coords.copy()
++    dx_inv = 1.0 / dx
++    dy_inv = 1.0 / dy
++    x_min = x_coords[0]
++    y_min = y_coords[0]
++    max_ix = vx.shape[1] - 2
++    max_iy = vx.shape[0] - 2
++    lo = floor * rho_mean
++    for i in range(n):
++        x = coords[i, 0]
++        y = coords[i, 1]
++        ix = max(0, min(int((x - x_min) * dx_inv), max_ix))
++        iy = max(0, min(int((y - y_min) * dy_inv), max_iy))
++        tx = (x - x_coords[ix]) * dx_inv
++        ty = (y - y_coords[iy]) * dy_inv
++        w00 = (1.0 - tx) * (1.0 - ty)
++        w10 = tx * (1.0 - ty)
++        w01 = (1.0 - tx) * ty
++        w11 = tx * ty
++        ux = w00 * vx[iy, ix] + w10 * vx[iy, ix + 1] + w01 * vx[iy + 1, ix] + w11 * vx[iy + 1, ix + 1]
++        uy = w00 * vy[iy, ix] + w10 * vy[iy, ix + 1] + w01 * vy[iy + 1, ix] + w11 * vy[iy + 1, ix + 1]
++        s = c
++        if use_ratio:
++            r0 = w00 * rho0[iy, ix] + w10 * rho0[iy, ix + 1] + w01 * rho0[iy + 1, ix] + w11 * rho0[iy + 1, ix + 1]
++            s = c * rho_mean / max((1.0 - t) * r0 + t * rho_mean, lo)
++        ux *= s
++        uy *= s
++        if max_disp > 0.0:
++            d = np.sqrt(ux * ux + uy * uy)
++            if d > max_disp:
++                ux *= max_disp / d
++                uy *= max_disp / d
++        out[i, 0] += ux
++        out[i, 1] += uy
++    return out
++
++
++MEASURE = []  # mean displacement per step in cells, filled when not None
++MEASURE_ON = False
++
++
++@njit(cache=True, fastmath=True)
++def vertex_means(coords, x_coords, y_coords, vx, vy, rho0, t, rho_mean, floor):
++    """Mean over the vertices of |v| and of |v| rho_mean / rho(x, t) (bilinear interpolation)."""
++    dx_inv = 1.0 / (x_coords[1] - x_coords[0])
++    dy_inv = 1.0 / (y_coords[1] - y_coords[0])
++    max_ix = vx.shape[1] - 2
++    max_iy = vx.shape[0] - 2
++    lo = floor * rho_mean
++    sa = 0.0
++    sb = 0.0
++    for i in range(coords.shape[0]):
++        x = coords[i, 0]
++        y = coords[i, 1]
++        ix = max(0, min(int((x - x_coords[0]) * dx_inv), max_ix))
++        iy = max(0, min(int((y - y_coords[0]) * dy_inv), max_iy))
++        tx = (x - x_coords[ix]) * dx_inv
++        ty = (y - y_coords[iy]) * dy_inv
++        w00 = (1.0 - tx) * (1.0 - ty)
++        w10 = tx * (1.0 - ty)
++        w01 = (1.0 - tx) * ty
++        w11 = tx * ty
++        ux = w00 * vx[iy, ix] + w10 * vx[iy, ix + 1] + w01 * vx[iy + 1, ix] + w11 * vx[iy + 1, ix + 1]
++        uy = w00 * vy[iy, ix] + w10 * vy[iy, ix + 1] + w01 * vy[iy + 1, ix] + w11 * vy[iy + 1, ix + 1]
++        r0 = w00 * rho0[iy, ix] + w10 * rho0[iy, ix + 1] + w01 * rho0[iy + 1, ix] + w11 * rho0[iy + 1, ix + 1]
++        a = np.sqrt(ux * ux + uy * uy)
++        sa += a
++        sb += a * rho_mean / max((1.0 - t) * r0 + t * rho_mean, lo)
++    return sa / coords.shape[0], sb / coords.shape[0]

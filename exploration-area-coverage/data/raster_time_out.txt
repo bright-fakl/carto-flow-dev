@@ -1,0 +1,12 @@
+states 128 None: 0.003s mass=6.7600 | 2: 0.007s mass=6.7599 | 4: 0.011s mass=6.7577 | 8: 0.026s mass=6.7573 | exact: 0.003s mass=6.7569
+states 256 None: 0.004s mass=6.7526 | 2: 0.011s mass=6.7598 | 4: 0.027s mass=6.7570 | 8: 0.084s mass=6.7573 | exact: 0.003s mass=6.7569
+states 512 None: 0.009s mass=6.7598 | 2: 0.033s mass=6.7570 | 4: 0.090s mass=6.7573 | 8: 0.309s mass=6.7568 | exact: 0.009s mass=6.7569
+states 1024 None: 0.024s mass=6.7563 | 2: 0.110s mass=6.7570 | 4: 0.334s mass=6.7569 | 8: 1.306s mass=6.7569 | exact: 0.026s mass=6.7569
+districts 128 None: 0.014s mass=6.6620 | 2: 0.045s mass=6.8032 | 4: 0.050s mass=6.7483 | 8: 0.068s mass=6.7590 | exact: 0.008s mass=6.7571
+districts 256 None: 0.016s mass=6.8345 | 2: 0.058s mass=6.7282 | 4: 0.109s mass=6.7644 | 8: 0.154s mass=6.7570 | exact: 0.009s mass=6.7571
+districts 512 None: 0.024s mass=6.7282 | 2: 0.075s mass=6.7644 | 4: 0.141s mass=6.7570 | 8: 0.392s mass=6.7560 | exact: 0.010s mass=6.7571
+districts 1024 None: 0.046s mass=6.7500 | 2: 0.169s mass=6.7563 | 4: 0.485s mass=6.7570 | 8: 1.523s mass=6.7570 | exact: 0.032s mass=6.7571
+counties 128 None: 0.100s mass=6.6735 | 2: 0.344s mass=6.7767 | 4: 0.337s mass=6.7673 | 8: 0.408s mass=6.7515 | exact: 0.029s mass=6.7569
+counties 256 None: 0.100s mass=6.8084 | 2: 0.317s mass=6.7528 | 4: 0.325s mass=6.7555 | 8: 0.458s mass=6.7552 | exact: 0.028s mass=6.7569
+counties 512 None: 0.111s mass=6.7528 | 2: 0.396s mass=6.7555 | 4: 0.437s mass=6.7552 | 8: 0.622s mass=6.7567 | exact: 0.035s mass=6.7569
+counties 1024 None: 0.151s mass=6.7497 | 2: 0.421s mass=6.7569 | 4: 0.779s mass=6.7572 | 8: 1.629s mass=6.7566 | exact: 0.063s mass=6.7569

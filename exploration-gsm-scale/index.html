@@ -1,0 +1,218 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GSM step scale in the flow loop</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>GSM step scale in the flow loop</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/75">#75</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>investigate/gsm-scale</dd>
+<dt>Base</dt><dd>fix/stall-detection</dd>
+<dt>Created</dt><dd>2026-10-09 18:30</dd>
+<dt>Updated</dt><dd>2026-10-09 22:15</dd>
+<dt>Before</dt><dd>fix/stall-detection @ 8441681</dd>
+<dt>After</dt><dd>investigate/gsm-scale @ bfb4253 (prototype, not for merging)</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC), congressional districts (432), 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6), the three strong-anisotropy runs of the adaptive-recompute page (preset_balanced settings, area_scale 1e-6), the multiresolution coarse level of the states; MorphOptions defaults of fix/stall-detection (stall rule on, recompute_every 10, dt 0.2), n_iter 400 (counties 300), each run with refresh_on_rise off (None) and on (0.01); NUMBA_NUM_THREADS=4</dd>
+</dl>
+<p class="desc">Does replacing carto-flow&#x27;s constant per-step scale with the GSM scale 1/rho(x,t), inside the existing flow loop, converge faster or more stably? The spatial pattern alone (B1) is slower, adds self-intersections and keeps the tail; the physical magnitude (B2, B4) cuts the cost 3 to 5 times on states and fixes the multires plateau, but needs a per-step cap, stalls on districts (B4) and fails on counties like the baseline. Precomputing the field (B3) is faster only when vertices outnumber grid cells.</p>
+<p>An investigation, not a change. The prototype adds four <code>MorphOptions</code> fields (<code>step_scale_mode</code>, <code>step_scale_floor</code>, <code>step_scale_precompute</code>, <code>step_scale_max_cells</code>) and a module <code>step_scale.py</code>; the default (constant) mode reproduces the stored baseline trace for states 256 (113 iterations). One run per cell; load average 0.3 to 1.6; wall times are indicative and the cost model (iterations plus recomputes times the ratio) is the primary metric. <code>tables.md</code> has every variant; the patch is in <code>code/gsm_scale.patch</code>.</p>
+<h2>Variants (all inside the carto-flow loop, applied after the velocity modulators)</h2>
+<table>
+<tr><th>name</th><th>mode</th><th>per step</th></tr>
+<tr><td>A</td><td>constant</td><td>current: the fastest grid point moves dt cells</td></tr>
+<tr><td>B1</td><td>gsm_normalized</td><td>velocity times <code>rho_mean / rho(x,t)</code>, renormalized every step so the fastest grid point moves dt cells (pattern only)</td></tr>
+<tr><td>B2</td><td>gsm_physical</td><td>raw velocity times <code>1 / (recompute_every * rho(x,t))</code>; path length 1 per round, as in the GSM preview prototype</td></tr>
+<tr><td>B3</td><td>step_scale_precompute</td><td>grid field <code>W_k = v f_k</code> per step, one interpolation (applies to B1 and B2)</td></tr>
+<tr><td>B4ii</td><td>integral_normalized / integral_physical</td><td>closed-form round field <code>W = v ln(rho_mean/rho0) / (rho_mean - rho0)</code> applied in <code>recompute_every</code> sub-steps</td></tr>
+<tr><td>B4i</td><td>integral_oneshot</td><td>the same field applied once per round, with a recompute every iteration</td></tr>
+</table>
+<p><code>rho(x,t)</code> is clamped below at <code>floor * rho_mean</code> (default 0.02; 0.01 and 0.1 tested), and <code>t = k / recompute_every</code> for step k of a round. <code>step_scale_max_cells</code> caps the displacement per vertex per step: 1 cell for B2 and B4ii physical, 3 cells for B4i. Without a cap, B4i produces NaN coordinates on 6 of 11 case/grid combinations, and B2 and B4ii stall on districts and counties.</p>
+<h2>Results</h2>
+<p>Cost is iterations plus recomputes times the ratio (states 128/256/512: 9/12/24; districts 256/512: 21/23; counties 256/512: 47.5/28.5). Runs stop at the first score below 1, so the mean error is a stopping tolerance. &quot;off / on&quot; is refresh_on_rise off / on.</p>
+<table>
+<tr><th>case</th><th>variant</th><th>it</th><th>rec</th><th>cost</th><th>mean %</th><th>max %</th><th>invalid</th><th>rises below 20</th></tr>
+<tr><td>states 256</td><td>A</td><td>113</td><td>12</td><td>257</td><td>0.31</td><td>4.4</td><td>0</td><td>0</td></tr>
+<tr><td></td><td>B1</td><td>135</td><td>14</td><td>303</td><td>0.83</td><td>3.8</td><td>6</td><td>0</td></tr>
+<tr><td></td><td>B3 on B1</td><td>130</td><td>13</td><td>286</td><td>2.4</td><td>9.1</td><td>2</td><td>0</td></tr>
+<tr><td></td><td>B2 (cap 1)</td><td>34</td><td>4</td><td>82</td><td>0.62</td><td>8.4</td><td>6</td><td>0</td></tr>
+<tr><td></td><td>B3 on B2</td><td>29</td><td>3</td><td>65</td><td>0.90</td><td>7.8</td><td>5</td><td>0</td></tr>
+<tr><td></td><td>B4ii normalized</td><td>117</td><td>12</td><td>261</td><td>1.9</td><td>9.0</td><td>3</td><td>0</td></tr>
+<tr><td></td><td>B4ii physical (cap 1)</td><td>27</td><td>3</td><td>63</td><td>1.0</td><td>9.9</td><td>4</td><td>0</td></tr>
+<tr><td></td><td>B4i one step (cap 3)</td><td>6</td><td>6</td><td>78</td><td>0.31</td><td>2.5</td><td>10</td><td>0</td></tr>
+<tr><td>states 512</td><td>A</td><td>214</td><td>22</td><td>742</td><td>0.51</td><td>7.3</td><td>0</td><td>0</td></tr>
+<tr><td></td><td>B1</td><td>270</td><td>27</td><td>918</td><td>0.83</td><td>9.0</td><td>21</td><td>0</td></tr>
+<tr><td></td><td>B2 (cap 1)</td><td>39</td><td>4</td><td>135</td><td>0.67</td><td>7.0</td><td>6</td><td>0</td></tr>
+<tr><td></td><td>B4ii physical (cap 1)</td><td>38</td><td>4</td><td>134</td><td>0.79</td><td>9.2</td><td>6</td><td>0</td></tr>
+<tr><td></td><td>B4i one step (cap 3)</td><td>10</td><td>10</td><td>250</td><td>0.19</td><td>1.5</td><td>10</td><td>0</td></tr>
+<tr><td>states 128</td><td>A</td><td>63</td><td>7</td><td>126</td><td>1.19</td><td>7.8</td><td>0</td><td>0</td></tr>
+<tr><td></td><td>B1</td><td>103</td><td>11</td><td>202</td><td>1.2</td><td>4.2</td><td>0</td><td>2 (off), 1 (on)</td></tr>
+<tr><td></td><td>B2, B4ii</td><td>stalled at 60 (score 13.6)</td><td>6</td><td>114</td><td>41</td><td>232</td><td>3</td><td>0</td></tr>
+<tr><td></td><td>B4i one step (cap 3)</td><td>5</td><td>5</td><td>50</td><td>0.65</td><td>5.4</td><td>18</td><td>0</td></tr>
+<tr><td>multires coarse</td><td>A</td><td>100, stalled</td><td>10</td><td>190</td><td>28.7</td><td>264</td><td>1</td><td>0</td></tr>
+<tr><td></td><td>B1</td><td>91</td><td>10</td><td>181</td><td>0.58</td><td>6.5</td><td>10</td><td>0</td></tr>
+<tr><td></td><td>B2 (cap 1)</td><td>71</td><td>8</td><td>143</td><td>0.38</td><td>8.8</td><td>23</td><td>0</td></tr>
+<tr><td></td><td>B4ii normalized</td><td>64</td><td>7</td><td>127</td><td>2.4</td><td>8.0</td><td>2</td><td>0</td></tr>
+<tr><td></td><td>B4ii physical (cap 1)</td><td>53 / 38</td><td>6 / 5</td><td>107 / 83</td><td>0.4 / 0.7</td><td>9.7</td><td>14</td><td>5 / 1</td></tr>
+<tr><td></td><td>B4i one step (cap 3)</td><td>8</td><td>8</td><td>80</td><td>0.51</td><td>8.3</td><td>22</td><td>0</td></tr>
+<tr><td>horizontal 256</td><td>A</td><td>245 / 233</td><td>25 / 27</td><td>545 / 557</td><td>1.0 / 1.3</td><td>8.9</td><td>0</td><td>17 / 9</td></tr>
+<tr><td></td><td>B1</td><td>251</td><td>26</td><td>563</td><td>1.8</td><td>8.5</td><td>11</td><td>1</td></tr>
+<tr><td></td><td>B2 (cap 1)</td><td>158</td><td>16</td><td>350</td><td>0.39</td><td>9.0</td><td>9</td><td>0</td></tr>
+<tr><td></td><td>B4ii physical (cap 1)</td><td>84</td><td>9</td><td>192</td><td>1.3</td><td>8.7</td><td>4</td><td>0</td></tr>
+<tr><td>tangential 256</td><td>A</td><td>226 / 216</td><td>23</td><td>502 / 492</td><td>1.2 / 1.7</td><td>9.0</td><td>1</td><td>10 / 4</td></tr>
+<tr><td></td><td>B1</td><td>276 / 265</td><td>28</td><td>612 / 601</td><td>1.5</td><td>7.8</td><td>3</td><td>8 / 2</td></tr>
+<tr><td></td><td>B2 (cap 1)</td><td>92</td><td>10</td><td>212</td><td>1.6</td><td>8.1</td><td>6</td><td>4</td></tr>
+<tr><td></td><td>B4ii physical (cap 1)</td><td>114 / 108</td><td>12</td><td>258 / 252</td><td>1.4</td><td>8.5</td><td>2</td><td>5 / 2</td></tr>
+<tr><td>tilted 256</td><td>A</td><td>171 / 169</td><td>18</td><td>387 / 385</td><td>1.7 / 1.1</td><td>8.8</td><td>1</td><td>3 / 1</td></tr>
+<tr><td></td><td>B1</td><td>233 / 231</td><td>24</td><td>521 / 519</td><td>1.4</td><td>7.0</td><td>5</td><td>2 / 1</td></tr>
+<tr><td></td><td>B2 (cap 1)</td><td>212</td><td>22</td><td>476</td><td>0.28</td><td>9.1</td><td>9</td><td>0</td></tr>
+<tr><td></td><td>B4ii physical (cap 1)</td><td>99</td><td>10</td><td>219</td><td>1.5</td><td>8.7</td><td>3</td><td>0</td></tr>
+<tr><td>districts 256</td><td>A</td><td>154 / 150</td><td>16</td><td>490 / 486</td><td>1.07</td><td>8.1</td><td>23</td><td>4 / 2</td></tr>
+<tr><td></td><td>B1</td><td>281 / 284</td><td>29 / 31</td><td>890 / 935</td><td>0.46</td><td>8.5</td><td>192</td><td>12 / 9</td></tr>
+<tr><td></td><td>B3 on B1</td><td>187</td><td>19</td><td>586</td><td>1.3</td><td>8.0</td><td>123</td><td>3</td></tr>
+<tr><td></td><td>B2 (cap 1)</td><td>116</td><td>12</td><td>368</td><td>0.29</td><td>9.5</td><td>175</td><td>0</td></tr>
+<tr><td></td><td>B2 cap 3 / no cap</td><td>stalled</td><td></td><td></td><td>1.5 / 0.7</td><td>92 / 22</td><td>288 / 299</td><td>44 / 31</td></tr>
+<tr><td></td><td>B4ii normalized</td><td>174 / 168</td><td>18</td><td>552</td><td>1.5</td><td>7.5</td><td>102</td><td>6</td></tr>
+<tr><td></td><td>B4ii physical (cap 1)</td><td>stalled</td><td>8</td><td>248</td><td>43</td><td>273</td><td>121</td><td>0</td></tr>
+<tr><td></td><td>B4i one step (cap 3)</td><td>stalled</td><td>50</td><td>1,100</td><td>17.5</td><td>412</td><td>256</td><td>2</td></tr>
+<tr><td>districts 512</td><td>A</td><td>263</td><td>27</td><td>884</td><td>0.61</td><td>9.5</td><td>20</td><td>0</td></tr>
+<tr><td></td><td>B1</td><td>not converged in 400</td><td>40</td><td>1,320</td><td>9.8</td><td>182</td><td>271</td><td>9</td></tr>
+<tr><td></td><td>B3 on B1</td><td>334</td><td>34</td><td>1,116</td><td>1.8</td><td>9.9</td><td>232</td><td>12</td></tr>
+<tr><td></td><td>B2 (cap 1)</td><td>69</td><td>7</td><td>230</td><td>0.18</td><td>9.2</td><td>188</td><td>0</td></tr>
+<tr><td></td><td>B4ii normalized</td><td>303</td><td>31</td><td>1,016</td><td>0.38</td><td>8.9</td><td>218</td><td>0</td></tr>
+<tr><td></td><td>B4ii physical (cap 1)</td><td>stalled</td><td>16</td><td>528</td><td>0.30</td><td>21</td><td>157</td><td>56</td></tr>
+<tr><td></td><td>B4i one step (cap 3)</td><td>25</td><td>25</td><td>600</td><td>0.06</td><td>8.8</td><td>213</td><td>2</td></tr>
+<tr><td>counties 256</td><td>A</td><td>260 stalled / 300</td><td>26 / 45</td><td>1,495 / 2,438</td><td>57</td><td>2,057</td><td>112 / 158</td><td>30 / 40</td></tr>
+<tr><td></td><td>all B variants</td><td>stalled or 300</td><td></td><td>288 to 2,425</td><td>48 to 1,142</td><td>4,000 to 215,000</td><td>408 to 2,755</td><td></td></tr>
+<tr><td>counties 512</td><td>A</td><td>300</td><td>30</td><td>1,155</td><td>26</td><td>2,812</td><td>48</td><td>5</td></tr>
+<tr><td></td><td>B2 (cap 1)</td><td>stalled at 240</td><td>24</td><td>924</td><td>32</td><td>1,587</td><td>752</td><td>53</td></tr>
+<tr><td></td><td>B4ii physical (cap 1)</td><td>stalled at 210</td><td>21</td><td>808</td><td>22</td><td>1,437</td><td>763</td><td>13</td></tr>
+<tr><td></td><td>B1, B3, B4ii normalized</td><td>300</td><td>30</td><td>1,155</td><td>109 to 186</td><td>11,500 to 26,800</td><td>872 to 1,000</td><td>0</td></tr>
+</table>
+<p>Iterations to converge across dt, states 256, refresh on:</p>
+<table>
+<tr><th>variant</th><th>dt 0.1</th><th>0.2</th><th>0.4</th><th>0.6</th></tr>
+<tr><td>A</td><td>216</td><td>113</td><td>66</td><td>45</td></tr>
+<tr><td>B1</td><td>274</td><td>135</td><td>69</td><td>49</td></tr>
+<tr><td>B3 on B1</td><td>258</td><td>130</td><td>64</td><td>43</td></tr>
+<tr><td>B4ii normalized</td><td>242</td><td>117</td><td>63</td><td>41</td></tr>
+</table>
+<h2>Answers</h2>
+<ul><li>The GSM spatial pattern (B1) does not help. It needs 1.2 to 1.9 times the iterations of A (states 256: 135 vs 113; states 512: 270 vs 214; districts 256: 281 vs 154; districts 512 does not converge in 400). The trace shape is unchanged (a slow descent, then a steep cliff), so the tail is not removed. It reduces the rises on strong anisotropy (horizontal 17 to 1) but not reliably, and creates self-intersections (states 256: 6 invalid polygons against 0 for A; states 512: 21; districts 100 to 300 against 20 to 24).</li><li>The physical magnitude (B2, B4ii) matters a lot, but only with the per-step cap. Cost drops 3 to 5 times on states (82 vs 257 at grid 256, 135 vs 742 at 512) and on districts 512 (230 vs 884), and does not depend on dt. On anisotropy: horizontal 350 vs 545, tangential 212 vs 502, tilted 476 vs 387 (worse). It adds invalid polygons, B4ii stalls on districts, and the cap is untuned.</li><li>The clamp: floors 0.01 and 0.02 give identical results on states, districts and counties 512; 0.1 changes only the final error. No blow-up occurred at any floor, but zero-valued targets were not run, so the floor was never really tested.</li><li>Precomputing the field (B3) is not equivalent to computing on the fly, because rho0 is discontinuous at region borders and interpolating the product smooths it. The one-step displacement differs by up to 0.6 to 0.8 of a step length (99th percentile 0.2 to 0.3) at t = 0, falling to 0.4 to 4.6 % of the displacement at t = 0.9. Per step, B3 against B1 takes 0.24 against 0.31 ms on states 256, 0.55 against 0.77 ms on districts 256, 1.13 against 1.65 ms on counties 256, and 1.42 against 1.82 ms on counties 512. At grid 1024 B3 is slower (states 4.2 vs 1.3 ms). It wins only when vertices outnumber grid cells, at grids up to 512.</li><li>B4 (closed-form round integral): normalized sub-steps are about equal to A on states (261 vs 257) and slower on districts (552 vs 490); physical sub-steps are the fastest on states (63 at 256, 134 at 512) and anisotropy (192, 258, 219) but stall on districts. One step per round (B4i) converges in 5 to 25 iterations with a recompute each, but needs the cap, stalls on districts 256 and counties, and each iteration costs 15 to 50 ms.</li><li>Counties: every variant fails, as A does (400 to 2,800 invalid polygons).</li><li>The multiresolution coarse plateau: B1, B2, B4ii and B4i all converge (cost 181, 143, 83 to 127 and 80, against 190 for the stalled A). At states 128 (DC has no cell centre) the physical variants and B3 stall at 13.6 like A, while B1 converges. The mechanism was not investigated.</li><li>Refresh-on-rise had no effect on the states runs (no rises). It lowers A&#x27;s rises on anisotropy (17 to 9, 10 to 4, 3 to 1), and for B2 on counties it costs more recomputes (24 to 42).</li></ul>
+<h2>Recommendation</h2>
+<ul><li>Do not adopt the GSM spatial pattern (B1, or B3 on B1), as a default or an option: it is slower and adds self-intersections. The hypothesis that the two methods overlap except for the step magnitude is largely confirmed.</li><li>The physical magnitude is the part worth exploring: B2 with a per-step cap of 1 cell, or B4ii physical, cuts the cost 3 to 5 times on states and removes the multires plateau. It is not adoptable as is: more invalid polygons than A, B4ii stalls on districts, the cap is untuned, it fails on counties, and tilted anisotropy gets slower.</li><li>A cheaper first test is the constant scale with a larger dt or recompute_every: A at dt 0.6 takes 45 iterations on states (0 to 1 invalid polygons), though districts then have 80 invalid.</li><li>B3 is only worth it if the pattern is adopted, and only for vertex-heavy inputs at grids up to 512. B4i is not competitive on cost.</li></ul>
+<h2>Controls: pattern versus magnitude</h2>
+<p>The maintainer questioned two things: B1 renormalizes by the grid maximum of |v f| (f up to 50 in sparse cells), so it may be a smaller effective step rather than a pattern effect; and B2&#x27;s physical step (mean 0.3 to 0.56 cells at states 256 and 512, against 0.09 for A) is simply larger than A&#x27;s. Controls added (commit bfb4253, <code>step_scale_mode</code> values <code>const_physical</code>, <code>gsm_equal_step</code>, <code>constant_errprop</code>, field <code>step_scale_ref</code>):</p>
+<ul><li>C1 <code>const_physical</code>: B2 with the constant rho_mean instead of rho(x,t) (cap 1 cell). Compare C1 with B2.</li><li>C2 <code>gsm_equal_step</code>: B1&#x27;s factor, renormalized so the mean vertex displacement per step equals A&#x27;s at the same step (statistic over the vertices, from the unscaled field). Floors 0.02, 0.1 (C2f10) and 0.5 (C2f50). Compare C2 with A.</li><li>C3: A at a larger dt, cap 1 cell. C3m: dt such that A&#x27;s mean vertex displacement per step over the run matches B2&#x27;s (measured per case, <code>scripts/measure_disp.py</code>, <code>data/dtmatch.json</code>): states 128 0.21, 256 0.71, 512 1.2 (run at the allowed maximum 1.0), multires 0.19, horizontal 0.27, tangential 0.52, tilted 0.17, districts 256 0.29, 512 0.85, counties 256 0.71, 512 0.33. C3d06 and C3d10: dt 0.6 and 1.0.</li><li>C4 <code>constant_errprop</code>: A&#x27;s direction and normalization, step = dt_max * clip(score_previous / ref, 0.1, 1) cells, cap 1 cell; C4a/C4b: dt_max 0.6 with ref 3/10; C4c/C4d: dt_max 1.0 with ref 3/10; C4e/C4f: ref 30 (added because the score is below 3 only in the last iterations, so ref 3 and 10 are almost the same as a constant dt_max).</li></ul>
+<p>Cost (iterations + recomputes x ratio), invalid polygons and status; refresh on rise off / on where they differ (c converged, s stalled, x iteration limit). Mean error at the stop is 0.2 to 1.9 % for all converged runs (stopping tolerance). All cells in <code>controls_tables.md</code> (iterations, recomputes, mean, max, rises).</p>
+<table>
+<tr><th>case</th><th>A</th><th>C3m (dt)</th><th>C3d06</th><th>C1</th><th>C2</th><th>C4a</th><th>C4f</th><th>B1</th><th>B2</th></tr>
+<tr><td>states 256</td><td>257, 0 inv, c</td><td>103 (0.71), 0, c</td><td>198 s / 117 c, 1</td><td>101, 1, c</td><td>235, 5, c</td><td>198 s / 117 c, 1</td><td>108, 0, c</td><td>303, 6, c</td><td>82, 6, c</td></tr>
+<tr><td>states 512</td><td>742, 0, c</td><td>196 (1.0), 0, c</td><td>299, 0, c</td><td>166, 1, c</td><td>706, 22, c</td><td>269, 0, c</td><td>299, 0, c</td><td>918, 21, c</td><td>135, 6, c</td></tr>
+<tr><td>multires coarse</td><td>190, 1, s</td><td>222 s / 141 c (0.19), 1</td><td>152 s / 76 c, 2 / 5</td><td>152, 3, s</td><td>171, 8, s (f 0.1 / 0.5: 164 / 163, c)</td><td>152 s / 76 c, 2 / 5</td><td>91 / 83, 5, c</td><td>181, 10, c</td><td>143, 23, c</td></tr>
+<tr><td>horizontal</td><td>545 / 557, 0, c</td><td>479 / 464 (0.27), 0, c</td><td>440 s / 226 c, 1</td><td>220, 2, s</td><td>454, 12, c</td><td>367 / 228, 1, c</td><td>324 / 392, 2 / 0, c</td><td>563, 11, c</td><td>350, 9, c</td></tr>
+<tr><td>tangential</td><td>502 / 492, 1, c</td><td>352 s / 315 c (0.52), 1 / 0</td><td>286 s / 329 c, 0 / 1</td><td>524, 1, c</td><td>478, 7, c</td><td>286 s / 464 c, 0</td><td>432, 4, c</td><td>612, 3, c</td><td>212, 6, c</td></tr>
+<tr><td>tilted</td><td>387 / 385, 1, c</td><td>438 (0.17), 0, c</td><td>484 s / 332 c, 3 / 1</td><td>700, 0, c</td><td>438, 2, c</td><td>369 / 337, 3 / 1, c</td><td>543, 3, c</td><td>521, 5, c</td><td>476, 9, c</td></tr>
+<tr><td>districts 256</td><td>490 / 486, 23, c</td><td>496 s / 409 c (0.29), 21 / 23</td><td>589 s / 477 c, 81 / 80</td><td>279, 75, s</td><td>926, 204, c</td><td>589 s / 477 c, 81 / 79</td><td>521 c / 445 s, 102 / 79</td><td>890, 192, c</td><td>368, 175, c</td></tr>
+<tr><td>districts 512</td><td>884, 20, c</td><td>324 (0.85), 52, c</td><td>389 / 457, 39 / 37, c</td><td>227 / 251, 87 / 83, c</td><td>1,320, 288, x (f 0.5: 1,281, c)</td><td>391 / 458, 37, c</td><td>297 / 393, 54 / 38, c</td><td>1,320, 271, x</td><td>230, 188, c</td></tr>
+<tr><td>counties 256 / 512</td><td>all variants fail (stall or iteration limit, 28 to 1,428 invalid)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+<p>Refresh-on-rise dependence: with refresh off, every larger constant step (C3d06, C3d10, C3m, C4a, C4c) oscillates with rises of the score (18 to 84 rises below 20 at dt 0.6 on states 128, tilted, districts 256) and often stalls; with refresh on they converge (rises 1 to 13). The dt sweep (states and districts 256, refresh on, <code>tables.md</code>): C2 at dt 0.1/0.2/0.4/0.6 takes 213/103/56/38 iterations on states (5 to 8 invalid) and 50 (stalled)/288/121/112 on districts (163 to 203 invalid); C4a and C4b (dt_max = dt) equal A within 1 to 12 % at every dt (states 218/114/63/45; districts 276/152/89/141, invalid 0 to 1 and 10 to 79) because ref 3 and 10 are only reached in the last iterations.</p>
+<h3>What the controls separate</h3>
+<ul><li>(i) Pattern only. C2 against A at an equal mean step: states 256 235 vs 257 (5 invalid polygons vs 0), states 512 706 vs 742 (22 vs 0), districts 256 926 vs 490 (204 vs 23), districts 512 not converged in 400, tilted 438 vs 387, horizontal 454 vs 545, tangential 478 vs 502. The pattern at an equal step gives at best 5 to 17 % fewer iterations (horizontal), is worse on districts and tilted, and always adds self-intersections. B1&#x27;s slowness was therefore partly the smaller effective step (cost B1 303 vs C2 235 on states 256, 918 vs 706 on states 512; on districts 256 890 vs 926 they are equal), but the pattern itself does not speed up A. C1 against B2: B2&#x27;s pattern helps where the flow is distorted: horizontal (C1 stalls at 220, B2 350 converged), tilted (700 vs 476), tangential (524 vs 212), districts 256 (C1 stalls at 279, B2 368), but costs 6 to 9 invalid polygons on states against 1 for C1 and 188 against 87 on districts 512; on states 256 and 512 C1 is not slower than B2 (101 vs 82, 166 vs 135) and has 1 invalid polygon.</li><li>(ii) Larger step only. C3m (A with B2&#x27;s mean step) takes 103 at states 256 and 196 at states 512 with 0 invalid polygons (A 257 and 742): a larger constant step recovers most of B2&#x27;s gain on states without self-intersections. Districts 512: 324 vs 884 (52 invalid vs 20), districts 256 (dt 0.29): 409 vs 490 with refresh on (23 invalid); tangential 315 vs 492, horizontal 464 vs 557, tilted 438 vs 385 (worse). With refresh off the larger steps oscillate and several stall; refresh on rise is needed.</li><li>(iii) Error-aware magnitude without pattern. C1 (physical, constant scale) is the cheapest on states (101, 166) and districts 512 (227), with 1 and 87 invalid polygons, but stalls on horizontal, districts 256 and the multires level and is slow on tilted/tangential: the physical magnitude without a pattern is not robust. C4 (error-proportional dt_max) with ref 3 and 10 is practically C3 at dt_max (it differs only in the last iterations); with ref 30 and dt_max 1.0 (C4f) it converges everywhere but counties (states 256 108, 512 299, multires 83 to 91, horizontal 324/392, tangential 432, districts 512 297/393) but not districts 256 with refresh on (stalls, 92 % max error), and is slower than C3m on states and tilted. C4 is not cheaper than a constant dt of the same size in these runs (C4f 108 vs C3d10 92 on states 256 with refresh on); the error-proportional factor is not what makes B2 fast.</li><li>(iv) Pattern plus magnitude (B2) is the lowest cost on states 256 (82) and the only low-cost converged variant on tangential (212), horizontal (350) and districts 256 (368, with refresh off or on), at 6 to 9 invalid polygons on states and 175 to 188 on districts, against 0 to 1 for C3m or C4f on states and 23 to 52 on districts.</li></ul>
+<h3>What remains of GSM&#x27;s advantage</h3>
+<ul><li>The pattern alone (C2): nothing. It is a smaller gain than noise on states, a loss on districts and tilted anisotropy, and adds invalid polygons (5 to 22 on states against 0).</li><li>The magnitude: a larger constant step, with refresh on rise, reproduces most of B2&#x27;s gain on states (C3m 103 vs B2 82 at 256; 196 vs 135 at 512) and districts 512 (324 vs 230) with 0 invalid polygons on states. The magnitude advantage that remains for B2 is on strongly distorted flows: tangential, horizontal and districts 256 (a constant larger step stalls or oscillates there). That part is a combination of pattern and magnitude (C1 fails there, C2 does not help).</li><li>The multires plateau: removed by larger steps with refresh on (C3d06 76 cost, C3m 141, C4a 76, C4f 83 to 91), by a weak pattern (C2 floors 0.1 and 0.5: 164, 163) and by B1/B2, not by the same-size step without it (C3m with refresh off, C1, C2 at floor 0.02 stall). So the plateau does not need GSM; it needs a bigger step or a weak pattern.</li><li>C4 against B2 (invalid polygons, plateau, districts, late spikes): C4f has fewer invalid polygons than B2 on states (0 vs 6) and on districts 512 (54 / 38 vs 188), fixes the multires plateau (83 to 91), converges districts 512 (297 to 393) but not districts 256 with refresh on, and is not faster than C3m. Late spikes: rises below score 20 under C4a/C4c are as many as under C3 at the same dt_max (1 to 13 with refresh on, up to 84 off); only refresh on removes them. Counties: still fail.</li></ul>
+<p>Caveats of the controls: one run per cell; C3m for states 512 was capped at dt 1.0 (matching dt 1.2); C4 with ref 3 and 10 is nearly a constant dt_max, so the error-aware magnitude was probed only through ref 30 and dt_max 0.6 and 1.0; the mean displacement per step is measured over each run&#x27;s own iterations; the dt of C3m is not tuned beyond the match; counties controls ran for the headline variants only.</p>
+<h2>Caveats</h2>
+<ul><li>Runs stop at score 1, so the physical variants were not checked for accuracy after that point.</li><li>B1 normalizes by the grid maximum of |v f| at each step (outside cells included), not over vertices.</li><li>The dt sweep covered states and districts 256 only, with refresh on.</li><li>The anisotropy runs use the preview&#x27;s settings with the stall rule on (the adaptive-recompute page used it off, so its iteration counts differ).</li><li>Cap values were not tuned; wall times are one run per cell.</li></ul>
+<p>Reproduce: <code>uv run python make_figures.py</code> in this directory; <code>scripts/run_case.py &lt;case&gt; &lt;grid&gt; [variants] [dt]</code> for the cases; <code>scripts/bench_precompute.py</code> for the B1 versus B3 benchmark; <code>scripts/invalid_reasons.py</code> for the invalid-polygon reasons.</p>
+<div class="figure">
+<img src="convergence_anisotropy.png" alt="The three strong-anisotropy runs.">
+<p class="caption">The three strong-anisotropy runs.</p>
+</div><div class="figure">
+<img src="convergence_controls.png" alt="convergence_controls.png">
+<p class="caption">convergence_controls.png</p>
+</div><div class="figure">
+<img src="convergence_controls_aniso_counties.png" alt="convergence_controls_aniso_counties.png">
+<p class="caption">convergence_controls_aniso_counties.png</p>
+</div><div class="figure">
+<img src="convergence_districts_counties.png" alt="Districts at 256 and 512, counties at 256 and 512.">
+<p class="caption">Districts at 256 and 512, counties at 256 and 512.</p>
+</div><div class="figure">
+<img src="convergence_states.png" alt="States at grids 128, 256 and 512 and the multiresolution coarse level; refresh off on top, on below.">
+<p class="caption">States at grids 128, 256 and 512 and the multiresolution coarse level; refresh off on top, on below.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

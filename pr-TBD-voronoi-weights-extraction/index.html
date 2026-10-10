@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voronoi cartogram cell areas follow the weights</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Voronoi cartogram cell areas follow the weights</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/83">#83</a></dd>
+<dt>Branch</dt><dd>fix/voronoi-weights-extraction</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-09 02:20</dd>
+<dt>Before</dt><dd>main @ 0124245</dd>
+<dt>After</dt><dd>fix/voronoi-weights-extraction @ 3631404</dd>
+<dt>Inputs</dt><dd>49 contiguous US states with population (bundled), RasterBackend resolution 256 unless stated</dd>
+</dl>
+<p class="desc">Final cell extraction now uses the weighted distance of the relaxation (mean area error 73-96 % to 5-14 %), and runs whose mean polygon area error exceeds 20 % are reported as not converged with a warning.</p>
+<h2>What changed</h2>
+<ul><li><code>RasterBackend</code> assigned pixels with the weighted distance <code>dist^2 / w</code> during relaxation, but the final polygon extraction used plain nearest-generator labeling. Output areas therefore scaled like <code>weight^0.55</code>. The extraction now uses the same weighted distance; unweighted results are unchanged.</li><li>New option <code>VoronoiOptions.max_mean_area_error_pct</code> (default 20, <code>None</code> disables). After extraction, if the mean absolute polygon area error against the target (equal area, or proportional to <code>weights</code>) exceeds it, <code>converged</code> is set to <code>False</code> and a <code>RuntimeWarning</code> states the mean and maximum errors and likely causes. It applies to every backend.</li><li>Docstrings and docs corrected: <code>area_equalizer_rate</code> has no effect with weights, the geodesic warning no longer recommends <code>area_eq_weight</code>, <code>ExactBackend.final_area_cv</code> is documented as not comparable with the raster value.</li></ul>
+<h2>Area error before and after</h2>
+<p>Mean and max are <code>|area / target - 1|</code> of the output polygons; k is the slope of log area against log population (1.0 is proportional). &quot;converged&quot; is the reported metric.</p>
+<table>
+<tr><th>case</th><th>mean before</th><th>max before</th><th>k before</th><th>mean after</th><th>max after</th><th>k after</th><th>converged before -&gt; after</th></tr>
+<tr><td>gallery: fixed boundary (300 iterations, area_cv_tol 0.05)</td><td>77.6 %</td><td>552 %</td><td>0.55</td><td>12.7 %</td><td>48 %</td><td>0.99</td><td>False -&gt; False</td></tr>
+<tr><td>gallery: ElasticBoundary(0.05)</td><td>73.0 %</td><td>634 %</td><td>0.57</td><td>4.9 %</td><td>27 %</td><td>0.98</td><td>True -&gt; True</td></tr>
+<tr><td>gallery: circular boundary</td><td>84.4 %</td><td>393 %</td><td>0.49</td><td>5.2 %</td><td>16 %</td><td>0.98</td><td>False -&gt; False</td></tr>
+<tr><td>default settings (resolution 300, 30 iterations)</td><td>82.8 %</td><td>370 %</td><td>0.51</td><td>26.9 %</td><td>80 %</td><td>0.93</td><td>False -&gt; False, now with warning</td></tr>
+<tr><td>resolution 256, 120 iterations</td><td>79.9 %</td><td>560 %</td><td>0.53</td><td>13.7 %</td><td>52 %</td><td>0.98</td><td>False -&gt; False</td></tr>
+</table>
+<p>The default 30 iterations are not enough for weighted runs: the mean error is 27 %, above the limit, so the run now warns. Max errors stay at 27-80 % even where the mean is good, which is why the gate uses the mean.</p>
+<h2>Backends that ignore weights</h2>
+<p><code>ExactBackend</code> and geodesic labeling ignore weights (they already warned). With a stopping tolerance that main accepts, they reported convergence; now they do not.</p>
+<table>
+<tr><th>backend</th><th>mean error</th><th>max error</th><th>converged before -&gt; after</th><th>gate warning</th></tr>
+<tr><td>ExactBackend, area_cv_tol=1.0</td><td>195.9 %</td><td>1780 %</td><td>True -&gt; False</td><td>yes</td></tr>
+<tr><td>RasterBackend(resolution=256, distance_mode=&#x27;geodesic&#x27;), tol=5000</td><td>193.6 %</td><td>1696 %</td><td>True -&gt; False</td><td>yes</td></tr>
+</table>
+<h2>Other results</h2>
+<ul><li>Unweighted runs: extraction code path unchanged (bit-identical); the gate leaves the converged uniform controls converged (their mean error is 3-4 %). Unweighted runs that do not converge and stay above 20 % now warn (for example geodesic labeling, about 37 %).</li><li>The weighted gallery scripts (<code>plot_voronoi_elastic_boundary.py</code>, <code>plot_voronoi_custom_boundary.py</code>, <code>plot_voronoi_cartogram.py</code>) and <code>plot_voronoi_districts.py</code> run without a new warning.</li><li>Voronoi tests: 61 passed. Five of the seven new accuracy tests fail on main (population areas, ExactBackend gate, geodesic gate, gate disabled by <code>None</code>, option validation).</li><li>Shapes change: the multiplicatively weighted distance gives cell borders that are circular arcs and rounded small cells (visible in the circular-boundary panel).</li></ul>
+<p>Regenerate with <code>uv run python make_figures.py</code> from a carto-flow checkout (the &quot;before&quot; panels patch the extraction back to main&#x27;s two lines; it takes several minutes because of the elastic runs).</p>
+<div class="figure">
+<img src="area_vs_weight.png" alt="Area share against population share (resolution 256, 120 iterations); the dashed line is proportional.">
+<p class="caption">Area share against population share (resolution 256, 120 iterations); the dashed line is proportional.</p>
+</div><div class="figure">
+<img src="gallery_before_after.png" alt="Population cartograms before (left) and after (right): the three weighted gallery configurations, the default settings, and the configuration used by the test.">
+<p class="caption">Population cartograms before (left) and after (right): the three weighted gallery configurations, the default settings, and the configuration used by the test.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

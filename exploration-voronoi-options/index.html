@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voronoi cartogram options, their interactions and a simpler option set</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Voronoi cartogram options, their interactions and a simpler option set</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/83">#83</a></dd>
+<dt>Branch</dt><dd>feat/voronoi-premorph</dd>
+<dt>Base</dt><dd>feat/voronoi-power-weights</dd>
+<dt>Created</dt><dd>2026-10-10 12:47</dd>
+<dt>Before</dt><dd>feat/voronoi-power-weights @ 02c94c9</dd>
+<dt>After</dt><dd>feat/voronoi-premorph @ c57925a</dd>
+<dt>Inputs</dt><dd>49 contiguous US states with population (S); the same with lognormal weights, seed 1, sigma 1.5 (L); 432 congressional districts with population, group_by &quot;State Name&quot; (D); the 49 states without weights (U). RasterBackend(resolution=256), VoronoiOptions(n_iter=300, area_cv_tol=0.05) unless the factor changes it; flow reference = morph_gdf with MorphOptions.preset_balanced(n_iter=400); NUMBA_NUM_THREADS=8</dd>
+</dl>
+<p class="desc">One-factor-at-a-time screen with selected pairs (209 runs) around three bases (fixed outline, elastic boundary, premorph) on weighted states, lognormal-weight states, districts and unweighted states. Premorph plus the generator anchor dominates on position fidelity and adjacency at the lowest cost. The anchor helps with premorph or the elastic boundary, but on the fixed outline the exact area solve fails (cells collapse). Springs and topology repair are mostly redundant once the anchor is on. prescale_components, output_resolution and simplify_tol have no measurable effect here.</p>
+<p>An investigation; nothing in the library was changed. 209 runs (S 78, L 65, U 38, D 28; 20 of them pairs). Repeated base runs gave identical metrics (3 repeats on S, 2 for P on L and D, 2 for E on U), so differences against a base are effects, not noise; changes below 0.05 R, 0.02 in adjacency kept and 0.01 in compactness are treated as negligible because single trajectories on F and E are sensitive to small changes. Reproduce: <code>NUMBA_NUM_THREADS=8 uv run python run_experiments.py S,U,L,D</code> from a checkout of <code>feat/voronoi-premorph</code> (about 40 minutes; resumes from <code>data/runs.jsonl</code>), then <code>uv run python make_figures.py &gt; data/tables.md</code>.</p>
+<h2>Glossary</h2>
+<ul><li>Bases: **F** = fixed outline (union of the input regions, rigid; the current weighted default); **E** = <code>ElasticBoundary(0.05)</code>; **P** = <code>premorph=True</code> (flow morph, then a rigid run on the morphed regions with <code>generator_anchor</code> 0.5). Factor levels are applied to one base at a time.</li><li>Metrics. Area err = mean |area / target - 1| of the output cells (%). Offset vs flow / vs orig = median distance from the cell centroid to the flow-morphed / original region centroid after scaling the map to the original area, in mean cell radii R (states 399 km, districts 134 km). Adjacency kept = share of the input adjacency pairs whose cells still touch. New adjacencies = touching cell pairs that were not adjacent in the input. Compactness = mean 4 pi A / P^2. Lag = median generator-to-cell-centroid distance in own cell radii. Split = cells with a second part above 1 %. Outline vs flow = symmetric difference of the outline with the flow-cartogram outline after scaling to equal area. TX own = share of Texas&#x27; flow-morphed region covered by Texas&#x27; cell(s).</li></ul>
+<h2>Results</h2>
+<h3>Bases</h3>
+<table>
+<tr><th>dataset</th><th>base</th><th>area err %</th><th>offset vs flow (R)</th><th>offset vs orig (R)</th><th>adjacency kept</th><th>new adj</th><th>compact</th><th>lag</th><th>split</th><th>outline vs flow</th><th>TX own</th><th>it</th><th>time (s)</th></tr>
+<tr><td>S</td><td>F fixed</td><td>0.04</td><td>1.14</td><td>1.84</td><td>0.52</td><td>58</td><td>0.62</td><td>0.01</td><td>0</td><td>0.41</td><td>0.58</td><td>250</td><td>2.4</td></tr>
+<tr><td>S</td><td>E elastic 0.05</td><td>0.00</td><td>0.75</td><td>1.97</td><td>0.55</td><td>54</td><td>0.61</td><td>0.05</td><td>4</td><td>0.06</td><td>0.42</td><td>178</td><td>8.8</td></tr>
+<tr><td>S</td><td>P premorph</td><td>0.00</td><td>0.16</td><td>1.50</td><td>0.80</td><td>29</td><td>0.55</td><td>0.21</td><td>5</td><td>0.00</td><td>0.89</td><td>53</td><td>0.9</td></tr>
+<tr><td>L</td><td>F</td><td>0.00</td><td>1.65</td><td>1.49</td><td>0.30</td><td>78</td><td>0.58</td><td>0.02</td><td>6</td><td>0.48</td><td>0.63</td><td>131</td><td>1.4</td></tr>
+<tr><td>L</td><td>E</td><td>0.00</td><td>0.88</td><td>2.22</td><td>0.40</td><td>69</td><td>0.57</td><td>0.11</td><td>3</td><td>0.16</td><td>0.23</td><td>300</td><td>13.3</td></tr>
+<tr><td>L</td><td>P</td><td>0.00</td><td>0.19</td><td>1.81</td><td>0.71</td><td>39</td><td>0.50</td><td>0.17</td><td>7</td><td>0.00</td><td>0.90</td><td>97</td><td>1.3</td></tr>
+<tr><td>D</td><td>F</td><td>0.00</td><td>2.05</td><td>6.14</td><td>0.43</td><td>712</td><td>0.81</td><td>0.37</td><td>15</td><td>0.44</td><td>0.33</td><td>185</td><td>10.9</td></tr>
+<tr><td>D</td><td>E</td><td>0.00</td><td>1.44</td><td>5.42</td><td>0.38</td><td>754</td><td>0.79</td><td>0.31</td><td>23</td><td>0.28</td><td>0.60</td><td>300</td><td>15.4</td></tr>
+<tr><td>D</td><td>P</td><td>0.00</td><td>0.21</td><td>5.12</td><td>0.61</td><td>491</td><td>0.69</td><td>0.18</td><td>43</td><td>0.00</td><td>0.96</td><td>9</td><td>2.1</td></tr>
+<tr><td>U</td><td>F</td><td>3.58</td><td>0.73</td><td>1.98</td><td>0.63</td><td>48</td><td>0.66</td><td>0.02</td><td>2</td><td>0.36</td><td>0.13</td><td>38</td><td>1.0</td></tr>
+<tr><td>U</td><td>E</td><td>3.71</td><td>0.54</td><td>1.84</td><td>0.72</td><td>37</td><td>0.64</td><td>0.05</td><td>2</td><td>0.26</td><td>0.16</td><td>16</td><td>1.0</td></tr>
+<tr><td>U</td><td>P</td><td>2.89</td><td>0.09</td><td>1.86</td><td>0.87</td><td>21</td><td>0.55</td><td>0.08</td><td>6</td><td>0.00</td><td>0.79</td><td>5</td><td>0.9</td></tr>
+</table>
+<p>The premorph base is the most faithful (offset vs flow 0.09 to 0.21 R against 0.54 to 2.05 R), keeps the most input adjacencies (0.61 to 0.87 against 0.30 to 0.72), has the fewest new adjacencies and is the fastest (0.9 to 2.1 s against 1.0 to 15.4 s). It pays in compactness (0.50 to 0.69 against 0.57 to 0.81) and split cells on the districts (43 against 15 to 23). Unweighted runs are not exact: area error 2.9 to 3.7 % (cells from the upsampled raster).</p>
+<h3>Main effects that matter</h3>
+<ul><li>**The generator anchor interacts strongly with the base.**</li><li>P: anchor 0 / 0.25 / 0.5 / 1: offset vs flow S 0.44 / 0.19 / 0.16 / 0.12 R, L 0.72 / 0.21 / 0.19 / 0.13, D 0.35 / 0.24 / 0.21 / 0.17, U 0.20 / 0.09 / 0.09 / 0.05; adjacency kept S 0.59 / 0.79 / 0.80 / 0.83, L 0.49 / 0.66 / 0.71 / 0.73; compactness S 0.58 / 0.57 / 0.55 / 0.51, D 0.74 / 0.72 / 0.69 / 0.65. Areas exact throughout. Anchor 1 on D runs to n_iter (14 s instead of 2 s).</li><li>E: anchor 0 to 0.5: offset vs flow S 0.75 to 0.19, L 0.88 to 0.35, D 1.44 to 0.97, U 0.54 to 0.14; adjacency kept S 0.55 to 0.80, L 0.40 to 0.72, D 0.38 to 0.63; compactness -0.05 to -0.09; on D the lag rises to 3.7 own radii and time doubles (29.5 s).</li><li>F: on S the anchor raises adjacency kept (0.52 to 0.76 at 0.5) but the generators leave their cells (lag 1.9 to 3.3 own radii) and the runs hit n_iter; on L (0.5, 1) and D (0.5) the exact area solve fails: 44 and 327 cells collapse, mean area error 307 % and 187 %, reported as not converged with a warning. Unweighted (U) with anchor 0.5: area error 43 %. **The anchor must not be used on the fixed outline.**</li><li>**adjacency_spring helps adjacency only without the anchor.** F: S 0.52 to 0.48 / 0.55 / 0.60 at 0.1 / 0.2 / 0.4, L 0.30 to 0.38 / 0.40 / 0.45, D 0.43 to 0.49 (0.2); E: S 0.55 to 0.61 (0.4), L 0.40 to 0.59 (0.4), D 0.38 to 0.48. On P it changes nothing beyond negligible amounts (S 0.80 to 0.82), and at 0.4 the area-CV rule stops firing. It can hurt positions: F spring 0.4 on S drops Texas&#x27; own share to 0.09. Anchor 0.25 gains more adjacency than any spring level on every base where it works.</li><li>**intra_group_spring (D):** F 0.43 to 0.53, E 0.38 to 0.57, P 0.61 to 0.62 adjacency kept; compactness -0.02 to -0.03.</li><li>**fix_topology=5:** adjacency kept F S 0.52 to 0.65, D 0.43 to 0.62, E S 0.55 to 0.66, P S 0.80 to 0.80, D 0.61 to 0.63; time F S 2.4 to 19 s, D 10.9 to 448 s, P D 2.1 to 28.8 s. With weights it damages positions (F S offset 1.14 to 1.46 R, Texas own 0.09; L F compactness 0.58 to 0.46; L P with anchor 0: offset 3.5 R, lag 5.4).</li><li>**Outline spec (F):** convex_hull, bbox and circle give much more compact cells (0.79 to 0.84 against 0.62 to 0.66) in a quarter of the iterations, with a different outline: a shape choice, not a quality setting.</li><li>**AdhesiveBoundary(0.3) and elastic + adhesion:** never better; adjacency -0.06 to -0.17 (S, E), runs often to n_iter.</li><li>**Elastic strength:** 0.02 is faster than 0.05 (106 against 178 iterations on S) at similar quality; 0.1 is no better.</li></ul>
+<h3>Options with no or negligible effect on these inputs</h3>
+<ul><li>prescale_components: identical results on all four datasets (one connected component each; untested on data with disconnected parts).</li><li>relaxation=&quot;lloyd&quot;: identical on P; on F and E fewer iterations (S F 165 against 250) with negligible quality change.</li><li>area_equalizer_rate (weighted): changes the iteration count (P S: 93 / 53 / 29 at 0.05 / 0.1 / 0.25), not the result. Unweighted it matters: rate 0 gives 10.7 % area error, 0.25 gives 2.3 %.</li><li>weight_ramp_iters: P insensitive; F and E trajectories change without a consistent direction.</li><li>resolution 128 / 512: P unchanged; F and E small changes except D F at 128 (adjacency 0.43 to 0.35, 300 iterations).</li><li>output_resolution 2x and cell_smoothing_px 6 (U): no change. simplify_tol 10 km: small speed-up. density_smooth=2 (E): slightly worse (adjacency -0.10). distance_mode=&quot;geodesic&quot; (U): 37 % area error in 300 iterations.</li></ul>
+<h3>Interactions</h3>
+<table>
+<tr><th>pair</th><th>finding</th></tr>
+<tr><td>anchor x base</td><td>anchor helps on P and E, fails on F (collapsed cells on L, D; 43 % error unweighted)</td></tr>
+<tr><td>anchor x spring (P, E)</td><td>with the anchor on, the spring adds at most 0.02 to 0.04 adjacency kept; without it (P anchor 0) spring 0.4 raises adjacency 0.59 to 0.71 (S), still below anchor 0.25 alone (0.79)</td></tr>
+<tr><td>anchor x fix_topology (P)</td><td>without the anchor, repair raises adjacency 0.59 to 0.66 (S) at 28 times the time and wrecks L (offset 3.5 R); with the anchor it adds nothing</td></tr>
+<tr><td>anchor x elastic (P)</td><td>premorph + elastic 0.02 with anchor 0: offset 0.51 R against 0.17 R with anchor 0.5</td></tr>
+<tr><td>anchor x adhesion (E)</td><td>adhesion adds nothing and runs to n_iter</td></tr>
+<tr><td>spring x fix_topology (F)</td><td>adjacency 0.69 (S), best on F, but 26 s and Texas own 0.10</td></tr>
+<tr><td>intra spring x anchor (D, P)</td><td>anchor 0 + intra 0.5: offset 0.40 R, adjacency 0.59, worse than the anchor alone (0.21 R, 0.61)</td></tr>
+</table>
+<h3>Stopping defaults</h3>
+<p><code>VoronoiOptions()</code> has n_iter 30 and no area_cv_tol. Weighted runs still have exact areas, but on F the generators are not settled: lag 1.0 (S), 1.2 (L), 5.7 (D) own radii, converged=False. P with 30 iterations matches its converged result. Many correct runs report converged=False only because the raster area CV did not drop below area_cv_tol before n_iter, although the area error is 0.00 %.</p>
+<h3>Recipes</h3>
+<table>
+<tr><th>recipe</th><th>settings</th><th>S: offset vs flow / adjacency / compact / time</th><th>L</th><th>D</th><th>U</th></tr>
+<tr><td>fixed (current)</td><td>default backend</td><td>1.14 / 0.52 / 0.62 / 2.4 s</td><td>1.65 / 0.30 / 0.58 / 1.4 s</td><td>2.05 / 0.43 / 0.81 / 10.9 s</td><td>0.73 / 0.63 / 0.66 / 1.0 s</td></tr>
+<tr><td>fast</td><td>fixed, resolution 128</td><td>1.16 / 0.54 / 0.63 / 1.2 s</td><td>1.68 / 0.33 / 0.59 / 1.6 s</td><td>2.22 / 0.35 / 0.79 / 8.1 s</td><td>0.70 / 0.64 / 0.66 / 0.5 s</td></tr>
+<tr><td>round outline</td><td>boundary=&quot;convex_hull&quot;</td><td>0.84 / 0.53 / 0.80 / 0.5 s</td><td>-</td><td>-</td><td>0.53 / 0.78 / 0.84 / 0.6 s</td></tr>
+<tr><td>elastic</td><td>ElasticBoundary(0.05)</td><td>0.75 / 0.55 / 0.61 / 8.8 s</td><td>0.88 / 0.40 / 0.57 / 13.3 s</td><td>1.44 / 0.38 / 0.79 / 15.4 s</td><td>0.54 / 0.72 / 0.64 / 1.0 s</td></tr>
+<tr><td>elastic + anchor</td><td>ElasticBoundary(0.05), anchor 0.5</td><td>0.19 / 0.80 / 0.56 / 7.3 s</td><td>0.35 / 0.72 / 0.53 / 14.5 s</td><td>0.97 / 0.63 / 0.70 / 29.5 s</td><td>0.14 / 0.88 / 0.57 / 1.3 s</td></tr>
+<tr><td>faithful (premorph=True)</td><td>premorph, anchor 0.5</td><td>0.16 / 0.80 / 0.55 / 0.9 s</td><td>0.19 / 0.71 / 0.50 / 1.3 s</td><td>0.21 / 0.61 / 0.69 / 2.1 s</td><td>0.09 / 0.87 / 0.55 / 0.9 s</td></tr>
+<tr><td>premorph, anchor 0.25</td><td>premorph, generator_anchor 0.25</td><td>0.19 / 0.79 / 0.57 / 0.8 s</td><td>0.21 / 0.66 / 0.52 / 1.6 s</td><td>0.24 / 0.59 / 0.72 / 2.3 s</td><td>0.09 / 0.84 / 0.57 / 0.9 s</td></tr>
+<tr><td>premorph + smooth outline</td><td>premorph, ElasticBoundary(0.02)</td><td>0.17 / 0.78 / 0.58 / 2.6 s</td><td>0.18 / 0.70 / 0.54 / 7.5 s</td><td>0.22 / 0.61 / 0.71 / 11.7 s</td><td>0.08 / 0.87 / 0.57 / 1.0 s</td></tr>
+</table>
+<h2>Option inventory and verdicts</h2>
+<p>Paths: U = unweighted, W = weighted raster, P = premorph. ExactBackend is out of scope.</p>
+<table>
+<tr><th>option</th><th>default</th><th>verdict</th></tr>
+<tr><td><code>premorph</code></td><td>None (True = preset_balanced, n_iter 400)</td><td>keep: best fidelity, adjacency and speed</td></tr>
+<tr><td><code>generator_anchor</code></td><td>None (0.5 with premorph, else 0)</td><td>keep; only useful with premorph or elastic</td></tr>
+<tr><td><code>boundary</code> spec</td><td>&quot;union&quot;</td><td>keep (a shape choice)</td></tr>
+<tr><td><code>ElasticBoundary(strength)</code></td><td>0.3 (docs use 0.02 to 0.05)</td><td>keep; use 0.02 to 0.05</td></tr>
+<tr><td><code>resolution</code></td><td>300</td><td>keep</td></tr>
+<tr><td><code>adjacency_spring</code> / <code>intra_group_spring</code></td><td>0.0 / None</td><td>advanced; redundant with the anchor</td></tr>
+<tr><td><code>fix_topology</code></td><td>None</td><td>dominated: 4 to 40 times the time, harmful with weights</td></tr>
+<tr><td><code>area_equalizer_rate</code> / <code>weight_ramp_iters</code></td><td>0.1 / 10</td><td>make internal</td></tr>
+<tr><td><code>relaxation</code></td><td>&quot;overrelax&quot;</td><td>make internal</td></tr>
+<tr><td><code>output_resolution</code> / <code>cell_smoothing_px</code></td><td>None / 3</td><td>make internal (cosmetic)</td></tr>
+<tr><td><code>AdhesiveBoundary</code>, elastic <code>adhesion_strength</code>, <code>density_smooth</code></td><td>-</td><td>dominated; deprecate the first two</td></tr>
+<tr><td><code>prescale_components</code></td><td>False</td><td>no effect on these inputs; keep for disconnected data</td></tr>
+<tr><td><code>distance_mode=&quot;geodesic&quot;</code></td><td>euclidean</td><td>unweighted only</td></tr>
+<tr><td><code>n_iter</code> / <code>area_cv_tol</code></td><td>30 / None</td><td>keep; 30 is too few for fixed and elastic runs</td></tr>
+</table>
+<h2>Proposed simplified option set (described, not implemented)</h2>
+<ul><li>Keep user-facing: <code>weights</code>, <code>premorph</code>, <code>boundary</code>, <code>group_by</code>, <code>backend</code>, <code>options</code>; RasterBackend <code>resolution</code>, <code>boundary</code> (None or ElasticBoundary), <code>generator_anchor</code>, <code>distance_mode</code> (unweighted only), the springs as advanced options for runs without premorph; ElasticBoundary <code>strength</code>; VoronoiOptions <code>n_iter</code>, <code>tol</code>, <code>area_cv_tol</code>, <code>area_error_tol</code>, <code>simplify_tol</code>, <code>prescale_components</code>, <code>fix_topology</code> as advanced and documented for unweighted runs.</li><li>Make internal: <code>relaxation</code>, <code>area_equalizer_rate</code>, <code>weight_ramp_iters</code>, <code>output_resolution</code>, <code>cell_smoothing_px</code>, <code>density_smooth</code>, <code>step_scale</code>, <code>min_boundary_points</code>, <code>adj_min_shared_length</code>. Deprecation candidates: <code>AdhesiveBoundary</code> and <code>ElasticBoundary.adhesion_strength</code>.</li><li>Recipes: (1) faithful = <code>premorph=True</code>; (2) smooth outline = premorph + <code>ElasticBoundary(0.02)</code>; (3) original outline = default with n_iter about 300 and area_cv_tol 0.05; (4) round outline = <code>boundary=&quot;convex_hull&quot;</code> or <code>&quot;circle&quot;</code>.</li><li>Anchor default: keep 0.5 for premorph. 0.25 gets most of the gain with slightly rounder cells (+0.01 to +0.03), but 0.5 is better on the lognormal weights. For the elastic boundary 0.5 also works.</li><li>Guards: warn when <code>generator_anchor</code> &gt; 0 without premorph and without ElasticBoundary (or resolve None to 0.5 for elastic as well); warn that <code>fix_topology</code> with weights is slow and can damage positions; document that <code>adjacency_spring</code> has no effect with premorph; document AdhesiveBoundary as superseded; raise n_iter or document n_iter 300 with area_cv_tol 0.05 for weighted fixed and elastic runs; base <code>converged</code> on the output area error and generator displacement instead of the raster area CV.</li></ul>
+<h2>Caveats</h2>
+<ul><li>One-factor-at-a-time around three bases plus 20 pair runs: interactions between non-anchor options (for example rate x ramp) are not measured.</li><li>One family of inputs (US states and districts). Outline specs were tested only on F. The districts&#x27; elastic base was run with fewer factors because of cost.</li><li>Repeated runs were identical, but F and E trajectories are sensitive (small option changes move single states by 0.5 R or more), so single-run differences on F and E generalize less than those on P.</li><li>Failed fixed-outline anchor runs have NaN compactness in the data and are drawn as crosses.</li></ul>
+<div class="figure">
+<img src="options_anchor.png" alt="Anchor x base on all four datasets; red crosses = failed area solve.">
+<p class="caption">Anchor x base on all four datasets; red crosses = failed area solve.</p>
+</div><div class="figure">
+<img src="options_effects.png" alt="States, population: change of each metric against the base, per option level, colored by base.">
+<p class="caption">States, population: change of each metric against the base, per option level, colored by base.</p>
+</div><div class="figure">
+<img src="options_scorecard_D.png" alt="Districts, population.">
+<p class="caption">Districts, population.</p>
+</div><div class="figure">
+<img src="options_scorecard_L.png" alt="States, lognormal weights.">
+<p class="caption">States, lognormal weights.</p>
+</div><div class="figure">
+<img src="options_scorecard_S.png" alt="States, population: every run against its base (green better, red worse; text = the run&#x27;s own value; ! = area error above 1 %).">
+<p class="caption">States, population: every run against its base (green better, red worse; text = the run&#x27;s own value; ! = area error above 1 %).</p>
+</div><div class="figure">
+<img src="options_scorecard_U.png" alt="States, unweighted.">
+<p class="caption">States, unweighted.</p>
+</div><div class="figure">
+<img src="options_spring.png" alt="Adjacency spring by base, and against the anchor on the premorph base.">
+<p class="caption">Adjacency spring by base, and against the anchor on the premorph base.</p>
+</div><div class="figure">
+<img src="options_tradeoff.png" alt="Recipes: offset vs flow against compactness, color = adjacency kept, size = time.">
+<p class="caption">Recipes: offset vs flow against compactness, color = adjacency kept, size = time.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Default step size dt of the flow cartogram</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Default step size dt of the flow cartogram</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/94">#94</a></dd>
+<dt>Branch</dt><dd>investigate/default-dt</dd>
+<dt>Base</dt><dd>fix/stall-detection</dd>
+<dt>Created</dt><dd>2026-10-10 03:34</dd>
+<dt>Before</dt><dd>fix/stall-detection @ 8441681 (refresh_on_rise=0.01, stall rule, best-iterate return)</dd>
+<dt>After</dt><dd>investigate/default-dt @ a4f0aea (scratch commit: preset_balanced dt 0.3, preset_high_quality dt 0.2; library otherwise unchanged)</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC), congressional districts (432), 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6), the three strong-anisotropy runs of the adaptive-recompute page (preset_balanced settings, area_scale 1e-6), states with poverty counts and dot-density landmarks (issue 86, seeds 7 to 11); MorphOptions defaults of fix/stall-detection (grid 256, mean_tol 0.05, max_tol 0.10, recompute_every 10, refresh_on_rise 0.01, stall rule on), n_iter 400 (counties 300); dt swept as an option value; NUMBA_NUM_THREADS=4</dd>
+</dl>
+<p class="desc">Should the default dt (0.2 cells per iteration for the fastest point) be raised now that refresh-on-rise is the default? At the default tolerances a larger dt cuts the cost by 20 to 40 %, but the gain is irregular, tight tolerances cost 1.5 to 2.7 times more at most dt values above 0.2, invalid polygons on districts grow above 0.4, the landmark border drift grows with dt times recompute_every, and the map changes. The MorphOptions default stays 0.2; preset_balanced (0.3) and preset_high_quality (0.2) are the presets worth changing.</p>
+<p>An investigation, not a change. Only <code>dt</code> (and in a few blocks <code>refresh_on_rise</code>, <code>recompute_every</code>, the tolerances and the grid) is swept; the library code is the base commit, plus a scratch commit that edits two preset values. Scripts are in <code>scripts/</code> (<code>run_all.sh &lt;group&gt;</code> for <code>run_sweep.py</code>, <code>run_extra.sh &lt;pipeline|presets|landmarks|landmarks2&gt;</code> for <code>run_extra.py</code>, <code>shape_compare.py</code>, <code>timing.py</code>, <code>analyze.py</code>; they import the library, so check out the branch); results are in <code>data/*.jsonl</code> (one run per line with the full score trace), <code>data/shape.json</code>, <code>data/timing.json</code>; <code>data/tables.md</code> has every table (about 40, including refresh_on_rise 0.2 and off, the grid 512 and 1024 blocks and the fine dt sweep at 0.1, 0.15, 0.25, 0.35, 0.45, 0.55, 0.7, 1.0). The runs are deterministic, so neighboring dt values act as the replicates: a result that jumps between 0.30, 0.35 and 0.40 is chaotic in dt, not noise.</p>
+<p>Metrics: accuracy from the output geometries (linear relative error of area shares, returned best iterate); invalid polygons from <code>shapely.is_valid</code>; cost = iterations + recomputes x ratio (states 9/12/24/71 at grids 128/256/512/1024, districts 18/21/23/47, counties 21/47.5/28.5); reliability C = converged, S = stalled, L = iteration limit. Runs stop at the first score below 1, so the final error is the stopping tolerance.</p>
+<h2>Results</h2>
+<h3>Default tolerances, refresh_on_rise 0.01, recompute_every 10</h3>
+<p>Cells are iterations / recomputes / cost / invalid polygons and reliability.</p>
+<table>
+<tr><th>case</th><th>dt 0.2</th><th>dt 0.3</th><th>dt 0.4</th><th>dt 0.5</th><th>dt 0.6</th><th>dt 0.8</th></tr>
+<tr><td>states 128</td><td>63 / 7 / 126 / 0 C</td><td>83 / 9 / 164 / 0 C</td><td>80 / 9 / 161 / 0 S</td><td>80 / 8 / 152 / 0 S</td><td>54 / 9 / 135 / 1 C</td><td>45 / 9 / 126 / 0 C</td></tr>
+<tr><td>states 256</td><td>113 / 12 / 257 / 0 C</td><td>79 / 9 / 187 / 0 C</td><td>66 / 8 / 162 / 0 C</td><td>52 / 6 / 124 / 0 C</td><td>45 / 6 / 117 / 1 C</td><td>53 / 7 / 137 / 1 C</td></tr>
+<tr><td>states 512</td><td>214 / 22 / 742 / 0 C</td><td>145 / 15 / 505 / 0 C</td><td>111 / 12 / 399 / 0 C</td><td>91 / 10 / 331 / 0 C</td><td>79 / 9 / 295 / 0 C</td><td>62 / 7 / 230 / 0 C</td></tr>
+<tr><td>states 1024</td><td>400 / 40 / 3240 / 1 L</td><td>-</td><td>214 / 22 / 1776 / 1 C</td><td>-</td><td>145 / 15 / 1210 / 0 C</td><td>-</td></tr>
+<tr><td>districts 256</td><td>150 / 16 / 486 / 24 C</td><td>111 / 13 / 384 / 22 C</td><td>87 / 13 / 360 / 23 C</td><td>105 / 14 / 399 / 42 C</td><td>141 / 16 / 477 / 80 C</td><td>93 / 13 / 366 / 63 C</td></tr>
+<tr><td>districts 512</td><td>263 / 27 / 884 / 20 C</td><td>185 / 19 / 622 / 27 C</td><td>145 / 16 / 513 / 29 C</td><td>120 / 15 / 465 / 25 C</td><td>112 / 15 / 457 / 37 C</td><td>80 / 14 / 402 / 30 C</td></tr>
+<tr><td>horizontal 256</td><td>233 / 27 / 557 / 0 C</td><td>172 / 21 / 424 / 0 C</td><td>131 / 19 / 359 / 0 C</td><td>125 / 22 / 389 / 1 C</td><td>94 / 11 / 226 / 1 C</td><td>123 / 23 / 399 / 1 C</td></tr>
+<tr><td>tangential 256</td><td>216 / 23 / 492 / 1 C</td><td>158 / 21 / 410 / 2 C</td><td>167 / 25 / 467 / 2 C</td><td>151 / 18 / 367 / 3 C</td><td>113 / 18 / 329 / 1 C</td><td>115 / 22 / 379 / 2 C</td></tr>
+<tr><td>tilted 256</td><td>169 / 18 / 385 / 1 C</td><td>145 / 18 / 361 / 0 C</td><td>111 / 12 / 255 / 1 C</td><td>98 / 16 / 290 / 2 C</td><td>104 / 19 / 332 / 1 C</td><td>272 / 36 / 704 / 23 C</td></tr>
+<tr><td>multires coarse (states)</td><td>100 / 10 / 190 / 1 S</td><td>50 / 6 / 104 / 0 C</td><td>80 / 9 / 161 / 1 S</td><td>80 / 8 / 152 / 2 S</td><td>31 / 5 / 76 / 5 C</td><td>130 / 13 / 247 / 4 S</td></tr>
+<tr><td>counties 256 (best score about 10 for all dt)</td><td>300 / 45 / 2438 / 158 S</td><td>-</td><td>270 / 41 / 2218 / 498 S</td><td>-</td><td>180 / 37 / 1938 / 419 S</td><td>200 / 48 / 2480 / 685 S</td></tr>
+</table>
+<ul><li>Over the nine cases with a full dt row the geometric mean of the cost relative to dt 0.2 is 0.79 at dt 0.3, 0.74 at 0.4, 0.69 at 0.5, 0.59 at 0.6 and 0.75 at 0.8; the worst single case is 1.30, 1.28, 1.21, 1.07 and 1.83 times dt 0.2. The gain is largest on fine grids (states 512: 0.68, 0.54, 0.45, 0.40, 0.31) and smallest on districts 256 and tangential anisotropy. It is not monotone in dt (tangential 0.4 costs more than 0.3, districts 256 at 0.6 costs as much as at 0.2, states 256 at 0.8 more than at 0.6).</li><li>Reliability with refresh_on_rise 0.01: of the 40 runs at dt 0.3 to 0.8 on states 128/256/512, districts 256/512 and the three anisotropy runs, only states 128 at 0.4 and 0.5 did not converge. refresh_on_rise 0.2 behaves like 0.01 on states and districts; on the anisotropy runs it differs (tilted at 0.3 and 0.8 stalls, tangential at 0.4 costs 613 against 467).</li><li>Invalid polygons: states and anisotropy stay at 0 to 3 up to dt 0.6 (tilted 0.8: 23). Districts: 24 at 0.2, 22 to 23 at 0.3 and 0.4, 42 at 0.5, 80 at 0.6 (grid 256). Nearly every invalid district is a self-intersection, also at dt 0.2 (about 5 % of the districts).</li></ul>
+<h3>Refresh-on-rise off, same cases (iterations and reliability)</h3>
+<table>
+<tr><th>case</th><th>dt 0.2</th><th>dt 0.3</th><th>dt 0.4</th><th>dt 0.5</th><th>dt 0.6</th><th>dt 0.8</th></tr>
+<tr><td>states 256</td><td>113 C</td><td>82 C</td><td>82 C</td><td>52 C</td><td>90 S</td><td>100 S</td></tr>
+<tr><td>districts 256</td><td>154 C</td><td>113 C</td><td>160 S</td><td>140 S</td><td>190 S</td><td>150 S</td></tr>
+<tr><td>horizontal 256</td><td>245 C</td><td>230 S</td><td>147 C</td><td>233 C</td><td>200 S</td><td>213 C</td></tr>
+<tr><td>tangential 256</td><td>226 C</td><td>184 C</td><td>312 C</td><td>252 C</td><td>130 S</td><td>211 C</td></tr>
+<tr><td>tilted 256</td><td>171 C</td><td>200 S</td><td>113 C</td><td>120 S</td><td>220 S</td><td>170 S</td></tr>
+<tr><td>multires coarse</td><td>100 S</td><td>100 S</td><td>110 S</td><td>80 S</td><td>80 S</td><td>130 S</td></tr>
+</table>
+<p>Without refresh-on-rise a dt above 0.2 stalls in 14 of 25 runs on the five grid-256 cases, with it in 0 of 25. Refresh-on-rise is what makes a larger dt usable at all; it does not make it free.</p>
+<h3>Tight tolerances (mean_tol 0.005, max_tol 0.01), grid 256</h3>
+<table>
+<tr><th>case</th><th>dt 0.2</th><th>dt 0.3</th><th>dt 0.4</th><th>dt 0.5</th><th>dt 0.6</th><th>dt 0.8</th></tr>
+<tr><td>states</td><td>115 / 13 / 271 / 0 C</td><td>141 / 40 / 621 / 0 C</td><td>78 / 14 / 246 / 0 C</td><td>184 / 71 / 1036 / 1 C</td><td>130 / 47 / 694 / 1 S</td><td>120 / 40 / 600 / 2 S</td></tr>
+<tr><td>districts</td><td>163 / 22 / 625 / 23 C</td><td>180 / 47 / 1167 / 25 S</td><td>140 / 39 / 959 / 27 S</td><td>173 / 48 / 1181 / 44 C</td><td>147 / 19 / 546 / 78 C</td><td>235 / 84 / 1999 / 75 C</td></tr>
+</table>
+<p>Larger steps overshoot: the score oscillates between about 1 and 5 for dt 0.25 and above (rises below score 20 on states: 1 at 0.2, 32 at 0.3, 65 at 0.5), and the run converges only when a dip crosses 1. The geometric mean cost over the two cases is 1.56 at 0.25, 2.07 at 0.3, 1.18 at 0.4, 2.69 at 0.5, 1.50 at 0.6 and 2.66 at 0.8 times dt 0.2, with one of the two cases stalling at each of 0.25, 0.3, 0.4, 0.6 and 0.8; the pattern is chaotic in dt (exceptions at 0.35 and 0.55). dt 0.15 costs 1.32 and 0.1 costs 1.68 times dt 0.2, so 0.2 is also close to the cheapest value for tight targets.</p>
+<h3>Quality of the converged shape against dt 0.2 (grid 256)</h3>
+<p>Symmetric difference as a percentage of the total area, mean vertex shift in cells, and regions whose centroid moves by more than 0.5 cell.</p>
+<table>
+<tr><th>case</th><th>dt 0.15 (control)</th><th>dt 0.3</th><th>dt 0.4</th><th>dt 0.5</th><th>dt 0.6</th><th>dt 0.8</th></tr>
+<tr><td>states</td><td>2.2 %, 0.07, 1 of 49</td><td>3.9 %, 0.16, 1</td><td>5.7 %, 0.25, 2</td><td>7.4 %, 0.32, 5</td><td>9.5 %, 0.44, 11</td><td>14.2 %, 0.80, 22</td></tr>
+<tr><td>districts</td><td>22 %, 0.15, 30 of 432</td><td>30 %, 0.23, 56</td><td>37 %, 0.28, 81</td><td>51 %, 0.45, 176</td><td>66 %, 0.71, 215</td><td>66 %, 0.63, 234</td></tr>
+<tr><td>horizontal</td><td>2.9 %, 0.10, 2</td><td>4.5 %, 0.16, 4</td><td>6.3 %, 0.25, 4</td><td>7.8 %, 0.31, 9</td><td>14 %, 0.54, 22</td><td>15 %, 0.58, 27</td></tr>
+<tr><td>tangential</td><td>4.4 %, 0.15, 1</td><td>7.0 %, 0.27, 2</td><td>12 %, 0.46, 14</td><td>15 %, 0.66, 15</td><td>15 %, 0.61, 20</td><td>21 %, 0.96, 35</td></tr>
+<tr><td>tilted</td><td>4.3 %, 0.14, 3</td><td>7.0 %, 0.25, 7</td><td>9.5 %, 0.36, 5</td><td>12 %, 0.46, 15</td><td>14 %, 0.52, 20</td><td>41 %, 1.98, 43</td></tr>
+</table>
+<p>The map depends on dt because the stopping point and the flow path do. At dt 0.3 the shape is 1.4 to 1.8 times the dt 0.15 control; from 0.5 up a larger dt is not just a faster path to the same map.</p>
+<h3>Multiresolution pipeline (<code>morph_multiresolution</code>, min_resolution 128, 3 levels, n_iter 300 per level, refresh_on_rise 0.01)</h3>
+<table>
+<tr><th>case</th><th>dt</th><th>iterations</th><th>cost</th><th>levels (grid, status, iterations)</th><th>mean %</th><th>max %</th><th>invalid</th></tr>
+<tr><td>states</td><td>0.2</td><td>134</td><td>272</td><td>128 S 100, 256 C 34</td><td>0.23</td><td>5.6</td><td>1</td></tr>
+<tr><td>states</td><td>0.3</td><td>50</td><td>104</td><td>128 C 50</td><td>0.97</td><td>9.0</td><td>0</td></tr>
+<tr><td>states</td><td>0.4</td><td>101</td><td>218</td><td>128 S 80, 256 C 21</td><td>0.42</td><td>3.4</td><td>3</td></tr>
+<tr><td>states</td><td>0.6</td><td>31</td><td>76</td><td>128 C 31</td><td>1.23</td><td>4.3</td><td>5</td></tr>
+<tr><td>states</td><td>0.8</td><td>170</td><td>359</td><td>128 S 130, 256 C 40</td><td>1.38</td><td>6.3</td><td>12</td></tr>
+<tr><td>districts</td><td>0.2</td><td>231</td><td>879</td><td>128 C 231</td><td>0.15</td><td>8.7</td><td>103</td></tr>
+<tr><td>districts</td><td>0.4</td><td>178</td><td>571</td><td>128 S 150, 256 C 28</td><td>0.25</td><td>4.8</td><td>85</td></tr>
+<tr><td>districts</td><td>0.6</td><td>233</td><td>866</td><td>128 S 210, 256 C 23</td><td>0.35</td><td>6.4</td><td>203</td></tr>
+<tr><td>districts</td><td>0.8</td><td>282</td><td>1482</td><td>128 S 150, 256 C 132</td><td>0.50</td><td>8.9</td><td>232</td></tr>
+</table>
+<p>The coarse-level plateau is not removed reliably by a larger dt: it converges at 0.3 and 0.6 and not at 0.2, 0.4, 0.5, 0.8. The pipeline gain is partly a different stopping level: when the 128 level converges (states at 0.3 and 0.6), the refinement levels are skipped and the returned map is the coarse one, with higher error (mean 1.0 to 1.2 % against 0.23 %).</p>
+<h3>recompute_every together with dt (cost, grid 256, refresh_on_rise 0.01)</h3>
+<table>
+<tr><th>case</th><th>(0.2, 10)</th><th>(0.2, 5)</th><th>(0.2, 20)</th><th>(0.4, 5)</th><th>(0.4, 10)</th><th>(0.4, 20)</th><th>(0.6, 5)</th><th>(0.6, 10)</th><th>(0.6, 20)</th></tr>
+<tr><td>states</td><td>257</td><td>372</td><td>209</td><td>214</td><td>162</td><td>192</td><td>148</td><td>117</td><td>214</td></tr>
+<tr><td>districts</td><td>486</td><td>724</td><td>458</td><td>410</td><td>360</td><td>417</td><td>330</td><td>477</td><td>776</td></tr>
+<tr><td>horizontal</td><td>557</td><td>692</td><td>541</td><td>414</td><td>359</td><td>645</td><td>337</td><td>226</td><td>315</td></tr>
+<tr><td>tangential</td><td>492</td><td>660</td><td>717</td><td>370</td><td>467</td><td>411</td><td>302</td><td>329</td><td>884</td></tr>
+<tr><td>tilted</td><td>385</td><td>543</td><td>383</td><td>300</td><td>255</td><td>313</td><td>305</td><td>332</td><td>469</td></tr>
+</table>
+<p>dt matters more than recompute_every: at fixed dt 0.4 and 0.6, 10 is the cheapest or within 10 % of the cheapest in 8 of 10 case/dt pairs. At equal nominal displacement per field, (0.4, 5) is cheaper than (0.2, 10) in all five cases (0.74 to 0.84 times).</p>
+<h3>Landmark co-advection (issue 86 repro)</h3>
+<p>Border-band z at the end of the morph, mean of 5 dot seeds (7 to 11), preset_balanced, area_scale 1e-6:</p>
+<table>
+<tr><th>dt, recompute_every (product)</th><th>iterations</th><th>z</th></tr>
+<tr><td>0.2, 1 (0.2)</td><td>106</td><td>2.31</td></tr>
+<tr><td>0.4, 2 (0.8)</td><td>54</td><td>2.22</td></tr>
+<tr><td>0.2, 5 (1.0)</td><td>108</td><td>2.76</td></tr>
+<tr><td>0.6, 3 (1.8)</td><td>37</td><td>3.07</td></tr>
+<tr><td>0.2, 10 (2.0, current)</td><td>113</td><td>3.69</td></tr>
+<tr><td>0.4, 5 (2.0)</td><td>58</td><td>3.51</td></tr>
+<tr><td>0.3, 7 (2.1)</td><td>76</td><td>3.86</td></tr>
+<tr><td>0.3, 10 (3.0)</td><td>79</td><td>4.75</td></tr>
+<tr><td>0.4, 10 (4.0)</td><td>66</td><td>5.33</td></tr>
+<tr><td>0.2, 20 (4.0)</td><td>125</td><td>5.47</td></tr>
+<tr><td>0.6, 10 (6.0)</td><td>45</td><td>6.59</td></tr>
+<tr><td>0.8, 10 (8.0)</td><td>53</td><td>8.92</td></tr>
+</table>
+<p>The border drift is set by the product dt x recompute_every (the distance moved with one stale field), not by dt alone: pairs with the same product give the same z. Larger steps do not fix the issue; they worsen it at a fixed recompute_every. All dots stay inside their own state (99.9 %) at every dt.</p>
+<h3>Animation frames and wall time</h3>
+<ul><li>With <code>snapshot_every=1</code> the frame count equals the iterations: 113, 79, 66, 52, 45, 53 for dt 0.2, 0.3, 0.4, 0.5, 0.6, 0.8. The largest vertex displacement between iterations is 1.0 to 1.05 dt cells (0.20 cell at 0.2, 0.84 at 0.8; at most 0.7 % of the map extent), so frame-to-frame jumps stay below one cell at every dt tested.</li><li>Wall time (best of 3, load 1.7 to 2.2): states 256 0.23 s at dt 0.2 and 0.15 s at 0.6; states 512 0.59 s and 0.29 s; districts 512 1.54 s and 0.85 s. It follows the cost model; on grid 256 states the saving is 40 ms.</li></ul>
+<h3>Presets</h3>
+<table>
+<tr><th>preset</th><th>grid, n_iter, tolerances</th><th>current dt</th><th>effect of a different dt</th></tr>
+<tr><td>preset_fast</td><td>128, 30, 0.15 / 0.25</td><td>0.3</td><td>does not converge in 30 iterations at any dt tested; n_iter, not dt, limits it</td></tr>
+<tr><td>preset_balanced</td><td>256, 100, 0.05 / 0.1</td><td>0.2</td><td>states: dt 0.2 does not converge in 100 iterations (needs 113); dt 0.3, 0.4, 0.6 converge in 79, 66, 45. Districts: 0.2 and 0.3 do not converge in 100 (need 150 and 111), 0.4 does (87)</td></tr>
+<tr><td>preset_high_quality</td><td>512, 300, 0.01 / 0.03</td><td>0.1</td><td>states: dt 0.1 does not converge in 300 iterations; 0.2, 0.3, 0.4 converge in 215, 146, 112. Districts: 0.1 does not, 0.2, 0.3, 0.4 converge in 268, 188, 152</td></tr>
+</table>
+<p>A new <code>MorphOptions</code> default would not change the presets, because each sets <code>dt</code> explicitly.</p>
+<h2>Conclusions</h2>
+<ul><li>The default <code>MorphOptions.dt</code> stays 0.2. With refresh-on-rise a larger constant dt converges almost everywhere, and at the default tolerances it saves about 20 % at dt 0.3 and 25 to 40 % at 0.4 to 0.6. But the gain is irregular, tight tolerances cost more at most dt values from 0.25 up, districts have 42 and 80 invalid polygons at 0.5 and 0.6 against 24, the landmark border drift grows (z 3.7 at 0.2 to 4.8 at 0.3 and 5.3 at 0.4 with recompute_every 10), and from dt 0.5 up the final map is a visibly different shape. A 20 % saving is within the spread between neighboring dt values.</li><li>Change two presets: <code>preset_balanced</code> to dt 0.3 and <code>preset_high_quality</code> to dt 0.2 (scratch commit a4f0aea). They remove two real failures: balanced does not finish states in its 100 iterations at 0.2 and does at 0.3 (79); high quality at 0.1 does not finish in 300 iterations at grid 512. Districts under balanced still need <code>n_iter</code>, and <code>preset_fast</code> needs <code>n_iter</code> at any dt.</li><li>If a larger default is wanted anyway, 0.3 is the largest value with no regression at the default tolerances in these runs, at the price of the tight-tolerance and landmark effects.</li><li>recompute_every does not need to change with dt for the cost. It should be reduced in proportion (dt 0.4: 5) only where the drift of co-advected points matters.</li><li>A better lever for the end phase than a larger constant dt is a smaller step near convergence (the adaptive-step page); the tight-tolerance runs show why: the limit-cycle amplitude grows with dt.</li></ul>
+<h2>Caveats</h2>
+<ul><li>One run per cell; deterministic but chaotic in dt. The geometric means mix cases of different size and exclude counties and the grid 1024 and fine-dt rows.</li><li>Counties never converge for any dt, so they say nothing about dt. States grid 1024 was run at dt 0.2, 0.4 and 0.6 only, and dt 0.2 hits the iteration limit.</li><li>Presets were run with area_scale 1; results with other data may differ.</li><li>Shape differences mix the flow path with the stopping point; the districts symmetric difference is not scale-free.</li><li>Wall times were measured on a shared machine; the cost model is the primary metric.</li><li><code>docs/explanations/flow-cartogram-algorithm.md</code> lists <code>dt</code> with a default of 1.0 (line 187) while the code default is 0.2; not touched here.</li></ul>
+<div class="figure">
+<img src="convergence_districts_aniso.png" alt="Districts at 256 and 512, the three anisotropy runs and counties. Counties never leave a score of about 10.">
+<p class="caption">Districts at 256 and 512, the three anisotropy runs and counties. Counties never leave a score of about 10.</p>
+</div><div class="figure">
+<img src="convergence_states.png" alt="Score per iteration (log, dashed line at 1), one color per dt, states at grids 128, 256, 512 and the multiresolution coarse level.">
+<p class="caption">Score per iteration (log, dashed line at 1), one color per dt, states at grids 128, 256, 512 and the multiresolution coarse level.</p>
+</div><div class="figure">
+<img src="convergence_tight.png" alt="Tight tolerances (0.5 % / 1 %) on states and districts, and refresh_on_rise off. Above dt 0.2 the score ends in a limit cycle between about 1 and 5 that crosses 1 only by chance.">
+<p class="caption">Tight tolerances (0.5 % / 1 %) on states and districts, and refresh_on_rise off. Above dt 0.2 the score ends in a limit cycle between about 1 and 5 that crosses 1 only by chance.</p>
+</div><div class="figure">
+<img src="cost_vs_invalid.png" alt="Cost relative to dt 0.2 against invalid polygons, one point per run; open markers did not converge.">
+<p class="caption">Cost relative to dt 0.2 against invalid polygons, one point per run; open markers did not converge.</p>
+</div><div class="figure">
+<img src="landmarks_and_shape.png" alt="Left: border-band z of the issue 86 repro against dt x recompute_every. Middle and right: symmetric difference and centroid shifts of the final shape against the dt 0.2 shape.">
+<p class="caption">Left: border-band z of the issue 86 repro against dt x recompute_every. Middle and right: symmetric difference and centroid shifts of the final shape against the dt 0.2 shape.</p>
+</div><div class="figure">
+<img src="scorecard.png" alt="Rows dt, columns cases; cell = cost relative to dt 0.2, invalid polygons below, hatched = not converged.">
+<p class="caption">Rows dt, columns cases; cell = cost relative to dt 0.2, invalid polygons below, hatched = not converged.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

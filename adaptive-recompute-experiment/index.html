@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Adaptive field refresh and step control, and the multiresolution plateau</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Adaptive field refresh and step control, and the multiresolution plateau</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>investigate/adaptive-recompute</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-09 02:58</dd>
+<dt>Before</dt><dd>main @ 0124245</dd>
+<dt>After</dt><dd>investigate/adaptive-recompute @ 2650f6a (prototype, not for merging)</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC), congressional districts, 3,108 counties (Census 500k boundaries, 2020 total votes as sizing variable, ESRI:102008, simplified 1 km, densified 5 km); preset_balanced-like defaults, stall rule off, n_iter 400 (counties 300)</dd>
+</dl>
+<p class="desc">Does refreshing the velocity field when the error rises beat a fixed recompute_every, does step halving with rollback help, and why does the coarse multiresolution level plateau where a single grid converges? Refresh-on-rise is cost-neutral and halves the oscillations; step control does not help; the plateau is a sub-cell region (DC) that no grid cell centre ever lands in.</p>
+<p>An investigation, not a change: the prototype lives on the branch above (new <code>MorphOptions</code> fields <code>adaptive_tol_rise</code>, <code>adaptive_min_interval</code>, <code>step_control</code>, <code>step_rollback</code>, <code>step_dt_floor</code>, <code>step_dt_restore</code>; defaults reproduce current behavior). Scripts are in <code>scripts/</code> (they import the prototype from its worktree path, so check out commit 2650f6a to rerun them). One run per cell, on a machine with load average 0.1 to 5, so wall times are fairly reliable, but the cost model below is the primary metric.</p>
+<h2>Cost of one field recompute</h2>
+<p>One recompute (rasterize + FFT) relative to one plain advection step (min of 2 timings):</p>
+<table>
+<tr><th>case</th><th>grid 128</th><th>grid 256</th><th>grid 512</th><th>grid 1024</th></tr>
+<tr><td>states</td><td>9.2</td><td>12.0</td><td>24.2</td><td>70.9</td></tr>
+<tr><td>districts</td><td>18.2</td><td>20.9</td><td>23.1</td><td>46.8</td></tr>
+<tr><td>counties</td><td>21.4</td><td>47.5</td><td>28.5</td><td>not run</td></tr>
+</table>
+<p>So cost (in plain steps) = iterations + recomputes x ratio, and a short refresh interval is expensive: <code>recompute_every=2</code> costs 2 to 4 times the default, <code>=1</code> costs 5 to 10 times, although they save 20 to 25 % of the iterations.</p>
+<h2>Convergence plots</h2>
+<p>Score per iteration (below 1 is converged, dashed line), from the per-run histories in <code>data/</code>. Regenerate with <code>uv run python make_figures.py</code>.</p>
+<h2>Policies</h2>
+<ul><li><code>fixed R</code>: <code>recompute_every=R</code>.</li><li><code>adapt</code>: refresh when the combined score <code>max(mean_log/log2(1+mean_tol), max_log/log2(1+max_tol))</code> rises by more than <code>tol_rise</code> relative to the previous iteration, once the current field has been used for at least <code>min_interval</code> iterations; <code>recompute_every=10</code> is the maximum interval.</li><li><code>adSC</code>: <code>adapt</code> plus step control: a rise on the first iteration after a fresh field halves dt (floor dt/8), rolls back to the best or previous iterate and forces a refresh; a successful refresh multiplies dt by 1.5 up to the original.</li></ul>
+<p>Columns: status, iterations, recomputes, rises (total / once the score is below 20), final mean / max error %, best score (below 1 is converged), cost in plain steps.</p>
+<h2>States, default options</h2>
+<p>At grid 256 and 512 the default run does not oscillate; every adaptive and step-control variant is identical to <code>fixed10</code>.</p>
+<table>
+<tr><th>grid</th><th>policy</th><th>it</th><th>rec</th><th>rises</th><th>mean / max %</th><th>best</th><th>cost</th></tr>
+<tr><td>256</td><td>fixed10</td><td>113</td><td>12</td><td>0</td><td>0.32 / 4.4</td><td>0.45</td><td>257</td></tr>
+<tr><td>256</td><td>fixed5</td><td>108</td><td>22</td><td>0</td><td>0.43 / 6.6</td><td>0.67</td><td>372</td></tr>
+<tr><td>256</td><td>fixed2</td><td>107</td><td>54</td><td>0</td><td>0.15 / 1.0</td><td>0.10</td><td>755</td></tr>
+<tr><td>256</td><td>fixed1</td><td>106</td><td>106</td><td>0</td><td>0.60 / 7.1</td><td>0.72</td><td>1378</td></tr>
+<tr><td>512</td><td>fixed10</td><td>214</td><td>22</td><td>0</td><td>0.50 / 7.3</td><td>0.74</td><td>746</td></tr>
+<tr><td>512</td><td>fixed5</td><td>211</td><td>43</td><td>0</td><td>0.66 / 7.9</td><td>0.80</td><td>1252</td></tr>
+<tr><td>512</td><td>fixed2</td><td>210</td><td>105</td><td>0</td><td>0.42 / 4.7</td><td>0.48</td><td>2751</td></tr>
+<tr><td>512</td><td>fixed1</td><td>209</td><td>209</td><td>0</td><td>0.87 / 8.6</td><td>0.86</td><td>5267</td></tr>
+</table>
+<h2>States, strong anisotropy, grid 256 (rollbacks were 0 in every converging run)</h2>
+<p>Horizontal (theta = 0):</p>
+<table>
+<tr><th>policy</th><th>it</th><th>rec</th><th>rises</th><th>mean / max %</th><th>best</th><th>cost</th></tr>
+<tr><td>fixed10</td><td>245</td><td>25</td><td>17 / 17</td><td>1.00 / 9.7</td><td>0.97</td><td>545</td></tr>
+<tr><td>fixed5</td><td>198</td><td>40</td><td>2</td><td>1.04 / 9.9</td><td>0.99</td><td>678</td></tr>
+<tr><td>fixed2</td><td>185</td><td>93</td><td>0</td><td>0.52 / 9.0</td><td>0.91</td><td>1301</td></tr>
+<tr><td>fixed1</td><td>183</td><td>183</td><td>0</td><td>0.35 / 8.8</td><td>0.89</td><td>2379</td></tr>
+<tr><td>adapt tol 0</td><td>231</td><td>27</td><td>8</td><td>1.27 / 9.7</td><td>0.97</td><td>555</td></tr>
+<tr><td>adapt tol 1 %</td><td>233</td><td>27</td><td>9</td><td>1.30 / 9.6</td><td>0.96</td><td>557</td></tr>
+<tr><td>adapt tol 5 %</td><td>233</td><td>27</td><td>9</td><td>1.30 / 9.6</td><td>0.96</td><td>557</td></tr>
+<tr><td>adSC (all variants)</td><td>231 to 233</td><td>27</td><td>8 to 9</td><td>as adapt</td><td>as adapt</td><td>555 to 557</td></tr>
+</table>
+<p>Tangential:</p>
+<table>
+<tr><th>policy</th><th>it</th><th>rec</th><th>rises</th><th>mean / max %</th><th>best</th><th>cost</th></tr>
+<tr><td>fixed10</td><td>226</td><td>23</td><td>10</td><td>1.42 / 8.9</td><td>0.90</td><td>502</td></tr>
+<tr><td>fixed5</td><td>192</td><td>39</td><td>0</td><td>1.61 / 10.0</td><td>1.00</td><td>660</td></tr>
+<tr><td>fixed2</td><td>181</td><td>91</td><td>0</td><td>1.49 / 9.2</td><td>0.92</td><td>1273</td></tr>
+<tr><td>fixed1</td><td>180</td><td>180</td><td>0</td><td>1.52 / 9.2</td><td>0.92</td><td>2340</td></tr>
+<tr><td>adapt tol 0, min 1</td><td>222</td><td>24</td><td>3</td><td>1.85 / 9.2</td><td>0.92</td><td>510</td></tr>
+<tr><td>adapt tol 1 %, min 1</td><td>216</td><td>23</td><td>4</td><td>1.99 / 8.6</td><td>0.86</td><td>492</td></tr>
+<tr><td>adSC tol 1 %, min 1 (best or prev)</td><td>216</td><td>23</td><td>4</td><td>1.99 / 8.6</td><td>0.86</td><td>492</td></tr>
+</table>
+<p>Tilted (theta = pi/6):</p>
+<table>
+<tr><th>policy</th><th>it</th><th>rec</th><th>rises</th><th>mean / max %</th><th>best</th><th>cost</th></tr>
+<tr><td>fixed10</td><td>171</td><td>18</td><td>3</td><td>1.74 / 9.1</td><td>0.92</td><td>387</td></tr>
+<tr><td>fixed5</td><td>159</td><td>32</td><td>0</td><td>0.59 / 9.1</td><td>0.91</td><td>543</td></tr>
+<tr><td>fixed2</td><td>155</td><td>78</td><td>0</td><td>0.56 / 8.6</td><td>0.87</td><td>1091</td></tr>
+<tr><td>fixed1</td><td>155</td><td>155</td><td>0</td><td>0.42 / 7.2</td><td>0.73</td><td>2015</td></tr>
+<tr><td>adapt tol 0 or 1 %, min 1</td><td>169</td><td>18</td><td>1</td><td>1.10 / 9.5</td><td>0.95</td><td>385</td></tr>
+<tr><td>adSC tol 1 %, min 1 (best or prev)</td><td>169</td><td>18</td><td>1</td><td>1.10 / 9.5</td><td>0.95</td><td>385</td></tr>
+</table>
+<h2>Congressional districts, default options</h2>
+<table>
+<tr><th>grid</th><th>policy</th><th>it</th><th>rec</th><th>rises</th><th>mean / max %</th><th>best</th><th>cost</th></tr>
+<tr><td>256</td><td>fixed10</td><td>154</td><td>16</td><td>4</td><td>1.08 / 8.4</td><td>0.85</td><td>488</td></tr>
+<tr><td>256</td><td>fixed5</td><td>136</td><td>28</td><td>0</td><td>0.78 / 9.8</td><td>0.98</td><td>721</td></tr>
+<tr><td>256</td><td>fixed2</td><td>133</td><td>67</td><td>0</td><td>0.28 / 6.4</td><td>0.65</td><td>1533</td></tr>
+<tr><td>256</td><td>fixed1</td><td>131</td><td>131</td><td>0</td><td>0.27 / 2.9</td><td>0.30</td><td>2869</td></tr>
+<tr><td>256</td><td>adapt tol 0 or 1 %, min 1</td><td>150</td><td>16</td><td>2</td><td>1.07 / 8.0</td><td>0.81</td><td>484</td></tr>
+<tr><td>512</td><td>fixed10</td><td>263</td><td>27</td><td>0</td><td>0.60 / 9.5</td><td>0.95</td><td>887</td></tr>
+<tr><td>512</td><td>fixed5</td><td>258</td><td>52</td><td>0</td><td>0.27 / 6.6</td><td>0.67</td><td>1459</td></tr>
+<tr><td>512</td><td>fixed2</td><td>254</td><td>127</td><td>0</td><td>0.55 / 9.1</td><td>0.91</td><td>3188</td></tr>
+<tr><td>512</td><td>fixed1</td><td>253</td><td>253</td><td>0</td><td>0.61 / 9.1</td><td>0.91</td><td>6097</td></tr>
+<tr><td>512</td><td>adapt and adSC</td><td>263</td><td>27</td><td>0</td><td>as fixed10</td><td></td><td>887</td></tr>
+</table>
+<h2>Counties (3,108, 300 iterations; no policy converges)</h2>
+<p>The best score is about 10 (max error about 200 %) for every policy, so the plateau does not depend on the schedule.</p>
+<table>
+<tr><th>grid</th><th>policy</th><th>rec</th><th>rises</th><th>best score</th><th>cost</th><th>rollbacks</th></tr>
+<tr><td>256</td><td>fixed10</td><td>30</td><td>42</td><td>10.2</td><td>1725</td><td>0</td></tr>
+<tr><td>256</td><td>fixed5</td><td>60</td><td>44</td><td>10.6</td><td>3150</td><td>0</td></tr>
+<tr><td>256</td><td>fixed2</td><td>150</td><td>44</td><td>10.5</td><td>7425</td><td>0</td></tr>
+<tr><td>256</td><td>fixed1</td><td>300</td><td>58</td><td>10.4</td><td>14550</td><td>0</td></tr>
+<tr><td>256</td><td>adapt tol 0, min 1</td><td>45</td><td>25</td><td>9.2</td><td>2438</td><td>0</td></tr>
+<tr><td>256</td><td>adapt tol 1 %, min 2</td><td>33</td><td>11</td><td>11.5</td><td>1868</td><td>0</td></tr>
+<tr><td>256</td><td>adapt tol 5 %, min 2</td><td>31</td><td>42</td><td>9.8</td><td>1772</td><td>0</td></tr>
+<tr><td>256</td><td>adSC tol 1 %, min 1, rollback to best</td><td>98</td><td>112</td><td>12.3</td><td>4955</td><td>27</td></tr>
+<tr><td>256</td><td>adSC tol 1 %, min 1, rollback to previous</td><td>43</td><td>36</td><td>9.9</td><td>2342</td><td>8</td></tr>
+<tr><td>256</td><td>adSC tol 0, min 1, rollback to best</td><td>108</td><td>84</td><td>12.3</td><td>5430</td><td>10</td></tr>
+<tr><td>512</td><td>fixed10</td><td>30</td><td>5</td><td>11.7</td><td>1155</td><td>0</td></tr>
+<tr><td>512</td><td>fixed5</td><td>60</td><td>10</td><td>10.4</td><td>2010</td><td>0</td></tr>
+<tr><td>512</td><td>fixed2</td><td>150</td><td>10</td><td>11.1</td><td>4575</td><td>0</td></tr>
+<tr><td>512</td><td>fixed1</td><td>300</td><td>1</td><td>11.9</td><td>8850</td><td>0</td></tr>
+<tr><td>512</td><td>adapt tol 0, min 1</td><td>36</td><td>7</td><td>11.6</td><td>1326</td><td>0</td></tr>
+<tr><td>512</td><td>adapt tol 1 %, min 2</td><td>32</td><td>5</td><td>11.7</td><td>1212</td><td>0</td></tr>
+<tr><td>512</td><td>adapt tol 5 %, min 2</td><td>30</td><td>5</td><td>11.7</td><td>1155</td><td>0</td></tr>
+<tr><td>512</td><td>adSC tol 1 %, min 1 (best or prev)</td><td>32</td><td>5</td><td>11.7</td><td>1212</td><td>0</td></tr>
+<tr><td>512</td><td>adSC tol 0, min 1, rollback to best</td><td>36</td><td>4</td><td>11.6</td><td>1326</td><td>4</td></tr>
+</table>
+<p>Best score within a recompute budget, grid 256: within 10 / 20 / 30 recomputes, fixed10 gives 27.5 / 11.6 / 10.2, fixed2 gives 37 / 35 / 32, fixed1 gives 38 / 37 / 36, adapt tol 0 min 1 gives 27.5 / 12.3 / 9.5. Grid 512 within 30 recomputes: fixed10 11.7, fixed5 39, fixed2 45, fixed1 47, every adaptive variant 11.7.</p>
+<h2>Multiresolution (grids 128 / 256 / 512 / 1024, stall rule off, 300 iterations per level)</h2>
+<p>Levels 3 and 4 gave identical results because the finest levels are never reached.</p>
+<table>
+<tr><th>data</th><th>policy</th><th>per-level result</th><th>total cost</th></tr>
+<tr><td>states</td><td>fixed10, adapt, adSC (all variants)</td><td>128: completed at 300 (flat at score 13.6, max error 265 %); 256: converged in 16</td><td>616 (316 iterations, 32 recomputes)</td></tr>
+<tr><td>states</td><td>fixed5</td><td>converges at level 128 (62 iterations, 13 recomputes)</td><td>182</td></tr>
+<tr><td>states</td><td>fixed2 / fixed1</td><td>converges at level 128</td><td>324 / 561</td></tr>
+<tr><td>districts</td><td>fixed10</td><td>128: completed at 300 (min score 2.2); 256: converged in 14</td><td>902</td></tr>
+<tr><td>districts</td><td>fixed5 / fixed2</td><td>128 and 256 completed, 512 converged</td><td>3084 / 6716</td></tr>
+<tr><td>districts</td><td>fixed1</td><td>128 completed, 256 converged</td><td>6045</td></tr>
+<tr><td>districts</td><td>adapt tol 0, min 1</td><td>converged at level 128 in 210 iterations, 28 recomputes</td><td>720</td></tr>
+<tr><td>districts</td><td>adapt tol 1 % or 5 %, min 2</td><td>converged at level 128, 230 iterations, 35 recomputes</td><td>867</td></tr>
+<tr><td>districts</td><td>adSC (prev or best)</td><td>240 to 259 iterations, 41 to 42 recomputes</td><td>about 1005</td></tr>
+</table>
+<h2>Why the coarse states level plateaus (follow-up check)</h2>
+<p>The states multiresolution level 128 stays flat at a score of 13.6 for 300 iterations, while a single run with <code>grid_size=128</code> converges in 63 iterations. The options are not the difference (<code>MorphOptions()</code> defaults, <code>preset_balanced</code> and <code>preset_balanced</code> with <code>area_scale=1e-6</code> give the same result in both setups). The two grids differ slightly: the single grid is 128 x 88 with 68.2 x 68.7 km cells, the multiresolution grid is 128 x 89 with square 68.0 km cells.</p>
+<p>The failing region is DC:</p>
+<table>
+<tr><th>setup</th><th>worst region</th><th>area</th><th>target</th></tr>
+<tr><td>multiresolution level 128, after 300 iterations</td><td>DC, error -265 %</td><td>0.17 cells (771 km2)</td><td>3.64 cells (16,871 km2)</td></tr>
+<tr><td>single grid 128, after 63 iterations</td><td>ID, error -8.3 % (DC on target)</td><td>DC 3.60 cells</td><td>3.64 cells</td></tr>
+</table>
+<p>DC starts at 0.04 cells and contains no grid cell centre in either grid, so the density rasterization (cell-centre sampling) cannot see it and only the flow of its neighbors changes its area. In the single grid DC grows past a cell centre around iteration 25 (0.14 cells at iteration 21, 1.50 at 31), becomes visible, and reaches its target by iteration 63. In the multiresolution grid it creeps to 0.17 cells and never contains a centre, so it stays invisible and the run plateaus. The plateau is therefore decided by grid alignment relative to a sub-cell region, not by the schedule or the stall rule. This is the cell-centre sampling in #95; the missing warning for regions smaller than the coarsest grid is #93; and the error floor in #87 is why a &quot;converged&quot; single run can hide the same problem.</p>
+<h2>Findings</h2>
+<p>1. Lowest total cost at matched error: <code>recompute_every=10</code>, or adaptive refresh with 10 as the maximum interval. Adaptive stays within +/-3 % of fixed10 on every converging single-grid case (horizontal 555 vs 545, tangential 492 to 510 vs 502, tilted 385 vs 387, districts 256 484 vs 488) and is identical where there are no rises. 2. Adaptive refresh reduces the oscillations but does not remove them: rises once the score is below 20 go from 17 to 8 to 9 (horizontal), 10 to 3 to 4 (tangential), 3 to 1 (tilted), 4 to 2 (districts 256). A rise is only visible after the stale field has caused it, so about one rise per cycle remains. Only <code>recompute_every</code> of 2 or 1 gives zero rises on the anisotropy runs, at 2.3 to 2.8 and 5 to 10 times the cost. 3. Step control is not needed: rollbacks are 0 in every converging case, because the rise comes several iterations after a refresh, not on its first iteration. On counties it fires (8 to 27 rollbacks) and rolling back to the best iterate is harmful (cost 4955 to 5430, best score 12.3 against 10.2). It is also dangerous in the strong-anisotropy runs, where the best score is the early transient around iteration 26 to 28. 4. <code>tol_rise</code> (0, 1 %, 5 %) and the minimum interval (1 to 3) barely matter; tol 0 to 1 % with minimum interval 1 is a reasonable choice. 5. Fixed <code>recompute_every=5</code> removes most oscillations and saves 10 to 20 % of the iterations, at 1.2 to 1.5 times the cost of fixed10 at grid 256 (1.7 times at grid 512). 6. The counties plateau and the coarse multiresolution plateaus are independent of the refresh schedule.</p>
+<h2>Recommendation</h2>
+<ul><li>Do not make adaptive refresh or step control the default. An opt-in adaptive refresh (tol 0 to 1 %, minimum interval 1, maximum interval <code>recompute_every</code>) is a few lines and safe; alternatively document <code>recompute_every=5</code> as the quality setting.</li><li>Not tested: a predictive trigger (refresh when the descent rate falls, before the rise), #94&#x27;s error-dependent step size, counties at grid 1024.</li><li>At fine grids (ratio 25 to 70 per recompute) avoid schedules that refresh more often than every 10 iterations.</li></ul>
+<div class="figure">
+<img src="convergence_anisotropy.png" alt="Strong anisotropy, 49 states, grid 256. Top: full runs. Bottom: zoom once the score is below 20, with the field refreshes of the default (blue) and refresh-on-rise (orange) runs as ticks. The default run (thick blue) hides behind the orange line wherever the two are identical. Refresh on rise removes about half of the spikes; fixed intervals of 5 and 2 remove most or all of them.">
+<p class="caption">Strong anisotropy, 49 states, grid 256. Top: full runs. Bottom: zoom once the score is below 20, with the field refreshes of the default (blue) and refresh-on-rise (orange) runs as ticks. The default run (thick blue) hides behind the orange line wherever the two are identical. Refresh on rise removes about half of the spikes; fixed intervals of 5 and 2 remove most or all of them.</p>
+</div><div class="figure">
+<img src="convergence_counties.png" alt="3,108 counties at grid 256 and 512, 300 iterations. No policy converges; the score ends near 10 whatever the schedule, and step control with rollback to the best iterate is the one that keeps the curve flat at a worse value at grid 256.">
+<p class="caption">3,108 counties at grid 256 and 512, 300 iterations. No policy converges; the score ends near 10 whatever the schedule, and step control with rollback to the best iterate is the one that keeps the curve flat at a worse value at grid 256.</p>
+</div><div class="figure">
+<img src="convergence_states_districts.png" alt="Default options, states and districts at grid 256 and 512. Refresh on rise follows the default until the score first rises (districts at grid 256 is the one case with a rise).">
+<p class="caption">Default options, states and districts at grid 256 and 512. Refresh on rise follows the default until the score first rises (districts at grid 256 is the one case with a rise).</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

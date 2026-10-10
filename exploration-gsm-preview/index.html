@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GSM-style integrator preview</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>GSM-style integrator preview</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/75">#75</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>investigate/gsm-preview</dd>
+<dt>Base</dt><dd>fix/stall-detection</dd>
+<dt>Created</dt><dd>2026-10-09 16:20</dd>
+<dt>Before</dt><dd>fix/stall-detection @ 8441681</dd>
+<dt>After</dt><dd>investigate/gsm-preview @ 1ed9d16 (prototype, not for merging)</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC), congressional districts (432), 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6); baseline = MorphOptions defaults of fix/stall-detection (stall rule on, refresh_on_rise 0.01), n_iter 400 (counties 300); GSM-style prototype on the same grid as the baseline; NUMBA_NUM_THREADS=4</dd>
+</dl>
+<p class="desc">Quick preview of whether a Gastner-Seguy-More style integrator (rasterize, one Poisson solve, carry all vertices along a prescribed linear density path, repeat) looks promising compared with the current stall rule and refresh-on-rise stack. It converges on states and, with a blur of 2 to 4 cells, on districts, removes the sawtooth and fixes the coarse multiresolution plateau; it fails on counties and with velocity modulators, and loses regions with no grid cell centre at grid 128.</p>
+<p>A preview, not a solver: one run per cell, one machine, load average 0.2 to 7 (listed per row in <code>tables.md</code>; the districts, counties and anisotropy rows ran at load 1 to 3). Wall times are indicative; the cost model is the primary metric. Regenerate figures and <code>tables.md</code> with <code>uv run python make_figures.py</code>; the runs come from <code>scripts/run_case.py</code> (committed on the branch under <code>experiments/gsm_preview/</code>).</p>
+<h2>The prototype</h2>
+<p><code>scripts/gsm_proto.py</code>, adapted from the talk-work prototype (<code>scripts/proto_gsm.py</code>). One pass: rasterize the current polygons with the library rasterizer, optionally blur the density (sigma <code>blur0 * 0.5^pass</code> cells, mean preserved), one FFT Poisson solve (<code>v = grad phi</code>, <code>laplace phi = rho - rho_bar</code>), then carry all vertices from t = 0 to 1 with an explicit midpoint integrator through <code>v(x, t) = grad phi(x) / rho(x, t)</code>, <code>rho(x, t) = rho_bar + (1 - t)(rho(x, 0) - rho_bar)</code>, with adaptive steps (error tolerance 0.02 cells) or a fixed number of steps. No stall rule, no refresh logic, no per-pass step size. A pass costs one rasterization plus one FFT (the field-recompute ratio of the other pages: 12 plain steps for states at grid 256, 9.2 at 128, 20.9 for districts, 47.5 for counties) plus the vertex-velocity evaluations, counted as one plain step each (an adaptive step is 2 evaluations, a rejected step is 2 too).</p>
+<p>Accuracy is measured from the output geometries: linear relative error of area shares, <code>|a_i / sum(a) / (t_i / sum(t)) - 1|</code>. The score is the one of the other pages (mean and max log2 error over the default tolerances 5 % and 10 %; below 1 = converged). Validity is <code>shapely.is_valid</code>; self-intersections are the invalid reasons that say so.</p>
+<h2>Results</h2>
+<p>The first pass below score 1 is used for the GSM cost; the passes after it keep refining. Baseline = full run. Cost is in plain-step units: iterations plus recomputes times the ratio for the baseline; passes times the ratio plus vertex-velocity evaluations for GSM.</p>
+<table>
+<tr><th>case</th><th>variant</th><th>passes / iterations</th><th>velocity fields</th><th>cost</th><th>wall s</th><th>mean %</th><th>max %</th><th>regions &gt; 10 %</th><th>invalid</th><th>stability</th></tr>
+<tr><td>states 256</td><td>baseline</td><td>113</td><td>12</td><td>257</td><td>0.5</td><td>0.31</td><td>4.4</td><td>0</td><td>0</td><td>monotone</td></tr>
+<tr><td>states 256</td><td>GSM blur 1, pass 4</td><td>4</td><td>4</td><td>466</td><td>1.5</td><td>0.27</td><td>5.7</td><td>0</td><td>0</td><td>monotone</td></tr>
+<tr><td>states 256</td><td>GSM blur 1, pass 12</td><td>12</td><td>12</td><td>658</td><td>1.9</td><td>0.00</td><td>0.0</td><td>0</td><td>0</td><td>monotone</td></tr>
+<tr><td>states 128</td><td>baseline</td><td>63</td><td>7</td><td>127</td><td>0.3</td><td>1.19</td><td>7.8</td><td>0</td><td>0</td><td>monotone</td></tr>
+<tr><td>states 128</td><td>GSM, any blur</td><td>12</td><td>12</td><td>418 (blur 1)</td><td>1.2</td><td>2.1</td><td>92.9</td><td>1 (DC)</td><td>0</td><td>monotone, stuck at DC</td></tr>
+<tr><td>states, multires coarse 128x89</td><td>baseline</td><td>100, stalled</td><td>10</td><td>192</td><td>0.2</td><td>28.7</td><td>264</td><td>21 of 49</td><td>1</td><td>plateau at score 13.6</td></tr>
+<tr><td>states, multires coarse</td><td>GSM blur 0, pass 6</td><td>6</td><td>6</td><td>657</td><td>2.2</td><td>0.00 at pass 12</td><td>0.0</td><td>0</td><td>0</td><td>monotone</td></tr>
+<tr><td>states, multires coarse</td><td>GSM blur 1/2/4, pass 12</td><td>12</td><td>12</td><td>424 / 408 / 403 (first &lt; 1 at pass 7 / 8 / 9)</td><td>1.2 to 1.4</td><td>0.02 to 0.04</td><td>0.2 to 0.7</td><td>0</td><td>0</td><td>monotone</td></tr>
+<tr><td>districts 256</td><td>baseline</td><td>150</td><td>16</td><td>484</td><td>1.2 (load 1.8)</td><td>1.07</td><td>8.0</td><td>0</td><td>24</td><td>2 small rises</td></tr>
+<tr><td>districts 256</td><td>GSM blur 2, pass 9</td><td>9</td><td>9</td><td>1,050</td><td>9.2</td><td>0.11 at pass 12</td><td>2.3</td><td>0</td><td>19</td><td>monotone</td></tr>
+<tr><td>districts 256</td><td>GSM blur 4, pass 10</td><td>10</td><td>10</td><td>973</td><td>8.2</td><td>0.16 at pass 12</td><td>6.4</td><td>0</td><td>16</td><td>1 small rise</td></tr>
+<tr><td>districts 256</td><td>GSM blur 0 / 1</td><td>12</td><td>12</td><td>3,357 / 1,161</td><td>32 / 9.6</td><td>0.47 / 0.49</td><td>53 / 97</td><td>0</td><td>144 / 44</td><td>stuck, never below 1</td></tr>
+<tr><td>counties 256</td><td>baseline</td><td>300, stalled</td><td>45</td><td>2,438</td><td>6.4</td><td>58</td><td>2,118</td><td>69 %</td><td>158</td><td>best score 9.9, ends 12, 35 rises</td></tr>
+<tr><td>counties 256</td><td>GSM blur 1 / 4 / 8</td><td>10</td><td>10</td><td>3,671 / 3,003 / 2,237</td><td>70 / 54 / 38</td><td>61 to 64</td><td>4,595 to 8,390</td><td>72 %</td><td>275 to 968</td><td>no progress, score 46 to 66</td></tr>
+<tr><td>anisotropy horiz / tang / tilt</td><td>baseline</td><td>233 / 216 / 169</td><td>27 / 23 / 18</td><td>557 / 492 / 385</td><td>0.6 to 0.7</td><td>1.1 to 1.7</td><td>8.7 to 8.8</td><td>0</td><td>0 to 1</td><td>converged, horizontal run has spikes</td></tr>
+<tr><td>anisotropy</td><td>GSM with modulator on the per-pass field</td><td>12</td><td>12</td><td>13,800 to 37,100</td><td>46 to 128</td><td>52 to 95</td><td>113 to 592</td><td>84 to 100 %</td><td>30 to 45</td><td>diverges</td></tr>
+</table>
+<p>Notes:</p>
+<ul><li>At states 256 the baseline&#x27;s final error is the tolerance it stopped at; GSM has no stopping rule here, only a pass cap, and drives the error to 1e-4. To a matched stop (score below 1) it costs 1.8 times the baseline in plain steps (466 versus 257) and 2.8 times the wall time (the adaptive integrator takes up to 234 steps in the first pass and 6 once the field is smooth).</li><li>Wall time includes the integrator in Python/scipy (<code>map_coordinates</code>), which is not tuned; counting evaluations as plain steps is an approximation either way.</li><li>Districts: the failing variants lose one district (index 393, target share 0.22 %) that contains no grid cell centre at the start (69 of the 432 districts have none; only this one is lost, with blur 1; with blur 2 none is lost). Invalid polygons: baseline 24, GSM 16 to 19 at the same accuracy; neither is clean.</li><li>Counties: the baseline also fails (best score 9.9, ends at 12, 158 invalid polygons, 35 rises); the prototype does not fall below score 46 in 10 passes at blurs 1, 4 and 8 and produces 275 to 968 invalid polygons. Not investigated further (no larger grids, no more passes, no target floor).</li><li>Strong anisotropy: the modulator is cheap to express (one call on the per-pass velocity field, <code>scripts/run_case.py</code>) but wrong in principle. <code>v/rho</code> only equalizes the density along the prescribed path if <code>rho v</code> stays curl-free with fixed divergence; a direction-dependent gain breaks that, and the run diverges (14,000 to 37,000 evaluations). The Dx/Dy of the preset are not used by the prototype. A GSM version of anisotropy would need the tensor in the Poisson solve (the Dx/Dy route), not a post-hoc map.</li></ul>
+<h2>Stability and sensitivity</h2>
+<ul><li>Monotonicity: on states (all grids) zero rises in every variant. Districts: 0 rises at blur 2, 1 at blur 4, 5 with 4 fixed steps. The baseline had 0 rises on states and 2 on districts.</li><li>Blur: states converge for 0 to 4 cells, but blur 0 gives 1 invalid polygon and needs twice the evaluations (986 versus 400 to 514); the earlier finding (valid polygons only with at least 1 cell) holds. Districts are sensitive: blur 0 and 1 do not converge, blur 2 and 4 do; the result is not a smooth function of the blur.</li><li>Steps per pass: states tolerate 4 to 32 fixed steps (score below 1 at pass 4 for all); 4 and 8 steps leave 6 and 3 invalid polygons, 16 and 32 none. Districts are erratic: 8 fixed steps converges (0.15 % mean, 93 invalid), 4 steps explodes (97 % of regions above 10 %), 16 and 32 lose the same district as blur 1. The integrator step is a real tuning knob on harder inputs.</li><li>Stall rule and refresh: not needed in any case where the prototype converges; the error falls monotonically, there is nothing to refresh on, and the pass count is bounded (12 passes, converged by pass 4 to 10). It needs a stopping rule (score below 1, or no further improvement) and a guard for a lost region (error near 100 % while the others improve).</li></ul>
+<h2>Sub-cell regions (DC)</h2>
+<p>DC contains no cell centre at grid 128, at the multiresolution 128 x 89 grid, and at grid 256 (<code>dc_cells0</code> is 0 for all three). The rasterized density never sees a region without a cell centre, so the flow does not equalize it directly. The outcomes differ by case:</p>
+<table>
+<tr><th>case</th><th>baseline DC error</th><th>GSM DC error</th></tr>
+<tr><td>states 128</td><td>0.05 %</td><td>92 to 94 % (all 8 variants)</td></tr>
+<tr><td>multiresolution coarse</td><td>96 %</td><td>0 to 0.7 %</td></tr>
+<tr><td>states 256</td><td>0.09 %</td><td>0 %</td></tr>
+</table>
+<p>I did not investigate why DC is equalized in some runs (untested guess: neighbors push DC until a cell centre falls inside, after which it is rasterized and corrected). This is a grid-phase effect for both methods, so GSM does not remove the need for area-weighted rasterization (issue 95) or a minimum-resolution check (issue 93), but it does remove the baseline&#x27;s stall at the multiresolution plateau in this example.</p>
+<h2>Differences from the paper that limit the conclusion</h2>
+<ul><li>The paper and cartogram-cpp use exact polygon-cell clipping (area-weighted); this prototype uses the library&#x27;s cell-centre sampling and relies on blur. This is probably the main reason for the lost regions and the blur sensitivity, and it is a library property, not a GSM property.</li><li>cartogram-cpp integrates about 500 quadtree points through a closed-form density and maps the polygon vertices through a Delaunay triangulation with flip detection; this prototype carries all vertices and lets them cross, a likely source of the invalid polygons and of the wall time.</li><li>cartogram-cpp doubles the grid on stagnation, anneals the blur and floors tiny targets; the prototype has a fixed grid, a fixed annealing (0.5 per pass) and no floor.</li><li>The velocity uses the library&#x27;s Poisson solve (<code>laplace phi = rho - rho_bar</code>, then <code>v/rho(t)</code>), per the issue 75 addendum, not the paper&#x27;s exact Eq. 2 to 7.</li><li>Single runs, one machine, no repeated timings; counties only 10 passes at grid 256.</li></ul>
+<h2>Recommendation</h2>
+<p>A full experiment looks worth doing, scoped as follows (judgment from this preview, not a measurement of effort):</p>
+<ul><li>In favor: converges on the states at every blur from 0 to 4 and every step count from 4 to 32 in 4 to 9 passes with no sawtooth and no stall/refresh logic; reaches 1e-4 accuracy where the baseline stops at its tolerance; fixes the multiresolution coarse-level plateau on states; converges on districts at blur 2 to 4 with fewer invalid polygons.</li><li>Against: to a matched stop it costs 1.8 to 2.2 times the baseline in plain steps and 2.8 to 8 times the wall time on states and districts at grid 256 in this implementation (a speed-up is not seen; a recompute costs 12 to 21 plain steps and the baseline needs only 12 to 16 of them); fails on counties; fails with velocity modulators; sensitive to blur and step count on districts; sub-cell regions still lost at grid 128.</li><li>A full experiment should test: (1) exact (area-weighted) rasterization (issue 95) with the prototype; (2) integrating a sample of points plus a vertex map instead of all vertices (cost and validity); (3) counties with a larger grid, more passes and a target floor; (4) states at grid 512 and 1024, the original motivation of issue 75; (5) combinations with exact area coverage, the adaptive step and the restart cap, only if (1) to (4) are positive. Effort: a few days for a clean branch experiment (the prototype is about 120 lines; the expense is the experiments).</li><li>Library parts a real implementation would touch: <code>algorithm.py</code> (a second loop in passes, vertex integration, no recompute-every logic), <code>MorphOptions</code> (method selector, blur, steps), convergence/stall semantics (no <code>STALLED</code>; needs a stopping rule and a lost-region guard), velocity modulators (<code>DirectionalTensor</code>, <code>BoundaryDecay</code>, <code>Smooth</code> break the prescribed-path assumption: they would move into the Poisson solve or be dropped for this method), snapshots and animation (one snapshot per pass; the t = 0 to 1 path could be sampled), co-advection of landmarks and <code>displacement_coords</code> (the same velocity function can carry them; not tested), and the licence question for go_cart / cartogram-cpp if any code is ported (this prototype is written from the published idea).</li></ul>
+<div class="figure">
+<img src="convergence_anisotropy.png" alt="The modulator experiment: baseline converges in 169 to 233 iterations, the prototype wanders between 10 and 90.">
+<p class="caption">The modulator experiment: baseline converges in 169 to 233 iterations, the prototype wanders between 10 and 90.</p>
+</div><div class="figure">
+<img src="convergence_districts_counties.png" alt="Districts (blur 2 and 4 converge, blur 0 and 1 stop at a lost region) and counties (neither method converges).">
+<p class="caption">Districts (blur 2 and 4 converge, blur 0 and 1 stop at a lost region) and counties (neither method converges).</p>
+</div><div class="figure">
+<img src="convergence_states.png" alt="States at grid 256, 128 and the multiresolution coarse level; left baseline score per iteration, middle GSM score per pass (one color per blur), right score versus cost in plain steps (the baseline&#x27;s cost axis is stretched linearly over iterations, an approximation). The GSM traces fall monotonically from 45 to below 1 in 4 to 9 passes and keep falling by about a factor of 3 per pass; there is no sawtooth. At grid 128 they flatten at 27 (DC).">
+<p class="caption">States at grid 256, 128 and the multiresolution coarse level; left baseline score per iteration, middle GSM score per pass (one color per blur), right score versus cost in plain steps (the baseline&#x27;s cost axis is stretched linearly over iterations, an approximation). The GSM traces fall monotonically from 45 to below 1 in 4 to 9 passes and keep falling by about a factor of 3 per pass; there is no sawtooth. At grid 128 they flatten at 27 (DC).</p>
+</div><div class="figure">
+<img src="sensitivity.png" alt="Left: blur 0 to 4 cells (adaptive steps). Right: fixed number of steps per pass (4 to 32) at blur 1.">
+<p class="caption">Left: blur 0 to 4 cells (adaptive steps). Right: fixed number of steps per pass (4 to 32) at blur 1.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

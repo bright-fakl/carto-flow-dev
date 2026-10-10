@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Area-weighted density rasterization</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Area-weighted density rasterization</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/95">#95</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>investigate/area-coverage</dd>
+<dt>Base</dt><dd>fix/stall-detection</dd>
+<dt>Created</dt><dd>2026-10-09 15:22</dd>
+<dt>Before</dt><dd>fix/stall-detection @ 8441681</dd>
+<dt>After</dt><dd>investigate/area-coverage @ 3284c33</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC), 432 congressional districts, 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6); default options and three strong-anisotropy setups (DirectionalTensor Dpar=4, Dperp=0.3: horizontal, tangential, tilted pi/6, preset_balanced values, area_scale 1e-6); grids 128, 256, 512 (1024 for timing and one counties run); n_iter 400 (counties 300)</dd>
+</dl>
+<p class="desc">Does rasterizing the density by area coverage instead of cell-center sampling change flow cartogram accuracy, cost and stability, and how does it interact with stall detection and refresh-on-rise? It lets sub-cell regions participate (the multiresolution plateau and the grid-128 anisotropy failures disappear), the exact numba version costs no more than center sampling, but it leaves the sawtooth, the counties plateau and the border drift unchanged.</p>
+<p>An investigation, not a change. The prototype is on <code>investigate/area-coverage</code> (from <code>fix/stall-detection</code>, local commit 3284c33). Unless a row says &quot;off&quot;, results use <code>refresh_on_rise=0.01</code> (the setting of 8441681); &quot;off&quot; is the setting of b0657b5. Full tables are in <code>tables_all.md</code>; scripts and per-run data are in <code>scripts/</code> and <code>data/</code>.</p>
+<h2>What was built</h2>
+<ul><li>New <code>MorphOptions.density_coverage</code> (default <code>None</code>, the current cell-center sampling). An integer <code>s &gt;= 2</code> supersamples <code>s x s</code> points per cell; <code>&quot;exact&quot;</code> computes exact coverage with a numba kernel that integrates the polygon edges per cell (signed-area accumulation, the scanline font-rasterizer method). Each cell takes the coverage-weighted mean of the region densities plus the uncovered fraction times the mean density. The exact kernel matches shapely clipping to about 1e-13 on states, districts and counties.</li><li>The 160 existing flow, density and options tests pass.</li></ul>
+<h2>Method</h2>
+<p>Convergence runs used the stall rule off, and the stall rule (patience 4) was replayed offline on each score history. Cost = iterations + recomputes x ratio, with the recompute-to-step ratio measured per variant. Accuracy is measured from the output geometries as |a_i/sum(a) / (t_i/sum(t)) - 1| (&quot;ext&quot;). &quot;Rises&quot; counts iterations where the score rises once it is below 20. Timing used <code>NUMBA_NUM_THREADS=4</code> at machine load 15 to 20, so wall times are noisy and only ratios between variants mean anything.</p>
+<h2>Rasterization time (ms per call, min of 3)</h2>
+<table>
+<tr><th>case</th><th>grid</th><th>center</th><th>s2</th><th>s4</th><th>s8</th><th>exact</th></tr>
+<tr><td>states</td><td>128</td><td>4</td><td>11</td><td>17</td><td>43</td><td>3</td></tr>
+<tr><td>states</td><td>256</td><td>5</td><td>18</td><td>43</td><td>88</td><td>4</td></tr>
+<tr><td>states</td><td>512</td><td>13</td><td>50</td><td>153</td><td>555</td><td>10</td></tr>
+<tr><td>states</td><td>1024</td><td>43</td><td>165</td><td>553</td><td>2155</td><td>30</td></tr>
+<tr><td>districts</td><td>128</td><td>23</td><td>69</td><td>76</td><td>141</td><td>11</td></tr>
+<tr><td>districts</td><td>256</td><td>28</td><td>86</td><td>114</td><td>232</td><td>11</td></tr>
+<tr><td>districts</td><td>512</td><td>38</td><td>110</td><td>223</td><td>639</td><td>13</td></tr>
+<tr><td>districts</td><td>1024</td><td>68</td><td>240</td><td>674</td><td>2301</td><td>31</td></tr>
+<tr><td>counties</td><td>128</td><td>120</td><td>430</td><td>438</td><td>489</td><td>37</td></tr>
+<tr><td>counties</td><td>256</td><td>161</td><td>469</td><td>498</td><td>607</td><td>37</td></tr>
+<tr><td>counties</td><td>512</td><td>145</td><td>483</td><td>589</td><td>956</td><td>43</td></tr>
+<tr><td>counties</td><td>1024</td><td>205</td><td>600</td><td>957</td><td>2315</td><td>64</td></tr>
+</table>
+<p>Exact is 1.3 to 5 times faster than center sampling; supersampling is 3 times (s2) to 50 times (s8) slower. The recompute-to-step ratio on states at grid 256 is 10 for center, 8 for exact, 47 for s4 and 130 to 150 for s8; on counties at grid 256 it is 28 for center, 10 for exact and 75 for s4.</p>
+<h2>Accuracy and stability, grid 256, refresh_on_rise on</h2>
+<table>
+<tr><th>case</th><th>raster</th><th>it</th><th>rec</th><th>cost</th><th>lib mean / max %</th><th>ext mean / max %</th><th>rises</th><th>spike</th></tr>
+<tr><td>states</td><td>center</td><td>113</td><td>12</td><td>236</td><td>0.32 / 4.4</td><td>0.31 / 4.4</td><td>0</td><td>0.99</td></tr>
+<tr><td>states</td><td>s2</td><td>111</td><td>12</td><td>393</td><td>0.78 / 9.7</td><td>0.78 / 9.7</td><td>0</td><td>0.99</td></tr>
+<tr><td>states</td><td>s4</td><td>112</td><td>12</td><td>699</td><td>0.21 / 0.8</td><td>0.21 / 0.8</td><td>0</td><td>0.99</td></tr>
+<tr><td>states</td><td>s8</td><td>112</td><td>12</td><td>1886</td><td>0.20 / 0.8</td><td>0.20 / 0.7</td><td>0</td><td>0.99</td></tr>
+<tr><td>states</td><td>exact</td><td>112</td><td>12</td><td>220</td><td>0.20 / 0.8</td><td>0.20 / 0.8</td><td>0</td><td>0.99</td></tr>
+<tr><td>horizontal</td><td>center</td><td>233</td><td>27</td><td>502</td><td>1.30 / 9.6</td><td>1.30 / 8.8</td><td>9</td><td>1.39</td></tr>
+<tr><td>horizontal</td><td>s4</td><td>211</td><td>24</td><td>1339</td><td>0.66 / 9.1</td><td>0.65 / 8.3</td><td>5</td><td>1.70</td></tr>
+<tr><td>horizontal</td><td>exact</td><td>207</td><td>24</td><td>398</td><td>1.14 / 9.9</td><td>1.11 / 9.0</td><td>5</td><td>1.33</td></tr>
+<tr><td>tangential</td><td>center</td><td>216</td><td>23</td><td>487</td><td>1.99 / 8.6</td><td>1.72 / 8.7</td><td>4</td><td>1.09</td></tr>
+<tr><td>tangential</td><td>s4</td><td>187</td><td>20</td><td>1322</td><td>1.95 / 8.3</td><td>1.96 / 7.7</td><td>3</td><td>1.16</td></tr>
+<tr><td>tangential</td><td>exact</td><td>187</td><td>20</td><td>340</td><td>1.49 / 8.0</td><td>1.52 / 7.5</td><td>3</td><td>1.14</td></tr>
+<tr><td>tilted</td><td>center</td><td>169</td><td>18</td><td>380</td><td>1.10 / 9.5</td><td>1.09 / 8.8</td><td>1</td><td>1.18</td></tr>
+<tr><td>tilted</td><td>s4</td><td>162</td><td>17</td><td>956</td><td>1.39 / 7.7</td><td>1.38 / 7.2</td><td>0</td><td>0.99</td></tr>
+<tr><td>tilted</td><td>exact</td><td>162</td><td>17</td><td>327</td><td>1.21 / 8.5</td><td>1.19 / 7.8</td><td>0</td><td>0.99</td></tr>
+</table>
+<h2>Grid 128, where center sampling fails</h2>
+<table>
+<tr><th>case</th><th>raster</th><th>status</th><th>it</th><th>cost</th><th>ext mean / max / share &gt;10 %</th><th>rises</th></tr>
+<tr><td>states</td><td>center</td><td>converged</td><td>63</td><td>106</td><td>1.19 / 7.8 / 0</td><td>0</td></tr>
+<tr><td>states</td><td>exact</td><td>converged</td><td>62</td><td>95</td><td>1.30 / 8.9 / 0</td><td>1</td></tr>
+<tr><td>horizontal</td><td>center</td><td>not converged (stall at 160)</td><td>400</td><td>734</td><td>3.2 / 19.4 / 4.1</td><td>149</td></tr>
+<tr><td>horizontal</td><td>exact</td><td>converged</td><td>203</td><td>348</td><td>1.28 / 8.9 / 0</td><td>16</td></tr>
+<tr><td>tangential</td><td>center</td><td>not converged (stall at 210)</td><td>400</td><td>713</td><td>10.1 / 41 / 38.8</td><td>149</td></tr>
+<tr><td>tangential</td><td>exact</td><td>converged</td><td>238</td><td>405</td><td>0.65 / 9.0 / 0</td><td>17</td></tr>
+<tr><td>tilted</td><td>center</td><td>converged</td><td>128</td><td>243</td><td>0.68 / 9.1 / 0</td><td>6</td></tr>
+<tr><td>tilted</td><td>exact</td><td>converged</td><td>182</td><td>317</td><td>2.49 / 8.8 / 0</td><td>40</td></tr>
+</table>
+<p>Tilted at grid 128 is the one case where center is better (128 iterations against 182 for exact; s2, s4 and s8 take 188 to 205). At grid 512 every variant converges in identical iteration counts (214 states, 355 to 357 horizontal, 306 tilted). Districts converge in 145 to 150 iterations at grid 256 and 263 to 265 at 512 for every variant; cost at 256 / 512 is 405 / 871 for center, 253 / 634 for exact and 1029 / 3374 for s4.</p>
+<h2>Multiresolution (min 128, 3 levels, stall rule off, 300 iterations per level)</h2>
+<table>
+<tr><th>data</th><th>refresh</th><th>raster</th><th>level 128</th><th>later levels</th><th>cost</th><th>ext mean / max %</th></tr>
+<tr><td>states</td><td>on or off</td><td>center</td><td>300 it, flat at 13.6</td><td>256: converged in 34</td><td>593</td><td>0.23 / 5.6 (DC)</td></tr>
+<tr><td>states</td><td>on or off</td><td>s2 / s4 / s8</td><td>converged in 62</td><td>none</td><td>161 / 249 / 393</td><td>1.2 / 7.2 to 7.9</td></tr>
+<tr><td>states</td><td>on or off</td><td>exact</td><td>converged in 63</td><td>none</td><td>124</td><td>1.6 / 9.2</td></tr>
+<tr><td>districts</td><td>on</td><td>center</td><td>converged in 231</td><td>none</td><td>768</td><td>0.15 / 8.7</td></tr>
+<tr><td>districts</td><td>on</td><td>s2 / s4 / s8</td><td>converged in 162 / 156 / 143</td><td>none</td><td>916 / 1131 / 1466</td><td>0.6 to 2.2 / 8.4 to 9.2</td></tr>
+<tr><td>districts</td><td>on</td><td>exact</td><td>converged in 123</td><td>none</td><td>276</td><td>0.77 / 8.3</td></tr>
+<tr><td>districts</td><td>off</td><td>center</td><td>300 it, best 2.2</td><td>256: converged in 3</td><td>770</td><td>1.0 / 7.2</td></tr>
+<tr><td>districts</td><td>off</td><td>s2</td><td>300 it, best 3.5</td><td>256 and 512: 300 each, never converges</td><td>5271</td><td>0.8 / 14.0</td></tr>
+<tr><td>districts</td><td>off</td><td>s4 / s8</td><td>300 it, best 2.7 / 3.2</td><td>256: converged in 2 / 13</td><td>1504 / 2434</td><td>0.5 / 7.2, 0.7 / 8.1</td></tr>
+<tr><td>districts</td><td>off</td><td>exact</td><td>300 it, best 2.6</td><td>256: converged in 45</td><td>601</td><td>0.46 / 8.4</td></tr>
+</table>
+<p>With the stall rule on, the center level 128 stalls at 100 iterations on states and 240 on districts with refresh off.</p>
+<p>Regions below one cell, and regions with no cell centre:</p>
+<table>
+<tr><th>data</th><th>grid</th><th>below one cell</th><th>no cell centre</th></tr>
+<tr><td>states</td><td>128</td><td>2</td><td>2</td></tr>
+<tr><td>states</td><td>256</td><td>1</td><td>1</td></tr>
+<tr><td>states</td><td>512</td><td>1</td><td>0</td></tr>
+<tr><td>districts</td><td>128</td><td>203</td><td>150</td></tr>
+<tr><td>districts</td><td>256</td><td>115</td><td>69</td></tr>
+<tr><td>districts</td><td>512</td><td>33</td><td>28</td></tr>
+<tr><td>districts</td><td>1024</td><td>6</td><td>5</td></tr>
+</table>
+<h2>Counties (300 iterations, refresh on)</h2>
+<table>
+<tr><th>grid</th><th>raster</th><th>best score</th><th>rises</th><th>lib mean / max %</th><th>ext mean / max / share &gt;10 %</th><th>cost</th></tr>
+<tr><td>256</td><td>center</td><td>9.9</td><td>40</td><td>4.5 / 156</td><td>58 / 2118 / 69</td><td>1560</td></tr>
+<tr><td>256</td><td>s2 / s4 / s8</td><td>7.6 / 8.2 / 9.1</td><td>52 / 76 / 82</td><td>3.2 / 2.5 / 3.7</td><td>49 / 46 / 52 (mean)</td><td>3896 / 4028 / 3547</td></tr>
+<tr><td>256</td><td>exact</td><td>9.2</td><td>110</td><td>3.2 / 139</td><td>51 / 8561 / 65</td><td>708</td></tr>
+<tr><td>512</td><td>center</td><td>11.7</td><td>5</td><td>8.0 / 204</td><td>26 / 2812 / 43</td><td>1274</td></tr>
+<tr><td>512</td><td>s2 / s4 / s8</td><td>9.5 / 9.7 / 8.7</td><td>3 / 1 / 5</td><td>6.4 / 6.0 / 6.7</td><td>22 / 21 / 21 (mean)</td><td>2762 / 3283 / 5291</td></tr>
+<tr><td>512</td><td>exact</td><td>8.7</td><td>3</td><td>5.1 / 130</td><td>19 / 1310 / 35</td><td>707</td></tr>
+<tr><td>1024</td><td>center</td><td>48.1</td><td>0</td><td>147 / 9667</td><td>397 / 22851 / 92</td><td>1451</td></tr>
+<tr><td>1024</td><td>exact</td><td>48.1</td><td>0</td><td>148 / 9662</td><td>397 / 22815 / 92</td><td>888</td></tr>
+</table>
+<h2>#86 border-band z (the issue&#x27;s repro)</h2>
+<p>The start z is +0.6. Results are identical with refresh-on-rise on or off, because the score never rises in these runs.</p>
+<table>
+<tr><th>grid</th><th>recompute_every</th><th>center</th><th>s4</th><th>exact</th></tr>
+<tr><td>256</td><td>10</td><td>+3.55 (496 vs 435)</td><td>+3.71</td><td>+3.77</td></tr>
+<tr><td>256</td><td>1</td><td>+2.31</td><td>+2.47</td><td>+2.47</td></tr>
+<tr><td>512</td><td>10</td><td>+2.70</td><td>+2.70</td><td>+2.71</td></tr>
+<tr><td>512</td><td>1</td><td>+1.09</td><td>+1.33</td><td>+1.33</td></tr>
+</table>
+<h2>Robustness</h2>
+<p>Each cell covers 56 runs: 7 case-grids (states at 128, 256 and 512, the three anisotropy runs at 256, districts at 256) x dt in {0.1, 0.2, 0.4, 0.6} x recompute_every in {10, 5}. No run diverged.</p>
+<table>
+<tr><th>raster</th><th>refresh_on_rise 0.01 (converged / not)</th><th>refresh_on_rise off (converged / not)</th></tr>
+<tr><td>center</td><td>53 / 3</td><td>49 / 7</td></tr>
+<tr><td>s4</td><td>54 / 2</td><td>49 / 7</td></tr>
+<tr><td>exact</td><td>53 / 3</td><td>48 / 8</td></tr>
+</table>
+<p>The runs that do not converge all hit the 400-iteration limit; most are dt 0.4 to 0.6 without refresh-on-rise, and four dt 0.1 runs at states grid 512 need more than 400 iterations with every variant.</p>
+<h2>Answers</h2>
+<p>1. **States and the anisotropy runs at 128, 256 and 512.** s4, s8 and exact are equivalent in accuracy and iterations; s2 is noisy (up to 9.7 % max error), no better than center. Coverage differs from center only where regions are sub-cell. At grid 128 center fails horizontal and tangential and every coverage variant converges; at grid 256 the DC error drops from 4.4 % to 0.8 % in the same 112 iterations; at grid 512 the results are identical. 2. **The multiresolution plateau is gone.** DC and the other sub-cell regions take part, so level 128 converges in 62 to 63 iterations (center sits flat at 13.6 for 300), matching the single grid-128 run. On districts, with refresh-on-rise on, level 128 converges in 123 iterations with exact against 231 with center (cost 276 against 768). Without refresh-on-rise, districts at 128 plateau (best 2.2 to 3.5) for every rasterizer: refresh-on-rise is what unblocks districts, not coverage. 3. **Districts and counties.** Districts at 256 and 512 are unchanged in iterations and cheaper with exact. The counties plateau barely moves (best 9.9 to 8.7 to 9.2 at grid 256, 11.7 to 8.7 at 512) and nothing converges. The worst regions have tiny targets: start areas of 1.5 to 14 cells and target areas of 0.003 to 0.05 cell (66 to 1165 votes). At grid 256, 2096 of 3108 targets are below one cell (856 at 512, 164 at 1024). These regions must shrink 100 to 500 times with a driving force proportional to their remaining area, so the rasterizer is not the limit. The large &quot;ext&quot; errors against the small library errors are #87. 4. **#86.** Coverage does not change the drift (z +3.55 for center, +3.77 for exact at grid 256), and the dependence on <code>recompute_every</code> is unchanged, which points to stale-field effects, not the rasterizer. 5. **Interaction with stall and refresh-on-rise.** Rises below score 20 at grid 256, refresh on / off: horizontal 9 / 17 (center) and 5 / 13 (exact); tangential 4 / 10 and 3 / 13; tilted 1 / 3 and 0 / 0. Spike sizes stay at 1.3 to 1.7. Coverage reduces iteration counts by 5 to 12 % on the anisotropy runs, but the sawtooth stays. At dt 0.4 to 0.6 refresh-on-rise is still needed (49 against 53 converged runs, the same for every raster). The replayed stall rule never fires on a run that converges; it fires only on counties and the grid-128 center anisotropy runs, and coverage removes the latter.</p>
+<h2>Recommendation</h2>
+<ul><li>Do the stall and refresh-on-rise work first: it governs robustness at large dt and the sawtooth, and coverage replaces none of it. Then add <code>&quot;exact&quot;</code> coverage as its own change.</li><li>Exact coverage is faster than center sampling, conserves mass, and removes the sub-cell failures (the multiresolution plateau, the grid-128 anisotropy failures, DC). It could become the default after a visual check. Supersampling adds only cost over exact.</li><li>Coverage removes the &quot;coarse level did not converge&quot; problem for sub-cell regions in #93, but counties-style sub-cell targets still need #93 and a resolution warning.</li></ul>
+<h2>Surprises</h2>
+<ul><li>Exact coverage is faster than center sampling, because the edge-integration kernel never tests individual cells.</li><li>Coverage did not touch #86 or the counties plateau; the counties problem is sub-cell targets, not sub-cell starts.</li><li>With coverage, multiresolution finishes at level 128, so the final geometry is only as accurate as the tolerance (ext max 7 to 9 %); center ends with a better mean error (0.15 to 0.23 %) only because it ran many more iterations.</li><li>Coverage is not uniformly better on iteration counts: tilted at grid 128 is slower with every coverage variant, and tangential at 256 with refresh off has more rises with exact (13 against 10).</li></ul>
+<div class="figure">
+<img src="convergence_counties.png" alt="Counties at grids 256 and 512.">
+<p class="caption">Counties at grids 256 and 512.</p>
+</div><div class="figure">
+<img src="convergence_districts.png" alt="Districts at grids 256 and 512.">
+<p class="caption">Districts at grids 256 and 512.</p>
+</div><div class="figure">
+<img src="convergence_multires.png" alt="Multiresolution level traces for states and districts.">
+<p class="caption">Multiresolution level traces for states and districts.</p>
+</div><div class="figure">
+<img src="convergence_states_aniso.png" alt="Score per iteration for states and the three anisotropy runs; the legend iteration counts come from the horizontal grid-128 panel only.">
+<p class="caption">Score per iteration for states and the three anisotropy runs; the legend iteration counts come from the horizontal grid-128 panel only.</p>
+</div><div class="figure">
+<img src="raster_time.png" alt="Rasterization time per call by variant and grid.">
+<p class="caption">Rasterization time per call by variant and grid.</p>
+</div><div class="figure">
+<img src="sawtooth_anisotropy.png" alt="The sawtooth with and without exact coverage, refresh-on-rise on and off.">
+<p class="caption">The sawtooth with and without exact coverage, refresh-on-rise on and off.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

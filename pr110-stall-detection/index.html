@@ -1,0 +1,207 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #110: Stall detection per field-refresh cycle; return the best iterate</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #110: Stall detection per field-refresh cycle; return the best iterate</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/110">https://github.com/bright-fakl/carto-flow/pull/110</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/81">#81</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>fix/stall-detection</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-09 00:14</dd>
+<dt>Updated</dt><dd>2026-10-09 10:50</dd>
+<dt>Before</dt><dd>main</dd>
+<dt>After</dt><dd>fix/stall-detection @ 8441681</dd>
+<dt>Inputs</dt><dd>US states (bundled, 49 incl. DC) with preset_balanced, area_scale=1e-6, n_iter=400 for the anisotropy runs; default options and grid_size=512 as unchanged controls; forced non-converging runs; US states and congressional districts (bundled) for multiresolution</dd>
+</dl>
+<p class="desc">The flow-cartogram stall rule judges fixed windows of iterations (progress = the window minimum of a still violated mean or max error ratio improves by 2%; stall = 4 windows without progress), the best iterate is returned when a run does not converge, and the result reports best_iteration and stop_reason. Look at the three strong-anisotropy runs (now converged), the cycle minima figure and the best-vs-last maps.</p>
+<h2>What changed</h2>
+<ul><li>Stall rule: a cycle is a fixed window of <code>max(recompute_every, 10)</code> iterations counted from iteration 1, independent of when the field is refreshed. Per cycle the minimum of the mean ratio (<code>mean/mean_tol</code>) and of the max ratio (<code>max/max_tol</code>) is recorded; a ratio below 1 is satisfied. A component counts only while it is still violated (cycle minimum above 1) and its minimum is lower than that component&#x27;s best so far by at least <code>stall_min_improvement</code> (default 2%); improvements of a satisfied component do not count. A cycle is progress if a component counts. The run stalls after <code>stall_patience</code> consecutive cycles without progress (default 4; it was a cumulative count of 5 mean-error increases). <code>None</code> still disables it.</li><li><code>MorphOptions.refresh_on_rise</code> (see below): opt-in in the second-to-last commit; the last commit (8441681) sets its default to 0.01 and can be dropped. The tables below set it explicitly, and make_figures.py runs the stall comparisons with the fixed schedule.</li><li>Best iterate: a run that ends without converging (<code>STALLED</code> or <code>COMPLETED</code>) returns the iterate with the lowest per-iteration score <code>max(mean ratio, max ratio)</code> (geometry, landmarks and coords from the same iteration). The final iterate keeps its snapshot, listed before the best one.</li><li><code>Cartogram.best_iteration</code> and <code>Cartogram.stop_reason</code> (<code>StopReason</code>: <code>CONVERGED</code>, <code>STALL_PATIENCE</code>, <code>ITERATION_LIMIT</code>).</li></ul>
+<h2>Strong anisotropy (trajectories.png)</h2>
+<p>Score per iteration (below 1 is converged), dot = stop. The curves of main and fix coincide until main stops. Main stalls at 190, 215 and 170; the fix runs on and converges. The tangential and tilted runs have a plateau of about 90 iterations where the max error stays fixed while the mean error falls; that counts as progress through the mean component.</p>
+<p>![trajectories](trajectories.png)</p>
+<h2>Cycle minima (cycles.png)</h2>
+<p>Per-cycle minima of the mean and max components on the sawtooth, with where the old and the new rule stop. Left: horizontal anisotropy, the cycle minima keep falling, so the new rule does not stop (converges at 245; old rule stalled at 190). Right: <code>preset_balanced</code> with <code>dt=0.6</code>, where the step is too large; the minima stop improving after iteration 50 and the new rule stalls at 90 and returns iteration 43.</p>
+<p>![cycles](cycles.png)</p>
+<h2>Best vs last iterate (best_vs_last.png)</h2>
+<p>Two runs that do not converge. Colors are signed area errors (-30% to 30%). Top: 0.5% / 1% tolerances, <code>n_iter=300</code> (main stalls at 119 on a spike and returns it; the new rule stalls at 200 and returns iteration 154). Bottom: <code>dt=0.6</code>, 0.1% / 0.2% tolerances, <code>n_iter=60</code>, stall detection off in both.</p>
+<p>![best vs last](best_vs_last.png)</p>
+<h2>Tables (make_figures.py)</h2>
+<p>Errors are of the returned state, mean / max in percent. Main uses its own default <code>stall_patience=5</code>.</p>
+<table>
+<tr><th>run</th><th>main: status / iterations</th><th>main: mean / max error %</th><th>fix: status / iterations</th><th>fix: mean / max error %</th></tr>
+<tr><td>horizontal</td><td>stalled / 190</td><td>3.47 / 41.5</td><td>converged / 245 (best 245)</td><td>1.00 / 9.7</td></tr>
+<tr><td>tangential</td><td>stalled / 215</td><td>2.15 / 14.9</td><td>converged / 226 (best 226)</td><td>1.42 / 8.9</td></tr>
+<tr><td>tilted</td><td>stalled / 170</td><td>3.11 / 21.3</td><td>converged / 171 (best 171)</td><td>1.74 / 9.1</td></tr>
+<tr><td>default options</td><td>converged / 113</td><td>0.32 / 4.4</td><td>converged / 113 (best 113)</td><td>0.32 / 4.4</td></tr>
+<tr><td>grid_size=512</td><td>converged / 214</td><td>0.50 / 7.3</td><td>converged / 214 (best 214)</td><td>0.50 / 7.3</td></tr>
+<tr><td>tolerances 0.5% / 1%, n_iter=300</td><td>stalled / 119</td><td>6.19 / 96.0</td><td>stalled / 200 (best 154, stall_patience)</td><td>0.31 / 2.1</td></tr>
+<tr><td>dt=0.6, tolerances 0.1% / 0.2%, n_iter=60</td><td>completed / 60</td><td>8.54 / 160.9</td><td>completed / 60 (best 43, iteration_limit)</td><td>1.36 / 12.1</td></tr>
+</table>
+<p>Horizontal anisotropy with different <code>recompute_every</code> (cycles are at least 10 iterations):</p>
+<table>
+<tr><th>recompute_every</th><th>main: status / iterations</th><th>fix: status / iterations</th></tr>
+<tr><td>1</td><td>converged / 183</td><td>converged / 183</td></tr>
+<tr><td>2</td><td>converged / 185</td><td>converged / 185</td></tr>
+<tr><td>5</td><td>stalled / 189</td><td>converged / 198</td></tr>
+<tr><td>10</td><td>stalled / 190</td><td>converged / 245</td></tr>
+</table>
+<p>Presets (US states):</p>
+<table>
+<tr><th>options</th><th>main: status / iterations</th><th>fix: status / iterations</th></tr>
+<tr><td>preset_fast</td><td>completed / 30</td><td>completed / 30</td></tr>
+<tr><td>preset_balanced</td><td>completed / 100</td><td>completed / 100</td></tr>
+<tr><td>preset_high_quality</td><td>completed / 300</td><td>completed / 300</td></tr>
+<tr><td>preset_balanced, dt=0.6</td><td>stalled / 49</td><td>stalled / 90</td></tr>
+</table>
+<p><code>preset_fast</code> has 30 iterations, three cycles, and a stall needs a progress cycle followed by 4 cycles without progress, so it cannot stall.</p>
+<p>Multiresolution (<code>min_resolution=128</code>, default options, best of 3 timings at low machine load; the workflow trigger is unchanged):</p>
+<table>
+<tr><th>data</th><th>levels</th><th>main: per level status / iterations</th><th>main total</th><th>fix: per level</th><th>fix total</th><th>time main / fix (s)</th></tr>
+<tr><td>states</td><td>3</td><td>stalled/66; converged/15</td><td>81</td><td>stalled/100; converged/34</td><td>134</td><td>0.2 / 0.3</td></tr>
+<tr><td>states</td><td>4</td><td>stalled/66; converged/15</td><td>81</td><td>stalled/100; converged/34</td><td>134</td><td>0.2 / 0.3</td></tr>
+<tr><td>districts</td><td>3</td><td>stalled/136; converged/43</td><td>179</td><td>stalled/240; converged/3</td><td>243</td><td>0.8 / 1.0</td></tr>
+<tr><td>districts</td><td>4</td><td>stalled/136; converged/43</td><td>179</td><td>stalled/240; converged/3</td><td>243</td><td>0.8 / 1.0</td></tr>
+</table>
+<p>Both rules end the first level stalled and the second converged, so the number of levels run is unchanged (2). The coarse level runs longer before it stalls (the timings were taken at a load average of about 19, so only the iteration counts are reliable). With stall detection off, the states level 1 converges at 346 after a max-error plateau of about 200 iterations; the new rule stops it at 100.</p>
+<p>Counties (3,108, prepared set, not bundled; <code>area_scale=1e-6</code>, <code>n_iter=1000</code>, default tolerances, fixed refresh schedule; stop iteration and best score, below 1 is converged):</p>
+<table>
+<tr><th>grid</th><th>old rule (patience 5)</th><th>patience 150</th><th>either component counts (previous commit)</th><th>violated components only (now)</th></tr>
+<tr><td>256</td><td>stalled / 198, best 11.65</td><td>stalled / 485, best 9.64</td><td>stalled / 380, best 9.64</td><td>stalled / 260, best 10.16</td></tr>
+<tr><td>512</td><td>stalled / 309, best 11.66</td><td>stalled / 540, best 10.50</td><td>stalled / 520, best 10.50</td><td>stalled / 430, best 10.50</td></tr>
+</table>
+<p>None converge. The mean ratio is below 1 from about iteration 220 (256) and 360 (512); the max ratio sits at 10 to 12 (counties.png). Counting only violated components removes the creep of the satisfied mean component and stops 120 / 90 iterations earlier. The max-ratio window minima still improve by 2% or more until iteration 220 (256) and 390 (512), which is why the stop is not earlier; at <code>stall_min_improvement=0.05</code> the 512 run would stop at 50, before its max error has started to fall (replay on the stored per-iteration errors).</p>
+<p>![counties](counties.png)</p>
+<h2>Refresh on rise (opt-in, refresh_on_rise.png)</h2>
+<p><code>MorphOptions.refresh_on_rise</code> (default <code>None</code> until the last commit, then 0.01): when the score rose by more than that relative amount in the last iteration, the velocity field is recomputed before the next iteration; <code>recompute_every</code> stays the maximum interval. The stall windows are fixed windows of <code>max(recompute_every, 10)</code> iterations from iteration 1, so the off path is unchanged (all iteration counts above are identical). Below: off vs on with 0.01 (fix only). Cost = iterations + recomputes x (9, 12, 24 at grid 128, 256, 512), one recompute in plain-step units; rises = iterations where the score rises while below 20.</p>
+<p>![refresh on rise](refresh_on_rise.png)</p>
+<table>
+<tr><th>run</th><th>status</th><th>iterations</th><th>recomputes</th><th>rises</th><th>mean / max error %</th><th>best score</th><th>cost</th></tr>
+<tr><td>horizontal, off</td><td>converged</td><td>245</td><td>25</td><td>17</td><td>1.00 / 9.7</td><td>0.97</td><td>545</td></tr>
+<tr><td>horizontal, on</td><td>converged</td><td>233</td><td>27</td><td>9</td><td>1.30 / 9.6</td><td>0.96</td><td>557</td></tr>
+<tr><td>horizontal, recompute_every=5, off</td><td>converged</td><td>198</td><td>40</td><td>2</td><td>1.04 / 9.9</td><td>0.99</td><td>678</td></tr>
+<tr><td>horizontal, recompute_every=5, on</td><td>converged</td><td>200</td><td>41</td><td>1</td><td>1.22 / 10.0</td><td>1.00</td><td>692</td></tr>
+<tr><td>tangential, off</td><td>converged</td><td>226</td><td>23</td><td>10</td><td>1.42 / 8.9</td><td>0.90</td><td>502</td></tr>
+<tr><td>tangential, on</td><td>converged</td><td>216</td><td>23</td><td>4</td><td>1.99 / 8.6</td><td>0.86</td><td>492</td></tr>
+<tr><td>tilted, off</td><td>converged</td><td>171</td><td>18</td><td>3</td><td>1.74 / 9.1</td><td>0.92</td><td>387</td></tr>
+<tr><td>tilted, on</td><td>converged</td><td>169</td><td>18</td><td>1</td><td>1.10 / 9.5</td><td>0.95</td><td>385</td></tr>
+<tr><td>default, off / on</td><td>converged</td><td>113</td><td>12</td><td>0</td><td>0.32 / 4.4</td><td>0.45</td><td>257</td></tr>
+<tr><td>grid 512, off / on</td><td>converged</td><td>214</td><td>22</td><td>0</td><td>0.50 / 7.3</td><td>0.74</td><td>742</td></tr>
+<tr><td>tolerances 0.5% / 1%, n_iter=300, off</td><td>stalled</td><td>200</td><td>20</td><td>28</td><td>0.31 / 2.1</td><td>2.12</td><td>440</td></tr>
+<tr><td>tolerances 0.5% / 1%, n_iter=300, on</td><td>converged</td><td>115</td><td>13</td><td>1</td><td>0.07 / 0.6</td><td>0.62</td><td>271</td></tr>
+<tr><td>dt=0.6, tight, n_iter=60, no stall, off</td><td>completed</td><td>60</td><td>6</td><td>0</td><td>1.36 / 12.1</td><td>57.10</td><td>132</td></tr>
+<tr><td>dt=0.6, tight, n_iter=60, no stall, on</td><td>completed</td><td>60</td><td>13</td><td>0</td><td>0.87 / 4.6</td><td>22.31</td><td>216</td></tr>
+<tr><td>preset_balanced, dt=0.6, off</td><td>stalled</td><td>90</td><td>9</td><td>27</td><td>1.36 / 12.1</td><td>1.20</td><td>198</td></tr>
+<tr><td>preset_balanced, dt=0.6, on</td><td>converged</td><td>45</td><td>6</td><td>1</td><td>0.87 / 4.6</td><td>0.47</td><td>117</td></tr>
+<tr><td>districts 256, off</td><td>converged</td><td>154</td><td>16</td><td>4</td><td>1.08 / 8.4</td><td>0.85</td><td>346</td></tr>
+<tr><td>districts 256, on</td><td>converged</td><td>150</td><td>16</td><td>2</td><td>1.07 / 8.0</td><td>0.81</td><td>342</td></tr>
+<tr><td>districts 512, off / on</td><td>converged</td><td>263</td><td>27</td><td>0</td><td>0.60 / 9.5</td><td>0.95</td><td>911</td></tr>
+</table>
+<p>Multiresolution (default options, <code>min_resolution=128</code>; per level grid: status / iterations / recomputes):</p>
+<table>
+<tr><th>data</th><th>refresh_on_rise</th><th>per level</th><th>total iterations</th><th>cost</th></tr>
+<tr><td>states, 3 or 4 levels</td><td>off / on</td><td>128: stalled/100/10; 256: converged/34/4</td><td>134</td><td>272</td></tr>
+<tr><td>districts, 3 or 4 levels</td><td>off</td><td>128: stalled/240/24; 256: converged/3/1</td><td>243</td><td>471</td></tr>
+<tr><td>districts, 3 or 4 levels</td><td>on</td><td>128: converged/231/36</td><td>231</td><td>555</td></tr>
+</table>
+<p>Counties (3,108, prepared set, not bundled, run outside the script; <code>area_scale=1e-6</code>, <code>n_iter=1000</code>; none converge; cost ratios 47.5 and 28.5 at grid 256 and 512):</p>
+<table>
+<tr><th>run</th><th>status</th><th>iterations</th><th>recomputes</th><th>rises</th><th>mean / max error %</th><th>best score</th><th>cost</th></tr>
+<tr><td>grid 256, off</td><td>stalled</td><td>260</td><td>26</td><td>30</td><td>4.85 / 163.5</td><td>10.16</td><td>1495</td></tr>
+<tr><td>grid 256, on</td><td>stalled</td><td>300</td><td>45</td><td>40</td><td>4.47 / 156.2</td><td>9.87</td><td>2438</td></tr>
+<tr><td>grid 512, off</td><td>stalled</td><td>430</td><td>43</td><td>41</td><td>4.59 / 172.0</td><td>10.50</td><td>1656</td></tr>
+<tr><td>grid 512, on</td><td>stalled</td><td>390</td><td>43</td><td>31</td><td>7.98 / 204.0</td><td>11.66</td><td>1616</td></tr>
+</table>
+<p>Refresh on rise halves the rises on the strong-anisotropy runs at about the same cost, needs more iterations than <code>recompute_every=5</code> (233 vs 198) but fewer recomputes, so its cost is lower (557 vs 678) and about that of <code>recompute_every=10</code> (545), and converges two runs that stall or oscillate otherwise (0.5% / 1% tolerances, <code>dt=0.6</code>). On counties it is 63% more costly at grid 256 (2438 vs 1495) and 2% cheaper at grid 512 (1616 vs 1656) with a worse best score there (11.66 vs 10.50), because the runs stall at different points. With the horizontal run at <code>recompute_every</code> 2 and 1, on and off are identical (no rises); the presets and <code>districts 512</code> are identical too. Districts multiresolution is the one case where it changes the level count (2 to 1), at 18% higher cost (555 vs 471) but 12 fewer iterations (231 vs 243).</p>
+<p>The default and grid-512 runs are identical to main (same iteration counts and errors). The cartogram-cpp states example from the issue is not bundled and was not run.</p>
+<div class="figure">
+<img src="best_vs_last.png" alt="best_vs_last.png">
+<p class="caption">best_vs_last.png</p>
+</div><div class="figure">
+<img src="counties.png" alt="counties.png">
+<p class="caption">counties.png</p>
+</div><div class="figure">
+<img src="cycles.png" alt="cycles.png">
+<p class="caption">cycles.png</p>
+</div><div class="figure">
+<img src="refresh_on_rise.png" alt="refresh_on_rise.png">
+<p class="caption">refresh_on_rise.png</p>
+</div><div class="figure">
+<img src="trajectories.png" alt="trajectories.png">
+<p class="caption">trajectories.png</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

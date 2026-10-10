@@ -1,0 +1,551 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Error-dependent step size for the flow cartogram</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Error-dependent step size for the flow cartogram</h1>
+<dl class="meta-list">
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/94">#94</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>investigate/adaptive-step</dd>
+<dt>Base</dt><dd>fix/stall-detection</dd>
+<dt>Created</dt><dd>2026-10-09 15:20</dd>
+<dt>Before</dt><dd>fix/stall-detection @ 8441681 (refresh_on_rise=0.01 by default; commit b0657b5 before it has it off)</dd>
+<dt>After</dt><dd>investigate/adaptive-step @ f9e3556 (prototype, not for merging)</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC), congressional districts, 3,108 counties (ESRI:102008, total_votes, simplified 1 km, densified 5 km), states under the strong-anisotropy setups (horizontal, tangential, tilted; preset_balanced values, area_scale 1e-6); grid 256 unless stated, n_iter 400 (counties 300); default stall rule (stall_patience 4) unless stated</dd>
+</dl>
+<p class="desc">Does an error-driven or area-change-limited step improve accuracy, cost and stability of the flow cartogram, and how does it interact with refresh-on-rise and the stall rule? Modestly: it removes most late oscillations and makes restarts safe, but refresh-on-rise already captures most of the robustness gain and the controllers cost 0 to 60 % more iterations.</p>
+<p>An investigation, not a change. The prototype adds four <code>MorphOptions</code> fields (defaults reproduce the current behavior; with them unset the results match the base commit to about 1e-13, the known numba noise): <code>step_score_ref</code>, <code>step_dt_min</code>, <code>step_restart_only</code>, <code>step_max_area_change</code>. Scripts are in <code>scripts/</code>; raw results are in <code>data/*.jsonl|json</code>; every table is regenerated by <code>scripts/all_tables.py</code> into <code>data/tables.md</code> (run with the worktree interpreter of f9e3556).</p>
+<h2>Controllers</h2>
+<p>The step normalization is unchanged: the fastest grid velocity moves <code>dt_eff</code> cells per iteration.</p>
+<ul><li>**A, error-driven dt**: <code>dt_eff = dt * clip(score / ref, dt_min / dt, 1)</code>, with the combined score <code>max(mean_log/log2(1+mean_tol), max_log/log2(1+max_tol))</code> of the current state (for the first iteration, of the input geometries). Swept: ref 3, 10, 30 with <code>dt_min</code> 0.05 (0.1 in the first sweep).</li><li>**B, area-change limit (CFL-style)**: after the trial step, if any region&#x27;s area changed by more than the fraction <code>f</code> (relative to <code>max(area, one cell)</code>), the step is redone from the previous coordinates, scaled by <code>f / largest change</code>. Swept: 2, 5, 10, 20 %. Costs one extra displacement plus area evaluation per limited step (&quot;redo steps&quot;).</li><li>**C, safe restart**: A applied only during the first <code>max(recompute_every, 10)</code> iterations; identical to constant dt whenever the run starts from a large error.</li><li>Combinations: A ref 10 + B 5 %; each with refresh-on-rise off and on, and with the stall rule.</li></ul>
+<p>Finding about issue point 2: <code>vmax_scale</code> cancels in <code>dt_prime</code> (the step is divided by the maximum of the already scaled field), so keeping <code>vmax_initial</code> would change nothing. The first step after a restart is large because the step always moves the fastest point <code>dt</code> cells, whatever the error.</p>
+<h2>Convergence traces</h2>
+<h2>Stability and the late spike</h2>
+<p>recompute_every 10. &quot;max rise factor&quot;: largest iteration-to-iteration score ratio once the score is below 20; &quot;final/best score&quot;: last iterate against the best one (large values are the issue&#x27;s late spike; the stall rule returns the best iterate).</p>
+<table>
+<tr><th>case</th><th>dt</th><th>refresh on rise</th><th>controller</th><th>status</th><th>it</th><th>rec</th><th>rises (score&lt;20)</th><th>max rise factor</th><th>final/best score</th><th>max err % (output)</th><th>cost</th></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>constant dt</td><td>stalled</td><td>200</td><td>20</td><td>28</td><td>2.79</td><td>15.7</td><td>2.1</td><td>440</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>A ref 3</td><td>stalled</td><td>200</td><td>20</td><td>29</td><td>3.26</td><td>13.4</td><td>2.2</td><td>440</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>A ref 10</td><td>converged</td><td>204</td><td>21</td><td>46</td><td>2.17</td><td>1.0</td><td>0.9</td><td>456</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>A ref 30</td><td>converged</td><td>135</td><td>14</td><td>9</td><td>2.78</td><td>1.0</td><td>0.6</td><td>303</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>B 5 %</td><td>stalled</td><td>220</td><td>22</td><td>32</td><td>5.08</td><td>18.5</td><td>1.1</td><td>484</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>B 10 %</td><td>converged</td><td>256</td><td>26</td><td>61</td><td>3.94</td><td>1.0</td><td>0.9</td><td>568</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>C ref 10</td><td>stalled</td><td>200</td><td>20</td><td>28</td><td>2.79</td><td>15.7</td><td>2.1</td><td>440</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>A ref 10 + B 5 %</td><td>converged</td><td>173</td><td>18</td><td>12</td><td>2.11</td><td>1.0</td><td>0.6</td><td>389</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>constant dt</td><td>converged</td><td>115</td><td>13</td><td>1</td><td>1.63</td><td>1.0</td><td>0.6</td><td>271</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>A ref 3</td><td>converged</td><td>115</td><td>13</td><td>1</td><td>1.63</td><td>1.0</td><td>0.6</td><td>271</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>A ref 10</td><td>converged</td><td>117</td><td>13</td><td>1</td><td>1.55</td><td>1.0</td><td>0.5</td><td>273</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>A ref 30</td><td>converged</td><td>119</td><td>13</td><td>1</td><td>1.57</td><td>1.0</td><td>0.5</td><td>275</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>B 5 %</td><td>converged</td><td>157</td><td>19</td><td>4</td><td>5.34</td><td>1.0</td><td>0.9</td><td>385</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>B 10 %</td><td>converged</td><td>131</td><td>20</td><td>8</td><td>6.06</td><td>1.0</td><td>0.9</td><td>371</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>C ref 10</td><td>converged</td><td>115</td><td>13</td><td>1</td><td>1.63</td><td>1.0</td><td>0.6</td><td>271</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>A ref 10 + B 5 %</td><td>converged</td><td>151</td><td>16</td><td>1</td><td>1.71</td><td>1.0</td><td>0.5</td><td>343</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>constant dt</td><td>stalled</td><td>200</td><td>20</td><td>66</td><td>1.61</td><td>6.0</td><td>9.9</td><td>440</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>A ref 3</td><td>converged</td><td>163</td><td>17</td><td>40</td><td>1.35</td><td>1.0</td><td>8.7</td><td>367</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>A ref 10</td><td>converged</td><td>214</td><td>22</td><td>20</td><td>1.04</td><td>1.0</td><td>9.0</td><td>478</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>A ref 30</td><td>converged</td><td>186</td><td>19</td><td>10</td><td>1.01</td><td>1.0</td><td>8.9</td><td>414</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>B 5 %</td><td>converged</td><td>247</td><td>25</td><td>56</td><td>1.30</td><td>1.0</td><td>9.0</td><td>547</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>B 10 %</td><td>converged</td><td>144</td><td>15</td><td>29</td><td>1.70</td><td>1.0</td><td>8.7</td><td>324</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>C ref 10</td><td>stalled</td><td>200</td><td>20</td><td>66</td><td>1.61</td><td>6.0</td><td>9.9</td><td>440</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>A ref 10 + B 5 %</td><td>converged</td><td>261</td><td>27</td><td>26</td><td>1.17</td><td>1.0</td><td>9.1</td><td>585</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>constant dt</td><td>converged</td><td>94</td><td>11</td><td>1</td><td>1.01</td><td>1.0</td><td>8.7</td><td>226</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>A ref 3</td><td>converged</td><td>96</td><td>11</td><td>1</td><td>1.01</td><td>1.0</td><td>8.3</td><td>228</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>A ref 10</td><td>converged</td><td>163</td><td>18</td><td>6</td><td>1.04</td><td>1.0</td><td>9.0</td><td>379</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>A ref 30</td><td>converged</td><td>196</td><td>22</td><td>12</td><td>1.01</td><td>1.0</td><td>9.0</td><td>460</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>B 5 %</td><td>converged</td><td>196</td><td>26</td><td>25</td><td>1.42</td><td>1.0</td><td>8.8</td><td>508</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>B 10 %</td><td>converged</td><td>165</td><td>24</td><td>23</td><td>1.83</td><td>1.0</td><td>9.1</td><td>453</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>C ref 10</td><td>converged</td><td>94</td><td>11</td><td>1</td><td>1.01</td><td>1.0</td><td>8.7</td><td>226</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>A ref 10 + B 5 %</td><td>converged</td><td>242</td><td>28</td><td>34</td><td>1.18</td><td>1.0</td><td>9.0</td><td>578</td></tr>
+<tr><td>tang</td><td>0.6</td><td>off</td><td>constant dt</td><td>stalled</td><td>130</td><td>13</td><td>40</td><td>1.27</td><td>4.0</td><td>29.7</td><td>286</td></tr>
+<tr><td>tang</td><td>0.6</td><td>off</td><td>A ref 3</td><td>stalled</td><td>130</td><td>13</td><td>40</td><td>1.27</td><td>4.0</td><td>29.7</td><td>286</td></tr>
+<tr><td>tang</td><td>0.6</td><td>off</td><td>A ref 10</td><td>stalled</td><td>160</td><td>16</td><td>29</td><td>1.00</td><td>1.0</td><td>19.7</td><td>352</td></tr>
+<tr><td>tang</td><td>0.6</td><td>off</td><td>A ref 30</td><td>stalled</td><td>150</td><td>15</td><td>37</td><td>1.08</td><td>1.8</td><td>70.8</td><td>330</td></tr>
+<tr><td>tang</td><td>0.6</td><td>off</td><td>B 5 %</td><td>converged</td><td>256</td><td>26</td><td>54</td><td>1.39</td><td>1.0</td><td>9.0</td><td>568</td></tr>
+<tr><td>tang</td><td>0.6</td><td>off</td><td>B 10 %</td><td>stalled</td><td>160</td><td>16</td><td>38</td><td>1.13</td><td>1.4</td><td>49.6</td><td>352</td></tr>
+<tr><td>tang</td><td>0.6</td><td>off</td><td>C ref 10</td><td>stalled</td><td>130</td><td>13</td><td>40</td><td>1.27</td><td>4.0</td><td>29.7</td><td>286</td></tr>
+<tr><td>tang</td><td>0.6</td><td>off</td><td>A ref 10 + B 5 %</td><td>stalled</td><td>220</td><td>22</td><td>49</td><td>1.03</td><td>1.6</td><td>24.0</td><td>484</td></tr>
+<tr><td>tang</td><td>0.6</td><td>on</td><td>constant dt</td><td>converged</td><td>113</td><td>18</td><td>10</td><td>1.61</td><td>1.0</td><td>9.1</td><td>329</td></tr>
+<tr><td>tang</td><td>0.6</td><td>on</td><td>A ref 3</td><td>converged</td><td>152</td><td>26</td><td>19</td><td>1.41</td><td>1.0</td><td>9.0</td><td>464</td></tr>
+<tr><td>tang</td><td>0.6</td><td>on</td><td>A ref 10</td><td>stalled</td><td>160</td><td>16</td><td>29</td><td>1.00</td><td>1.0</td><td>19.7</td><td>352</td></tr>
+<tr><td>tang</td><td>0.6</td><td>on</td><td>A ref 30</td><td>stalled</td><td>370</td><td>38</td><td>30</td><td>1.01</td><td>1.0</td><td>35.9</td><td>826</td></tr>
+<tr><td>tang</td><td>0.6</td><td>on</td><td>B 5 %</td><td>converged</td><td>160</td><td>20</td><td>5</td><td>1.09</td><td>1.0</td><td>9.5</td><td>400</td></tr>
+<tr><td>tang</td><td>0.6</td><td>on</td><td>B 10 %</td><td>converged</td><td>149</td><td>24</td><td>16</td><td>1.72</td><td>1.0</td><td>8.0</td><td>437</td></tr>
+<tr><td>tang</td><td>0.6</td><td>on</td><td>C ref 10</td><td>converged</td><td>113</td><td>18</td><td>10</td><td>1.61</td><td>1.0</td><td>9.1</td><td>329</td></tr>
+<tr><td>tang</td><td>0.6</td><td>on</td><td>A ref 10 + B 5 %</td><td>converged</td><td>246</td><td>28</td><td>34</td><td>1.03</td><td>1.0</td><td>9.1</td><td>582</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>off</td><td>constant dt</td><td>stalled</td><td>220</td><td>22</td><td>84</td><td>1.52</td><td>4.7</td><td>9.3</td><td>484</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>off</td><td>A ref 3</td><td>converged</td><td>165</td><td>17</td><td>51</td><td>1.52</td><td>1.0</td><td>8.1</td><td>369</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>off</td><td>A ref 10</td><td>converged</td><td>183</td><td>19</td><td>17</td><td>1.24</td><td>1.0</td><td>9.0</td><td>411</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>off</td><td>A ref 30</td><td>converged</td><td>165</td><td>17</td><td>0</td><td>0.99</td><td>1.0</td><td>8.4</td><td>369</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>off</td><td>B 5 %</td><td>converged</td><td>144</td><td>15</td><td>0</td><td>0.97</td><td>1.0</td><td>6.7</td><td>324</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>off</td><td>B 10 %</td><td>stalled</td><td>120</td><td>12</td><td>26</td><td>1.36</td><td>2.8</td><td>28.7</td><td>264</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>off</td><td>C ref 10</td><td>stalled</td><td>220</td><td>22</td><td>84</td><td>1.52</td><td>4.7</td><td>9.3</td><td>484</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>off</td><td>A ref 10 + B 5 %</td><td>converged</td><td>149</td><td>15</td><td>0</td><td>0.97</td><td>1.0</td><td>8.8</td><td>329</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>on</td><td>constant dt</td><td>converged</td><td>104</td><td>19</td><td>13</td><td>2.03</td><td>1.0</td><td>8.5</td><td>332</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>on</td><td>A ref 3</td><td>converged</td><td>109</td><td>19</td><td>13</td><td>1.60</td><td>1.0</td><td>9.0</td><td>337</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>on</td><td>A ref 10</td><td>converged</td><td>181</td><td>19</td><td>9</td><td>1.24</td><td>1.0</td><td>9.1</td><td>409</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>on</td><td>A ref 30</td><td>converged</td><td>165</td><td>17</td><td>0</td><td>0.99</td><td>1.0</td><td>8.4</td><td>369</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>on</td><td>B 5 %</td><td>converged</td><td>144</td><td>15</td><td>0</td><td>0.97</td><td>1.0</td><td>6.7</td><td>324</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>on</td><td>B 10 %</td><td>converged</td><td>94</td><td>13</td><td>5</td><td>1.57</td><td>1.0</td><td>8.7</td><td>250</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>on</td><td>C ref 10</td><td>converged</td><td>104</td><td>19</td><td>13</td><td>2.03</td><td>1.0</td><td>8.5</td><td>332</td></tr>
+<tr><td>tilt</td><td>0.6</td><td>on</td><td>A ref 10 + B 5 %</td><td>converged</td><td>149</td><td>15</td><td>0</td><td>0.97</td><td>1.0</td><td>8.8</td><td>329</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>constant dt</td><td>stalled</td><td>190</td><td>19</td><td>32</td><td>2.01</td><td>3.6</td><td>26.4</td><td>587</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>A ref 3</td><td>stalled</td><td>190</td><td>19</td><td>32</td><td>1.84</td><td>3.9</td><td>26.4</td><td>587</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>A ref 10</td><td>converged</td><td>153</td><td>16</td><td>2</td><td>1.23</td><td>1.0</td><td>7.6</td><td>487</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>A ref 30</td><td>stalled</td><td>120</td><td>12</td><td>0</td><td>1.00</td><td>1.0</td><td>1198.1</td><td>371</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>B 5 %</td><td>converged</td><td>255</td><td>26</td><td>9</td><td>1.44</td><td>1.0</td><td>7.8</td><td>798</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>B 10 %</td><td>converged</td><td>131</td><td>14</td><td>6</td><td>1.04</td><td>1.0</td><td>10.0</td><td>424</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>C ref 10</td><td>stalled</td><td>190</td><td>19</td><td>32</td><td>2.01</td><td>3.6</td><td>26.4</td><td>587</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>A ref 10 + B 5 %</td><td>converged</td><td>236</td><td>24</td><td>0</td><td>0.99</td><td>1.0</td><td>8.7</td><td>738</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>constant dt</td><td>converged</td><td>141</td><td>16</td><td>2</td><td>1.92</td><td>1.0</td><td>5.2</td><td>475</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>A ref 3</td><td>converged</td><td>141</td><td>16</td><td>2</td><td>1.33</td><td>1.0</td><td>7.5</td><td>475</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>A ref 10</td><td>converged</td><td>151</td><td>16</td><td>1</td><td>1.23</td><td>1.0</td><td>9.4</td><td>485</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>A ref 30</td><td>stalled</td><td>120</td><td>12</td><td>0</td><td>1.00</td><td>1.0</td><td>1198.1</td><td>371</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>B 5 %</td><td>converged</td><td>237</td><td>25</td><td>1</td><td>1.09</td><td>1.0</td><td>5.4</td><td>760</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>B 10 %</td><td>converged</td><td>126</td><td>17</td><td>6</td><td>1.18</td><td>1.0</td><td>7.0</td><td>481</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>C ref 10</td><td>converged</td><td>141</td><td>16</td><td>2</td><td>1.92</td><td>1.0</td><td>5.2</td><td>475</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>A ref 10 + B 5 %</td><td>converged</td><td>236</td><td>24</td><td>0</td><td>0.99</td><td>1.0</td><td>8.7</td><td>738</td></tr>
+</table>
+<h2>Accuracy</h2>
+<p>From the output geometries (the returned best iterate): linear relative error of area shares against target shares, independent of the library. dt 0.2, recompute_every 10, refresh-on-rise on. The library and output columns agree within 1 point except on counties, where the library floors errors at one cell (58 % mean error in the output against 4.5 % in the library). A dt-0.6 version is in <code>data/tables.md</code>.</p>
+<table>
+<tr><th>case</th><th>controller</th><th>status</th><th>it</th><th>library mean / max %</th><th>output mean / max %</th><th>share above 10 %</th><th>best score</th></tr>
+<tr><td>states</td><td>constant dt</td><td>converged</td><td>113</td><td>0.32 / 4.4</td><td>0.31 / 4.4</td><td>0.0</td><td>0.45</td></tr>
+<tr><td>states</td><td>A ref 3</td><td>converged</td><td>114</td><td>0.38 / 6.6</td><td>0.38 / 6.6</td><td>0.0</td><td>0.67</td></tr>
+<tr><td>states</td><td>A ref 10</td><td>converged</td><td>124</td><td>0.53 / 7.7</td><td>0.55 / 7.7</td><td>0.0</td><td>0.78</td></tr>
+<tr><td>states</td><td>B 10 %</td><td>converged</td><td>115</td><td>0.57 / 4.1</td><td>0.56 / 3.9</td><td>0.0</td><td>0.42</td></tr>
+<tr><td>states</td><td>A ref 10 + B 5 %</td><td>converged</td><td>154</td><td>0.54 / 7.6</td><td>0.55 / 7.6</td><td>0.0</td><td>0.77</td></tr>
+<tr><td>states_t</td><td>constant dt</td><td>converged</td><td>115</td><td>0.07 / 0.6</td><td>0.07 / 0.6</td><td>0.0</td><td>0.62</td></tr>
+<tr><td>states_t</td><td>A ref 3</td><td>converged</td><td>115</td><td>0.07 / 0.6</td><td>0.07 / 0.6</td><td>0.0</td><td>0.62</td></tr>
+<tr><td>states_t</td><td>A ref 10</td><td>converged</td><td>117</td><td>0.05 / 0.5</td><td>0.05 / 0.5</td><td>0.0</td><td>0.47</td></tr>
+<tr><td>states_t</td><td>B 10 %</td><td>converged</td><td>131</td><td>0.20 / 0.9</td><td>0.20 / 0.9</td><td>0.0</td><td>0.93</td></tr>
+<tr><td>states_t</td><td>A ref 10 + B 5 %</td><td>converged</td><td>151</td><td>0.07 / 0.5</td><td>0.07 / 0.5</td><td>0.0</td><td>0.45</td></tr>
+<tr><td>districts</td><td>constant dt</td><td>converged</td><td>150</td><td>1.07 / 8.0</td><td>1.07 / 8.0</td><td>0.0</td><td>0.81</td></tr>
+<tr><td>districts</td><td>A ref 3</td><td>converged</td><td>152</td><td>1.22 / 9.4</td><td>1.22 / 9.4</td><td>0.0</td><td>0.94</td></tr>
+<tr><td>districts</td><td>A ref 10</td><td>converged</td><td>163</td><td>0.46 / 8.5</td><td>0.47 / 8.5</td><td>0.0</td><td>0.86</td></tr>
+<tr><td>districts</td><td>B 10 %</td><td>converged</td><td>165</td><td>0.85 / 7.5</td><td>0.84 / 7.5</td><td>0.0</td><td>0.76</td></tr>
+<tr><td>districts</td><td>A ref 10 + B 5 %</td><td>converged</td><td>221</td><td>0.84 / 9.6</td><td>0.83 / 9.5</td><td>0.0</td><td>0.96</td></tr>
+<tr><td>horiz</td><td>constant dt</td><td>converged</td><td>233</td><td>1.30 / 9.6</td><td>1.30 / 8.8</td><td>0.0</td><td>0.96</td></tr>
+<tr><td>horiz</td><td>A ref 3</td><td>converged</td><td>259</td><td>0.72 / 9.9</td><td>0.72 / 9.0</td><td>0.0</td><td>0.99</td></tr>
+<tr><td>horiz</td><td>A ref 10</td><td>converged</td><td>276</td><td>0.34 / 10.0</td><td>0.34 / 9.1</td><td>0.0</td><td>1.00</td></tr>
+<tr><td>horiz</td><td>B 10 %</td><td>converged</td><td>233</td><td>1.30 / 9.6</td><td>1.30 / 8.8</td><td>0.0</td><td>0.96</td></tr>
+<tr><td>horiz</td><td>A ref 10 + B 5 %</td><td>converged</td><td>294</td><td>0.33 / 10.0</td><td>0.32 / 9.1</td><td>0.0</td><td>1.00</td></tr>
+<tr><td>tang</td><td>constant dt</td><td>converged</td><td>216</td><td>1.99 / 8.6</td><td>1.72 / 8.7</td><td>0.0</td><td>0.86</td></tr>
+<tr><td>tang</td><td>A ref 3</td><td>converged</td><td>222</td><td>1.61 / 10.0</td><td>1.59 / 9.2</td><td>0.0</td><td>1.00</td></tr>
+<tr><td>tang</td><td>A ref 10</td><td>converged</td><td>236</td><td>2.09 / 9.9</td><td>2.01 / 8.6</td><td>0.0</td><td>0.99</td></tr>
+<tr><td>tang</td><td>B 10 %</td><td>converged</td><td>208</td><td>1.50 / 8.8</td><td>1.54 / 8.0</td><td>0.0</td><td>0.88</td></tr>
+<tr><td>tang</td><td>A ref 10 + B 5 %</td><td>converged</td><td>265</td><td>1.54 / 9.8</td><td>1.31 / 8.6</td><td>0.0</td><td>0.98</td></tr>
+<tr><td>tilt</td><td>constant dt</td><td>converged</td><td>169</td><td>1.10 / 9.5</td><td>1.09 / 8.8</td><td>0.0</td><td>0.95</td></tr>
+<tr><td>tilt</td><td>A ref 3</td><td>converged</td><td>178</td><td>0.96 / 9.9</td><td>0.94 / 9.1</td><td>0.0</td><td>0.99</td></tr>
+<tr><td>tilt</td><td>A ref 10</td><td>converged</td><td>202</td><td>0.43 / 9.2</td><td>0.43 / 8.4</td><td>0.0</td><td>0.92</td></tr>
+<tr><td>tilt</td><td>B 10 %</td><td>converged</td><td>169</td><td>1.16 / 9.1</td><td>1.12 / 8.5</td><td>0.0</td><td>0.91</td></tr>
+<tr><td>tilt</td><td>A ref 10 + B 5 %</td><td>converged</td><td>205</td><td>0.44 / 9.3</td><td>0.44 / 8.5</td><td>0.0</td><td>0.93</td></tr>
+<tr><td>counties</td><td>constant dt</td><td>stalled</td><td>300</td><td>4.47 / 156.2</td><td>58.46 / 2117.7</td><td>69.4</td><td>9.87</td></tr>
+<tr><td>counties</td><td>A ref 3</td><td>stalled</td><td>300</td><td>4.47 / 156.2</td><td>58.46 / 2117.7</td><td>69.4</td><td>9.87</td></tr>
+<tr><td>counties</td><td>A ref 10</td><td>stalled</td><td>300</td><td>4.47 / 156.2</td><td>58.46 / 2117.7</td><td>69.4</td><td>9.87</td></tr>
+<tr><td>counties</td><td>B 10 %</td><td>stalled</td><td>250</td><td>6.01 / 195.5</td><td>59.64 / 2724.3</td><td>73.3</td><td>11.37</td></tr>
+<tr><td>counties</td><td>A ref 10 + B 5 %</td><td>completed</td><td>300</td><td>6.81 / 194.0</td><td>74.41 / 5266.5</td><td>76.0</td><td>11.31</td></tr>
+</table>
+<h2>Robustness grid</h2>
+<p>dt in {0.1, 0.2, 0.4, 0.6, 0.8} x recompute_every in {10, 5} x refresh-on-rise {off, on} on states, tight states, districts, three anisotropy runs (cheap set, 30 runs per row) at grid 256, stall rule at default. No run diverged (final score above the first score). Iteration and cost ratios are medians over runs where the controller and constant dt both converged. &quot;mean rises&quot; counts iterations where the score rises once below 20, averaged over runs (partly a function of run length).</p>
+<table>
+<tr><th>controller</th><th>refresh on rise</th><th>recompute_every</th><th>runs</th><th>converged</th><th>stalled</th><th>diverged</th><th>incomplete</th><th>median it (conv)</th><th>it ratio to constant dt (both conv)</th><th>cost ratio (both conv)</th><th>mean rises below score 20</th></tr>
+<tr><td>constant dt</td><td>off</td><td>10</td><td>30</td><td>17</td><td>13</td><td>0</td><td>0</td><td>216</td><td>1.00</td><td>1.00</td><td>27.4</td></tr>
+<tr><td>constant dt</td><td>off</td><td>5</td><td>30</td><td>28</td><td>2</td><td>0</td><td>0</td><td>116</td><td>1.00</td><td>1.00</td><td>10.3</td></tr>
+<tr><td>constant dt</td><td>on</td><td>10</td><td>30</td><td>27</td><td>2</td><td>0</td><td>1</td><td>123</td><td>1.00</td><td>1.00</td><td>9.0</td></tr>
+<tr><td>constant dt</td><td>on</td><td>5</td><td>30</td><td>28</td><td>2</td><td>0</td><td>0</td><td>96</td><td>1.00</td><td>1.00</td><td>7.0</td></tr>
+<tr><td>A ref 3</td><td>off</td><td>10</td><td>30</td><td>18</td><td>11</td><td>0</td><td>1</td><td>188</td><td>1.01</td><td>1.00</td><td>22.3</td></tr>
+<tr><td>A ref 3</td><td>off</td><td>5</td><td>30</td><td>27</td><td>3</td><td>0</td><td>0</td><td>109</td><td>1.00</td><td>1.00</td><td>9.1</td></tr>
+<tr><td>A ref 3</td><td>on</td><td>10</td><td>30</td><td>29</td><td>0</td><td>0</td><td>1</td><td>131</td><td>1.02</td><td>1.01</td><td>7.8</td></tr>
+<tr><td>A ref 3</td><td>on</td><td>5</td><td>30</td><td>30</td><td>0</td><td>0</td><td>0</td><td>100</td><td>1.02</td><td>1.00</td><td>3.1</td></tr>
+<tr><td>A ref 10</td><td>off</td><td>10</td><td>30</td><td>22</td><td>6</td><td>0</td><td>2</td><td>177</td><td>1.07</td><td>1.07</td><td>12.0</td></tr>
+<tr><td>A ref 10</td><td>off</td><td>5</td><td>30</td><td>28</td><td>0</td><td>0</td><td>2</td><td>110</td><td>1.08</td><td>1.06</td><td>2.8</td></tr>
+<tr><td>A ref 10</td><td>on</td><td>10</td><td>30</td><td>26</td><td>2</td><td>0</td><td>2</td><td>163</td><td>1.09</td><td>1.07</td><td>6.7</td></tr>
+<tr><td>A ref 10</td><td>on</td><td>5</td><td>30</td><td>28</td><td>0</td><td>0</td><td>2</td><td>107</td><td>1.13</td><td>1.07</td><td>1.4</td></tr>
+<tr><td>A ref 30</td><td>off</td><td>10</td><td>30</td><td>21</td><td>6</td><td>0</td><td>3</td><td>181</td><td>1.50</td><td>1.49</td><td>5.7</td></tr>
+<tr><td>A ref 30</td><td>off</td><td>5</td><td>30</td><td>27</td><td>0</td><td>0</td><td>3</td><td>167</td><td>1.60</td><td>1.58</td><td>2.2</td></tr>
+<tr><td>A ref 30</td><td>on</td><td>10</td><td>30</td><td>24</td><td>3</td><td>0</td><td>3</td><td>178</td><td>1.51</td><td>1.39</td><td>5.0</td></tr>
+<tr><td>A ref 30</td><td>on</td><td>5</td><td>30</td><td>27</td><td>0</td><td>0</td><td>3</td><td>167</td><td>1.70</td><td>1.59</td><td>1.9</td></tr>
+<tr><td>B 5 %</td><td>off</td><td>10</td><td>30</td><td>25</td><td>5</td><td>0</td><td>0</td><td>216</td><td>1.06</td><td>1.06</td><td>14.1</td></tr>
+<tr><td>B 5 %</td><td>off</td><td>5</td><td>30</td><td>29</td><td>1</td><td>0</td><td>0</td><td>152</td><td>1.19</td><td>1.18</td><td>2.0</td></tr>
+<tr><td>B 5 %</td><td>on</td><td>10</td><td>30</td><td>29</td><td>0</td><td>0</td><td>1</td><td>176</td><td>1.40</td><td>1.22</td><td>4.5</td></tr>
+<tr><td>B 5 %</td><td>on</td><td>5</td><td>30</td><td>30</td><td>0</td><td>0</td><td>0</td><td>150</td><td>1.36</td><td>1.32</td><td>1.0</td></tr>
+<tr><td>B 10 %</td><td>off</td><td>10</td><td>30</td><td>22</td><td>8</td><td>0</td><td>0</td><td>168</td><td>1.00</td><td>1.00</td><td>18.1</td></tr>
+<tr><td>B 10 %</td><td>off</td><td>5</td><td>30</td><td>29</td><td>1</td><td>0</td><td>0</td><td>118</td><td>1.00</td><td>1.00</td><td>5.0</td></tr>
+<tr><td>B 10 %</td><td>on</td><td>10</td><td>30</td><td>28</td><td>1</td><td>0</td><td>1</td><td>128</td><td>1.01</td><td>1.00</td><td>5.2</td></tr>
+<tr><td>B 10 %</td><td>on</td><td>5</td><td>30</td><td>30</td><td>0</td><td>0</td><td>0</td><td>108</td><td>1.09</td><td>1.05</td><td>2.6</td></tr>
+<tr><td>C ref 10</td><td>off</td><td>10</td><td>30</td><td>17</td><td>13</td><td>0</td><td>0</td><td>216</td><td>1.00</td><td>1.00</td><td>27.4</td></tr>
+<tr><td>C ref 10</td><td>off</td><td>5</td><td>30</td><td>28</td><td>2</td><td>0</td><td>0</td><td>116</td><td>1.00</td><td>1.00</td><td>10.3</td></tr>
+<tr><td>C ref 10</td><td>on</td><td>10</td><td>30</td><td>27</td><td>2</td><td>0</td><td>1</td><td>123</td><td>1.00</td><td>1.00</td><td>9.0</td></tr>
+<tr><td>C ref 10</td><td>on</td><td>5</td><td>30</td><td>28</td><td>2</td><td>0</td><td>0</td><td>96</td><td>1.00</td><td>1.00</td><td>7.0</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>off</td><td>10</td><td>30</td><td>24</td><td>4</td><td>0</td><td>2</td><td>221</td><td>1.20</td><td>1.18</td><td>7.8</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>off</td><td>5</td><td>30</td><td>28</td><td>0</td><td>0</td><td>2</td><td>148</td><td>1.35</td><td>1.35</td><td>0.8</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>on</td><td>10</td><td>30</td><td>28</td><td>0</td><td>0</td><td>2</td><td>211</td><td>1.53</td><td>1.31</td><td>4.9</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>on</td><td>5</td><td>30</td><td>28</td><td>0</td><td>0</td><td>2</td><td>149</td><td>1.59</td><td>1.50</td><td>0.3</td></tr>
+</table>
+<p>Converged runs per dt (12 runs per cell):</p>
+<table>
+<tr><th>controller</th><th>refresh on rise</th><th>dt 0.1</th><th>dt 0.2</th><th>dt 0.4</th><th>dt 0.6</th><th>dt 0.8</th></tr>
+<tr><td>constant dt</td><td>off</td><td>12/12</td><td>11/12</td><td>10/12</td><td>6/12</td><td>6/12</td></tr>
+<tr><td>A ref 3</td><td>off</td><td>11/12</td><td>11/12</td><td>10/12</td><td>8/12</td><td>5/12</td></tr>
+<tr><td>A ref 10</td><td>off</td><td>8/12</td><td>12/12</td><td>10/12</td><td>10/12</td><td>10/12</td></tr>
+<tr><td>A ref 30</td><td>off</td><td>6/12</td><td>12/12</td><td>11/12</td><td>9/12</td><td>10/12</td></tr>
+<tr><td>B 5 %</td><td>off</td><td>12/12</td><td>11/12</td><td>10/12</td><td>10/12</td><td>11/12</td></tr>
+<tr><td>B 10 %</td><td>off</td><td>12/12</td><td>12/12</td><td>11/12</td><td>9/12</td><td>7/12</td></tr>
+<tr><td>C ref 10</td><td>off</td><td>12/12</td><td>11/12</td><td>10/12</td><td>6/12</td><td>6/12</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>off</td><td>8/12</td><td>12/12</td><td>11/12</td><td>10/12</td><td>11/12</td></tr>
+<tr><td>constant dt</td><td>on</td><td>11/12</td><td>12/12</td><td>11/12</td><td>10/12</td><td>11/12</td></tr>
+<tr><td>A ref 3</td><td>on</td><td>11/12</td><td>12/12</td><td>12/12</td><td>12/12</td><td>12/12</td></tr>
+<tr><td>A ref 10</td><td>on</td><td>8/12</td><td>12/12</td><td>11/12</td><td>11/12</td><td>12/12</td></tr>
+<tr><td>A ref 30</td><td>on</td><td>6/12</td><td>12/12</td><td>11/12</td><td>10/12</td><td>12/12</td></tr>
+<tr><td>B 5 %</td><td>on</td><td>11/12</td><td>12/12</td><td>12/12</td><td>12/12</td><td>12/12</td></tr>
+<tr><td>B 10 %</td><td>on</td><td>11/12</td><td>12/12</td><td>12/12</td><td>12/12</td><td>11/12</td></tr>
+<tr><td>C ref 10</td><td>on</td><td>11/12</td><td>12/12</td><td>11/12</td><td>10/12</td><td>11/12</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>on</td><td>8/12</td><td>12/12</td><td>12/12</td><td>12/12</td><td>12/12</td></tr>
+</table>
+<p>Counties (10 runs per row, from <code>data/grid_counties.jsonl</code>; none converges, none changes the plateau):</p>
+<table>
+<tr><th>controller</th><th>refresh on rise</th><th>runs</th><th>conv</th><th>stall</th><th>div</th><th>incompl</th><th>median best score</th><th>median output mean err %</th><th>median cost</th></tr>
+<tr><td>constant dt</td><td>off</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>10.8</td><td>59</td><td>1680</td></tr>
+<tr><td>constant dt</td><td>on</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>10.6</td><td>58</td><td>2091</td></tr>
+<tr><td>A ref 3</td><td>off</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>10.8</td><td>59</td><td>1680</td></tr>
+<tr><td>A ref 3</td><td>on</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>10.6</td><td>58</td><td>2091</td></tr>
+<tr><td>A ref 10</td><td>off</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>10.8</td><td>59</td><td>1680</td></tr>
+<tr><td>A ref 10</td><td>on</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>10.6</td><td>58</td><td>2091</td></tr>
+<tr><td>A ref 30</td><td>off</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>11.2</td><td>70</td><td>1564</td></tr>
+<tr><td>A ref 30</td><td>on</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>11.5</td><td>63</td><td>1824</td></tr>
+<tr><td>B 5 %</td><td>off</td><td>10</td><td>0</td><td>1</td><td>0</td><td>9</td><td>11.7</td><td>85</td><td>2438</td></tr>
+<tr><td>B 5 %</td><td>on</td><td>10</td><td>0</td><td>1</td><td>0</td><td>9</td><td>11.4</td><td>77</td><td>2675</td></tr>
+<tr><td>B 10 %</td><td>off</td><td>10</td><td>0</td><td>7</td><td>0</td><td>3</td><td>11.5</td><td>61</td><td>1912</td></tr>
+<tr><td>B 10 %</td><td>on</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>11.6</td><td>68</td><td>2021</td></tr>
+<tr><td>C ref 10</td><td>off</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>10.8</td><td>59</td><td>1680</td></tr>
+<tr><td>C ref 10</td><td>on</td><td>10</td><td>0</td><td>8</td><td>0</td><td>2</td><td>10.6</td><td>58</td><td>2091</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>off</td><td>10</td><td>0</td><td>1</td><td>0</td><td>9</td><td>11.7</td><td>85</td><td>2438</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>on</td><td>10</td><td>0</td><td>1</td><td>0</td><td>9</td><td>11.4</td><td>77</td><td>2675</td></tr>
+</table>
+<h2>Restarts (issue point 2)</h2>
+<p>Second run on the output of a first run, tight tolerances; states and districts at grid 256 and 512 (4 start geometries per row). <code>conv</code>: converged at the tight tolerances; <code>loose</code>: converged at 5 % / 20 % (first stage of a two-phase schedule); <code>stall</code>: best iterate of a dt-0.6 run without refresh-on-rise that did not converge. Per-run rows: <code>data/restart.json</code>.</p>
+<table>
+<tr><th>start</th><th>refresh on rise</th><th>controller</th><th>converged</th><th>median it</th><th>median cost</th><th>median score after it 1</th><th>median max score in it 1-5</th></tr>
+<tr><td>conv</td><td>on</td><td>constant dt</td><td>4/4</td><td>4</td><td>51</td><td>3.6</td><td>7.8</td></tr>
+<tr><td>conv</td><td>on</td><td>A ref 3</td><td>4/4</td><td>1</td><td>25</td><td>0.5</td><td>0.5</td></tr>
+<tr><td>conv</td><td>on</td><td>A ref 10</td><td>4/4</td><td>1</td><td>25</td><td>0.4</td><td>0.4</td></tr>
+<tr><td>conv</td><td>on</td><td>A ref 30</td><td>4/4</td><td>1</td><td>25</td><td>0.4</td><td>0.4</td></tr>
+<tr><td>conv</td><td>on</td><td>C ref 3</td><td>4/4</td><td>1</td><td>25</td><td>0.5</td><td>0.5</td></tr>
+<tr><td>conv</td><td>on</td><td>C ref 10</td><td>4/4</td><td>1</td><td>25</td><td>0.4</td><td>0.4</td></tr>
+<tr><td>conv</td><td>on</td><td>B 10 %</td><td>4/4</td><td>4</td><td>51</td><td>3.6</td><td>7.8</td></tr>
+<tr><td>conv</td><td>on</td><td>A ref 10 + B 5 %</td><td>4/4</td><td>1</td><td>25</td><td>0.4</td><td>0.4</td></tr>
+<tr><td>conv</td><td>off</td><td>constant dt</td><td>3/4</td><td>52</td><td>159</td><td>3.6</td><td>20.1</td></tr>
+<tr><td>conv</td><td>off</td><td>A ref 3</td><td>3/4</td><td>1</td><td>25</td><td>0.5</td><td>0.5</td></tr>
+<tr><td>conv</td><td>off</td><td>A ref 10</td><td>4/4</td><td>1</td><td>25</td><td>0.4</td><td>0.4</td></tr>
+<tr><td>conv</td><td>off</td><td>A ref 30</td><td>4/4</td><td>1</td><td>25</td><td>0.4</td><td>0.4</td></tr>
+<tr><td>conv</td><td>off</td><td>C ref 3</td><td>3/4</td><td>1</td><td>25</td><td>0.5</td><td>0.5</td></tr>
+<tr><td>conv</td><td>off</td><td>C ref 10</td><td>3/4</td><td>1</td><td>25</td><td>0.4</td><td>0.4</td></tr>
+<tr><td>conv</td><td>off</td><td>B 10 %</td><td>2/4</td><td>56</td><td>189</td><td>3.6</td><td>20.1</td></tr>
+<tr><td>conv</td><td>off</td><td>A ref 10 + B 5 %</td><td>4/4</td><td>1</td><td>25</td><td>0.4</td><td>0.4</td></tr>
+<tr><td>loose</td><td>on</td><td>constant dt</td><td>4/4</td><td>6</td><td>59</td><td>11.6</td><td>12.9</td></tr>
+<tr><td>loose</td><td>on</td><td>A ref 3</td><td>4/4</td><td>10</td><td>98</td><td>11.6</td><td>13.4</td></tr>
+<tr><td>loose</td><td>on</td><td>A ref 10</td><td>4/4</td><td>7</td><td>48</td><td>11.6</td><td>11.9</td></tr>
+<tr><td>loose</td><td>on</td><td>A ref 30</td><td>4/4</td><td>12</td><td>58</td><td>13.8</td><td>13.8</td></tr>
+<tr><td>loose</td><td>on</td><td>C ref 3</td><td>4/4</td><td>10</td><td>98</td><td>11.6</td><td>13.4</td></tr>
+<tr><td>loose</td><td>on</td><td>C ref 10</td><td>4/4</td><td>7</td><td>48</td><td>11.6</td><td>11.9</td></tr>
+<tr><td>loose</td><td>on</td><td>B 10 %</td><td>4/4</td><td>9</td><td>80</td><td>11.6</td><td>12.3</td></tr>
+<tr><td>loose</td><td>on</td><td>A ref 10 + B 5 %</td><td>4/4</td><td>6</td><td>42</td><td>12.7</td><td>12.7</td></tr>
+<tr><td>loose</td><td>off</td><td>constant dt</td><td>1/4</td><td>85</td><td>231</td><td>11.6</td><td>17.5</td></tr>
+<tr><td>loose</td><td>off</td><td>A ref 3</td><td>2/4</td><td>62</td><td>184</td><td>11.6</td><td>17.5</td></tr>
+<tr><td>loose</td><td>off</td><td>A ref 10</td><td>4/4</td><td>28</td><td>92</td><td>11.6</td><td>15.7</td></tr>
+<tr><td>loose</td><td>off</td><td>A ref 30</td><td>4/4</td><td>34</td><td>101</td><td>13.8</td><td>13.8</td></tr>
+<tr><td>loose</td><td>off</td><td>C ref 3</td><td>1/4</td><td>65</td><td>187</td><td>11.6</td><td>17.5</td></tr>
+<tr><td>loose</td><td>off</td><td>C ref 10</td><td>2/4</td><td>42</td><td>118</td><td>11.6</td><td>15.7</td></tr>
+<tr><td>loose</td><td>off</td><td>B 10 %</td><td>1/4</td><td>95</td><td>253</td><td>11.6</td><td>17.5</td></tr>
+<tr><td>loose</td><td>off</td><td>A ref 10 + B 5 %</td><td>4/4</td><td>14</td><td>61</td><td>12.7</td><td>12.7</td></tr>
+<tr><td>stall</td><td>on</td><td>constant dt</td><td>4/4</td><td>6</td><td>54</td><td>2.4</td><td>8.0</td></tr>
+<tr><td>stall</td><td>on</td><td>A ref 3</td><td>4/4</td><td>5</td><td>41</td><td>1.5</td><td>6.5</td></tr>
+<tr><td>stall</td><td>on</td><td>A ref 10</td><td>4/4</td><td>4</td><td>27</td><td>2.2</td><td>2.2</td></tr>
+<tr><td>stall</td><td>on</td><td>A ref 30</td><td>4/4</td><td>6</td><td>29</td><td>5.2</td><td>5.2</td></tr>
+<tr><td>stall</td><td>on</td><td>C ref 3</td><td>4/4</td><td>5</td><td>41</td><td>1.5</td><td>6.5</td></tr>
+<tr><td>stall</td><td>on</td><td>C ref 10</td><td>4/4</td><td>4</td><td>27</td><td>2.2</td><td>2.2</td></tr>
+<tr><td>stall</td><td>on</td><td>B 10 %</td><td>4/4</td><td>6</td><td>54</td><td>2.4</td><td>8.0</td></tr>
+<tr><td>stall</td><td>on</td><td>A ref 10 + B 5 %</td><td>4/4</td><td>4</td><td>27</td><td>4.5</td><td>4.5</td></tr>
+<tr><td>stall</td><td>off</td><td>constant dt</td><td>3/4</td><td>42</td><td>130</td><td>2.4</td><td>24.2</td></tr>
+<tr><td>stall</td><td>off</td><td>A ref 3</td><td>3/4</td><td>12</td><td>42</td><td>1.5</td><td>14.9</td></tr>
+<tr><td>stall</td><td>off</td><td>A ref 10</td><td>3/4</td><td>4</td><td>27</td><td>2.2</td><td>2.2</td></tr>
+<tr><td>stall</td><td>off</td><td>A ref 30</td><td>4/4</td><td>15</td><td>45</td><td>5.2</td><td>5.2</td></tr>
+<tr><td>stall</td><td>off</td><td>C ref 3</td><td>3/4</td><td>12</td><td>42</td><td>1.5</td><td>14.9</td></tr>
+<tr><td>stall</td><td>off</td><td>C ref 10</td><td>3/4</td><td>4</td><td>27</td><td>2.2</td><td>2.2</td></tr>
+<tr><td>stall</td><td>off</td><td>B 10 %</td><td>3/4</td><td>42</td><td>130</td><td>2.4</td><td>23.6</td></tr>
+<tr><td>stall</td><td>off</td><td>A ref 10 + B 5 %</td><td>4/4</td><td>4</td><td>27</td><td>4.5</td><td>4.5</td></tr>
+</table>
+<h2>Multiresolution (min_resolution 128, levels 3, 300 iterations per level)</h2>
+<p>Each level starts from the previous level&#x27;s returned best iterate. Mean over dt 0.2 and 0.4 (2 runs per row); per-level rows of every run in <code>data/multires.jsonl</code>. Cost uses the per-grid ratios (states 9.2 / 12 / 24, districts 18 / 21 / 23).</p>
+<table>
+<tr><th>case</th><th>stall_patience</th><th>refresh on rise</th><th>controller</th><th>converged</th><th>mean cost (dt 0.2 and 0.4)</th><th>mean levels run</th><th>mean output max err %</th></tr>
+<tr><td>states</td><td>4</td><td>on</td><td>constant dt</td><td>2/2</td><td>120</td><td>1.0</td><td>6.2</td></tr>
+<tr><td>states</td><td>4</td><td>on</td><td>A ref 3</td><td>2/2</td><td>120</td><td>1.0</td><td>6.8</td></tr>
+<tr><td>states</td><td>4</td><td>on</td><td>A ref 10</td><td>2/2</td><td>128</td><td>1.0</td><td>8.3</td></tr>
+<tr><td>states</td><td>4</td><td>on</td><td>A ref 30</td><td>2/2</td><td>159</td><td>1.0</td><td>8.1</td></tr>
+<tr><td>states</td><td>4</td><td>on</td><td>B 10 %</td><td>2/2</td><td>126</td><td>1.0</td><td>8.0</td></tr>
+<tr><td>states</td><td>4</td><td>on</td><td>C ref 10</td><td>2/2</td><td>120</td><td>1.0</td><td>6.2</td></tr>
+<tr><td>states</td><td>4</td><td>on</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>188</td><td>1.0</td><td>7.8</td></tr>
+<tr><td>states</td><td>4</td><td>off</td><td>constant dt</td><td>2/2</td><td>224</td><td>2.0</td><td>3.9</td></tr>
+<tr><td>states</td><td>4</td><td>off</td><td>A ref 3</td><td>2/2</td><td>149</td><td>1.0</td><td>7.7</td></tr>
+<tr><td>states</td><td>4</td><td>off</td><td>A ref 10</td><td>2/2</td><td>128</td><td>1.0</td><td>8.3</td></tr>
+<tr><td>states</td><td>4</td><td>off</td><td>A ref 30</td><td>2/2</td><td>159</td><td>1.0</td><td>8.1</td></tr>
+<tr><td>states</td><td>4</td><td>off</td><td>B 10 %</td><td>2/2</td><td>127</td><td>1.0</td><td>6.9</td></tr>
+<tr><td>states</td><td>4</td><td>off</td><td>C ref 10</td><td>2/2</td><td>225</td><td>2.0</td><td>8.7</td></tr>
+<tr><td>states</td><td>4</td><td>off</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>188</td><td>1.0</td><td>7.8</td></tr>
+<tr><td>states</td><td>None</td><td>on</td><td>constant dt</td><td>2/2</td><td>120</td><td>1.0</td><td>6.2</td></tr>
+<tr><td>states</td><td>None</td><td>on</td><td>A ref 3</td><td>2/2</td><td>120</td><td>1.0</td><td>6.8</td></tr>
+<tr><td>states</td><td>None</td><td>on</td><td>A ref 10</td><td>2/2</td><td>128</td><td>1.0</td><td>8.3</td></tr>
+<tr><td>states</td><td>None</td><td>on</td><td>A ref 30</td><td>2/2</td><td>159</td><td>1.0</td><td>8.1</td></tr>
+<tr><td>states</td><td>None</td><td>on</td><td>B 10 %</td><td>2/2</td><td>126</td><td>1.0</td><td>8.0</td></tr>
+<tr><td>states</td><td>None</td><td>on</td><td>C ref 10</td><td>2/2</td><td>120</td><td>1.0</td><td>6.2</td></tr>
+<tr><td>states</td><td>None</td><td>on</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>188</td><td>1.0</td><td>7.8</td></tr>
+<tr><td>states</td><td>None</td><td>off</td><td>constant dt</td><td>2/2</td><td>494</td><td>1.5</td><td>4.7</td></tr>
+<tr><td>states</td><td>None</td><td>off</td><td>A ref 3</td><td>2/2</td><td>149</td><td>1.0</td><td>7.7</td></tr>
+<tr><td>states</td><td>None</td><td>off</td><td>A ref 10</td><td>2/2</td><td>128</td><td>1.0</td><td>8.3</td></tr>
+<tr><td>states</td><td>None</td><td>off</td><td>A ref 30</td><td>2/2</td><td>159</td><td>1.0</td><td>8.1</td></tr>
+<tr><td>states</td><td>None</td><td>off</td><td>B 10 %</td><td>2/2</td><td>127</td><td>1.0</td><td>6.9</td></tr>
+<tr><td>states</td><td>None</td><td>off</td><td>C ref 10</td><td>2/2</td><td>494</td><td>1.5</td><td>7.5</td></tr>
+<tr><td>states</td><td>None</td><td>off</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>188</td><td>1.0</td><td>7.8</td></tr>
+<tr><td>districts</td><td>4</td><td>on</td><td>constant dt</td><td>2/2</td><td>926</td><td>2.5</td><td>6.4</td></tr>
+<tr><td>districts</td><td>4</td><td>on</td><td>A ref 3</td><td>2/2</td><td>927</td><td>2.5</td><td>8.7</td></tr>
+<tr><td>districts</td><td>4</td><td>on</td><td>A ref 10</td><td>2/2</td><td>932</td><td>2.5</td><td>8.0</td></tr>
+<tr><td>districts</td><td>4</td><td>on</td><td>A ref 30</td><td>2/2</td><td>875</td><td>2.5</td><td>9.6</td></tr>
+<tr><td>districts</td><td>4</td><td>on</td><td>B 10 %</td><td>2/2</td><td>804</td><td>2.0</td><td>5.9</td></tr>
+<tr><td>districts</td><td>4</td><td>on</td><td>C ref 10</td><td>2/2</td><td>926</td><td>2.5</td><td>6.4</td></tr>
+<tr><td>districts</td><td>4</td><td>on</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>1288</td><td>2.5</td><td>7.9</td></tr>
+<tr><td>districts</td><td>4</td><td>off</td><td>constant dt</td><td>2/2</td><td>768</td><td>2.5</td><td>7.2</td></tr>
+<tr><td>districts</td><td>4</td><td>off</td><td>A ref 3</td><td>2/2</td><td>768</td><td>2.5</td><td>8.5</td></tr>
+<tr><td>districts</td><td>4</td><td>off</td><td>A ref 10</td><td>2/2</td><td>772</td><td>2.5</td><td>8.5</td></tr>
+<tr><td>districts</td><td>4</td><td>off</td><td>A ref 30</td><td>2/2</td><td>875</td><td>2.5</td><td>9.6</td></tr>
+<tr><td>districts</td><td>4</td><td>off</td><td>B 10 %</td><td>2/2</td><td>804</td><td>2.0</td><td>5.9</td></tr>
+<tr><td>districts</td><td>4</td><td>off</td><td>C ref 10</td><td>2/2</td><td>768</td><td>2.5</td><td>7.2</td></tr>
+<tr><td>districts</td><td>4</td><td>off</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>1288</td><td>2.5</td><td>7.9</td></tr>
+<tr><td>districts</td><td>None</td><td>on</td><td>constant dt</td><td>2/2</td><td>1589</td><td>2.5</td><td>6.4</td></tr>
+<tr><td>districts</td><td>None</td><td>on</td><td>A ref 3</td><td>2/2</td><td>1590</td><td>2.5</td><td>8.7</td></tr>
+<tr><td>districts</td><td>None</td><td>on</td><td>A ref 10</td><td>2/2</td><td>1595</td><td>2.5</td><td>8.0</td></tr>
+<tr><td>districts</td><td>None</td><td>on</td><td>A ref 30</td><td>2/2</td><td>1165</td><td>2.0</td><td>7.8</td></tr>
+<tr><td>districts</td><td>None</td><td>on</td><td>B 10 %</td><td>2/2</td><td>1100</td><td>2.0</td><td>5.9</td></tr>
+<tr><td>districts</td><td>None</td><td>on</td><td>C ref 10</td><td>2/2</td><td>1589</td><td>2.5</td><td>6.4</td></tr>
+<tr><td>districts</td><td>None</td><td>on</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>1273</td><td>2.0</td><td>8.1</td></tr>
+<tr><td>districts</td><td>None</td><td>off</td><td>constant dt</td><td>1/2</td><td>2282</td><td>3.0</td><td>53.9</td></tr>
+<tr><td>districts</td><td>None</td><td>off</td><td>A ref 3</td><td>1/2</td><td>2283</td><td>3.0</td><td>54.0</td></tr>
+<tr><td>districts</td><td>None</td><td>off</td><td>A ref 10</td><td>1/2</td><td>2066</td><td>2.5</td><td>53.9</td></tr>
+<tr><td>districts</td><td>None</td><td>off</td><td>A ref 30</td><td>2/2</td><td>1165</td><td>2.0</td><td>7.8</td></tr>
+<tr><td>districts</td><td>None</td><td>off</td><td>B 10 %</td><td>2/2</td><td>1100</td><td>2.0</td><td>5.9</td></tr>
+<tr><td>districts</td><td>None</td><td>off</td><td>C ref 10</td><td>1/2</td><td>2298</td><td>3.0</td><td>51.2</td></tr>
+<tr><td>districts</td><td>None</td><td>off</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>1273</td><td>2.0</td><td>8.1</td></tr>
+<tr><td>states_t</td><td>4</td><td>on</td><td>constant dt</td><td>2/2</td><td>637</td><td>2.0</td><td>0.5</td></tr>
+<tr><td>states_t</td><td>4</td><td>on</td><td>A ref 3</td><td>2/2</td><td>308</td><td>1.5</td><td>0.8</td></tr>
+<tr><td>states_t</td><td>4</td><td>on</td><td>A ref 10</td><td>2/2</td><td>166</td><td>1.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>4</td><td>on</td><td>A ref 30</td><td>2/2</td><td>150</td><td>1.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>4</td><td>on</td><td>B 10 %</td><td>2/2</td><td>166</td><td>1.0</td><td>0.8</td></tr>
+<tr><td>states_t</td><td>4</td><td>on</td><td>C ref 10</td><td>2/2</td><td>386</td><td>1.5</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>4</td><td>on</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>216</td><td>1.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>4</td><td>off</td><td>constant dt</td><td>2/2</td><td>418</td><td>2.5</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>4</td><td>off</td><td>A ref 3</td><td>1/2</td><td>422</td><td>2.5</td><td>1.0</td></tr>
+<tr><td>states_t</td><td>4</td><td>off</td><td>A ref 10</td><td>2/2</td><td>351</td><td>2.5</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>4</td><td>off</td><td>A ref 30</td><td>2/2</td><td>254</td><td>1.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>4</td><td>off</td><td>B 10 %</td><td>1/2</td><td>637</td><td>3.0</td><td>1.1</td></tr>
+<tr><td>states_t</td><td>4</td><td>off</td><td>C ref 10</td><td>2/2</td><td>367</td><td>3.0</td><td>0.3</td></tr>
+<tr><td>states_t</td><td>4</td><td>off</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>397</td><td>2.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>None</td><td>on</td><td>constant dt</td><td>2/2</td><td>681</td><td>1.0</td><td>0.9</td></tr>
+<tr><td>states_t</td><td>None</td><td>on</td><td>A ref 3</td><td>2/2</td><td>538</td><td>1.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>None</td><td>on</td><td>A ref 10</td><td>2/2</td><td>166</td><td>1.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>None</td><td>on</td><td>A ref 30</td><td>2/2</td><td>150</td><td>1.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>None</td><td>on</td><td>B 10 %</td><td>2/2</td><td>166</td><td>1.0</td><td>0.8</td></tr>
+<tr><td>states_t</td><td>None</td><td>on</td><td>C ref 10</td><td>2/2</td><td>681</td><td>1.0</td><td>0.9</td></tr>
+<tr><td>states_t</td><td>None</td><td>on</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>216</td><td>1.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>None</td><td>off</td><td>constant dt</td><td>2/2</td><td>1126</td><td>2.5</td><td>0.4</td></tr>
+<tr><td>states_t</td><td>None</td><td>off</td><td>A ref 3</td><td>2/2</td><td>1130</td><td>2.5</td><td>0.6</td></tr>
+<tr><td>states_t</td><td>None</td><td>off</td><td>A ref 10</td><td>2/2</td><td>700</td><td>2.0</td><td>0.6</td></tr>
+<tr><td>states_t</td><td>None</td><td>off</td><td>A ref 30</td><td>2/2</td><td>254</td><td>1.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>None</td><td>off</td><td>B 10 %</td><td>2/2</td><td>981</td><td>2.5</td><td>0.6</td></tr>
+<tr><td>states_t</td><td>None</td><td>off</td><td>C ref 10</td><td>2/2</td><td>866</td><td>2.0</td><td>0.7</td></tr>
+<tr><td>states_t</td><td>None</td><td>off</td><td>A ref 10 + B 5 %</td><td>2/2</td><td>766</td><td>2.0</td><td>0.7</td></tr>
+</table>
+<h2>Stall rule</h2>
+<p>stall_patience None (reference), 4 (default), 2, 1; 7 cases x dt 0.2 and 0.6, counties included (they supply the runs where the reference does not converge). A false stall is a run that converges with the rule off but is stopped by it.</p>
+<table>
+<tr><th>controller</th><th>refresh on rise</th><th>stall_patience</th><th>runs</th><th>converged</th><th>false stalls (reference converges)</th><th>runs where the reference does not converge</th><th>iterations saved on those</th><th>median output max err %</th></tr>
+<tr><td>constant dt</td><td>on</td><td>None</td><td>27</td><td>24</td><td>0</td><td>3</td><td>0 %</td><td>8.5</td></tr>
+<tr><td>constant dt</td><td>on</td><td>4</td><td>27</td><td>22</td><td>2</td><td>3</td><td>13 %</td><td>8.5</td></tr>
+<tr><td>constant dt</td><td>on</td><td>2</td><td>27</td><td>20</td><td>4</td><td>3</td><td>31 %</td><td>8.7</td></tr>
+<tr><td>constant dt</td><td>on</td><td>1</td><td>27</td><td>20</td><td>4</td><td>3</td><td>41 %</td><td>8.7</td></tr>
+<tr><td>constant dt</td><td>off</td><td>None</td><td>27</td><td>18</td><td>0</td><td>9</td><td>0 %</td><td>8.6</td></tr>
+<tr><td>constant dt</td><td>off</td><td>4</td><td>27</td><td>10</td><td>8</td><td>9</td><td>51 %</td><td>9.3</td></tr>
+<tr><td>constant dt</td><td>off</td><td>2</td><td>27</td><td>10</td><td>8</td><td>9</td><td>60 %</td><td>9.9</td></tr>
+<tr><td>constant dt</td><td>off</td><td>1</td><td>27</td><td>10</td><td>8</td><td>9</td><td>64 %</td><td>10.8</td></tr>
+<tr><td>A ref 10</td><td>on</td><td>None</td><td>27</td><td>24</td><td>0</td><td>3</td><td>0 %</td><td>8.6</td></tr>
+<tr><td>A ref 10</td><td>on</td><td>4</td><td>27</td><td>22</td><td>2</td><td>3</td><td>13 %</td><td>8.6</td></tr>
+<tr><td>A ref 10</td><td>on</td><td>2</td><td>27</td><td>20</td><td>4</td><td>3</td><td>31 %</td><td>8.6</td></tr>
+<tr><td>A ref 10</td><td>on</td><td>1</td><td>27</td><td>18</td><td>6</td><td>3</td><td>41 %</td><td>8.6</td></tr>
+<tr><td>A ref 10</td><td>off</td><td>None</td><td>27</td><td>24</td><td>0</td><td>3</td><td>0 %</td><td>8.5</td></tr>
+<tr><td>A ref 10</td><td>off</td><td>4</td><td>27</td><td>20</td><td>4</td><td>3</td><td>22 %</td><td>8.6</td></tr>
+<tr><td>A ref 10</td><td>off</td><td>2</td><td>27</td><td>16</td><td>8</td><td>3</td><td>29 %</td><td>9.0</td></tr>
+<tr><td>A ref 10</td><td>off</td><td>1</td><td>27</td><td>14</td><td>10</td><td>3</td><td>37 %</td><td>9.0</td></tr>
+<tr><td>B 10 %</td><td>on</td><td>None</td><td>27</td><td>24</td><td>0</td><td>3</td><td>0 %</td><td>8.0</td></tr>
+<tr><td>B 10 %</td><td>on</td><td>4</td><td>27</td><td>24</td><td>0</td><td>3</td><td>14 %</td><td>8.0</td></tr>
+<tr><td>B 10 %</td><td>on</td><td>2</td><td>27</td><td>24</td><td>0</td><td>3</td><td>21 %</td><td>8.0</td></tr>
+<tr><td>B 10 %</td><td>on</td><td>1</td><td>27</td><td>22</td><td>2</td><td>3</td><td>29 %</td><td>8.0</td></tr>
+<tr><td>B 10 %</td><td>off</td><td>None</td><td>27</td><td>20</td><td>0</td><td>7</td><td>0 %</td><td>7.9</td></tr>
+<tr><td>B 10 %</td><td>off</td><td>4</td><td>27</td><td>18</td><td>2</td><td>7</td><td>37 %</td><td>8.7</td></tr>
+<tr><td>B 10 %</td><td>off</td><td>2</td><td>27</td><td>16</td><td>4</td><td>7</td><td>49 %</td><td>8.7</td></tr>
+<tr><td>B 10 %</td><td>off</td><td>1</td><td>27</td><td>16</td><td>4</td><td>7</td><td>56 %</td><td>8.7</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>on</td><td>None</td><td>26</td><td>24</td><td>0</td><td>2</td><td>0 %</td><td>8.7</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>on</td><td>4</td><td>26</td><td>24</td><td>0</td><td>2</td><td>0 %</td><td>8.7</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>on</td><td>2</td><td>26</td><td>22</td><td>2</td><td>2</td><td>90 %</td><td>8.8</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>on</td><td>1</td><td>26</td><td>16</td><td>8</td><td>2</td><td>93 %</td><td>8.8</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>off</td><td>None</td><td>27</td><td>22</td><td>0</td><td>5</td><td>0 %</td><td>8.7</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>off</td><td>4</td><td>27</td><td>20</td><td>2</td><td>5</td><td>18 %</td><td>8.7</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>off</td><td>2</td><td>27</td><td>18</td><td>4</td><td>5</td><td>74 %</td><td>8.8</td></tr>
+<tr><td>A ref 10 + B 5 %</td><td>off</td><td>1</td><td>27</td><td>14</td><td>8</td><td>5</td><td>87 %</td><td>8.8</td></tr>
+</table>
+<h2>Compute cost and wall time</h2>
+<p>Cost = iterations + recomputes x ratio (12 states and anisotropy, 21 districts, 47.5 counties at grid 256); &quot;redo steps&quot; are B&#x27;s extra trial steps (about 0.7 plain steps each, not in the cost column). Wall time: sequential runs, NUMBA_NUM_THREADS=4, minimum of 2 repetitions, but other agents were running jobs (load average 9 to 16 on 16 cores), so times are rough; compare within a case only.</p>
+<table>
+<tr><th>case</th><th>dt</th><th>refresh on rise</th><th>controller</th><th>status</th><th>it</th><th>rec</th><th>redo steps</th><th>cost</th><th>wall s (min of 2)</th><th>load avg</th></tr>
+<tr><td>states</td><td>0.2</td><td>off</td><td>constant dt</td><td>converged</td><td>113</td><td>12</td><td>0</td><td>257</td><td>0.40</td><td>9 to 9</td></tr>
+<tr><td>states</td><td>0.2</td><td>off</td><td>A ref 3</td><td>converged</td><td>114</td><td>12</td><td>0</td><td>258</td><td>0.40</td><td>10 to 10</td></tr>
+<tr><td>states</td><td>0.2</td><td>off</td><td>A ref 10</td><td>converged</td><td>124</td><td>13</td><td>0</td><td>280</td><td>0.41</td><td>10 to 10</td></tr>
+<tr><td>states</td><td>0.2</td><td>off</td><td>B 10 %</td><td>converged</td><td>115</td><td>12</td><td>7</td><td>259</td><td>0.41</td><td>10 to 10</td></tr>
+<tr><td>states</td><td>0.2</td><td>off</td><td>A ref 10 + B 5 %</td><td>converged</td><td>154</td><td>16</td><td>67</td><td>346</td><td>0.54</td><td>10 to 10</td></tr>
+<tr><td>states</td><td>0.2</td><td>on</td><td>constant dt</td><td>converged</td><td>113</td><td>12</td><td>0</td><td>257</td><td>0.39</td><td>10 to 10</td></tr>
+<tr><td>states</td><td>0.2</td><td>on</td><td>A ref 3</td><td>converged</td><td>114</td><td>12</td><td>0</td><td>258</td><td>0.40</td><td>10 to 10</td></tr>
+<tr><td>states</td><td>0.2</td><td>on</td><td>A ref 10</td><td>converged</td><td>124</td><td>13</td><td>0</td><td>280</td><td>0.42</td><td>9 to 9</td></tr>
+<tr><td>states</td><td>0.2</td><td>on</td><td>B 10 %</td><td>converged</td><td>115</td><td>12</td><td>7</td><td>259</td><td>0.40</td><td>9 to 9</td></tr>
+<tr><td>states</td><td>0.2</td><td>on</td><td>A ref 10 + B 5 %</td><td>converged</td><td>154</td><td>16</td><td>67</td><td>346</td><td>0.55</td><td>9 to 9</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>constant dt</td><td>stalled</td><td>200</td><td>20</td><td>0</td><td>440</td><td>0.60</td><td>9 to 9</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>A ref 3</td><td>stalled</td><td>200</td><td>20</td><td>0</td><td>440</td><td>0.59</td><td>9 to 9</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>A ref 10</td><td>converged</td><td>204</td><td>21</td><td>0</td><td>456</td><td>0.58</td><td>10 to 10</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>B 10 %</td><td>converged</td><td>256</td><td>26</td><td>10</td><td>568</td><td>0.71</td><td>10 to 10</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>off</td><td>A ref 10 + B 5 %</td><td>converged</td><td>173</td><td>18</td><td>93</td><td>389</td><td>0.61</td><td>10 to 10</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>constant dt</td><td>converged</td><td>115</td><td>13</td><td>0</td><td>271</td><td>0.41</td><td>10 to 10</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>A ref 3</td><td>converged</td><td>115</td><td>13</td><td>0</td><td>271</td><td>0.44</td><td>10 to 10</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>A ref 10</td><td>converged</td><td>117</td><td>13</td><td>0</td><td>273</td><td>0.42</td><td>10 to 10</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>B 10 %</td><td>converged</td><td>131</td><td>20</td><td>7</td><td>371</td><td>0.52</td><td>10 to 10</td></tr>
+<tr><td>states_t</td><td>0.2</td><td>on</td><td>A ref 10 + B 5 %</td><td>converged</td><td>151</td><td>16</td><td>83</td><td>343</td><td>0.60</td><td>10 to 10</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>constant dt</td><td>stalled</td><td>200</td><td>20</td><td>0</td><td>440</td><td>0.61</td><td>10 to 10</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>A ref 3</td><td>converged</td><td>163</td><td>17</td><td>0</td><td>367</td><td>0.52</td><td>10 to 10</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>A ref 10</td><td>converged</td><td>214</td><td>22</td><td>0</td><td>478</td><td>0.71</td><td>10 to 10</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>B 10 %</td><td>converged</td><td>144</td><td>15</td><td>101</td><td>324</td><td>0.71</td><td>10 to 10</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>off</td><td>A ref 10 + B 5 %</td><td>converged</td><td>261</td><td>27</td><td>103</td><td>585</td><td>0.84</td><td>10 to 11</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>constant dt</td><td>converged</td><td>94</td><td>11</td><td>0</td><td>226</td><td>0.36</td><td>11 to 11</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>A ref 3</td><td>converged</td><td>96</td><td>11</td><td>0</td><td>228</td><td>0.37</td><td>11 to 11</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>A ref 10</td><td>converged</td><td>163</td><td>18</td><td>0</td><td>379</td><td>0.54</td><td>11 to 11</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>B 10 %</td><td>converged</td><td>165</td><td>24</td><td>122</td><td>453</td><td>0.70</td><td>11 to 11</td></tr>
+<tr><td>horiz</td><td>0.6</td><td>on</td><td>A ref 10 + B 5 %</td><td>converged</td><td>242</td><td>28</td><td>109</td><td>578</td><td>0.85</td><td>11 to 11</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>constant dt</td><td>stalled</td><td>190</td><td>19</td><td>0</td><td>587</td><td>1.48</td><td>11 to 11</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>A ref 3</td><td>stalled</td><td>190</td><td>19</td><td>0</td><td>587</td><td>1.48</td><td>11 to 11</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>A ref 10</td><td>converged</td><td>153</td><td>16</td><td>0</td><td>487</td><td>1.24</td><td>11 to 11</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>B 10 %</td><td>converged</td><td>131</td><td>14</td><td>119</td><td>424</td><td>1.36</td><td>12 to 12</td></tr>
+<tr><td>districts</td><td>0.6</td><td>off</td><td>A ref 10 + B 5 %</td><td>converged</td><td>236</td><td>24</td><td>234</td><td>738</td><td>2.28</td><td>12 to 12</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>constant dt</td><td>converged</td><td>141</td><td>16</td><td>0</td><td>475</td><td>1.20</td><td>12 to 12</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>A ref 3</td><td>converged</td><td>141</td><td>16</td><td>0</td><td>475</td><td>1.20</td><td>12 to 12</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>A ref 10</td><td>converged</td><td>151</td><td>16</td><td>0</td><td>485</td><td>1.21</td><td>12 to 12</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>B 10 %</td><td>converged</td><td>126</td><td>17</td><td>122</td><td>481</td><td>1.47</td><td>13 to 13</td></tr>
+<tr><td>districts</td><td>0.6</td><td>on</td><td>A ref 10 + B 5 %</td><td>converged</td><td>236</td><td>24</td><td>234</td><td>738</td><td>2.13</td><td>13 to 13</td></tr>
+<tr><td>counties</td><td>0.2</td><td>off</td><td>constant dt</td><td>stalled</td><td>260</td><td>26</td><td>0</td><td>1495</td><td>7.19</td><td>13 to 13</td></tr>
+<tr><td>counties</td><td>0.2</td><td>off</td><td>A ref 3</td><td>stalled</td><td>260</td><td>26</td><td>0</td><td>1495</td><td>7.29</td><td>13 to 14</td></tr>
+<tr><td>counties</td><td>0.2</td><td>off</td><td>A ref 10</td><td>stalled</td><td>260</td><td>26</td><td>0</td><td>1495</td><td>7.26</td><td>14 to 15</td></tr>
+<tr><td>counties</td><td>0.2</td><td>off</td><td>B 10 %</td><td>completed</td><td>300</td><td>30</td><td>181</td><td>1725</td><td>9.31</td><td>14 to 14</td></tr>
+<tr><td>counties</td><td>0.2</td><td>off</td><td>A ref 10 + B 5 %</td><td>completed</td><td>300</td><td>30</td><td>278</td><td>1725</td><td>11.18</td><td>14 to 15</td></tr>
+<tr><td>counties</td><td>0.2</td><td>on</td><td>constant dt</td><td>stalled</td><td>300</td><td>45</td><td>0</td><td>2438</td><td>11.97</td><td>15 to 16</td></tr>
+<tr><td>counties</td><td>0.2</td><td>on</td><td>A ref 3</td><td>stalled</td><td>300</td><td>45</td><td>0</td><td>2438</td><td>11.30</td><td>16 to 16</td></tr>
+<tr><td>counties</td><td>0.2</td><td>on</td><td>A ref 10</td><td>stalled</td><td>300</td><td>42</td><td>0</td><td>2295</td><td>11.00</td><td>16 to 16</td></tr>
+<tr><td>counties</td><td>0.2</td><td>on</td><td>B 10 %</td><td>stalled</td><td>250</td><td>29</td><td>131</td><td>1628</td><td>9.51</td><td>15 to 16</td></tr>
+<tr><td>counties</td><td>0.2</td><td>on</td><td>A ref 10 + B 5 %</td><td>completed</td><td>300</td><td>38</td><td>278</td><td>2105</td><td>7.61</td><td>15 to 16</td></tr>
+</table>
+<h2>Answers</h2>
+<p>1. **Is a controller plus a fixed schedule as good as refresh-on-rise?** Not at the default interval. With recompute_every 10 and refresh-on-rise off, constant dt converges in 17 of 30 runs, A ref 3 / ref 10 in 18 / 22, B 5 % in 25, A+B in 24; refresh-on-rise with constant dt reaches 27. With recompute_every 5 all are within 27 to 29 of 30 (constant dt 28). At dt 0.6 and 0.8 a controller without refresh-on-rise (A ref 10 and B 5 %: 10/12 and 10/12 or 11/12) matches constant dt with refresh-on-rise (10/12, 11/12). 2. **Is the combination redundant?** No, but the gain is small. Refresh-on-rise plus A ref 3 or B 5 % converges in 29 to 30 of 30 (constant dt: 27 to 28) and lowers the mean number of rises from 9.0 to 7.8 (A ref 3) or 4.5 (B 5 %) at recompute_every 10, and from 7.0 to 3.1 or 1.0 at 5. Cost against constant dt: A ref 3 +0 to 1 %, B 5 % +22 to 32 %, A ref 10 +7 %, A ref 30 +39 to 59 % (dt sits at the floor for most of the run). 3. **Does it let stall_patience be reduced?** No. Patience 2 gives false stalls for every variant: constant dt 4 (refresh-on-rise on) / 8 (off) of 27, A ref 10 4 / 8, A+B 2 / 4, B 10 % 0 / 4; patience 1 gives 6 to 10 (A), 8 (A+B), 4 to 8 (constant dt), 2 to 4 (B 10 %). Only B with refresh-on-rise on holds at patience 2 without a false stall, and A+B with refresh-on-rise on at patience 4. The one clear stall-rule problem seen: A ref 30 on districts at dt 0.6 is stopped at 1198 % maximum error, because its step is at the floor on the sub-cell plateau and the progress per cycle falls under the 2 % threshold. Keep patience 4.</p>
+<h2>Findings</h2>
+<ul><li>With refresh-on-rise on (the current stack) the issue&#x27;s late spike is already gone on the bundled states with tight tolerances (115 iterations, 0.6 % maximum error). With it off, constant dt stalls at 200 iterations with a final score 15.7 times the best; A ref 10 / ref 30, B 10 % and A+B converge (204 / 135 / 256 / 173 iterations).</li><li>dt 0.6 (R 10, refresh-on-rise off): constant dt stalls on all four cases (horizontal, tangential, tilted, districts). A ref 10 fixes horizontal, tilted and districts; tangential is fixed only by B 5 %. With refresh-on-rise on, constant dt converges on all four.</li><li>Restarts: after one constant-dt step from a converged state the score is a median 3.6 (up to 8.6); it takes a median of 4 (refresh-on-rise on) or 52 (off) iterations to converge again. A and C variants have a median score of 0.4 to 0.5 after the first step and a median of 1 iteration. After a loose first stage, A ref 10 converges 4 of 4 without refresh-on-rise (constant dt 1 of 4). C is as good as A for restarts and changes nothing on a fresh start.</li><li>Multiresolution: with tight tolerances A ref 10 / 30 cut the cost on states from 637 to 166 / 150 (constant dt needs a second level on average, A converges on the 128 grid). With default tolerances on states and districts there is no change (states 120 against 128, districts 926 against 932): the coarse-level plateau of the districts (a sub-cell region) is not a step-size problem. B 10 % lowers the district cost to 804.</li><li>Counties do not respond to any controller (best score about 10, output mean error 58 %).</li><li>A is slower when dt is already small: at dt 0.1 with <code>dt_min</code> 0.05 the horizontal and tangential runs do not finish in 400 iterations (8 of 12 converge against 12 of 12). <code>dt_min</code> should be relative to dt (for example dt / 4).</li><li>B is the more physical limiter but blunt: at 5 % it redoes nearly every step in some runs (up to 278 of 300), raising iterations by 20 to 40 % and wall time by up to 90 % (horizontal, dt 0.6).</li><li>Accuracy at convergence is the same for all controllers (output maximum error 4 to 10 %, depending on tolerances; share above 10 % is 0 in every converged run). A shifts the final mean error lower on anisotropy runs (horizontal 1.30 to 0.34 %) because the end phase is gentler.</li></ul>
+<h2>Recommendation</h2>
+<p>1. Keep refresh-on-rise (already in the stack): it gives most of the robustness at no cost; each controller on top adds 2 to 3 converged runs out of 30. 2. Add the safe-restart cap (C, or A limited to a first window) as a small change: it makes continuation from an existing geometry correct (multiresolution levels, the workflow, two-phase schedules), is exactly neutral on fresh runs and costs nothing. 3. Do not make A or B a default. If wanted, offer A with ref 3 to 10 and a <code>dt_min</code> relative to dt as an option for large-dt presets (0.4 to 0.8) and for tight tolerances in multiresolution, where it paid off most. Do not pair it with a lower stall patience. 4. Order: (a) #95 area-weighted density and the grid-independent error floor (#87) first, since the counties and coarse-level plateaus that cause the large failures are independent of the step; (b) evaluate #75 (analytic, frozen field) before tuning a controller, since it removes the stale-field oscillation that A and B treat; (c) ship C with whatever restart work touches <code>morph_geometries</code>; (d) leave the stall rule unchanged: patience can only drop once the progress threshold scales with <code>dt_eff</code>.</p>
+<h2>Surprises</h2>
+<ul><li><code>vmax_scale</code> cancels in the step, contrary to the hypothesis in issue point 2.</li><li>The smallest controller (C, the restart cap) is the one with the clearest benefit; the error-driven step over the whole run mostly trades iterations for fewer oscillations.</li><li>A bad interaction with the stall rule appears with a step at its floor (A ref 30, districts).</li><li>Independent output errors match the library to within 1 point on every converged run.</li></ul>
+<div class="figure">
+<img src="robustness.png" alt="Converged runs per controller and dt over cases and recompute_every 10 and 5 (counties included, they never converge). Left refresh-on-rise off, right on.">
+<p class="caption">Converged runs per controller and dt over cases and recompute_every 10 and 5 (counties included, they never converge). Left refresh-on-rise off, right on.</p>
+</div><div class="figure">
+<img src="traces_counties.png" alt="Counties (3,108) and horizontal anisotropy at dt 0.2. Counties plateau at a score of about 10 for every controller; A never leaves full dt there because the score stays above its reference.">
+<p class="caption">Counties (3,108) and horizontal anisotropy at dt 0.2. Counties plateau at a score of about 10 for every controller; A never leaves full dt there because the score stays above its reference.</p>
+</div><div class="figure">
+<img src="traces_states.png" alt="Score per iteration (log, dashed line at 1), stall rule off, recompute_every 10. Top: refresh-on-rise off; bottom: on. Tight-tolerance states (0.5 % / 1 %, dt 0.2), horizontal and tangential anisotropy at dt 0.6, districts at dt 0.6. Constant dt (thick blue) oscillates without refresh-on-rise; A and A+B remove most of the oscillation at the price of a slower end phase.">
+<p class="caption">Score per iteration (log, dashed line at 1), stall rule off, recompute_every 10. Top: refresh-on-rise off; bottom: on. Tight-tolerance states (0.5 % / 1 %, dt 0.2), horizontal and tangential anisotropy at dt 0.6, districts at dt 0.6. Constant dt (thick blue) oscillates without refresh-on-rise; A and A+B remove most of the oscillation at the price of a slower end phase.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
