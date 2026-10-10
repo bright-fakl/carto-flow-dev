@@ -8,7 +8,7 @@ inputs: states_uniform (49 US states, no size/tile_count/group_by — one tile p
 kind: exploration
 topic: symbol
 status: led-to
-related: pr55-docs-grid-vs-mosaic-guidance
+related: pr40-mosaic-interior-bonus, pr55-docs-grid-vs-mosaic-guidance, pr56-mosaic-option-behavior-docs
 ---
 
 `pr:` and `url:` are intentionally absent — this is not a PR review page. The

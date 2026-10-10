@@ -8,7 +8,7 @@ inputs: states_uniform (49 US states, 1 tile each, hexagon), states_uniform_sq (
 kind: exploration
 topic: symbol
 status: led-to
-related: pr56-mosaic-option-behavior-docs
+related: mosaic-inert-verify, pr48-mosaic-honest-hungarian-defaults, pr56-mosaic-option-behavior-docs
 ---
 
 figure: knob_outside_penalty.png — outside_penalty, all five inputs, both morph settings
