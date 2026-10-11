@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #118: Default generator_anchor of 0.25 with premorph; prescale_components test</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #118: Default generator_anchor of 0.25 with premorph; prescale_components test</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>voronoi</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-voronoi-followup/index.html">Voronoi options follow-up: prescale_components on disconnected input, anchor 0.25 against 0.5, group_by springs</a> <span class="meta">(exploration)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/118">https://github.com/bright-fakl/carto-flow/pull/118</a></dd>
+<dt>Branch</dt><dd>feat/premorph-anchor-025</dd>
+<dt>Base</dt><dd>docs/changelog-voronoi</dd>
+<dt>Created</dt><dd>2026-10-11 14:00</dd>
+<dt>Before</dt><dd>main @ 4ae2ea1 (anchor 0.5 with premorph)</dd>
+<dt>After</dt><dd>feat/premorph-anchor-025 @ 32c56dc</dd>
+<dt>Inputs</dt><dd>49 contiguous states with population, 432 districts with population (group_by State Name); RasterBackend(resolution=256), premorph=True, n_iter 300, area_cv_tol 0.05</dd>
+</dl>
+<p class="desc">With premorph the generator anchor defaults to 0.25 instead of 0.5. On the states and districts 0.25 keeps almost all of the fidelity gain over no anchor, with rounder cells; look at Texas and Louisiana in the top row and at the district cells in the bottom row.</p>
+<p>The runs, the tables and the study of <code>prescale_components</code> and <code>intra_group_spring</code> are on [exploration-voronoi-followup](../exploration-voronoi-followup/index.html).</p>
+<table>
+<tr><th>data</th><th>anchor</th><th>Texas inside its morphed region</th><th>Louisiana shift</th><th>split cells</th><th>adjacency kept</th><th>compactness</th></tr>
+<tr><td>states</td><td>0</td><td>0.73</td><td>2.93</td><td>3</td><td>0.59</td><td>0.58</td></tr>
+<tr><td>states</td><td>0.25</td><td>0.88</td><td>1.62</td><td>4</td><td>0.79</td><td>0.57</td></tr>
+<tr><td>states</td><td>0.5</td><td>0.89</td><td>1.66</td><td>5</td><td>0.80</td><td>0.55</td></tr>
+<tr><td>districts</td><td>0</td><td>0.94</td><td>5.04</td><td>38</td><td>0.57</td><td>0.75</td></tr>
+<tr><td>districts</td><td>0.25</td><td>0.95</td><td>5.05</td><td>41</td><td>0.60</td><td>0.72</td></tr>
+<tr><td>districts</td><td>0.5</td><td>0.96</td><td>5.07</td><td>43</td><td>0.61</td><td>0.69</td></tr>
+</table>
+<ul><li>The cell areas do not depend on the anchor; the change only moves the trade between fidelity to the flow map and compactness.</li><li>Largest loss of the larger audit inputs: adjacency kept 0.66 against 0.71 on lognormal weights spanning 1,400 times.</li><li><code>prescale_components</code>: new <code>TestPrescaleComponents</code> runs the states with Alaska and Hawaii at resolution 96 with and without the option; with it Alaska and Hawaii are within 2 % of their targets and the mean error is within <code>area_error_tol</code>, without it the mean error is more than ten times larger. Nothing else changes for that option.</li></ul>
+<div class="figure">
+<img src="followup_anchor.png" alt="Premorph with the anchor at 0, 0.25 and 0.5. Top: the states, with Texas (red), Louisiana (orange), Arkansas (green), Oklahoma (purple) and New Mexico (brown) highlighted. Bottom: the districts colored by state. The 0.5 column is the result before this PR; the 0.25 column is the new default.">
+<p class="caption">Premorph with the anchor at 0, 0.25 and 0.5. Top: the states, with Texas (red), Louisiana (orange), Arkansas (green), Oklahoma (purple) and New Mexico (brown) highlighted. Bottom: the districts colored by state. The 0.5 column is the result before this PR; the 0.25 column is the new default.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
