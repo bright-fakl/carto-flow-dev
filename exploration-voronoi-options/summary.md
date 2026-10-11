@@ -113,8 +113,8 @@ Paths: U = unweighted, W = weighted raster, P = premorph. ExactBackend is out of
 | `boundary` spec | "union" | keep (a shape choice) |
 | `ElasticBoundary(strength)` | 0.3 (docs use 0.02 to 0.05) | keep; use 0.02 to 0.05 |
 | `resolution` | 300 | keep |
-| `adjacency_spring` / `intra_group_spring` | 0.0 / None | advanced. `adjacency_spring` is redundant with the anchor. `intra_group_spring` is not: the [follow-up](../exploration-voronoi-followup/index.html) shows it keeps states whole on the fixed and elastic bases (0.54 to 0.94 and 0.42 to 0.83 at 0.5) and does little with premorph |
-| `fix_topology` | None | dominated: 4 to 40 times the time, harmful with weights |
+| `adjacency_spring` / `intra_group_spring` | 0.0 / None | keep as regular options (no separate advanced tier). `adjacency_spring` is redundant with the anchor. `intra_group_spring` is not: the [follow-up](../exploration-voronoi-followup/index.html) shows it keeps states whole on the fixed and elastic bases (0.54 to 0.94 and 0.42 to 0.83 at 0.5) and does little with premorph |
+| `fix_topology` | None | keep as a regular option, documented as slow and harmful with weights (4 to 40 times the time) |
 | `area_equalizer_rate` / `weight_ramp_iters` | 0.1 / 10 | make internal |
 | `relaxation` | "overrelax" | make internal |
 | `output_resolution` / `cell_smoothing_px` | None / 3 | make internal (cosmetic) |
@@ -125,7 +125,7 @@ Paths: U = unweighted, W = weighted raster, P = premorph. ExactBackend is out of
 
 ## Proposed simplified option set (described, not implemented)
 
-- Keep user-facing: `weights`, `premorph`, `boundary`, `group_by`, `backend`, `options`; RasterBackend `resolution`, `boundary` (None or ElasticBoundary), `generator_anchor`, `distance_mode` (unweighted only), the springs as advanced options for runs without premorph; ElasticBoundary `strength`; VoronoiOptions `n_iter`, `tol`, `area_cv_tol`, `area_error_tol`, `simplify_tol`, `fix_topology` as advanced and documented for unweighted runs; `prescale_components` stays a basic option (inputs with disconnected parts such as Alaska and Hawaii).
+- Keep user-facing: `weights`, `premorph`, `boundary`, `group_by`, `backend`, `options`; RasterBackend `resolution`, `boundary` (None or ElasticBoundary), `generator_anchor`, `distance_mode` (unweighted only), the springs `adjacency_spring` and `intra_group_spring` as regular options (the documentation says when each helps: `intra_group_spring` with `group_by` on fixed and elastic runs, `adjacency_spring` only without the anchor); ElasticBoundary `strength`; VoronoiOptions `n_iter`, `tol`, `area_cv_tol`, `area_error_tol`, `simplify_tol` and `fix_topology` as regular options, with the documentation saying that `fix_topology` is slow and can damage positions with weights, so it suits unweighted runs; `prescale_components` stays a basic option (inputs with disconnected parts such as Alaska and Hawaii).
 - Make internal: `relaxation`, `area_equalizer_rate`, `weight_ramp_iters`, `output_resolution`, `cell_smoothing_px`, `density_smooth`, `step_scale`, `min_boundary_points`, `adj_min_shared_length`. Deprecation candidates: `AdhesiveBoundary` and `ElasticBoundary.adhesion_strength`.
 - Recipes: (1) faithful = `premorph=True`; (2) smooth outline = premorph + `ElasticBoundary(0.02)`; (3) original outline = default with n_iter about 300 and area_cv_tol 0.05; (4) round outline = `boundary="convex_hull"` or `"circle"`.
 - Anchor default: 0.25 for premorph (the follow-up compares it with 0.5: Texas inside its morphed region 0.88 against 0.89, adjacency 0.79 against 0.80 on the states, rounder cells; the largest loss is adjacency 0.66 against 0.71 on the lognormal weights). For the elastic boundary 0.5 also works.
