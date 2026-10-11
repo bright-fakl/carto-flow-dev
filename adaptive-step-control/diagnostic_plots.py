@@ -29,7 +29,7 @@ import carto_flow.flow_cartogram.stepsize as stepsize
 from carto_flow.flow_cartogram import CartogramWorkflow, MorphOptions, morph_gdf
 from carto_flow.flow_cartogram.grid import build_multilevel_grids
 from carto_flow.flow_cartogram.stall import cycle_length
-from carto_flow.flow_cartogram.stepsize import DEAD_BAND_FRACTION, THRESHOLD, WINDOW, StepController
+from carto_flow.flow_cartogram.stepsize import CONTESTED_FRACTION, DEAD_BAND_FRACTION, THRESHOLD, WINDOW, StepController
 from make_figures import LATE_BAND, fixed_dead_band, options_for, source, true_errors
 
 warnings.filterwarnings("ignore")
@@ -64,7 +64,7 @@ def replay(log_errors, scores, window, initial_score, dead_band):
     """Share of regions with a recent sign change and the controller's fractions on a recorded error sequence."""
     controller = StepController(window, initial_score, dead_band)
     previous, recent = None, []
-    share, fraction, shrinks = [], [], []
+    share, share_all, fraction, shrinks = [], [], [], []
     for t, e in enumerate(log_errors):
         fraction.append(controller.current(t))
         before = controller.fraction
@@ -75,9 +75,12 @@ def replay(log_errors, scores, window, initial_score, dead_band):
         if previous is not None:
             flipped = (np.abs(e) > dead_band) & (np.abs(previous) > dead_band) & (np.sign(e) != np.sign(previous))
         recent = (recent + [flipped])[-WINDOW:]
-        share.append(float(np.any(recent, axis=0).mean()))
+        inverted = np.any(recent, axis=0)
+        contested = np.abs(e) >= CONTESTED_FRACTION * np.abs(e).max()
+        share.append(float(inverted[contested].mean()))
+        share_all.append(float(inverted.mean()))
         previous = e
-    return share, fraction, shrinks
+    return share, share_all, fraction, shrinks
 
 
 def collect(result, options, values, adaptive, initial_score=None, dead_band=None):
@@ -89,12 +92,12 @@ def collect(result, options, values, adaptive, initial_score=None, dead_band=Non
     init = INITIAL_SCORE[0] if adaptive else initial_score
     if dead_band is None:
         dead_band = DEAD_BAND_FRACTION * np.log2(1 + options.max_tol)
-    share, predicted, shrinks = replay(log_errors, scores, window, init, dead_band)
+    share, share_all, predicted, shrinks = replay(log_errors, scores, window, init, dead_band)
     out = {
         "adaptive": adaptive, "status": result.status.value, "it": int(result.niterations),
         "mean_tol": options.mean_tol, "max_tol": options.max_tol,
         "true_max": (true.max(axis=1) * 100).tolist(), "true_mean": (true.mean(axis=1) * 100).tolist(),
-        "share": share, "shrinks": shrinks, "fraction": list(USED) if adaptive else predicted,
+        "share": share, "share_all": share_all, "shrinks": shrinks, "fraction": list(USED) if adaptive else predicted,
         "initial_score": float(init),
     }
     return out
@@ -147,12 +150,12 @@ def continuation(name, grid, first_tol, tol):
 
 
 SCENARIOS = [
-    ("horizontal_dt06", "Horizontal anisotropy, states grid 256, dt 0.6, default tolerances (122 against 165 iterations)", lambda: fresh("horizontal", 256, 0.6)),
-    ("tangential_dt06", "Tangential anisotropy, states grid 256, dt 0.6, default tolerances (118 against 162)", lambda: fresh("tangential", 256, 0.6)),
-    ("tilted_dt06", "Tilted anisotropy, states grid 256, dt 0.6, default tolerances (95 against 133)", lambda: fresh("tilted", 256, 0.6)),
-    ("districts_multires", "Districts, coarse multiresolution level (grid 128), dt 0.2, default tolerances (123 against 125)", lambda: multires_level("districts", 0.2)),
-    ("districts_multires_tight", "Districts, coarse multiresolution level (grid 128), dt 0.2, tolerances 0.5 % / 1 % (constant dt converges at 173, adaptive_dt stalls at 170)", lambda: multires_level("districts", 0.2, (0.005, 0.01))),
-    ("states_tight", "States grid 256, dt 0.2, tolerances 0.5 % / 1 % (112 against 118)", lambda: fresh("states", 256, 0.2, (0.005, 0.01))),
+    ("horizontal_dt06", "Horizontal anisotropy, states grid 256, dt 0.6, default tolerances (122 against 127 iterations)", lambda: fresh("horizontal", 256, 0.6)),
+    ("tangential_dt06", "Tangential anisotropy, states grid 256, dt 0.6, default tolerances (118 against 123)", lambda: fresh("tangential", 256, 0.6)),
+    ("tilted_dt06", "Tilted anisotropy, states grid 256, dt 0.6, default tolerances (95 against 98)", lambda: fresh("tilted", 256, 0.6)),
+    ("districts_multires", "Districts, coarse multiresolution level (grid 128), dt 0.2, default tolerances (123 in both modes)", lambda: multires_level("districts", 0.2)),
+    ("districts_multires_tight", "Districts, coarse multiresolution level (grid 128), dt 0.2, tolerances 0.5 % / 1 % (173 against 149 iterations)", lambda: multires_level("districts", 0.2, (0.005, 0.01))),
+    ("states_tight", "States grid 256, dt 0.2, tolerances 0.5 % / 1 % (112 in both modes)", lambda: fresh("states", 256, 0.2, (0.005, 0.01))),
     ("districts_continuation", "Districts grid 256: second run at 0.5 % / 1 % on a result converged at 5 % / 20 % (7 against 13)", lambda: continuation("districts", 256, (0.05, 0.2), (0.005, 0.01))),
     ("tilted_stall", "Tilted anisotropy, dt 0.6, default tolerances, recompute_on_rise None (stalls at 130 in both modes)", lambda: fresh("tilted", 256, 0.6, rise=None)),
     ("states_tight_none", "States grid 256, dt 0.2, tolerances 0.2 % / 0.4 %, recompute_on_rise None (192 against 152)", lambda: fresh("states", 256, 0.2, (0.002, 0.004), rise=None)),
@@ -169,7 +172,8 @@ def plot(key, title, runs):
         c = COLORS[a]
         axes[0].plot(x, r["true_max"], color=c, label=label, linewidth=1.3)
         axes[0].axvline(r["it"], color=c, linestyle=":", linewidth=1.2)
-        axes[1].plot(x, r["share"], color=c, linewidth=1.3, label=("measured, " + ON) if a else ("measured, " + OFF))
+        axes[1].plot(x, r["share"], color=c, linewidth=1.3, label=("contested regions, " + ON) if a else ("contested regions, " + OFF))
+        axes[1].plot(x, r["share_all"], color=c, linewidth=0.8, linestyle=":", alpha=0.7)
         axes[2].plot(x, r["fraction"], color=c, linewidth=1.6, label=("actual (" + ON + ")") if a else ("predicted (open loop on the constant-dt run)"),
                      linestyle="-" if a else "--")
         axes[3].plot(x, r["true_mean"], color=c, linewidth=1.3)
@@ -183,12 +187,12 @@ def plot(key, title, runs):
     r = runs[True]
     axes[0].axhline(r["max_tol"] * 100, color="black", linestyle="--", linewidth=0.8, label=f"max tolerance {r['max_tol'] * 100:.3g} %")
     axes[3].axhline(r["mean_tol"] * 100, color="black", linestyle="--", linewidth=0.8, label=f"mean tolerance {r['mean_tol'] * 100:.3g} %")
-    axes[1].axhline(THRESHOLD, color="black", linestyle="--", linewidth=0.8, label=f"threshold {THRESHOLD} (triangles: shrink events; open: predicted on the constant-dt run)")
+    axes[1].axhline(THRESHOLD, color="black", linestyle="--", linewidth=0.8, label=f"threshold {THRESHOLD} on the contested share (triangles: shrink events; open: predicted on the constant-dt run)")
     axes[0].set_yscale("log")
     axes[3].set_yscale("log")
     axes[2].set_ylim(0, 1.05)
     axes[0].set_ylabel("true max area error %")
-    axes[1].set_ylabel("share of regions\nwith a sign change")
+    axes[1].set_ylabel("share with a sign change\n(solid: contested regions,\ndotted: all regions)")
     axes[2].set_ylabel("fraction of dt")
     axes[3].set_ylabel("true mean area error %")
     axes[3].set_xlabel("iteration (dotted: stopping iteration)")
