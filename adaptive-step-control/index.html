@@ -1,0 +1,270 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #123: Adaptive step size for the flow cartogram</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #123: Adaptive step size for the flow cartogram</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-adaptive-step/index.html">Error-dependent step size for the flow cartogram</a> <span class="meta">(exploration)</span><br><a href="../exact-density-coverage/index.html">Exact area-weighted density rasterization, as the default</a> <span class="meta">(pr)</span><br><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/123">https://github.com/bright-fakl/carto-flow/pull/123</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/94">#94</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>feat/adaptive-step</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-12 15:00</dd>
+<dt>Before</dt><dd>main @ 71b5157 (constant dt; reproduced with adaptive_dt=False)</dd>
+<dt>After</dt><dd>feat/adaptive-step @ 5f5fda2</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC) and congressional districts (432), bundled; the three strong-anisotropy runs of the adaptive-recompute page (states, preset_balanced values, area_scale 1e-6, DirectionalTensor horizontal / tangential / tilted); 3,108 counties (prepared set, not bundled). MorphOptions defaults except where stated (dt 0.2, recompute_every 10, recompute_on_rise 0.01, exact rasterization, stall rule on, n_iter 400); NUMBA_NUM_THREADS=8, runs sequential. True error is the output area against the population share of the total output area. Cost = iterations + field recomputes x cost of one recompute in plain steps (states 9, 12, 24 at grids 128, 256, 512; districts 18, 21, 23; measured on adaptive-recompute-experiment).</dd>
+</dl>
+<p class="desc">MorphOptions.adaptive_dt (default on) shrinks the step when the regions&#x27; area errors alternate in sign and limits the first steps of a run that starts near the target. 32 of 32 tight-tolerance runs converge against 17 (with and without recompute_on_rise), the late-phase oscillation of the true maximum error drops by a factor of about 3, a continuation from a converged cartogram takes 1 iteration instead of 4, and runs at the default tolerances at dt 0.2 change by at most 3 % in iterations. Anisotropy runs at dt 0.6 need 35 to 40 % more iterations.</p>
+<p><code>make_figures.py</code> runs every experiment below and writes the figures and <code>data/tables.md</code> (all tables, one row per run); <code>REUSE=1</code> reuses the stored <code>data/*.json</code>. The counties part runs when <code>COUNTIES_PARQUET</code> points at a GeoDataFrame file with <code>GEOID</code>, <code>total_votes</code> and <code>geometry</code>. The numbers in &quot;How the rule was chosen&quot; come from throwaway variants of the branch and are not regenerated by the script.</p>
+<h2>What changes</h2>
+<p>The step moves the fastest point <code>dt</code> grid cells whatever the error (<code>dt_prime = dt * min(dx, dy) / max_v</code>; the field&#x27;s strength cancels). Near the target that is more than the correction asks for: the area of each region alternates around its target with an amplitude proportional to <code>dt</code>, and a tolerance below the amplitude is met only when the oscillation dips below it (<a href="../exact-density-coverage/index.html">exact-density-coverage</a>, section &quot;Late phase&quot;).</p>
+<p><code>MorphOptions.adaptive_dt</code> (default <code>True</code>; <code>False</code> is the constant step of main) multiplies <code>dt</code> by a fraction <code>f</code> in [1/8, 1]:</p>
+<ul><li>**Sign changes.** A region is inverted if the sign of its area error (current area against target, as <code>log2</code> of the ratio) changed in any of the last 3 iterations; a change is only recorded between two iterations in which the region&#x27;s error exceeds 1e-3 (regions inside the dead band are skipped, the last significant sign is not kept). When the share <code>s</code> of inverted regions exceeds 30 %, <code>f</code> is multiplied by <code>1 - 0.6 s</code>, and the next 3 iterations cannot shrink it again. <code>f</code> never grows back. The rule uses neither the score nor the tolerances nor <code>recompute_on_rise</code>.</li><li>**Restart.** In the first <code>max(recompute_every, 10)</code> iterations <code>f</code> is also limited to the score of the current state (for the first step: of the input geometries) divided by 10, not below 1/8. A run that starts far from the target (score above 10) is not affected.</li></ul>
+<p>The constants (3 iterations, 1e-3, 30 %, 0.6, 1/8, 10) are fixed in <code>stepsize.py</code>; the only option is the switch.</p>
+<h2>Late phase</h2>
+<p>True maximum error over the last 50 of 300 iterations, with every iteration recorded and computed from the geometry of each snapshot (the cycle has period 2, so sampling every n-th iteration is not representative):</p>
+<table>
+<tr><th>input</th><th>dt</th><th>recompute_on_rise</th><th>constant dt: lowest / median / highest %</th><th>adaptive_dt: lowest / median / highest %</th></tr>
+<tr><td>states</td><td>0.1</td><td>0.01</td><td>0.426 / 0.622 / 2.160</td><td>0.068 / 0.308 / 0.846</td></tr>
+<tr><td>states</td><td>0.1</td><td>None</td><td>0.228 / 4.159 / 17.562</td><td>0.134 / 1.814 / 6.415</td></tr>
+<tr><td>states</td><td>0.2</td><td>0.01</td><td>0.302 / 0.814 / 2.003</td><td>0.118 / 0.272 / 0.682</td></tr>
+<tr><td>states</td><td>0.2</td><td>None</td><td>0.303 / 5.322 / 14.540</td><td>0.023 / 1.365 / 3.752</td></tr>
+<tr><td>states</td><td>0.4</td><td>0.01</td><td>1.287 / 2.371 / 6.223</td><td>0.095 / 0.228 / 0.566</td></tr>
+<tr><td>states</td><td>0.4</td><td>None</td><td>1.114 / 8.717 / 19.548</td><td>0.058 / 1.562 / 4.352</td></tr>
+<tr><td>districts</td><td>0.2</td><td>0.01</td><td>0.388 / 0.964 / 2.742</td><td>0.154 / 0.556 / 1.428</td></tr>
+<tr><td>districts</td><td>0.2</td><td>None</td><td>2.849 / 5.947 / 14.051</td><td>0.152 / 1.902 / 3.904</td></tr>
+</table>
+<p>The highest error drops by a factor of 2 to 11 (2.0 to 0.68 % at dt 0.2). Without <code>recompute_on_rise</code> the field is stale for up to 10 iterations and the constant-dt cycle is much larger (14 to 20 %); the rule reduces it by a factor of 2.7 to 4.5, and what remains is the stale field, not the step.</p>
+<h2>Tight tolerances</h2>
+<p>32 runs: states at grids 128, 256, 512 and districts at grid 256, tolerances (mean / max) 0.2 % / 0.4 % and 0.5 % / 1 %, dt 0.2 and 0.4, <code>recompute_on_rise</code> 0.01 and None (rows in <code>data/tables.md</code>).</p>
+<table>
+<tr><th></th><th>constant dt converges</th><th>adaptive_dt converges</th></tr>
+<tr><td><code>recompute_on_rise</code> 0.01 (16 runs)</td><td>10</td><td>16</td></tr>
+<tr><td><code>recompute_on_rise</code> None (16 runs)</td><td>7</td><td>16</td></tr>
+<tr><td>total</td><td>17 of 32</td><td>32 of 32</td></tr>
+</table>
+<p>Of the 17 runs where both converge the median cost ratio is 0.83 (range 0.20 to 1.34); three cost more than 5 % more (1.10, 1.12, 1.34; for example states at grid 256, 0.5 % / 1 %, dt 0.2 with the default recompute: 112 iterations (cost 256) against 118 (286)). States at grid 128, 0.5 % / 1 %, dt 0.2: 182 iterations (cost 776) against 71 (152). The true maximum error of the output is equal or lower in 28 of the 32 runs; in the four others it is higher but within the tolerance (0.20 against 0.25 %; 0.23 against 0.36 %; 0.72 against 0.86 %; 0.73 against 0.78 %).</p>
+<h2>Runs at the default tolerances</h2>
+<p>12 runs; wall time is the minimum of two. Iterations with constant dt against adaptive_dt:</p>
+<table>
+<tr><th>input</th><th>grid</th><th>dt</th><th>iterations, constant dt</th><th>iterations, adaptive_dt</th><th>wall s, constant dt / adaptive_dt</th></tr>
+<tr><td>states</td><td>128</td><td>0.2</td><td>62</td><td>63</td><td>0.14 / 0.14</td></tr>
+<tr><td>states</td><td>256</td><td>0.2</td><td>112</td><td>112</td><td>0.30 / 0.22</td></tr>
+<tr><td>states</td><td>512</td><td>0.2</td><td>214</td><td>214</td><td>0.53 / 0.52</td></tr>
+<tr><td>districts</td><td>256</td><td>0.2</td><td>145</td><td>145</td><td>0.56 / 0.56</td></tr>
+<tr><td>states</td><td>256</td><td>0.4</td><td>62</td><td>62</td><td>0.15 / 0.15</td></tr>
+<tr><td>districts</td><td>256</td><td>0.4</td><td>81</td><td>80</td><td>0.41 / 0.41</td></tr>
+<tr><td>horizontal</td><td>256</td><td>0.2</td><td>207</td><td>213</td><td>0.35 / 0.34</td></tr>
+<tr><td>tangential</td><td>256</td><td>0.2</td><td>187</td><td>187</td><td>0.31 / 0.32</td></tr>
+<tr><td>tilted</td><td>256</td><td>0.2</td><td>162</td><td>162</td><td>0.27 / 0.29</td></tr>
+<tr><td>horizontal</td><td>256</td><td>0.6</td><td>122</td><td>165</td><td>0.25 / 0.28</td></tr>
+<tr><td>tangential</td><td>256</td><td>0.6</td><td>118</td><td>162</td><td>0.27 / 0.29</td></tr>
+<tr><td>tilted</td><td>256</td><td>0.6</td><td>95</td><td>133</td><td>0.23 / 0.25</td></tr>
+</table>
+<p>At dt 0.2 and 0.4 the runs are identical or within 3 % (horizontal at dt 0.2: +6 iterations). The three anisotropy runs at dt 0.6, which is three times the default, need 35 to 40 % more iterations: the regions overshoot during the approach, the step shrinks and cannot recover. Wall times agree within noise. The stopping point differs, so the true maximum error of the output differs too (states at grid 256: 0.78 % against 4.4 %; every output is within the 10 % tolerance). All 12 runs converge in both modes.</p>
+<h2>Continuation from an existing geometry</h2>
+<p>A second <code>CartogramWorkflow.morph</code> on the result of a first run, tolerances 0.5 % / 1 % (rows in <code>data/tables.md</code>):</p>
+<table>
+<tr><th>input</th><th>grid</th><th>first run</th><th>constant dt: iterations (cost), score after iteration 1</th><th>adaptive_dt: iterations (cost), score after iteration 1</th></tr>
+<tr><td>states</td><td>256</td><td>converged at 0.5 % / 1 %</td><td>4 (28), 2.5</td><td>1 (13), 0.1</td></tr>
+<tr><td>states</td><td>512</td><td>converged at 0.5 % / 1 %</td><td>4 (52), 2.7</td><td>1 (25), 0.3</td></tr>
+<tr><td>districts</td><td>256</td><td>converged at 0.5 % / 1 %</td><td>4 (46), 2.3</td><td>1 (22), 0.3</td></tr>
+<tr><td>states</td><td>256</td><td>converged at 5 % / 20 %</td><td>92 (620), 1.6</td><td>2 (14), 1.1</td></tr>
+<tr><td>states</td><td>512</td><td>converged at 5 % / 20 %</td><td>4 (52), 8.0</td><td>3 (27), 8.0</td></tr>
+<tr><td>districts</td><td>256</td><td>converged at 5 % / 20 %</td><td>7 (70), 7.0</td><td>13 (97), 7.0</td></tr>
+</table>
+<p>The restart limit is needed. In a throwaway variant without it (states, grid 128, tolerances 0.5 % / 1 %, converged first run) the second run took 19 iterations (score 8.9, 18.7, 13.9 after the first three iterations) against 4 with constant dt and 1 with the limit: the first step undoes the convergence before any sign change can be seen, and the sign rule then shrinks the step for a run that has to converge again.</p>
+<p>The districts at grid 256 started from a loose result are slower with adaptive_dt (7 against 13 iterations): the score of the start is 7, so the limit takes 70 % of the step although a full step was right.</p>
+<h3>Multiresolution</h3>
+<p><code>morph_multiresolution(min_resolution=128, levels=3)</code>, 300 iterations per level; the loop stops at the first converged level (cost over the levels run):</p>
+<table>
+<tr><th>input</th><th>tolerances</th><th>dt</th><th>constant dt</th><th>adaptive_dt</th></tr>
+<tr><td>states</td><td>default</td><td>0.2</td><td>128: converged 63 it; cost 126</td><td>128: converged 63; cost 126</td></tr>
+<tr><td>states</td><td>default</td><td>0.4</td><td>128: converged 39; cost 93</td><td>128: converged 40; cost 85</td></tr>
+<tr><td>states</td><td>0.5 % / 1 %</td><td>0.2</td><td>128: converged 94; cost 292</td><td>128: converged 70; cost 151</td></tr>
+<tr><td>states</td><td>0.5 % / 1 %</td><td>0.4</td><td>128: converged 45; cost 126</td><td>128: converged 49; cost 112</td></tr>
+<tr><td>districts</td><td>default</td><td>0.2</td><td>128: converged 123; cost 447</td><td>128: converged 125; cost 467</td></tr>
+<tr><td>districts</td><td>default</td><td>0.4</td><td>128, 256, 512: stalled (120, 50, 50 it); cost 1317</td><td>same stalls; cost 1090</td></tr>
+<tr><td>districts</td><td>0.5 % / 1 %</td><td>0.2</td><td>128: converged 173; cost 947</td><td>128: converged 170; cost 800</td></tr>
+<tr><td>districts</td><td>0.5 % / 1 %</td><td>0.4</td><td>128, 256, 512: stalled (140, 50, 50 it); cost 1499</td><td>same stalls (130, 50, 50); cost 1076</td></tr>
+</table>
+<p>Equal or cheaper in seven of the eight runs (the districts at dt 0.2 and the default tolerances cost 4 % more). The districts at dt 0.4 stall at every level in both modes (sub-cell plateau; the step control does not address it).</p>
+<h2>recompute_on_rise</h2>
+<p>The tables above use both settings where it matters. The one false stall of an earlier design (states, dt 0.2, tolerances 0.2 % / 0.4 %, <code>recompute_on_rise=None</code>) does not occur: adaptive_dt converges in 152 iterations, constant dt in 192.</p>
+<table>
+<tr><th>input</th><th>dt</th><th>tolerances</th><th>recompute_on_rise</th><th>constant dt</th><th>adaptive_dt</th></tr>
+<tr><td>states</td><td>0.2</td><td>0.2 / 0.4 %</td><td>0.01</td><td>converged, 148 it, cost 508</td><td>converged, 118, 286</td></tr>
+<tr><td>states</td><td>0.2</td><td>0.2 / 0.4 %</td><td>None</td><td>converged, 192, 432</td><td>converged, 152, 344</td></tr>
+<tr><td>states</td><td>0.4</td><td>0.2 / 0.4 %</td><td>0.01</td><td>converged, 100, 412</td><td>converged, 70, 190</td></tr>
+<tr><td>states</td><td>0.4</td><td>0.2 / 0.4 %</td><td>None</td><td>stalled, 210, 462</td><td>converged, 122, 278</td></tr>
+<tr><td>tilted</td><td>0.6</td><td>default</td><td>0.01</td><td>converged, 95, 275</td><td>converged, 133, 313</td></tr>
+<tr><td>tilted</td><td>0.6</td><td>default</td><td>None</td><td>stalled, 130, 286</td><td>stalled, 130, 286</td></tr>
+<tr><td>horizontal</td><td>0.6</td><td>default</td><td>0.01</td><td>converged, 122, 338</td><td>converged, 165, 369</td></tr>
+<tr><td>horizontal</td><td>0.6</td><td>default</td><td>None</td><td>converged, 164, 368</td><td>converged, 167, 371</td></tr>
+</table>
+<p>Tilted at dt 0.6 without <code>recompute_on_rise</code> stalls in both modes at the same iteration.</p>
+<h2>Counties</h2>
+<p>3,108 counties, grid 256, 300 iterations (<code>data/tables.md</code>): constant dt and adaptive_dt give the same run (stalled at 210 iterations, best iteration 169, true mean 49.6 %, max 5018 %). The counties do not respond (targets far below one cell; not a step problem).</p>
+<h2>Per-iteration diagnostics</h2>
+<p><code>diagnostic_plots.py</code> records every iteration of nine scenarios, with the settings of the tables above, for adaptive_dt off and on. Panels, same x axis: (1) true maximum area error from the geometry of each snapshot with the tolerance and the stopping iteration (dotted); (2) share of regions whose error sign changed in the last 3 iterations (the controller&#x27;s detection and dead band), the threshold 0.3, and the shrink events (filled triangles: on run; open triangles: events the controller would have produced on the constant-dt run); (3) fraction of dt: actual for the on run, predicted for the constant-dt run by replaying the controller on its recorded errors (open loop); (4) true mean area error with its tolerance.</p>
+<h3>Scenarios that do not benefit</h3>
+<ul><li>**Anisotropy at dt 0.6.** The share first crosses 0.3 while the maximum error is still 3 to 5 times the tolerance (horizontal: iteration 85, share 0.33, maximum error about 33 % against 10 %; tilted: iteration 62, about 35 %; tangential: iteration 63, about 50 %). The approach to the tolerance is a sequence of oscillations of the maximum error between roughly 10 % and 40 %, and the constant-dt runs converge by a dip below 10 % (iterations 122, 118 and 95). With the rule, 5 to 8 shrinks bring the fraction to 0.14 (horizontal, by iteration 151), 0.33 (tangential) and 0.125 (tilted, by iteration 124); the share then stays near 0 between spikes, the maximum error falls steadily (horizontal: about 23 % at iteration 100, 17 % at 125, 9 % at 165) and the run needs 40 to 70 more iterations at a fraction of 0.15 to 0.4. The cost is the permanent early shrink: the step stays small for the rest of a slow approach that no longer oscillates much.</li><li>**Districts, coarse level.** The share crosses 0.3 at iteration 109 when the maximum error is about 25 % (tolerance 10 %); 4 shrinks lead to a fraction of 0.36, and the run converges 2 iterations later than constant dt, which dips below 10 % at iteration 123. The gain of the rule does not show here and the cost is 2 iterations.</li><li>**States, 0.5 % / 1 %.** Both runs are identical up to iteration 110, when the maximum error is about 20 times the tolerance and the share reaches 0.37 for the first time. This is not an oscillation: regions pass through their targets while the whole map arrives. One shrink (fraction 0.78) follows, and the approach then bounces (4, 11, 6, 1.7, 3.3 % maximum error) until 0.27 % at iteration 118; constant dt happens to land at 0.75 % at iteration 112. The rule fires on the arrival crossing, there is no cycle to remove, and the step it takes costs 6 iterations.</li><li>**Continuation from a loose result.** The on run has no shrink (the share stays below 0.22); all of the difference comes from the restart limit. The fraction falls from 1 to 0.27 in iterations 1 to 6 and stays there until the window ends after iteration 10; the maximum error is flat at about 2.6 to 2.7 % (tolerance 1 %) in iterations 5 to 9, and the run converges at 13 after the limit is lifted (1.4 %, 3.2 %, 0.6 % in iterations 11 to 13). Constant dt oscillates (7.2, 4.3, 8.8, 4.9, 1.8, 3.6 %) and lands at 0.78 % at iteration 7. The limit is proportional to the score (about 2.7 here), which stays far from converged for 10 iterations, so the window of 10 iterations costs more than the first step it protects against.</li><li>**Remaining stall (tilted, dt 0.6, <code>recompute_on_rise=None</code>).** Both runs stall at 130 and neither gets below 20 % maximum error. Constant dt oscillates between 30 % and 190 %; the share crosses 0.3 at iteration 62 (maximum error about 35 %), 6 shrinks bring the fraction to 0.23 and the amplitude falls to 25 to 70 %, but the plateau stays above the tolerance. The stall comes from the stale field (no recompute on rise), not from the step size.</li></ul>
+<h3>Scenarios that benefit</h3>
+<ul><li>**Tight, <code>recompute_on_rise=None</code>.** The share of the constant-dt run jumps to 0.8 at each cycle (iterations 112, 132, 150 to 190), and its maximum error cycles between about 1 % and 60 %. With the rule, 3 shrinks (fraction 0.51) lower the peaks to about 40 %, 18 % and 15 %, and the run converges at 152 on a dip to 0.25 %; the predicted fractions on the constant-dt run reach 0.125, so the controller would have shrunk more there than it did on the run it controlled.</li><li>**Late phase at dt 0.4.** Constant dt alternates between about 1 % and 6 % maximum error for 240 iterations with the share at 0.5 to 0.95. The rule shrinks 5 times between iterations 57 and 75 and holds the floor (0.125); the maximum error then alternates between about 0.1 % and 0.6 %. After the shrinks the share is only 0.02 to 0.12, so the remaining period-2 oscillation of the maximum error is not a sign alternation of the regions.</li></ul>
+<h2>Further checks of the rule</h2>
+<p>These were run on the PR branch after the per-iteration diagnostics, to test ideas about the skewed error distribution. The scripts are <code>signed_errors_symlog.py</code> and <code>signed_errors_linear.py</code> for the figures; the other numbers were measured in throwaway scripts and are not regenerated.</p>
+<ul><li>**Who oscillates.** In the last 40 iterations before the stop, the peak-to-peak swing per region (linear %) has a median of 5.9 % (constant dt) and 1.6 % (adaptive), a 90th percentile of 34 % and 21 %, a maximum of 47 % (Nebraska, Colorado) and 36.5 %; 18 and 10 of 49 regions swing by more than 10 %. The mean absolute error at the stop is 1.07 % and 0.56 %. The eight smallest regions reach a mean maximum error of 18 % (constant) and 9 % (adaptive), the eight largest 2.5 % and 1.3 %.</li><li>**Who creeps.** DC (0.2 % of the area, about 0.15 grid cells) stays 17 % (constant) and 12.6 % (adaptive) below its target over the last 40 iterations; Kansas 13.5 % above in the constant run. The stopping iteration is set by such regions: at iteration 100 one region is above 10 % for constant dt and five for adaptive; at iteration 118 none against seven.</li><li>**Flips by size.** Flip frequency is unrelated to target area (rank correlation -0.04 to -0.21; smallest and largest quartile both 0.42 in the late cycle of the states), and the share by count (0.39) equals the share by area (0.40). Weighting the share by the error magnitude gives the same first crossing (iterations 85/85, 72/76, 62/63 for horizontal, tangential, tilted, at max errors of 44 to 70 %): the large-error regions are flipping too. Large errors sit in small regions (rank correlation of target area with mean absolute error -0.40 to -0.59), but the flips are not concentrated there.</li><li>**Field recomputes in the tangential run.** All recomputes are on the 10-iteration schedule until iteration 67; from there 14 (constant) and 13 (adaptive) are triggered by <code>recompute_on_rise</code>, with intervals of 3 to 6 and 6 to 8 iterations. Both runs do 21 field computations, so the cost is +12 % for +37 % iterations.</li><li>**Cost of the dt 0.6 anisotropy runs** (iterations + 12 x field computations; wall time, minimum of two): horizontal 338 to 369 (+9 %, 0.25 to 0.28 s), tangential 370 to 414 (+12 %, 0.26 to 0.30 s), tilted 275 to 313 (+14 %, 0.23 to 0.24 s).</li><li>**A gamma modulation of the velocity magnitude** (<code>v * (|v| / vmax)^(g - 1)</code> after the anisotropy modulator, constant dt) is worse almost everywhere: strong anisotropy at dt 0.2 needs 207/187/162 iterations at g=1 against 276/229/199 at g=1.5 and 400/344/222 at g=2; only tangential at dt 0.6 improves (118 to 106 at g=1.5); the late-phase highest true error of the states at dt 0.2 is 2.0 % at g=1 against 25 % at g=1.5.</li></ul>
+<h2>How the rule was chosen</h2>
+<p>These numbers come from throwaway variants of the branch (states at grid 256, every iteration recorded, dt 0.2 unless stated). An earlier version of this page described a rule on the score (halve the step when the score rises by 1 %, recover by 25 % per iteration); the reviewer asked for a trigger that does not share the event of <code>recompute_on_rise</code>, a step that never recovers, and the sign of each region&#x27;s error as the signal. The first design and its comparison with an error-driven step are in git history of the branch <code>feat/adaptive-step-v1</code> only.</p>
+<p>Detection (logging with the step unchanged, tolerances 1e-6, <code>recompute_on_rise</code> 0.01):</p>
+<table>
+<tr><th>detector</th><th>far phase (error above 20 %): mean / max share</th><th>late share: mean / std</th><th>first shrink</th><th>late-phase highest % with control</th></tr>
+<tr><td>sign differs from the previous iteration</td><td>0.004 / 0.22</td><td>0.40 / 0.40</td><td>iteration 109</td><td>0.27</td></tr>
+<tr><td>any change in the last 2 iterations</td><td>0.006 / 0.37</td><td>0.60 / 0.35</td><td>109</td><td>0.26</td></tr>
+<tr><td>any change in the last 3 iterations (adopted)</td><td>0.006 / 0.37</td><td>0.81 / 0.03</td><td>109</td><td>0.23</td></tr>
+<tr><td>any change in the last 4 iterations</td><td>0.007 / 0.39</td><td>0.82 / 0.02</td><td>109</td><td>0.23</td></tr>
+<tr><td>sign against the last significant sign, last 2</td><td>0.011 / 0.61</td><td>0.75 / 0.35</td><td>109</td><td>0.23</td></tr>
+<tr><td>sign against 2 iterations ago, last 2</td><td>0.010 / 0.57</td><td>0.96 / 0.03</td><td>109</td><td>0.23</td></tr>
+</table>
+<p>The share swings between about 0.8 and 0 within one iteration (period 2; some regions have period 4), and a window of 3 makes it smooth (std 0.03). Every detector fires 3 iterations before the error first falls below 5 %. Without <code>recompute_on_rise</code> the per-iteration detector and the window of 2 reach 0.5 % and 3.6 % (median) while windows of 3 and 4 reach 0.58 % both; the window of 3 is the shortest that is reliable. The dead band skips regions with a small error; keeping the last significant sign (the two &quot;last significant sign&quot; variants) did not change the outcome and raised the far-phase share.</p>
+<p>Size of the shrink, window 3, share threshold 0.1, <code>recompute_on_rise</code> 0.01 / None (iterations: default tolerances, 0.2 % / 0.4 % at dt 0.2, at dt 0.4; late-phase highest %): fixed halving: 120, 128, 79 / 120, 166, 93; 0.23 / 1.24. Proportional to the error at the first trigger: 114, 121, 72 / 114, 125, 82; 0.31 / 1.10. Multiply by <code>1 - 0.6 s</code>: 112, 117, 75 / 112, 132, 82; 0.30 / 1.95. The proportional rules cost fewer iterations at the default tolerances (112 to 114 against 120 for the fixed halving; constant dt takes 112) because a mild trigger shrinks less. The share-based rule needs no reference error and was kept.</p>
+<p>Threshold and pause, <code>1 - 0.6 s</code>, window 3 (iterations: horizontal 0.6, tangential 0.6, districts grid 128 at the default tolerances; states 0.2 % / 0.4 % at dt 0.2 and 0.4 with <code>recompute_on_rise</code> 0.01 / None; late-phase highest %, 0.01 / None). Constant dt: 122, 118, 123; 148, 100 / 192, stalled; 2.0 / 14.5.</p>
+<table>
+<tr><th>threshold, pause</th><th>iterations (default tolerances)</th><th>iterations (tight)</th><th>late-phase highest %</th></tr>
+<tr><td>0.1, none</td><td>174, 191, 256</td><td>117, 75 / 132, 82</td><td>0.30 / 1.95</td></tr>
+<tr><td>0.1, 3</td><td>169, 203, 163</td><td>123, 70 / 152, 123</td><td>0.45 / 3.23</td></tr>
+<tr><td>0.3, none</td><td>165, 166, 153</td><td>118, 73 / 151, 81</td><td>0.56 / 4.52</td></tr>
+<tr><td>0.3, 3 (adopted)</td><td>165, 162, 124</td><td>118, 70 / 152, 122</td><td>0.68 / 3.75</td></tr>
+<tr><td>0.5, 3</td><td>148, 123, 123</td><td>121, 68 / 151, 102</td><td>0.70 / 20.07</td></tr>
+</table>
+<p>At threshold 0.1 regions flip sign while the error is still large (score around 9 to 11 on the anisotropy runs and the districts at grid 128) and several consecutive triggers from the same sign change take the step to the floor; the districts at grid 128 needed 256 iterations. A threshold of 0.3 with a pause of one window costs 124 and keeps most of the late-phase gain; 0.5 is cheaper but leaves 20 % in the stale-field cycle, worse than constant dt.</p>
+<h2>Design alternatives and trade-offs</h2>
+<p>1. Default <code>adaptive_dt=False</code>: no change for anyone; users with tight tolerances or large presets opt in. The cost of default-on is the 35 to 40 % more iterations of the three dt 0.6 anisotropy runs and 4 % on one multiresolution run. 2. Let the step recover slowly: not done, as the reviewer asked for a decrease-only step; the cost is in the dt 0.6 anisotropy runs, where an early shrink is permanent. 3. Make the shrink depend on the error magnitude: measured above, a proportional rule saves iterations at default tolerances (3 to 8 %) but needs a reference error; the share rule was kept. 4. Expose the constants: not justified by the measurements.</p>
+<h2>Not verified or not changed</h2>
+<ul><li>Not tested: grid 1024, the <code>&quot;center&quot;</code> rasterizer, <code>prescale_components</code>; the districts at grid 512 (stall in both modes, sub-cell plateau) were dropped from the comparison.</li><li>A restart from a loose result on the districts at grid 256 is slower (7 against 13 iterations).</li><li>Existing tests pin behavior of the constant step (a deliberately diverging step, the best-iterate bookkeeping, the rise count of the recompute rule, the accuracy gain of exact rasterization at the stopping point) and now set <code>adaptive_dt=False</code>; with the control a run stops after a shrunk step at an error well inside the tolerance but not necessarily as low as a constant step that lands low (states at grid 256: 4.4 % against 0.78 %).</li></ul>
+<div class="figure">
+<img src="cost_ratio.png" alt="Cost with adaptive_dt over cost with constant dt per run (log scale). Left: the 12 runs at the default tolerances. Right: the 32 tight-tolerance runs. Triangles mark runs where only adaptive_dt converged (their ratio compares against a stalled or capped constant-dt run, so it understates the gain).">
+<p class="caption">Cost with adaptive_dt over cost with constant dt per run (log scale). Left: the 12 runs at the default tolerances. Right: the 32 tight-tolerance runs. Triangles mark runs where only adaptive_dt converged (their ratio compares against a stalled or capped constant-dt run, so it understates the gain).</p>
+</div><div class="figure">
+<img src="diagnostics_districts_continuation.png" alt="Districts grid 256, second run at 0.5 % / 1 % on a result converged at 5 % / 20 %: 7 against 13; panel 3 shows the restart limit.">
+<p class="caption">Districts grid 256, second run at 0.5 % / 1 % on a result converged at 5 % / 20 %: 7 against 13; panel 3 shows the restart limit.</p>
+</div><div class="figure">
+<img src="diagnostics_districts_multires.png" alt="Districts, coarse multiresolution level (grid 128), dt 0.2, default tolerances: 123 against 125.">
+<p class="caption">Districts, coarse multiresolution level (grid 128), dt 0.2, default tolerances: 123 against 125.</p>
+</div><div class="figure">
+<img src="diagnostics_horizontal_dt06.png" alt="Horizontal anisotropy, dt 0.6, default tolerances: 122 iterations against 165.">
+<p class="caption">Horizontal anisotropy, dt 0.6, default tolerances: 122 iterations against 165.</p>
+</div><div class="figure">
+<img src="diagnostics_states_late.png" alt="States grid 256, dt 0.4, unreachable tolerances, stall rule off: late phase.">
+<p class="caption">States grid 256, dt 0.4, unreachable tolerances, stall rule off: late phase.</p>
+</div><div class="figure">
+<img src="diagnostics_states_tight.png" alt="States grid 256, dt 0.2, tolerances 0.5 % / 1 %: 112 against 118.">
+<p class="caption">States grid 256, dt 0.2, tolerances 0.5 % / 1 %: 112 against 118.</p>
+</div><div class="figure">
+<img src="diagnostics_states_tight_none.png" alt="States grid 256, dt 0.2, tolerances 0.2 % / 0.4 %, `recompute_on_rise=None`: 192 against 152.">
+<p class="caption">States grid 256, dt 0.2, tolerances 0.2 % / 0.4 %, <code>recompute_on_rise=None</code>: 192 against 152.</p>
+</div><div class="figure">
+<img src="diagnostics_tangential_dt06.png" alt="Tangential anisotropy, dt 0.6: 118 against 162.">
+<p class="caption">Tangential anisotropy, dt 0.6: 118 against 162.</p>
+</div><div class="figure">
+<img src="diagnostics_tilted_dt06.png" alt="Tilted anisotropy, dt 0.6: 95 against 133.">
+<p class="caption">Tilted anisotropy, dt 0.6: 95 against 133.</p>
+</div><div class="figure">
+<img src="diagnostics_tilted_stall.png" alt="Tilted anisotropy, dt 0.6, `recompute_on_rise=None`: stalls at 130 iterations in both modes.">
+<p class="caption">Tilted anisotropy, dt 0.6, <code>recompute_on_rise=None</code>: stalls at 130 iterations in both modes.</p>
+</div><div class="figure">
+<img src="inversion_share.png" alt="Share of regions with a sign change in the last 3 iterations (orange) against the true maximum area error (blue, right axis), states at grid 256, dt 0.2, constant dt, every iteration recorded. The share is about 0 while the error falls from 1700 % to 10 % and 0.75 to 0.9 once the oscillation starts around iteration 112.">
+<p class="caption">Share of regions with a sign change in the last 3 iterations (orange) against the true maximum area error (blue, right axis), states at grid 256, dt 0.2, constant dt, every iteration recorded. The share is about 0 while the error falls from 1700 % to 10 % and 0.75 to 0.9 once the oscillation starts around iteration 112.</p>
+</div><div class="figure">
+<img src="late_phase.png" alt="Left: true maximum area error at each of the last 80 of 300 iterations, states at grid 256, dt 0.2, tolerances 1e-6 (unreachable), stall rule off, every iteration recorded (default `recompute_on_rise`). Constant dt alternates between 0.3 % and 2.0 %; adaptive_dt between 0.1 % and 0.7 %. Right: highest and median over the last 50 iterations against dt.">
+<p class="caption">Left: true maximum area error at each of the last 80 of 300 iterations, states at grid 256, dt 0.2, tolerances 1e-6 (unreachable), stall rule off, every iteration recorded (default <code>recompute_on_rise</code>). Constant dt alternates between 0.3 % and 2.0 %; adaptive_dt between 0.1 % and 0.7 %. Right: highest and median over the last 50 iterations against dt.</p>
+</div><div class="figure">
+<img src="restart.png" alt="Iterations of the second run on the output of a first run.">
+<p class="caption">Iterations of the second run on the output of a first run.</p>
+</div><div class="figure">
+<img src="signed_errors_tangential.png" alt="Signed relative area error per region and iteration, tangential anisotropy, dt 0.6, `adaptive_dt` off (118 iterations) and on (162), symlog axis (lines colored by target area, dark = small) and heatmap (largest target area at the top).">
+<p class="caption">Signed relative area error per region and iteration, tangential anisotropy, dt 0.6, <code>adaptive_dt</code> off (118 iterations) and on (162), symlog axis (lines colored by target area, dark = small) and heatmap (largest target area at the top).</p>
+</div><div class="figure">
+<img src="signed_errors_tangential_linear.png" alt="The same lines on a linear axis, clipped at 40 %.">
+<p class="caption">The same lines on a linear axis, clipped at 40 %.</p>
+</div><div class="figure">
+<img src="tight_traces.png" alt="Score per iteration, states at grid 256, tolerances 0.2 % / 0.4 %, stall rule off. Constant dt oscillates between about 1.3 and 20 and converges when it happens to dip (148 and 100 iterations); with adaptive_dt the oscillation decays after the first shrinks.">
+<p class="caption">Score per iteration, states at grid 256, tolerances 0.2 % / 0.4 %, stall rule off. Constant dt oscillates between about 1.3 and 20 and converges when it happens to dip (148 and 100 iterations); with adaptive_dt the oscillation decays after the first shrinks.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
