@@ -29,8 +29,8 @@ import carto_flow.flow_cartogram.stepsize as stepsize
 from carto_flow.flow_cartogram import CartogramWorkflow, MorphOptions, morph_gdf
 from carto_flow.flow_cartogram.grid import build_multilevel_grids
 from carto_flow.flow_cartogram.stall import cycle_length
-from carto_flow.flow_cartogram.stepsize import DEAD_BAND, THRESHOLD, WINDOW, StepController
-from make_figures import options_for, source, true_errors
+from carto_flow.flow_cartogram.stepsize import DEAD_BAND_FRACTION, THRESHOLD, WINDOW, StepController
+from make_figures import LATE_BAND, fixed_dead_band, options_for, source, true_errors
 
 warnings.filterwarnings("ignore")
 HERE = Path(__file__).resolve().parent
@@ -60,9 +60,9 @@ def score_series(log_errors, mean_tol, max_tol):
     return np.maximum(a.mean(axis=1) / np.log2(1 + mean_tol), a.max(axis=1) / np.log2(1 + max_tol))
 
 
-def replay(log_errors, scores, window, initial_score):
+def replay(log_errors, scores, window, initial_score, dead_band):
     """Share of regions with a recent sign change and the controller's fractions on a recorded error sequence."""
-    controller = StepController(window, initial_score)
+    controller = StepController(window, initial_score, dead_band)
     previous, recent = None, []
     share, fraction, shrinks = [], [], []
     for t, e in enumerate(log_errors):
@@ -73,21 +73,23 @@ def replay(log_errors, scores, window, initial_score):
             shrinks.append(t + 1)
         flipped = np.zeros(len(e), bool)
         if previous is not None:
-            flipped = (np.abs(e) > DEAD_BAND) & (np.abs(previous) > DEAD_BAND) & (np.sign(e) != np.sign(previous))
+            flipped = (np.abs(e) > dead_band) & (np.abs(previous) > dead_band) & (np.sign(e) != np.sign(previous))
         recent = (recent + [flipped])[-WINDOW:]
         share.append(float(np.any(recent, axis=0).mean()))
         previous = e
     return share, fraction, shrinks
 
 
-def collect(result, options, values, adaptive, initial_score=None):
+def collect(result, options, values, adaptive, initial_score=None, dead_band=None):
     snaps = result.snapshots.snapshots
     log_errors = np.array([s.errors.log_errors for s in snaps])
     scores = score_series(log_errors, options.mean_tol, options.max_tol)
     true = np.array([true_errors(s.geometry, values) for s in snaps])
     window = cycle_length(options.recompute_every)
     init = INITIAL_SCORE[0] if adaptive else initial_score
-    share, predicted, shrinks = replay(log_errors, scores, window, init)
+    if dead_band is None:
+        dead_band = DEAD_BAND_FRACTION * np.log2(1 + options.max_tol)
+    share, predicted, shrinks = replay(log_errors, scores, window, init, dead_band)
     out = {
         "adaptive": adaptive, "status": result.status.value, "it": int(result.niterations),
         "mean_tol": options.mean_tol, "max_tol": options.max_tol,
@@ -98,25 +100,29 @@ def collect(result, options, values, adaptive, initial_score=None):
     return out
 
 
-def fresh(name, grid, dt, tol=None, rise=0.01, n_iter=400, **extra):
+def fresh(name, grid, dt, tol=None, rise=0.01, n_iter=400, band=None, **extra):
     gdf = source(name)
     values = gdf["Population"].to_numpy(float)
     runs = {}
     init = None
     for adaptive in (True, False):  # the run with adaptive_dt first: it records the initial score
         o = options_for(name, adaptive, grid, dt, tol, snapshot_every=1, recompute_on_rise=rise, n_iter=n_iter, **extra)
-        res = morph_gdf(gdf, "Population", options=o)
-        runs[adaptive] = collect(res, o, values, adaptive, init)
+        if band is None:
+            res = morph_gdf(gdf, "Population", options=o)
+        else:
+            with fixed_dead_band(band):
+                res = morph_gdf(gdf, "Population", options=o)
+        runs[adaptive] = collect(res, o, values, adaptive, init, band)
         init = runs[True]["initial_score"]
     return runs
 
 
-def multires_level(name, dt):
+def multires_level(name, dt, tol=None):
     gdf = source(name)
     values = gdf["Population"].to_numpy(float)
     runs, init = {}, None
     for adaptive in (True, False):
-        o = options_for(name, adaptive, 256, dt, None, n_iter=300, snapshot_every=1)
+        o = options_for(name, adaptive, 256, dt, tol, n_iter=300, snapshot_every=1)
         wf = CartogramWorkflow(gdf, "Population", options=o)
         grid = build_multilevel_grids(wf._original_gdf.total_bounds, 128, 3, margin=o.grid_margin, square=True)[0]
         lo = o.copy_with(grid=grid)
@@ -145,11 +151,12 @@ SCENARIOS = [
     ("tangential_dt06", "Tangential anisotropy, states grid 256, dt 0.6, default tolerances (118 against 162)", lambda: fresh("tangential", 256, 0.6)),
     ("tilted_dt06", "Tilted anisotropy, states grid 256, dt 0.6, default tolerances (95 against 133)", lambda: fresh("tilted", 256, 0.6)),
     ("districts_multires", "Districts, coarse multiresolution level (grid 128), dt 0.2, default tolerances (123 against 125)", lambda: multires_level("districts", 0.2)),
+    ("districts_multires_tight", "Districts, coarse multiresolution level (grid 128), dt 0.2, tolerances 0.5 % / 1 % (constant dt converges at 173, adaptive_dt stalls at 170)", lambda: multires_level("districts", 0.2, (0.005, 0.01))),
     ("states_tight", "States grid 256, dt 0.2, tolerances 0.5 % / 1 % (112 against 118)", lambda: fresh("states", 256, 0.2, (0.005, 0.01))),
     ("districts_continuation", "Districts grid 256: second run at 0.5 % / 1 % on a result converged at 5 % / 20 % (7 against 13)", lambda: continuation("districts", 256, (0.05, 0.2), (0.005, 0.01))),
     ("tilted_stall", "Tilted anisotropy, dt 0.6, default tolerances, recompute_on_rise None (stalls at 130 in both modes)", lambda: fresh("tilted", 256, 0.6, rise=None)),
     ("states_tight_none", "States grid 256, dt 0.2, tolerances 0.2 % / 0.4 %, recompute_on_rise None (192 against 152)", lambda: fresh("states", 256, 0.2, (0.002, 0.004), rise=None)),
-    ("states_late", "States grid 256, dt 0.4, unreachable tolerances 1e-6, stall rule off (late phase)", lambda: fresh("states", 256, 0.4, (1e-6, 1e-6), n_iter=300, stall_patience=None)),
+    ("states_late", "States grid 256, dt 0.4, unreachable tolerances 1e-6, dead band as for a 0.4 % max tolerance, stall rule off (late phase)", lambda: fresh("states", 256, 0.4, (1e-6, 1e-6), n_iter=300, band=LATE_BAND, stall_patience=None)),
 ]
 
 

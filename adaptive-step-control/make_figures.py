@@ -29,7 +29,7 @@ import carto_flow.flow_cartogram.algorithm as alg
 from carto_flow import data
 from carto_flow.flow_cartogram import CartogramWorkflow, MorphOptions, morph_gdf
 from carto_flow.flow_cartogram.anisotropy import DirectionalTensor
-from carto_flow.flow_cartogram.stepsize import DEAD_BAND, THRESHOLD, WINDOW
+from carto_flow.flow_cartogram.stepsize import DEAD_BAND_FRACTION, THRESHOLD, WINDOW, StepController
 
 warnings.filterwarnings("ignore")
 HERE = Path(__file__).resolve().parent
@@ -165,7 +165,27 @@ def tight_section():
     return rows
 
 
-def inversion_share(snapshots, values):
+LATE_BAND_TOL = 0.004
+"""The late-phase runs use unreachable tolerances (1e-6); the dead band is set as for a max tolerance of 0.4 %."""
+LATE_BAND = DEAD_BAND_FRACTION * np.log2(1 + LATE_BAND_TOL)
+
+
+class fixed_dead_band:
+    """Context manager: every StepController created inside uses the dead band ``band``."""
+
+    def __init__(self, band):
+        self.band = band
+
+    def __enter__(self):
+        self._saved = alg.StepController
+        band = self.band
+        alg.StepController = lambda window, score, dead_band, enabled=True: StepController(window, score, band, enabled)
+
+    def __exit__(self, *exc):
+        alg.StepController = self._saved
+
+
+def inversion_share(snapshots, values, dead_band):
     """Share of regions per iteration whose area error changed sign in the last WINDOW iterations (as in stepsize.py)."""
     target = values / values.sum()
     previous, recent, out = None, [], []
@@ -174,7 +194,7 @@ def inversion_share(snapshots, values):
         e = np.log2(a / a.sum() / target)
         flipped = np.zeros(len(e), bool)
         if previous is not None:
-            flipped = (np.abs(e) > DEAD_BAND) & (np.abs(previous) > DEAD_BAND) & (np.sign(e) != np.sign(previous))
+            flipped = (np.abs(e) > dead_band) & (np.abs(previous) > dead_band) & (np.sign(e) != np.sign(previous))
         recent = (recent + [flipped])[-WINDOW:]
         out.append(float(np.any(recent, axis=0).mean()))
         previous = e
@@ -191,10 +211,11 @@ def late_section():
             for rise in (0.01, None):
                 for adaptive in (False, True):
                     o = options_for(name, adaptive, grid, dt, (1e-6, 1e-6), n_iter=300, stall_patience=None, snapshot_every=1, recompute_on_rise=rise)
-                    res = morph_gdf(gdf, "Population", options=o)
+                    with fixed_dead_band(LATE_BAND):
+                        res = morph_gdf(gdf, "Population", options=o)
                     series = [float(true_errors(s.geometry, values).max() * 100) for s in res.snapshots.snapshots]
                     rows.append({"case": name, "grid": grid, "dt": dt, "adaptive": adaptive, "recompute_on_rise": rise, "series": series,
-                                 "share": inversion_share(res.snapshots.snapshots, values) if not adaptive else None})
+                                 "share": inversion_share(res.snapshots.snapshots, values, LATE_BAND) if not adaptive else None})
                     tail = np.array(series[-50:])
                     print("late", name, dt, rise, adaptive, round(tail.min(), 3), round(np.median(tail), 3), round(tail.max(), 3), flush=True)
     return rows
