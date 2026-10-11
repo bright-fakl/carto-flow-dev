@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #110: Stall detection per field-refresh cycle; return the best iterate</title>
+<title>PR #110: Stall detection per field-recompute cycle; return the best iterate</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,7 +72,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #110: Stall detection per field-refresh cycle; return the best iterate</h1>
+<h1>PR #110: Stall detection per field-recompute cycle; return the best iterate</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
@@ -90,7 +90,7 @@
 </dl>
 <p class="desc">The flow-cartogram stall rule judges fixed windows of iterations (progress = the window minimum of a still violated mean or max error ratio improves by 2%; stall = 4 windows without progress), the best iterate is returned when a run does not converge, and the result reports best_iteration and stop_reason. Look at the three strong-anisotropy runs (now converged), the cycle minima figure and the best-vs-last maps.</p>
 <h2>What changed</h2>
-<ul><li>Stall rule: a cycle is a fixed window of <code>max(recompute_every, 10)</code> iterations counted from iteration 1, independent of when the field is refreshed. Per cycle the minimum of the mean ratio (<code>mean/mean_tol</code>) and of the max ratio (<code>max/max_tol</code>) is recorded; a ratio below 1 is satisfied. A component counts only while it is still violated (cycle minimum above 1) and its minimum is lower than that component&#x27;s best so far by at least <code>stall_min_improvement</code> (default 2%); improvements of a satisfied component do not count. A cycle is progress if a component counts. The run stalls after <code>stall_patience</code> consecutive cycles without progress (default 4; it was a cumulative count of 5 mean-error increases). <code>None</code> still disables it.</li><li><code>MorphOptions.refresh_on_rise</code> (see below): opt-in in the second-to-last commit; the last commit (8441681) sets its default to 0.01 and can be dropped. The tables below set it explicitly, and make_figures.py runs the stall comparisons with the fixed schedule.</li><li>Best iterate: a run that ends without converging (<code>STALLED</code> or <code>COMPLETED</code>) returns the iterate with the lowest per-iteration score <code>max(mean ratio, max ratio)</code> (geometry, landmarks and coords from the same iteration). The final iterate keeps its snapshot, listed before the best one.</li><li><code>Cartogram.best_iteration</code> and <code>Cartogram.stop_reason</code> (<code>StopReason</code>: <code>CONVERGED</code>, <code>STALL_PATIENCE</code>, <code>ITERATION_LIMIT</code>).</li></ul>
+<ul><li>Stall rule: a cycle is a fixed window of <code>max(recompute_every, 10)</code> iterations counted from iteration 1, independent of when the field is recomputed. Per cycle the minimum of the mean ratio (<code>mean/mean_tol</code>) and of the max ratio (<code>max/max_tol</code>) is recorded; a ratio below 1 is satisfied. A component counts only while it is still violated (cycle minimum above 1) and its minimum is lower than that component&#x27;s best so far by at least <code>stall_min_improvement</code> (default 2%); improvements of a satisfied component do not count. A cycle is progress if a component counts. The run stalls after <code>stall_patience</code> consecutive cycles without progress (default 4; it was a cumulative count of 5 mean-error increases). <code>None</code> still disables it.</li><li><code>MorphOptions.recompute_on_rise</code> (see below): opt-in in the second-to-last commit; the last commit (8441681) sets its default to 0.01 and can be dropped. The tables below set it explicitly, and make_figures.py runs the stall comparisons with the fixed schedule.</li><li>Best iterate: a run that ends without converging (<code>STALLED</code> or <code>COMPLETED</code>) returns the iterate with the lowest per-iteration score <code>max(mean ratio, max ratio)</code> (geometry, landmarks and coords from the same iteration). The final iterate keeps its snapshot, listed before the best one.</li><li><code>Cartogram.best_iteration</code> and <code>Cartogram.stop_reason</code> (<code>StopReason</code>: <code>CONVERGED</code>, <code>STALL_PATIENCE</code>, <code>ITERATION_LIMIT</code>).</li></ul>
 <h2>Strong anisotropy (trajectories.png)</h2>
 <p>Score per iteration (below 1 is converged), dot = stop. The curves of main and fix coincide until main stops. Main stalls at 190, 215 and 170; the fix runs on and converges. The tangential and tilted runs have a plateau of about 90 iterations where the max error stays fixed while the mean error falls; that counts as progress through the mean component.</p>
 <p>![trajectories](trajectories.png)</p>
@@ -138,7 +138,7 @@
 <tr><td>districts</td><td>4</td><td>stalled/136; converged/43</td><td>179</td><td>stalled/240; converged/3</td><td>243</td><td>0.8 / 1.0</td></tr>
 </table>
 <p>Both rules end the first level stalled and the second converged, so the number of levels run is unchanged (2). The coarse level runs longer before it stalls (the timings were taken at a load average of about 19, so only the iteration counts are reliable). With stall detection off, the states level 1 converges at 346 after a max-error plateau of about 200 iterations; the new rule stops it at 100.</p>
-<p>Counties (3,108, prepared set, not bundled; <code>area_scale=1e-6</code>, <code>n_iter=1000</code>, default tolerances, fixed refresh schedule; stop iteration and best score, below 1 is converged):</p>
+<p>Counties (3,108, prepared set, not bundled; <code>area_scale=1e-6</code>, <code>n_iter=1000</code>, default tolerances, fixed recompute schedule; stop iteration and best score, below 1 is converged):</p>
 <table>
 <tr><th>grid</th><th>old rule (patience 5)</th><th>patience 150</th><th>either component counts (previous commit)</th><th>violated components only (now)</th></tr>
 <tr><td>256</td><td>stalled / 198, best 11.65</td><td>stalled / 485, best 9.64</td><td>stalled / 380, best 9.64</td><td>stalled / 260, best 10.16</td></tr>
@@ -146,9 +146,9 @@
 </table>
 <p>None converge. The mean ratio is below 1 from about iteration 220 (256) and 360 (512); the max ratio sits at 10 to 12 (counties.png). Counting only violated components removes the creep of the satisfied mean component and stops 120 / 90 iterations earlier. The max-ratio window minima still improve by 2% or more until iteration 220 (256) and 390 (512), which is why the stop is not earlier; at <code>stall_min_improvement=0.05</code> the 512 run would stop at 50, before its max error has started to fall (replay on the stored per-iteration errors).</p>
 <p>![counties](counties.png)</p>
-<h2>Refresh on rise (opt-in, refresh_on_rise.png)</h2>
-<p><code>MorphOptions.refresh_on_rise</code> (default <code>None</code> until the last commit, then 0.01): when the score rose by more than that relative amount in the last iteration, the velocity field is recomputed before the next iteration; <code>recompute_every</code> stays the maximum interval. The stall windows are fixed windows of <code>max(recompute_every, 10)</code> iterations from iteration 1, so the off path is unchanged (all iteration counts above are identical). Below: off vs on with 0.01 (fix only). Cost = iterations + recomputes x (9, 12, 24 at grid 128, 256, 512), one recompute in plain-step units; rises = iterations where the score rises while below 20.</p>
-<p>![refresh on rise](refresh_on_rise.png)</p>
+<h2>Recompute on rise (opt-in, recompute_on_rise.png)</h2>
+<p><code>MorphOptions.recompute_on_rise</code> (default <code>None</code> until the last commit, then 0.01): when the score rose by more than that relative amount in the last iteration, the velocity field is recomputed before the next iteration; <code>recompute_every</code> stays the maximum interval. The stall windows are fixed windows of <code>max(recompute_every, 10)</code> iterations from iteration 1, so the off path is unchanged (all iteration counts above are identical). Below: off vs on with 0.01 (fix only). Cost = iterations + recomputes x (9, 12, 24 at grid 128, 256, 512), one recompute in plain-step units; rises = iterations where the score rises while below 20.</p>
+<p>![recompute on rise](recompute_on_rise.png)</p>
 <table>
 <tr><th>run</th><th>status</th><th>iterations</th><th>recomputes</th><th>rises</th><th>mean / max error %</th><th>best score</th><th>cost</th></tr>
 <tr><td>horizontal, off</td><td>converged</td><td>245</td><td>25</td><td>17</td><td>1.00 / 9.7</td><td>0.97</td><td>545</td></tr>
@@ -173,7 +173,7 @@
 </table>
 <p>Multiresolution (default options, <code>min_resolution=128</code>; per level grid: status / iterations / recomputes):</p>
 <table>
-<tr><th>data</th><th>refresh_on_rise</th><th>per level</th><th>total iterations</th><th>cost</th></tr>
+<tr><th>data</th><th>recompute_on_rise</th><th>per level</th><th>total iterations</th><th>cost</th></tr>
 <tr><td>states, 3 or 4 levels</td><td>off / on</td><td>128: stalled/100/10; 256: converged/34/4</td><td>134</td><td>272</td></tr>
 <tr><td>districts, 3 or 4 levels</td><td>off</td><td>128: stalled/240/24; 256: converged/3/1</td><td>243</td><td>471</td></tr>
 <tr><td>districts, 3 or 4 levels</td><td>on</td><td>128: converged/231/36</td><td>231</td><td>555</td></tr>
@@ -186,7 +186,7 @@
 <tr><td>grid 512, off</td><td>stalled</td><td>430</td><td>43</td><td>41</td><td>4.59 / 172.0</td><td>10.50</td><td>1656</td></tr>
 <tr><td>grid 512, on</td><td>stalled</td><td>390</td><td>43</td><td>31</td><td>7.98 / 204.0</td><td>11.66</td><td>1616</td></tr>
 </table>
-<p>Refresh on rise halves the rises on the strong-anisotropy runs at about the same cost, needs more iterations than <code>recompute_every=5</code> (233 vs 198) but fewer recomputes, so its cost is lower (557 vs 678) and about that of <code>recompute_every=10</code> (545), and converges two runs that stall or oscillate otherwise (0.5% / 1% tolerances, <code>dt=0.6</code>). On counties it is 63% more costly at grid 256 (2438 vs 1495) and 2% cheaper at grid 512 (1616 vs 1656) with a worse best score there (11.66 vs 10.50), because the runs stall at different points. With the horizontal run at <code>recompute_every</code> 2 and 1, on and off are identical (no rises); the presets and <code>districts 512</code> are identical too. Districts multiresolution is the one case where it changes the level count (2 to 1), at 18% higher cost (555 vs 471) but 12 fewer iterations (231 vs 243).</p>
+<p>Recompute on rise halves the rises on the strong-anisotropy runs at about the same cost, needs more iterations than <code>recompute_every=5</code> (233 vs 198) but fewer recomputes, so its cost is lower (557 vs 678) and about that of <code>recompute_every=10</code> (545), and converges two runs that stall or oscillate otherwise (0.5% / 1% tolerances, <code>dt=0.6</code>). On counties it is 63% more costly at grid 256 (2438 vs 1495) and 2% cheaper at grid 512 (1616 vs 1656) with a worse best score there (11.66 vs 10.50), because the runs stall at different points. With the horizontal run at <code>recompute_every</code> 2 and 1, on and off are identical (no rises); the presets and <code>districts 512</code> are identical too. Districts multiresolution is the one case where it changes the level count (2 to 1), at 18% higher cost (555 vs 471) but 12 fewer iterations (231 vs 243).</p>
 <p>The default and grid-512 runs are identical to main (same iteration counts and errors). The cartogram-cpp states example from the issue is not bundled and was not run.</p>
 <div class="figure">
 <img src="best_vs_last.png" alt="best_vs_last.png">
