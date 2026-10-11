@@ -2,8 +2,8 @@
 pr: 119
 url: https://github.com/bright-fakl/carto-flow/pull/119
 issue: 95, 109
-title: Exact area-weighted density rasterization (density_rasterization="exact")
-description: Each grid cell takes the area it covers of each region instead of the region at its center. Regions smaller than a cell take part, the coarse multiresolution level no longer plateaus, and rasterization is faster or equal from grid 256 up; accuracy at the stopping point is comparable, and the late phase of both rasterizations is the same limit cycle, set by the step size. The default stays center until the review.
+title: Exact area-weighted density rasterization, as the default
+description: Each grid cell takes the area it covers of each region instead of the region at its center, and this is now the default. Regions smaller than a cell take part, the coarse multiresolution level no longer plateaus, rasterization is faster or equal from grid 256 up, and accuracy at the stopping point is comparable; the late phase of both rasterizations is the same limit cycle, set by the step size.
 kind: pr
 topic: flow
 branch: feat/exact-density-coverage
@@ -11,11 +11,11 @@ base: main
 date: 2026-10-11 16:00
 related: exploration-area-coverage, flow-convergence-synthesis
 before: main @ 4ae2ea1 (center sampling only)
-after: feat/exact-density-coverage @ 5488a95
+after: feat/exact-density-coverage @ 8947e69
 inputs: US states (49 incl. DC) and congressional districts (432), bundled; MorphOptions defaults except where stated (grid 256, dt 0.2, recompute_on_rise 0.01, stall rule on); NUMBA_NUM_THREADS=8. True error is the output area against the population share of the total output area.
 ---
 
-The prototype and its first measurements are on [exploration-area-coverage](../exploration-area-coverage/index.html); this page measures the code of the PR. `make_figures.py` regenerates every figure and `data/tables.md`. Counties are not bundled and are not run here; the exploration page found them unchanged.
+The first commit adds `density_rasterization="exact"`; the second makes it the default (`"center"` restores the previous behavior). The comparisons below set the mode explicitly. The prototype and its first measurements are on [exploration-area-coverage](../exploration-area-coverage/index.html); this page measures the code of the PR. `make_figures.py` regenerates every figure and `data/tables.md`. Counties are not bundled and are not run here; the exploration page found them unchanged.
 
 ## What changes in the density field
 
@@ -113,6 +113,20 @@ Minimum of three calls, in milliseconds:
 | districts | 256 | 18.7 | 8.3 |
 | districts | 512 | 23.2 | 10.6 |
 | districts | 1024 | 40.9 | 19.8 |
+
+## Effect of the new default
+
+- The default states run converges in 112 iterations instead of 113; its maximum area error at grid 256 is 0.78 % instead of 4.36 % (table above).
+- The Voronoi `premorph` runs this morph and is unaffected within noise (premorph with the balanced preset, 400 iterations, `RasterBackend(resolution=256)`, anchor 0.25):
+
+| input | rasterization | morph iterations | Voronoi iterations | mean area error % | adjacency kept | compactness | Texas inside its morphed region |
+|---|---|---|---|---|---|---|---|
+| states | center | 113 | 43 | 0.081 | 0.789 | 0.570 | 0.88 |
+| states | exact | 112 | 43 | 0.085 | 0.780 | 0.566 | 0.88 |
+| districts | center | 150 | 9 | 0.000 | 0.600 | 0.718 | - |
+| districts | exact | 145 | 9 | 0.007 | 0.601 | 0.718 | - |
+
+- Tests: three tests of `test_flow_stall_detection.py` tune a diverging step or a small margin on center sampling and pin `"center"` explicitly; the pinned iteration counts of the default run move from 113 to 112.
 
 ## Not changed
 
