@@ -3,7 +3,7 @@ pr: 119
 url: https://github.com/bright-fakl/carto-flow/pull/119
 issue: 95, 109
 title: Exact area-weighted density rasterization (density_rasterization="exact")
-description: Each grid cell takes the area it covers of each region instead of the region at its center. Regions smaller than a cell take part, the coarse multiresolution level no longer plateaus, and rasterization is faster or equal from grid 256 up; accuracy at the stopping point is comparable, and far past convergence center sampling gets lower because its field goes exactly uniform. The default stays center.
+description: Each grid cell takes the area it covers of each region instead of the region at its center. Regions smaller than a cell take part, the coarse multiresolution level no longer plateaus, and rasterization is faster or equal from grid 256 up; accuracy at the stopping point is comparable, and the late phase of both rasterizations is the same limit cycle, set by the step size. The default stays center until the review.
 kind: pr
 topic: flow
 branch: feat/exact-density-coverage
@@ -70,20 +70,34 @@ Different tolerances (the stopping point moves, and so do the errors at it):
 
 At matching tolerances the iteration counts are within 10 %, with one exception: the districts at 0.2 %/0.4 % stall at 220 iterations for exact coverage (true maximum error 0.49 %) where center converges at 235. The true errors at the stopping point are mixed: lower for exact on the states at grid 256 with default tolerances, the states at 512 at 1 % and the districts at 1 %, higher on the mean for the states at 256.
 
-## Far past convergence
+## Late phase: the same limit cycle for both rasterizations
 
-figure: coverage_accuracy.png — True maximum area error against iteration with tolerances that cannot be reached (stall rule off, 300 iterations). Center sampling keeps improving; exact coverage plateaus.
+An earlier version of this page, and of the PR description, said that center sampling keeps improving far past convergence while exact coverage plateaus, because the center field becomes exactly uniform. That was wrong. It came from sampling every tenth iteration, which for these runs falls on opposite phases of a 2-cycle for the two modes. With every iteration recorded the two behave alike.
 
-| input | grid | rasterization | lowest true max error % | at iteration | true max error % at iteration 291 | true mean error % at iteration 291 |
-|---|---|---|---|---|---|---|
-| states | 256 | center | 0.04 | 291 | 0.04 | 0.015 |
-| states | 256 | exact | 1.32 | 291 | 1.32 | 0.544 |
-| states | 512 | center | 0.03 | 241 | 0.06 | 0.016 |
-| states | 512 | exact | 0.33 | 261 | 0.35 | 0.093 |
-| districts | 256 | center | 0.17 | 291 | 0.17 | 0.033 |
-| districts | 256 | exact | 1.53 | 291 | 1.53 | 0.407 |
+figure: coverage_cycle.png — Left: the true maximum area error at every iteration of the states at grid 256 with unreachable tolerances. Both rasterizations alternate between a low and a high value with the same envelope, around 2 %. Right: with a fresh field at every iteration, the late-phase error is proportional to dt (0.2 % at dt 0.05, 1.5 % at dt 0.4) and the same for both.
 
-With center sampling the density field becomes exactly uniform once the rasterized regions match their targets, the velocity is zero, and the run freezes at a small true error. With exact coverage the residual never vanishes, and the normalized step (the fastest point moves `dt` cells) keeps moving the borders; the late-phase oscillation of #94. A smaller step near convergence is the lever for that, not the rasterizer. At realistic tolerances (above) both stop long before this matters. This is the reason the default stays `"center"`.
+Late phase of the states at grid 256 (300 iterations, tolerances unreachable, stall rule off, every iteration recorded). True maximum area error over the last 50 iterations:
+
+| rasterization | lowest % | median % | highest % |
+|---|---|---|---|
+| center | 0.020 | 1.049 | 2.547 |
+| exact | 0.303 | 0.815 | 2.003 |
+
+| dt | center: lowest / median / highest % | exact: lowest / median / highest % |
+|---|---|---|
+| 0.4 | 1.445 / 1.482 / 1.538 | 1.102 / 1.583 / 2.248 |
+| 0.2 | 0.580 / 0.769 / 0.904 | 0.724 / 0.804 / 0.912 |
+| 0.1 | 0.082 / 0.467 / 1.120 | 0.193 / 0.426 / 0.685 |
+| 0.05 | 0.175 / 0.204 / 0.246 | 0.206 / 0.210 / 0.213 |
+
+What happens, and why the field does not become uniform:
+
+- The field is uniform only if every region's area equals its target, because the density in region i is the value over the current area and the target density is the mean. With exact rasterization the encoded mass of each region is exactly its value, so the field deviates from uniform by exactly the area errors (the field's standard deviation inside the regions is 0.2 to 0.7 % in these runs).
+- The step does not shrink with the error. After the field is normalized, the displacement is scaled so that the fastest point moves `dt` grid cells per iteration (`dt_prime = dt * min(dx, dy) / max_v` in `algorithm.py`; the relative strength of the field cancels). Near the target, that step is larger than the correction the field asks for, so each iteration overshoots and the errors alternate in sign around zero (Colorado: +2.1, +0.05, -2.0, +0.03, +2.1 %, with the default recompute rules; +0.5, -0.8 % with a fresh field at every iteration). The amplitude is set by `dt` and the geometry of the regions, not by the rasterizer, which is why the right panel shows no difference between center and exact.
+- The center runs only look better when sampled at one phase: their low phase is 0.02 %, their high phase 2.5 %; the exact runs go between 0.3 % and 2.0 %.
+- A step that shrinks with the error would remove the cycle for both rasterizations: this is the error-dependent step of #94 ([exploration-adaptive-step](../exploration-adaptive-step/index.html)).
+
+So no limitation specific to exact coverage remains in these measurements. Whatever tolerance sits below the cycle amplitude (about 0.5 to 2 % for these inputs at `dt` 0.2) is reached by chance at the moment the cycle dips below it, for both rasterizations; this is also why the districts at 0.2 %/0.4 % stall for exact and converge for center in the table above.
 
 ## Cost of one rasterization
 

@@ -172,30 +172,55 @@ def fig_multires():
     plt.close(fig)
 
 
-def fig_accuracy():
-    """True area error against iteration with the tolerances unreachable, so both runs go the same number of steps."""
-    cases = [("states", STATES, 256), ("states", STATES, 512), ("districts", DISTRICTS, 256)]
-    fig, axes = plt.subplots(1, 3, figsize=(14, 4))
+def fig_cycle():
+    """Late-phase behavior: the error alternates around the target, with the same amplitude for both rasterizations."""
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4))
     TABLES.append("")
-    TABLES.append("True area error with unreachable tolerances (300 iterations, stall rule off):")
+    TABLES.append("Late phase of the states at grid 256 (300 iterations, tolerances unreachable, stall rule off, every iteration recorded). True maximum area error over the last 50 iterations:")
     TABLES.append("")
-    TABLES.append("| input | grid | rasterization | lowest true max error % | at iteration | true max error % at iteration 291 | true mean error % at iteration 291 |")
-    TABLES.append("|---|---|---|---|---|---|---|")
-    for ax, (name, gdf, grid) in zip(axes, cases, strict=True):
-        for m in MODES:
-            result, _ = run(gdf, "Population", grid, m, n_iter=300, mean_tol=1e-6, max_tol=1e-6, stall_patience=None, snapshot_every=10)
-            its = [i for i in result.snapshots.get_iterations() if (i - 1) % 10 == 0]  # periodic snapshots only
-            mx = [np.abs(true_errors_at(result, gdf, "Population", i)).max() for i in its]
-            mean300 = np.abs(true_errors_at(result, gdf, "Population", its[-1])).mean()
-            ax.semilogy(its, mx, color=COLORS[m], label=m)
-            k = int(np.argmin(mx))
-            TABLES.append(f"| {name} | {grid} | {m} | {mx[k]:.2f} | {its[k]} | {mx[-1]:.2f} | {mean300:.3f} |")
-        ax.set_title(f"{name}, grid {grid}", fontsize=10)
-        ax.set_xlabel("iteration")
+    TABLES.append("| rasterization | lowest % | median % | highest % |")
+    TABLES.append("|---|---|---|---|")
+    for m in MODES:
+        result, _ = run(STATES, "Population", 256, m, n_iter=300, mean_tol=1e-6, max_tol=1e-6, stall_patience=None, snapshot_every=1)
+        its = list(range(200, 300))
+        mx = np.array([np.abs(true_errors_at(result, STATES, "Population", i)).max() for i in its])
+        axes[0].plot(its, mx, "o-", markersize=3, linewidth=0.8, color=COLORS[m], label=m)
+        last = mx[-50:]
+        TABLES.append(f"| {m} | {last.min():.3f} | {np.median(last):.3f} | {last.max():.3f} |")
+    axes[0].set_xlabel("iteration")
     axes[0].set_ylabel("true max area error %")
+    axes[0].set_title("states, grid 256, default recompute rules", fontsize=10)
     axes[0].legend()
+
+    TABLES.append("")
+    TABLES.append("Fresh field at every iteration (recompute_every=1, no recompute on rise); true maximum error over the last 30 iterations against dt:")
+    TABLES.append("")
+    TABLES.append("| dt | center: lowest / median / highest % | exact: lowest / median / highest % |")
+    TABLES.append("|---|---|---|")
+    dts = (0.4, 0.2, 0.1, 0.05)
+    med = {m: [] for m in MODES}
+    for dt in dts:
+        n_iter = 300 if dt >= 0.1 else 600
+        cells = []
+        for m in MODES:
+            result, _ = run(
+                STATES, "Population", 256, m, n_iter=n_iter, dt=dt, recompute_every=1, recompute_on_rise=None,
+                mean_tol=1e-6, max_tol=1e-6, stall_patience=None, snapshot_every=1,
+            )
+            mx = np.array([np.abs(true_errors_at(result, STATES, "Population", i)).max() for i in range(n_iter - 30, n_iter)])
+            med[m].append(np.median(mx))
+            cells.append(f"{mx.min():.3f} / {np.median(mx):.3f} / {mx.max():.3f}")
+        TABLES.append(f"| {dt:g} | {cells[0]} | {cells[1]} |")
+    for m in MODES:
+        axes[1].plot(dts, med[m], "o-", color=COLORS[m], label=m)
+    axes[1].set_xscale("log")
+    axes[1].set_yscale("log")
+    axes[1].set_xlabel("dt (cells moved by the fastest point per iteration)")
+    axes[1].set_ylabel("late-phase true max error % (median)")
+    axes[1].set_title("fresh field every iteration", fontsize=10)
+    axes[1].legend()
     fig.tight_layout()
-    fig.savefig(HERE / "coverage_accuracy.png", dpi=110)
+    fig.savefig(HERE / "coverage_cycle.png", dpi=110)
     plt.close(fig)
 
 
@@ -246,7 +271,7 @@ if __name__ == "__main__":
     fig_traces()
     fig_maps()
     fig_multires()
-    fig_accuracy()
+    fig_cycle()
     tolerance_sweep()
     rasterization_times()
     (HERE / "data" / "tables.md").write_text("\n".join(TABLES) + "\n")
