@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Exact density rasterizer, ring orientation from the signed area</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Exact density rasterizer, ring orientation from the signed area</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exact-density-coverage/index.html">Exact area-weighted density rasterization, as the default</a> <span class="meta">(pr)</span><br><a href="../adaptive-step-control/index.html">Adaptive step size for the flow cartogram</a> <span class="meta">(pr)</span><br><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
+<dt>URL</dt><dd>(missing)</dd>
+<dt>Branch</dt><dd>fix/exact-ring-orientation</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-11 18:57</dd>
+<dt>Before</dt><dd>main @ 71b5157 (rings oriented by shapely.orient_polygons)</dd>
+<dt>After</dt><dd>fix/exact-ring-orientation (rings oriented by the sign of their shoelace area)</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC) and congressional districts (432), bundled; MorphOptions defaults except where stated; NUMBA_NUM_THREADS=8. True error is the output area against the population share of the total output area.</dd>
+</dl>
+<p class="desc">A region whose ring has a small self-intersection could reach the exact rasterizer with the wrong sign and vanish from the density field; orienting rings by their shoelace area keeps it, and a stalled districts run converges.</p>
+<p><code>make_figures.py</code> regenerates the figures and <code>data/tables.md</code>; <code>timing.py</code> is run in a checkout of main and one of the branch. The &quot;before&quot; runs of <code>make_figures.py</code> patch the previous orientation back in, so one checkout gives both columns.</p>
+<h2>What goes wrong</h2>
+<p>The exact rasterizer integrates the signed area that the edges of each ring sweep across the cells and clips the result to [0, 1]. It needs every exterior ring counter-clockwise (positive signed area). It used <code>shapely.orient_polygons</code>, whose orientation test (GEOS <code>isCCW</code>) looks at the highest vertex of the ring. For a ring with a small self-intersecting loop at that vertex, the test and the signed area can disagree: the ring stays clockwise, every cell of the region gets a negative coverage, the clip sets it to zero, and the cells get the mean density. The region is missing from the field and receives no force from its own area error. Its area, measured by the shoelace formula, is correct, so the error metrics do not show the cause.</p>
+<p>In the investigation of the adaptive step control one region of the districts (grid 128) stayed at +10 % after every other region was within 1 %; repairing only that polygon (an area change of 0.00 %) let it converge, and the field around it differed by up to 4 % of the mean density in 18 cells. The center rasterizer, which does not depend on ring orientation, converged from the same state without a repair. Details: <a href="../adaptive-step-control/index.html">adaptive-step-control</a>.</p>
+<p>The ring of a region of the stalled districts run is shown below: in the cells it covers, the field before the fix shows no contrast, after the fix it shows the region&#x27;s density.</p>
+<h2>The fix</h2>
+<p>Rings are no longer reoriented before the kernel. Inside the numba function that accumulates the coverage, the shoelace sign of each ring is computed and the ring is counted with sign +1 or -1 so that exteriors are positive and holes negative. Valid input gives the same coverage as before (the existing tests against shapely clipping pass unchanged), and a ring with a small loop keeps the sign of its body. Cells that only a loop covers get a small negative sum and are clipped to zero, as before.</p>
+<h2>Results</h2>
+<table>
+<tr><th>case</th><th>before: status, iterations, true max error</th><th>after: status, iterations, true max error</th></tr>
+<tr><td>districts, grid 128, dt 0.4, 1 % / 2 %</td><td>stalled, 110, 26.41 %</td><td>converged, 151, 1.95 %</td></tr>
+<tr><td>districts, grid 128, dt 0.2, 1 % / 2 %</td><td>converged, 135, 1.58 %</td><td>converged, 135, 1.58 %</td></tr>
+<tr><td>districts, grid 256, tolerances 0.5 % / 1 %</td><td>converged, 156, 0.73 %</td><td>converged, 156, 0.73 %</td></tr>
+<tr><td>districts, grid 256, default tolerances</td><td>converged, 145, 9.76 %</td><td>converged, 145, 9.76 %</td></tr>
+<tr><td>states, grid 256, default tolerances</td><td>converged, 112, 0.78 %</td><td>converged, 112, 0.78 %</td></tr>
+</table>
+<p>Stalled run (before): 22 of 432 regions are invalid; the rings of regions [23, 98] reach the rasterizer with a sign opposite to their shoelace area (true errors 3.9 %, 21.2 %). The worst region is 41 (error 26.4 %); the wrong-sign regions are not among its six nearest neighbors. The two fields differ in 31 cells; the summed density deviation (cells) there is -0.068 before and +0.564 after.</p>
+<p>Runs without invalid regions and runs where the invalid regions have the right sign give the same iterations and errors before and after (the four other rows).</p>
+<h2>Cost</h2>
+<p>Median time of one exact density field (ms), main against the branch:</p>
+<table>
+<tr><th>input, grid</th><th>main</th><th>branch</th></tr>
+<tr><td>states, 256</td><td>2.2</td><td>1.8</td></tr>
+<tr><td>districts, 256</td><td>6.3</td><td>5.0</td></tr>
+<tr><td>districts, 1024</td><td>20.0</td><td>18.0</td></tr>
+</table>
+<p>The call to <code>orient_polygons</code> is gone and the sign is found inside the compiled loop.</p>
+<h2>Not included</h2>
+<ul><li>The output polygons of a morph can still cross themselves (22 of 432 districts in the stalled run, 19 to 53 in converged runs). They no longer drop out of the field; making the output valid belongs to #85 and #78.</li><li>The other stalls seen on the districts (grid 512 at 0.5 % / 1 %, states at tight tolerances) do not have this cause.</li><li>The <code>center</code> rasterizer is not affected.</li></ul>
+<div class="figure">
+<img src="field.png" alt="Region 98 of a stalled districts run (grid 128, dt 0.4, 1 % / 2 %; green outline; true error 21.2 %). Left: density relative to the mean with the previous orientation (the region is missing from the field). Middle: with the fix. Right: difference.">
+<p class="caption">Region 98 of a stalled districts run (grid 128, dt 0.4, 1 % / 2 %; green outline; true error 21.2 %). Left: density relative to the mean with the previous orientation (the region is missing from the field). Middle: with the fix. Right: difference.</p>
+</div><div class="figure">
+<img src="histories.png" alt="Max error per iteration, districts, grid 128, dt 0.4, 1 % / 2 %. Before the fix the run stalls at 110 iterations with a maximum error of 26 %; after it converges at 151 iterations.">
+<p class="caption">Max error per iteration, districts, grid 128, dt 0.4, 1 % / 2 %. Before the fix the run stalls at 110 iterations with a maximum error of 26 %; after it converges at 151 iterations.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
