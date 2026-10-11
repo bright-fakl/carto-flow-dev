@@ -6,7 +6,7 @@ description: With premorph the generator anchor defaults to 0.25 instead of 0.5.
 kind: pr
 topic: voronoi
 branch: feat/premorph-anchor-025
-base: docs/changelog-voronoi
+base: main
 date: 2026-10-11 14:00
 related: exploration-voronoi-followup
 before: main @ 4ae2ea1 (anchor 0.5 with premorph)

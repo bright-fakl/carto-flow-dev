@@ -7,7 +7,7 @@ description: The error metrics no longer depend on the grid: the initial error o
 kind: pr
 topic: flow
 branch: feat/error-floor
-base: docs/changelog-voronoi
+base: main
 date: 2026-10-11 20:00
 related: flow-convergence-synthesis
 before: main @ 4ae2ea1 (floor of one grid cell)

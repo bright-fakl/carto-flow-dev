@@ -7,7 +7,7 @@ description: Each grid cell takes the area it covers of each region instead of t
 kind: pr
 topic: flow
 branch: feat/exact-density-coverage
-base: docs/changelog-voronoi
+base: main
 date: 2026-10-11 16:00
 related: exploration-area-coverage, flow-convergence-synthesis
 before: main @ 4ae2ea1 (center sampling only)
