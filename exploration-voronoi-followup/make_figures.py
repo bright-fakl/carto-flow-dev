@@ -35,6 +35,52 @@ def cells(ds, base, factor, level):
     return shapely.from_wkb(pickle.loads(gzip.open(HERE / "data" / "cells" / f"{key}.pkl.gz").read())["cells"])
 
 
+_DISTRICT_LABELS: np.ndarray | None = None
+
+
+def district_labels():
+    global _DISTRICT_LABELS
+    if _DISTRICT_LABELS is None:
+        _DISTRICT_LABELS = examples.load_us_census(population=True, level="congressional_district")["State Name"].to_numpy()
+    return _DISTRICT_LABELS
+
+
+def cohesion(geoms, labels, k=6):
+    """Group cohesion that does not depend on which cells are neighbors.
+
+    largest_piece: area share of each group's largest connected piece (area-weighted mean over groups).
+    solidity: group union area over its convex hull area (area-weighted mean).
+    neighbor_purity: share of a cell's k nearest cells (by centroid) that are in its own group, mean over
+    cells of groups with at least two cells (k is capped at the group size minus one).
+    """
+    from scipy.spatial import cKDTree
+
+    largest, solidity, weights = [], [], []
+    for g in np.unique(labels):
+        union = shapely.union_all(geoms[labels == g])
+        areas = np.array([p.area for p in shapely.get_parts(union)])
+        largest.append(areas.max() / areas.sum())
+        solidity.append(union.area / max(shapely.convex_hull(union).area, 1e-300))
+        weights.append(areas.sum())
+    centroids = shapely.centroid(geoms)
+    xy = np.column_stack([shapely.get_x(centroids), shapely.get_y(centroids)])
+    tree = cKDTree(xy)
+    sizes = {g: int((labels == g).sum()) for g in np.unique(labels)}
+    purity = []
+    for i in range(len(xy)):
+        n = sizes[labels[i]]
+        if n < 2:
+            continue
+        kk = min(k, n - 1)
+        near = [j for j in tree.query(xy[i], kk + 1)[1] if j != i][:kk]
+        purity.append(np.mean(labels[near] == labels[i]))
+    return {
+        "largest_piece": float(np.average(largest, weights=weights)),
+        "solidity": float(np.average(solidity, weights=weights)),
+        "neighbor_purity": float(np.mean(purity)),
+    }
+
+
 def draw(ax, geoms, colors, edge="white", lw=0.3):
     gpd.GeoSeries(list(geoms)).plot(ax=ax, color=colors, edgecolor=edge, linewidth=lw)
     ax.set_axis_off()
@@ -111,18 +157,37 @@ def groups():
     fig.savefig(HERE / "followup_groups.png", dpi=110)
     plt.close(fig)
 
-    fig, axes = plt.subplots(1, 3, figsize=(13, 3.6))
+    fig, axes = plt.subplots(1, 4, figsize=(17, 3.6))
     names = ["off", "0.25", "0.5", "1", "0.5 + adj 0.1"]
-    for ax, key, title in zip(axes, ["groups_whole", "adj_within", "adj_between"], ["states whole", "within-state adjacency kept", "between-state adjacency kept"], strict=True):
+    panels = [
+        ("largest_piece", "largest piece, share of the state"),
+        ("solidity", "solidity (union / convex hull)"),
+        ("neighbor_purity", "neighbor purity (6 nearest cells)"),
+        ("adj_within", "within-state adjacency kept (original pairs)"),
+    ]
+    for ax, (key, title) in zip(axes, panels, strict=True):
         for base, color in zip("FEP", ["#1f77b4", "#ff7f0e", "#2ca02c"], strict=True):
-            ys = [row("D", base, "intra_group_spring", n)[key] for n in names]
+            if key == "adj_within":
+                ys = [row("D", base, "intra_group_spring", n)[key] for n in names]
+            else:
+                ys = [GROUP_COHESION[(base, n)][key] for n in names]
             ax.plot(names, ys, "o-", color=color, label=BASE_NAMES[base])
-        ax.set_title(title, fontsize=10)
+        ax.set_title(title, fontsize=9)
         ax.tick_params(axis="x", labelrotation=30, labelsize=8)
     axes[0].legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(HERE / "followup_groups_metrics.png", dpi=110)
     plt.close(fig)
+
+
+GROUP_COHESION: dict = {}
+
+
+def compute_cohesion():
+    labels = district_labels()
+    for base in "FEP":
+        for level in ["off", "0.25", "0.5", "1", "0.5 + adj 0.1"]:
+            GROUP_COHESION[(base, level)] = cohesion(cells("D", base, "intra_group_spring", level), labels)
 
 
 def tables():
@@ -145,18 +210,22 @@ def tables():
                 f"{r.get('LA_shift', float('nan')):.2f} | {r['split']} | {r['adj_kept']:.2f} | {r['compact']:.2f} | {r['d_flow_med']:.2f} | {r['time']:.1f} |"
             )
     out.append("")
-    out.append("| base | setting | iterations | states whole | within-state adj | between-state adj | all adj kept | compactness | time s |")
-    out.append("|---|---|---|---|---|---|---|---|---|")
+    out.append("| base | setting | iterations | states whole | largest piece | solidity | neighbor purity | within-state adj | between-state adj | all adj kept | compactness | time s |")
+    out.append("|---|---|---|---|---|---|---|---|---|---|---|---|")
     for r in ROWS:
         if r["factor"] in ("intra_group_spring", "adjacency_spring"):
+            co = GROUP_COHESION.get((r["base"], r["level"])) if r["factor"] == "intra_group_spring" else None
+            if co is None:
+                co = cohesion(cells("D", r["base"], r["factor"], r["level"]), district_labels())
             out.append(
-                f"| {r['base']} | {r['factor']} {r['level']} | {r['it']} | {r['groups_whole']:.2f} | {r['adj_within']:.2f} | "
-                f"{r['adj_between']:.2f} | {r['adj_kept']:.2f} | {r['compact']:.2f} | {r['time']:.1f} |"
+                f"| {r['base']} | {r['factor']} {r['level']} | {r['it']} | {r['groups_whole']:.2f} | {co['largest_piece']:.3f} | {co['solidity']:.3f} | "
+                f"{co['neighbor_purity']:.3f} | {r['adj_within']:.2f} | {r['adj_between']:.2f} | {r['adj_kept']:.2f} | {r['compact']:.2f} | {r['time']:.1f} |"
             )
     (HERE / "data" / "tables.md").write_text("\n".join(out) + "\n")
 
 
 if __name__ == "__main__":
+    compute_cohesion()
     tables()
     prescale()
     anchor()
