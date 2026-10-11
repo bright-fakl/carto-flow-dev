@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #119: Exact area-weighted density rasterization (density_rasterization=&quot;exact&quot;)</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #119: Exact area-weighted density rasterization (density_rasterization=&quot;exact&quot;)</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-area-coverage/index.html">Area-weighted density rasterization</a> <span class="meta">(exploration)</span><br><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/119">https://github.com/bright-fakl/carto-flow/pull/119</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/95">#95</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>feat/exact-density-coverage</dd>
+<dt>Base</dt><dd>docs/changelog-voronoi</dd>
+<dt>Created</dt><dd>2026-10-11 16:00</dd>
+<dt>Before</dt><dd>main @ 4ae2ea1 (center sampling only)</dd>
+<dt>After</dt><dd>feat/exact-density-coverage @ 5488a95</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC) and congressional districts (432), bundled; MorphOptions defaults except where stated (grid 256, dt 0.2, recompute_on_rise 0.01, stall rule on); NUMBA_NUM_THREADS=8. True error is the output area against the population share of the total output area.</dd>
+</dl>
+<p class="desc">Each grid cell takes the area it covers of each region instead of the region at its center. Regions smaller than a cell take part, the coarse multiresolution level no longer plateaus, and rasterization is faster or equal from grid 256 up; accuracy at the stopping point is comparable, and far past convergence center sampling gets lower because its field goes exactly uniform. The default stays center.</p>
+<p>The prototype and its first measurements are on [exploration-area-coverage](../exploration-area-coverage/index.html); this page measures the code of the PR. <code>make_figures.py</code> regenerates every figure and <code>data/tables.md</code>. Counties are not bundled and are not run here; the exploration page found them unchanged.</p>
+<h2>What changes in the density field</h2>
+<h2>Multiresolution</h2>
+<table>
+<tr><th>input</th><th>rasterization</th><th>level</th><th>grid</th><th>status</th><th>iterations</th></tr>
+<tr><td>states</td><td>center</td><td>1</td><td>128</td><td>stalled</td><td>100</td></tr>
+<tr><td>states</td><td>center</td><td>2</td><td>256</td><td>converged</td><td>34</td></tr>
+<tr><td>states</td><td>center</td><td>total</td><td>-</td><td>converged</td><td>134 (true max error 5.63 %)</td></tr>
+<tr><td>states</td><td>exact</td><td>1</td><td>128</td><td>converged</td><td>63</td></tr>
+<tr><td>states</td><td>exact</td><td>total</td><td>-</td><td>converged</td><td>63 (true max error 9.15 %)</td></tr>
+<tr><td>districts</td><td>center</td><td>1</td><td>128</td><td>converged</td><td>231</td></tr>
+<tr><td>districts</td><td>center</td><td>total</td><td>-</td><td>converged</td><td>231 (true max error 8.72 %)</td></tr>
+<tr><td>districts</td><td>exact</td><td>1</td><td>128</td><td>converged</td><td>123</td></tr>
+<tr><td>districts</td><td>exact</td><td>total</td><td>-</td><td>converged</td><td>123 (true max error 8.31 %)</td></tr>
+</table>
+<h2>Convergence and accuracy at the stopping point</h2>
+<table>
+<tr><th>input</th><th>grid</th><th>rasterization</th><th>status</th><th>iterations</th><th>reported max error %</th><th>true max error %</th><th>true mean error %</th><th>seconds</th></tr>
+<tr><td>states</td><td>128</td><td>center</td><td>converged</td><td>63</td><td>8.30</td><td>7.75</td><td>1.193</td><td>0.3</td></tr>
+<tr><td>states</td><td>128</td><td>exact</td><td>converged</td><td>62</td><td>9.66</td><td>8.87</td><td>1.297</td><td>0.2</td></tr>
+<tr><td>states</td><td>256</td><td>center</td><td>converged</td><td>113</td><td>4.38</td><td>4.36</td><td>0.313</td><td>0.6</td></tr>
+<tr><td>states</td><td>256</td><td>exact</td><td>converged</td><td>112</td><td>0.79</td><td>0.78</td><td>0.203</td><td>0.2</td></tr>
+<tr><td>districts</td><td>256</td><td>center</td><td>converged</td><td>150</td><td>8.00</td><td>8.05</td><td>1.065</td><td>0.7</td></tr>
+<tr><td>districts</td><td>256</td><td>exact</td><td>converged</td><td>145</td><td>9.76</td><td>9.76</td><td>1.415</td><td>0.5</td></tr>
+</table>
+<p>Different tolerances (the stopping point moves, and so do the errors at it):</p>
+<table>
+<tr><th>input</th><th>grid</th><th>tolerances</th><th>center: status, iterations, true max, true mean</th><th>exact: status, iterations, true max, true mean</th></tr>
+<tr><td>states</td><td>256</td><td>0.02 / 0.04</td><td>converged, 115, 0.62, 0.071</td><td>converged, 112, 0.78, 0.203</td></tr>
+<tr><td>states</td><td>256</td><td>0.01 / 0.02</td><td>converged, 115, 0.62, 0.071</td><td>converged, 112, 0.78, 0.203</td></tr>
+<tr><td>states</td><td>256</td><td>0.005 / 0.01</td><td>converged, 115, 0.62, 0.071</td><td>converged, 112, 0.78, 0.203</td></tr>
+<tr><td>states</td><td>256</td><td>0.002 / 0.004</td><td>converged, 161, 0.37, 0.073</td><td>converged, 148, 0.39, 0.129</td></tr>
+<tr><td>states</td><td>512</td><td>0.02 / 0.04</td><td>converged, 215, 1.43, 0.186</td><td>converged, 215, 3.32, 0.237</td></tr>
+<tr><td>states</td><td>512</td><td>0.01 / 0.02</td><td>converged, 215, 1.43, 0.186</td><td>converged, 219, 0.68, 0.113</td></tr>
+<tr><td>states</td><td>512</td><td>0.005 / 0.01</td><td>converged, 217, 0.53, 0.067</td><td>converged, 219, 0.68, 0.113</td></tr>
+<tr><td>states</td><td>512</td><td>0.002 / 0.004</td><td>converged, 219, 0.30, 0.054</td><td>converged, 243, 0.38, 0.099</td></tr>
+<tr><td>districts</td><td>256</td><td>0.02 / 0.04</td><td>converged, 153, 3.64, 0.355</td><td>converged, 151, 3.76, 0.571</td></tr>
+<tr><td>districts</td><td>256</td><td>0.01 / 0.02</td><td>converged, 155, 1.88, 0.252</td><td>converged, 154, 1.50, 0.173</td></tr>
+<tr><td>districts</td><td>256</td><td>0.005 / 0.01</td><td>converged, 163, 0.90, 0.165</td><td>converged, 156, 0.73, 0.132</td></tr>
+<tr><td>districts</td><td>256</td><td>0.002 / 0.004</td><td>converged, 235, 0.39, 0.074</td><td>stalled, 220, 0.49, 0.109</td></tr>
+</table>
+<p>At matching tolerances the iteration counts are within 10 %, with one exception: the districts at 0.2 %/0.4 % stall at 220 iterations for exact coverage (true maximum error 0.49 %) where center converges at 235. The true errors at the stopping point are mixed: lower for exact on the states at grid 256 with default tolerances, the states at 512 at 1 % and the districts at 1 %, higher on the mean for the states at 256.</p>
+<h2>Far past convergence</h2>
+<table>
+<tr><th>input</th><th>grid</th><th>rasterization</th><th>lowest true max error %</th><th>at iteration</th><th>true max error % at iteration 291</th><th>true mean error % at iteration 291</th></tr>
+<tr><td>states</td><td>256</td><td>center</td><td>0.04</td><td>291</td><td>0.04</td><td>0.015</td></tr>
+<tr><td>states</td><td>256</td><td>exact</td><td>1.32</td><td>291</td><td>1.32</td><td>0.544</td></tr>
+<tr><td>states</td><td>512</td><td>center</td><td>0.03</td><td>241</td><td>0.06</td><td>0.016</td></tr>
+<tr><td>states</td><td>512</td><td>exact</td><td>0.33</td><td>261</td><td>0.35</td><td>0.093</td></tr>
+<tr><td>districts</td><td>256</td><td>center</td><td>0.17</td><td>291</td><td>0.17</td><td>0.033</td></tr>
+<tr><td>districts</td><td>256</td><td>exact</td><td>1.53</td><td>291</td><td>1.53</td><td>0.407</td></tr>
+</table>
+<p>With center sampling the density field becomes exactly uniform once the rasterized regions match their targets, the velocity is zero, and the run freezes at a small true error. With exact coverage the residual never vanishes, and the normalized step (the fastest point moves <code>dt</code> cells) keeps moving the borders; the late-phase oscillation of #94. A smaller step near convergence is the lever for that, not the rasterizer. At realistic tolerances (above) both stop long before this matters. This is the reason the default stays <code>&quot;center&quot;</code>.</p>
+<h2>Cost of one rasterization</h2>
+<p>Minimum of three calls, in milliseconds:</p>
+<table>
+<tr><th>input</th><th>grid</th><th>center ms</th><th>exact ms</th></tr>
+<tr><td>states</td><td>128</td><td>2.0</td><td>2.4</td></tr>
+<tr><td>states</td><td>256</td><td>3.0</td><td>2.4</td></tr>
+<tr><td>states</td><td>512</td><td>7.1</td><td>4.5</td></tr>
+<tr><td>states</td><td>1024</td><td>23.0</td><td>12.8</td></tr>
+<tr><td>districts</td><td>128</td><td>14.9</td><td>11.4</td></tr>
+<tr><td>districts</td><td>256</td><td>18.7</td><td>8.3</td></tr>
+<tr><td>districts</td><td>512</td><td>23.2</td><td>10.6</td></tr>
+<tr><td>districts</td><td>1024</td><td>40.9</td><td>19.8</td></tr>
+</table>
+<h2>Not changed</h2>
+<p>The counties plateau (targets far below one cell), the sawtooth, and the border drift of #86 are unaffected; see the exploration page.</p>
+<div class="figure">
+<img src="coverage_accuracy.png" alt="True maximum area error against iteration with tolerances that cannot be reached (stall rule off, 300 iterations). Center sampling keeps improving; exact coverage plateaus.">
+<p class="caption">True maximum area error against iteration with tolerances that cannot be reached (stall rule off, 300 iterations). Center sampling keeps improving; exact coverage plateaus.</p>
+</div><div class="figure">
+<img src="coverage_density.png" alt="The initial density field around Washington DC at grids 128 and 256. DC covers 0.04 cells at grid 128 and 0.15 at 256 and contains no cell center at either, so center sampling does not see it; exact coverage puts its density (the bright cell at 256) where it is. The right column is exact minus center.">
+<p class="caption">The initial density field around Washington DC at grids 128 and 256. DC covers 0.04 cells at grid 128 and 0.15 at 256 and contains no cell center at either, so center sampling does not see it; exact coverage puts its density (the bright cell at 256) where it is. The right column is exact minus center.</p>
+</div><div class="figure">
+<img src="coverage_maps.png" alt="States at grid 256: area error per region (left, center; middle, exact) and the two outlines (right). The maps are nearly identical; the largest center error is Wyoming.">
+<p class="caption">States at grid 256: area error per region (left, center; middle, exact) and the two outlines (right). The maps are nearly identical; the largest center error is Wyoming.</p>
+</div><div class="figure">
+<img src="coverage_multires.png" alt="Score of a multiresolution morph from grid 128 (3 levels, 300 iterations per level, stall rule on), levels concatenated. Center sampling plateaus at 13.6 on the coarse level until the stall rule fires; exact coverage converges at once.">
+<p class="caption">Score of a multiresolution morph from grid 128 (3 levels, 300 iterations per level, stall rule on), levels concatenated. Center sampling plateaus at 13.6 on the coarse level until the stall rule fires; exact coverage converges at once.</p>
+</div><div class="figure">
+<img src="coverage_traces.png" alt="Score against iteration at the default tolerances: the same path with a steeper end for exact coverage.">
+<p class="caption">Score against iteration at the default tolerances: the same path with a steeper end for exact coverage.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
