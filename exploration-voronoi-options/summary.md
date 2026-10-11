@@ -129,7 +129,30 @@ Paths: U = unweighted, W = weighted raster, P = premorph. ExactBackend is out of
 - Make internal: `relaxation`, `area_equalizer_rate`, `weight_ramp_iters`, `output_resolution`, `cell_smoothing_px`, `density_smooth`, `step_scale`, `min_boundary_points`, `adj_min_shared_length`. Deprecation candidates: `AdhesiveBoundary` and `ElasticBoundary.adhesion_strength`.
 - Recipes: (1) faithful = `premorph=True`; (2) smooth outline = premorph + `ElasticBoundary(0.02)`; (3) original outline = default with n_iter about 300 and area_cv_tol 0.05; (4) round outline = `boundary="convex_hull"` or `"circle"`.
 - Anchor default: 0.25 for premorph (the follow-up compares it with 0.5: Texas inside its morphed region 0.88 against 0.89, adjacency 0.79 against 0.80 on the states, rounder cells; the largest loss is adjacency 0.66 against 0.71 on the lognormal weights). For the elastic boundary 0.5 also works.
-- Guards: warn when `generator_anchor` > 0 without premorph and without ElasticBoundary (or resolve None to 0.5 for elastic as well); warn that `fix_topology` with weights is slow and can damage positions; document that `adjacency_spring` has no effect with premorph; document AdhesiveBoundary as superseded; raise n_iter or document n_iter 300 with area_cv_tol 0.05 for weighted fixed and elastic runs; base `converged` on the output area error and generator displacement instead of the raster area CV.
+- Guards: warn that `fix_topology` with weights is slow and can damage positions; document that `adjacency_spring` has no effect with premorph; document AdhesiveBoundary as superseded; raise n_iter or document n_iter 300 with area_cv_tol 0.05 for weighted fixed and elastic runs; base `converged` on the output area error and generator displacement instead of the raster area CV. The warning for `generator_anchor` without premorph that this page proposed was removed in the merged work: the anchor is a plain option, and the warning for areas that miss `area_error_tol` names it when one is active.
+
+## Premorph against the flow map it starts from
+
+The "adjacency kept" metric compares the cells with the original polygons. For premorph runs the natural reference is the flow map itself, which `premorph` takes as its layout: the flow morph deforms the regions continuously, so it keeps 100 % of the original adjacencies, and everything the cells lose is lost relative to the morph. `exploration-voronoi-followup/premorph_reference.py` scores the morph's polygons and the premorph cells (anchor 0.25) with the same metrics (the morph is the balanced preset with 400 iterations and center rasterization, as in the saved runs).
+
+| input | pairs | morph keeps of the original | cells keep of the original | cells keep of the morph | new pairs in the cells (not in the morph) |
+|---|---|---|---|---|---|
+| states | all, 109 | 1.000 | 0.789 | 0.789 | 31 |
+| districts | all, 1133 | 1.000 | 0.600 | 0.601 | 500 |
+| districts | within a state, 814 | 1.000 | 0.636 | 0.637 | 220 |
+
+- The cells keep 0.789 of the state adjacencies and 0.600 of the district adjacencies, and add 31 and 500 pairs that the morph does not have. The loss is the price of replacing irregular polygons by compact convex cells: a thin district or a state with a long shared border cannot be reproduced by a Voronoi-like cell. The premorph's value is therefore not an adjacency ceiling but the best available starting layout (offset 0.16 to 0.21 R from the morph in the table above).
+
+| layout | largest piece | solidity | neighbor purity | compactness |
+|---|---|---|---|---|
+| flow map (the premorph's own polygons) | 0.993 | 0.760 | 0.702 | 0.191 |
+| premorph cells, anchor 0.25 | 0.977 | 0.752 | 0.656 | 0.718 |
+| fixed outline, no spring | 0.848 | 0.610 | 0.520 | 0.805 |
+| fixed outline, intra_group_spring 0.5 | 0.990 | 0.748 | 0.635 | 0.771 |
+| elastic boundary, intra_group_spring 0.5 | 0.973 | 0.760 | 0.656 | 0.765 |
+
+- On the cohesion metrics the premorph cells keep almost everything the flow map has: largest piece 0.977 against 0.993, solidity 0.752 against 0.760, neighbor purity 0.656 against 0.702. The fixed outline with no group spring is far below (0.848 / 0.610 / 0.520); with `intra_group_spring` 0.5 it reaches the premorph's level on the first two metrics (0.990 / 0.748) and is somewhat lower on neighbor purity (0.635), and the elastic boundary with the spring is similar (0.973 / 0.760 / 0.656).
+- Compactness of the flow map's polygons is 0.19 against 0.72 for the cells: the morph is not a candidate output, which is why the cells are needed.
 
 ## Caveats
 
