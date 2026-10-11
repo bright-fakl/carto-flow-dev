@@ -1,4 +1,7 @@
 ---
+pr: 124
+url: https://github.com/bright-fakl/carto-flow/pull/124
+issue: 109
 title: Exact density rasterizer, ring orientation from the signed area
 description: A region whose ring has a small self-intersection could reach the exact rasterizer with the wrong sign and vanish from the density field; orienting rings by their shoelace area keeps it, and a stalled districts run converges.
 kind: pr

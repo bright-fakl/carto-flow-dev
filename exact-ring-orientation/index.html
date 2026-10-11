@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Exact density rasterizer, ring orientation from the signed area</title>
+<title>PR #124: Exact density rasterizer, ring orientation from the signed area</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,13 +72,14 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>Exact density rasterizer, ring orientation from the signed area</h1>
+<h1>PR #124: Exact density rasterizer, ring orientation from the signed area</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
-<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Status</dt><dd><span class="status todo">unknown</span></dd>
 <dt>Related</dt><dd><a href="../exact-density-coverage/index.html">Exact area-weighted density rasterization, as the default</a> <span class="meta">(pr)</span><br><a href="../adaptive-step-control/index.html">Adaptive step size for the flow cartogram</a> <span class="meta">(pr)</span><br><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
-<dt>URL</dt><dd>(missing)</dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/124">https://github.com/bright-fakl/carto-flow/pull/124</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
 <dt>Branch</dt><dd>fix/exact-ring-orientation</dd>
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-11 18:57</dd>
@@ -103,7 +104,7 @@
 <tr><td>districts, grid 256, default tolerances</td><td>converged, 145, 9.76 %</td><td>converged, 145, 9.76 %</td></tr>
 <tr><td>states, grid 256, default tolerances</td><td>converged, 112, 0.78 %</td><td>converged, 112, 0.78 %</td></tr>
 </table>
-<p>Stalled run (before): 22 of 432 regions are invalid; the rings of regions [23, 98] reach the rasterizer with a sign opposite to their shoelace area (true errors 3.9 %, 21.2 %). The worst region is 41 (error 26.4 %); the wrong-sign regions are not among its six nearest neighbors. The two fields differ in 31 cells; the summed density deviation (cells) there is -0.068 before and +0.564 after.</p>
+<p>Stalled run (before): 22 of 432 regions are invalid; the rings of regions [23, 98] reach the rasterizer with a sign opposite to their shoelace area (true errors 3.9 %, 21.2 %). The worst region is 41 (error 26.4 %); the wrong-sign regions are not among its six nearest neighbors. The worst region is therefore not one of the wrong-sign regions: the missing regions change the field around them and the error shows elsewhere. The two fields differ in 31 cells; the summed density deviation (cells) there is -0.068 before and +0.564 after.</p>
 <p>Runs without invalid regions and runs where the invalid regions have the right sign give the same iterations and errors before and after (the four other rows).</p>
 <h2>Cost</h2>
 <p>Median time of one exact density field (ms), main against the branch:</p>
