@@ -1,7 +1,7 @@
 ---
 issue: 75, 94, 95, 109
-title: Overview of the step-scale variants
-description: One-glance comparison of the carto-flow step-scale variants tested on the exploration-gsm-scale page, with a glossary: cost relative to the baseline per case, cost against invalid polygons, and the median cost ratio with the number of converged cases.
+title: GSM solver evaluation: overview and conclusions
+description: Conclusions of the Gastner-Seguy-More (2018) evaluation (#75) with the one-glance comparison of the step-scale variants, a glossary, and the integrator preview. The solver is on hold; the physical step magnitude is the only part worth testing further. Replaces the preview and step-scale pages as the entry point.
 branch: investigate/gsm-scale
 base: fix/stall-detection
 date: 2026-10-10 09:30
@@ -11,7 +11,22 @@ inputs: the tables of exploration-gsm-scale (states at grids 128, 256 and 512, t
 kind: exploration
 topic: flow
 status: on-hold
+related: flow-convergence-synthesis
 ---
+
+## Question and status
+
+Can the GSM method (rasterize, one Poisson solve per round, carry every vertex along a prescribed linear density path) converge faster or more stably than the current loop? Status: on hold. Two prototypes were tested on states, districts and counties; details are on [exploration-gsm-preview](../exploration-gsm-preview/index.html) (the full integrator) and [exploration-gsm-scale](../exploration-gsm-scale/index.html) (the GSM step scale inside the existing loop). Both are marked superseded by this page and stay available for the tables.
+
+## Conclusions
+
+- **Integrator.** It converges on states and, with a blur of 2 to 4 cells, on districts, removes the sawtooth and fixes the coarse multiresolution plateau. To a matched stop it costs 1.8 to 2.2 times the baseline in plain steps (2.8 to 8 times the wall time) in this implementation, fails on counties and with velocity modulators, and loses regions with no grid-cell centre at grid 128. A full experiment would have to test it with exact area coverage, with a sample of points instead of all vertices, and at grids 512 and 1024.
+- **Spatial pattern** (`rho_mean / rho(x, t)`): does not help. It needs 1.2 to 1.9 times the iterations and adds self-intersections (states at 256: 6 invalid polygons against 0).
+- **Physical magnitude** (displacement proportional to the flux, with a per-step cap of one cell): cuts the cost 3 to 5 times on states and removes the multiresolution plateau. Not adoptable as is: more invalid polygons than the baseline, stalls on districts, untuned cap, fails on counties, slower on tilted anisotropy.
+- **Next test if the work resumes:** the constant scale with a larger dt or `recompute_every` (a cheaper version of the same gain), then the capped physical magnitude.
+- **Counties fail for every variant**, as for the baseline: see the [convergence synthesis](../flow-convergence-synthesis/index.html).
+
+## Step-scale comparison
 
 How to read the figures: the baseline A is one in every case. Cost is in plain-step units (iterations plus field recomputes times the ratio of one recompute to one step, 9 to 47 depending on case). Iteration counts alone mislead: variant B4i takes 5 to 25 iterations because each iteration is a complete round with a recompute, so its cost is 0.3 to 0.7 of A, not 0.05.
 
@@ -41,4 +56,4 @@ figure: overview_summary.png — Median cost relative to A over the cases where 
 - The variants that reduce cost most (B2, B3, B4) also have the most invalid polygons (4 to 25 on states and anisotropy, 175 to 213 on districts).
 - Counties fail for every variant (they are all hatched), and several variants stall on districts 256.
 
-Source: `data/gsm_scale_tables.md` (a copy of `exploration-gsm-scale/tables.md`); regenerate with `uv run python make_overview.py`. This page covers only the step-scale variants; the stall, refresh, adaptive-step and area-coverage pages are not included.
+Source: `data/gsm_scale_tables.md` (a copy of `exploration-gsm-scale/tables.md`); regenerate with `uv run python make_overview.py`. The comparison covers only the step-scale variants; the other convergence work is on the [convergence synthesis](../flow-convergence-synthesis/index.html).

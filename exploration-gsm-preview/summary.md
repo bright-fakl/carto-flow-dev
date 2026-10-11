@@ -10,7 +10,7 @@ after: investigate/gsm-preview @ 1ed9d16 (prototype, not for merging)
 inputs: US states (49 incl. DC), congressional districts (432), 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6); baseline = MorphOptions defaults of fix/stall-detection (stall rule on, refresh_on_rise 0.01), n_iter 400 (counties 300); GSM-style prototype on the same grid as the baseline; NUMBA_NUM_THREADS=4
 kind: exploration
 topic: flow
-status: on-hold
+status: superseded
 related: exploration-overview
 ---
 

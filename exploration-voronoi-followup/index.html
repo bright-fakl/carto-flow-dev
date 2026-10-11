@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voronoi options follow-up: prescale_components on disconnected input, anchor 0.25 against 0.5, group_by springs</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Voronoi options follow-up: prescale_components on disconnected input, anchor 0.25 against 0.5, group_by springs</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>voronoi</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-voronoi-options/index.html">Voronoi cartogram options, their interactions and a simpler option set</a> <span class="meta">(exploration)</span></dd>
+<dt>Created</dt><dd>2026-10-11 12:30</dd>
+<dt>Before</dt><dd>main @ 4ae2ea1 (PRs 110 to 112 merged)</dd>
+<dt>After</dt><dd>the same checkout; options varied one at a time</dd>
+<dt>Inputs</dt><dd>S = 49 contiguous states with population; A = 50 states and DC including Alaska and Hawaii (contiguous_only=False) with population; D = 432 congressional districts with population, group_by &quot;State Name&quot;. RasterBackend(resolution=256), VoronoiOptions(n_iter=300, area_cv_tol=0.05); bases F = fixed union outline, E = ElasticBoundary(0.05), P = premorph=True. Single runs.</dd>
+</dl>
+<p class="desc">Three questions the option audit left open. prescale_components is required for Alaska and Hawaii on every base (45 % area error without it on the fixed outline, 0 % with it), but the elastic base still fails on disconnected input. generator_anchor 0.25 is close to 0.5 on states and districts. intra_group_spring keeps states together on the fixed and elastic bases and is not redundant with the anchor there.</p>
+<p>Run script <code>run_followup.py</code> (on the helpers of the audit) writes <code>data/runs.jsonl</code>; <code>make_figures.py</code> writes the figures and <code>data/tables.md</code> from it. Metrics are those of the audit page: area error is the cell area against the weight share of the total cell area, adjacency kept is the share of the input&#x27;s adjacent pairs that are still adjacent, compactness is the mean 4 pi A / perimeter squared. New here: &quot;states whole&quot; is the share of states whose districts form one connected piece (pieces under 1 % of the state&#x27;s area ignored); within-state and between-state adjacency are the adjacency kept restricted to pairs inside one state and to pairs across states.</p>
+<h2>1. prescale_components with Alaska and Hawaii</h2>
+<p>The audit&#x27;s four inputs were all connected, so it could not test this option. On A (disconnected parts of very different size):</p>
+<table>
+<tr><th>base</th><th>prescale</th><th>iterations</th><th>converged</th><th>mean error %</th><th>max error %</th><th>AK area / target</th><th>HI area / target</th><th>adjacency kept</th><th>time s</th></tr>
+<tr><td>F</td><td>off</td><td>300</td><td>no</td><td>45.45</td><td>550.1</td><td>2.58</td><td>0.42</td><td>0.32</td><td>10.7</td></tr>
+<tr><td>F</td><td>on</td><td>189</td><td>yes</td><td>0.00</td><td>0.0</td><td>1.00</td><td>1.00</td><td>0.51</td><td>3.8</td></tr>
+<tr><td>E</td><td>off</td><td>300</td><td>no</td><td>24.52</td><td>99.2</td><td>0.92</td><td>0.40</td><td>0.36</td><td>22.1</td></tr>
+<tr><td>E</td><td>on</td><td>300</td><td>no</td><td>9.35</td><td>79.1</td><td>0.21</td><td>0.47</td><td>0.41</td><td>19.1</td></tr>
+<tr><td>P</td><td>off</td><td>300</td><td>no</td><td>1.93</td><td>10.7</td><td>1.10</td><td>1.00</td><td>0.79</td><td>8.1</td></tr>
+<tr><td>P</td><td>on</td><td>70</td><td>yes</td><td>0.00</td><td>0.0</td><td>1.00</td><td>1.00</td><td>0.81</td><td>2.7</td></tr>
+<tr><td>P</td><td>morph&#x27;s prescale only</td><td>104</td><td>no</td><td>3.49</td><td>26.6</td><td>1.00</td><td>1.00</td><td>0.79</td><td>4.6</td></tr>
+<tr><td>P</td><td>morph&#x27;s and cells&#x27; prescale</td><td>94</td><td>yes</td><td>0.00</td><td>0.0</td><td>1.00</td><td>1.00</td><td>0.79</td><td>3.2</td></tr>
+</table>
+<ul><li><code>VoronoiOptions.prescale_components</code> is needed on every base. Without it the fixed outline ends with a mean area error of 45 % (Alaska 2.6 times its share, Hawaii 0.4 times) and the premorph run does not converge. With it the fixed outline and the premorph runs reach 0 % error, the premorph in 70 iterations instead of 300. The option keeps its place among the basic options for inputs with disconnected parts.</li><li>With <code>premorph</code> the pre-morph&#x27;s own <code>prescale_components</code> (a <code>MorphOptions</code> field) is not enough: the cells&#x27; prescale is still what brings the error to zero.</li><li>The elastic boundary does not work on this input even with the option: mean error 9.35 %, Alaska at 0.21 times its share, and spiky cells on the east coast. This is a new limit of the elastic base, not caused by the option.</li></ul>
+<h2>2. generator_anchor 0.25 against 0.5 with premorph</h2>
+<table>
+<tr><th>data</th><th>anchor</th><th>iterations</th><th>Texas inside its morphed region</th><th>Texas shift (cell radii)</th><th>Louisiana shift</th><th>split cells</th><th>adjacency kept</th><th>compactness</th><th>median offset from the flow map</th><th>time s</th></tr>
+<tr><td>S</td><td>0</td><td>53</td><td>0.73</td><td>1.84</td><td>2.93</td><td>3</td><td>0.59</td><td>0.58</td><td>0.44</td><td>1.0</td></tr>
+<tr><td>S</td><td>0.25</td><td>43</td><td>0.88</td><td>1.47</td><td>1.62</td><td>4</td><td>0.79</td><td>0.57</td><td>0.19</td><td>0.9</td></tr>
+<tr><td>S</td><td>0.5</td><td>53</td><td>0.89</td><td>1.50</td><td>1.66</td><td>5</td><td>0.80</td><td>0.55</td><td>0.16</td><td>0.9</td></tr>
+<tr><td>D</td><td>0</td><td>12</td><td>0.94</td><td>5.41</td><td>5.04</td><td>38</td><td>0.57</td><td>0.75</td><td>0.35</td><td>2.4</td></tr>
+<tr><td>D</td><td>0.25</td><td>9</td><td>0.95</td><td>5.36</td><td>5.05</td><td>41</td><td>0.60</td><td>0.72</td><td>0.25</td><td>2.2</td></tr>
+<tr><td>D</td><td>0.5</td><td>9</td><td>0.96</td><td>5.36</td><td>5.07</td><td>43</td><td>0.61</td><td>0.69</td><td>0.21</td><td>2.2</td></tr>
+</table>
+<ul><li>0.25 keeps almost all of the gain over 0 on the states: Texas inside its region 0.88 (0.73 at 0, 0.89 at 0.5), Louisiana shift 1.62 (2.93 at 0, 1.66 at 0.5), adjacency 0.79 (0.59 and 0.80). On districts the differences between 0.25 and 0.5 are at most 0.04 in any measure, with fewer split cells (41 against 43) and rounder cells (0.72 against 0.69).</li><li>The audit&#x27;s larger inputs gave the same picture: 0.25 against 0.5 changes the median offset from the flow map by 0.00 to +0.03 cell radii and the adjacency kept by -0.01 to -0.03; the one case with a larger loss is the lognormal weights (adjacency 0.66 against 0.71), a weight range of 1,400 times. Compactness is 0.02 to 0.03 higher at 0.25 everywhere.</li><li>Neither value changes the cell areas, so the choice only trades fidelity to the flow map for compactness. 0.25 leaves more room to strengthen the anchor.</li></ul>
+<h2>3. intra_group_spring with group_by</h2>
+<p>The audit ran this option once, on the districts with one setting (0.5 together with an adjacency spring of 0.1), and scored it with global adjacency; it never measured whether groups stay together. Here: districts grouped by state, strength 0, 0.25, 0.5 and 1 on each base.</p>
+<table>
+<tr><th>base</th><th>setting</th><th>iterations</th><th>states whole</th><th>within-state adj</th><th>between-state adj</th><th>all adj kept</th><th>compactness</th><th>time s</th></tr>
+<tr><td>F</td><td>off</td><td>185</td><td>0.54</td><td>0.45</td><td>0.38</td><td>0.43</td><td>0.81</td><td>12.9</td></tr>
+<tr><td>F</td><td>0.25</td><td>94</td><td>0.77</td><td>0.56</td><td>0.26</td><td>0.48</td><td>0.78</td><td>7.8</td></tr>
+<tr><td>F</td><td>0.5</td><td>101</td><td>0.94</td><td>0.64</td><td>0.25</td><td>0.53</td><td>0.77</td><td>8.8</td></tr>
+<tr><td>F</td><td>1</td><td>108</td><td>1.00</td><td>0.75</td><td>0.20</td><td>0.59</td><td>0.77</td><td>9.3</td></tr>
+<tr><td>F</td><td>0.5 + adjacency spring 0.1</td><td>103</td><td>0.83</td><td>0.61</td><td>0.33</td><td>0.53</td><td>0.77</td><td>9.3</td></tr>
+<tr><td>F</td><td>adjacency spring 0.1 alone</td><td>173</td><td>0.52</td><td>0.44</td><td>0.45</td><td>0.44</td><td>0.79</td><td>13.3</td></tr>
+<tr><td>E</td><td>off</td><td>300</td><td>0.42</td><td>0.39</td><td>0.36</td><td>0.38</td><td>0.79</td><td>16.8</td></tr>
+<tr><td>E</td><td>0.25</td><td>300</td><td>0.73</td><td>0.59</td><td>0.24</td><td>0.49</td><td>0.78</td><td>19.2</td></tr>
+<tr><td>E</td><td>0.5</td><td>300</td><td>0.83</td><td>0.66</td><td>0.23</td><td>0.54</td><td>0.76</td><td>19.2</td></tr>
+<tr><td>E</td><td>1</td><td>300</td><td>0.90</td><td>0.75</td><td>0.19</td><td>0.59</td><td>0.75</td><td>20.6</td></tr>
+<tr><td>E</td><td>0.5 + adjacency spring 0.1</td><td>300</td><td>0.92</td><td>0.67</td><td>0.30</td><td>0.57</td><td>0.77</td><td>19.2</td></tr>
+<tr><td>E</td><td>adjacency spring 0.1 alone</td><td>300</td><td>0.52</td><td>0.48</td><td>0.44</td><td>0.47</td><td>0.79</td><td>18.0</td></tr>
+<tr><td>P</td><td>off</td><td>9</td><td>0.85</td><td>0.64</td><td>0.51</td><td>0.61</td><td>0.69</td><td>2.6</td></tr>
+<tr><td>P</td><td>0.25</td><td>10</td><td>0.81</td><td>0.65</td><td>0.50</td><td>0.61</td><td>0.69</td><td>3.3</td></tr>
+<tr><td>P</td><td>0.5</td><td>13</td><td>0.85</td><td>0.66</td><td>0.50</td><td>0.62</td><td>0.69</td><td>3.3</td></tr>
+<tr><td>P</td><td>1</td><td>300</td><td>0.88</td><td>0.69</td><td>0.48</td><td>0.63</td><td>0.68</td><td>29.2</td></tr>
+<tr><td>P</td><td>0.5 + adjacency spring 0.1</td><td>14</td><td>0.83</td><td>0.66</td><td>0.50</td><td>0.62</td><td>0.69</td><td>3.5</td></tr>
+<tr><td>P</td><td>adjacency spring 0.1 alone</td><td>10</td><td>0.83</td><td>0.64</td><td>0.52</td><td>0.61</td><td>0.69</td><td>3.1</td></tr>
+</table>
+<ul><li>On the fixed and elastic bases <code>intra_group_spring</code> does what it is for: the share of states in one piece rises from 0.54 to 0.94 (F, 0.5) and from 0.42 to 0.83 (E, 0.5), and within-state adjacency from 0.45 to 0.64 and from 0.39 to 0.66. It costs between-state adjacency (0.38 to 0.25 on F) and 0.04 of compactness; on the fixed outline it also converges in about half the iterations (101 against 185). The audit&#x27;s verdict that the springs are &quot;redundant with the anchor&quot; does not hold here: the anchor is not used on these bases, and <code>adjacency_spring</code> alone does not keep groups together (states whole 0.52).</li><li>With <code>premorph</code> the flow morph already keeps most states together (0.85) and the spring adds little (0.85 at 0.5, 0.88 at 1). At strength 1 the premorph run does not converge in 300 iterations and takes ten times as long.</li><li>The strength is a free trade-off: 0.5 gets most of the within-state gain on F and E; 1 keeps every state whole on F at the price of between-state adjacency 0.20.</li></ul>
+<h2>Caveats</h2>
+<ul><li>Single runs; the audit found repeated runs identical, but F and E trajectories are sensitive to small option changes.</li><li>&quot;States whole&quot; ignores pieces under 1 % of a state&#x27;s area, and the state-level metrics use only the districts input (one grouped data set). Group springs were not tested with weights absent or with other grouped inputs.</li><li>The elastic base was not tried with other strengths on A.</li></ul>
+<div class="figure">
+<img src="followup_anchor.png" alt="Premorph results for anchors 0, 0.25 and 0.5. Top: the 49 states with Texas (red), Louisiana (orange), Arkansas (green), Oklahoma (purple) and New Mexico (brown) highlighted. Bottom: the 432 districts colored by state.">
+<p class="caption">Premorph results for anchors 0, 0.25 and 0.5. Top: the 49 states with Texas (red), Louisiana (orange), Arkansas (green), Oklahoma (purple) and New Mexico (brown) highlighted. Bottom: the 432 districts colored by state.</p>
+</div><div class="figure">
+<img src="followup_groups.png" alt="Districts colored by state for each base and spring strength (off, 0.25, 0.5, 1). The titles give the share of states that stay in one piece and the within-state adjacency kept.">
+<p class="caption">Districts colored by state for each base and spring strength (off, 0.25, 0.5, 1). The titles give the share of states that stay in one piece and the within-state adjacency kept.</p>
+</div><div class="figure">
+<img src="followup_groups_metrics.png" alt="Share of states whole, within-state adjacency kept and between-state adjacency kept against the spring setting, per base.">
+<p class="caption">Share of states whole, within-state adjacency kept and between-state adjacency kept against the spring setting, per base.</p>
+</div><div class="figure">
+<img src="followup_prescale.png" alt="Cells for A with Alaska and Hawaii in red, for each base without and with `prescale_components`. The titles give iterations, mean area error and the area of the Alaska and Hawaii cells relative to their weight share.">
+<p class="caption">Cells for A with Alaska and Hawaii in red, for each base without and with <code>prescale_components</code>. The titles give iterations, mean area error and the area of the Alaska and Hawaii cells relative to their weight share.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

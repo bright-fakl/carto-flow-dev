@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Overview of the step-scale variants</title>
+<title>GSM solver evaluation: overview and conclusions</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,11 +72,12 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>Overview of the step-scale variants</h1>
+<h1>GSM solver evaluation: overview and conclusions</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>exploration</dd>
 <dt>Topic</dt><dd>flow</dd>
 <dt>Status</dt><dd><span class="status parked">on-hold</span></dd>
+<dt>Related</dt><dd><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
 <dt>Referenced by</dt><dd><a href="../exploration-default-dt/index.html">Default step size dt of the flow cartogram</a> <span class="meta">(exploration)</span><br><a href="../exploration-gsm-scale/index.html">GSM step scale in the flow loop</a> <span class="meta">(exploration)</span><br><a href="../exploration-gsm-preview/index.html">GSM-style integrator preview</a> <span class="meta">(exploration)</span><br><a href="../exploration-area-coverage/index.html">Area-weighted density rasterization</a> <span class="meta">(exploration)</span><br><a href="../exploration-adaptive-step/index.html">Error-dependent step size for the flow cartogram</a> <span class="meta">(exploration)</span></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/75">#75</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/94">#94</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/95">#95</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
 <dt>Branch</dt><dd>investigate/gsm-scale</dd>
@@ -86,7 +87,12 @@
 <dt>After</dt><dd>investigate/gsm-scale @ bfb4253 (prototype, not for merging)</dd>
 <dt>Inputs</dt><dd>the tables of exploration-gsm-scale (states at grids 128, 256 and 512, the multiresolution coarse level, three anisotropy runs, districts at 256 and 512, counties at 256 and 512); each case with refresh on rise off and on; cost = iterations + field recomputes x the case&#x27;s recompute / step cost ratio</dd>
 </dl>
-<p class="desc">One-glance comparison of the carto-flow step-scale variants tested on the exploration-gsm-scale page, with a glossary: cost relative to the baseline per case, cost against invalid polygons, and the median cost ratio with the number of converged cases.</p>
+<p class="desc">Conclusions of the Gastner-Seguy-More (2018) evaluation (#75) with the one-glance comparison of the step-scale variants, a glossary, and the integrator preview. The solver is on hold; the physical step magnitude is the only part worth testing further. Replaces the preview and step-scale pages as the entry point.</p>
+<h2>Question and status</h2>
+<p>Can the GSM method (rasterize, one Poisson solve per round, carry every vertex along a prescribed linear density path) converge faster or more stably than the current loop? Status: on hold. Two prototypes were tested on states, districts and counties; details are on [exploration-gsm-preview](../exploration-gsm-preview/index.html) (the full integrator) and [exploration-gsm-scale](../exploration-gsm-scale/index.html) (the GSM step scale inside the existing loop). Both are marked superseded by this page and stay available for the tables.</p>
+<h2>Conclusions</h2>
+<ul><li>**Integrator.** It converges on states and, with a blur of 2 to 4 cells, on districts, removes the sawtooth and fixes the coarse multiresolution plateau. To a matched stop it costs 1.8 to 2.2 times the baseline in plain steps (2.8 to 8 times the wall time) in this implementation, fails on counties and with velocity modulators, and loses regions with no grid-cell centre at grid 128. A full experiment would have to test it with exact area coverage, with a sample of points instead of all vertices, and at grids 512 and 1024.</li><li>**Spatial pattern** (<code>rho_mean / rho(x, t)</code>): does not help. It needs 1.2 to 1.9 times the iterations and adds self-intersections (states at 256: 6 invalid polygons against 0).</li><li>**Physical magnitude** (displacement proportional to the flux, with a per-step cap of one cell): cuts the cost 3 to 5 times on states and removes the multiresolution plateau. Not adoptable as is: more invalid polygons than the baseline, stalls on districts, untuned cap, fails on counties, slower on tilted anisotropy.</li><li>**Next test if the work resumes:** the constant scale with a larger dt or <code>recompute_every</code> (a cheaper version of the same gain), then the capped physical magnitude.</li><li>**Counties fail for every variant**, as for the baseline: see the [convergence synthesis](../flow-convergence-synthesis/index.html).</li></ul>
+<h2>Step-scale comparison</h2>
 <p>How to read the figures: the baseline A is one in every case. Cost is in plain-step units (iterations plus field recomputes times the ratio of one recompute to one step, 9 to 47 depending on case). Iteration counts alone mislead: variant B4i takes 5 to 25 iterations because each iteration is a complete round with a recompute, so its cost is 0.3 to 0.7 of A, not 0.05.</p>
 <h2>Glossary</h2>
 <table>
@@ -104,7 +110,7 @@
 </table>
 <h2>What the figures say</h2>
 <ul><li>Cost reductions come from three places: a larger step (C3 variants: about 0.25 to 0.4 of A on states 256 and 512, with refresh on rise needed for stability), the physical magnitude (B2, B3, B4: 0.18 to 0.35 on states, 0.35 to 0.6 on the anisotropy runs), and fewer, larger rounds (B4i).</li><li>The density pattern alone (C2, B1) does not reduce cost and adds invalid polygons (5 to 22 on states against 0).</li><li>The variants that reduce cost most (B2, B3, B4) also have the most invalid polygons (4 to 25 on states and anisotropy, 175 to 213 on districts).</li><li>Counties fail for every variant (they are all hatched), and several variants stall on districts 256.</li></ul>
-<p>Source: <code>data/gsm_scale_tables.md</code> (a copy of <code>exploration-gsm-scale/tables.md</code>); regenerate with <code>uv run python make_overview.py</code>. This page covers only the step-scale variants; the stall, refresh, adaptive-step and area-coverage pages are not included.</p>
+<p>Source: <code>data/gsm_scale_tables.md</code> (a copy of <code>exploration-gsm-scale/tables.md</code>); regenerate with <code>uv run python make_overview.py</code>. The comparison covers only the step-scale variants; the other convergence work is on the [convergence synthesis](../flow-convergence-synthesis/index.html).</p>
 <div class="figure">
 <img src="overview_scatter.png" alt="Cost against invalid polygons for each case (refresh on). Filled markers converged, hollow ones did not. Lower left is better.">
 <p class="caption">Cost against invalid polygons for each case (refresh on). Filled markers converged, hollow ones did not. Lower left is better.</p>

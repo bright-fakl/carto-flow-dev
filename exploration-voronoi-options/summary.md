@@ -113,13 +113,13 @@ Paths: U = unweighted, W = weighted raster, P = premorph. ExactBackend is out of
 | `boundary` spec | "union" | keep (a shape choice) |
 | `ElasticBoundary(strength)` | 0.3 (docs use 0.02 to 0.05) | keep; use 0.02 to 0.05 |
 | `resolution` | 300 | keep |
-| `adjacency_spring` / `intra_group_spring` | 0.0 / None | advanced; redundant with the anchor |
+| `adjacency_spring` / `intra_group_spring` | 0.0 / None | advanced. `adjacency_spring` is redundant with the anchor. `intra_group_spring` is not: the [follow-up](../exploration-voronoi-followup/index.html) shows it keeps states whole on the fixed and elastic bases (0.54 to 0.94 and 0.42 to 0.83 at 0.5) and does little with premorph |
 | `fix_topology` | None | dominated: 4 to 40 times the time, harmful with weights |
 | `area_equalizer_rate` / `weight_ramp_iters` | 0.1 / 10 | make internal |
 | `relaxation` | "overrelax" | make internal |
 | `output_resolution` / `cell_smoothing_px` | None / 3 | make internal (cosmetic) |
 | `AdhesiveBoundary`, elastic `adhesion_strength`, `density_smooth` | - | dominated; deprecate the first two |
-| `prescale_components` | False | no effect on these inputs, but all four were connected: it is a BASIC option for inputs with disconnected parts (for example Alaska and Hawaii); not tested here on such data |
+| `prescale_components` | False | no effect on these inputs (all four were connected). BASIC option: on Alaska and Hawaii the [follow-up](../exploration-voronoi-followup/index.html) shows it is needed on every base (fixed outline 45 % area error without it, 0 % with it); the elastic base still fails on such input |
 | `distance_mode="geodesic"` | euclidean | unweighted only |
 | `n_iter` / `area_cv_tol` | 30 / None | keep; 30 is too few for fixed and elastic runs |
 
@@ -128,12 +128,12 @@ Paths: U = unweighted, W = weighted raster, P = premorph. ExactBackend is out of
 - Keep user-facing: `weights`, `premorph`, `boundary`, `group_by`, `backend`, `options`; RasterBackend `resolution`, `boundary` (None or ElasticBoundary), `generator_anchor`, `distance_mode` (unweighted only), the springs as advanced options for runs without premorph; ElasticBoundary `strength`; VoronoiOptions `n_iter`, `tol`, `area_cv_tol`, `area_error_tol`, `simplify_tol`, `fix_topology` as advanced and documented for unweighted runs; `prescale_components` stays a basic option (inputs with disconnected parts such as Alaska and Hawaii).
 - Make internal: `relaxation`, `area_equalizer_rate`, `weight_ramp_iters`, `output_resolution`, `cell_smoothing_px`, `density_smooth`, `step_scale`, `min_boundary_points`, `adj_min_shared_length`. Deprecation candidates: `AdhesiveBoundary` and `ElasticBoundary.adhesion_strength`.
 - Recipes: (1) faithful = `premorph=True`; (2) smooth outline = premorph + `ElasticBoundary(0.02)`; (3) original outline = default with n_iter about 300 and area_cv_tol 0.05; (4) round outline = `boundary="convex_hull"` or `"circle"`.
-- Anchor default: keep 0.5 for premorph. 0.25 gets most of the gain with slightly rounder cells (+0.01 to +0.03), but 0.5 is better on the lognormal weights. For the elastic boundary 0.5 also works.
+- Anchor default: 0.25 for premorph (the follow-up compares it with 0.5: Texas inside its morphed region 0.88 against 0.89, adjacency 0.79 against 0.80 on the states, rounder cells; the largest loss is adjacency 0.66 against 0.71 on the lognormal weights). For the elastic boundary 0.5 also works.
 - Guards: warn when `generator_anchor` > 0 without premorph and without ElasticBoundary (or resolve None to 0.5 for elastic as well); warn that `fix_topology` with weights is slow and can damage positions; document that `adjacency_spring` has no effect with premorph; document AdhesiveBoundary as superseded; raise n_iter or document n_iter 300 with area_cv_tol 0.05 for weighted fixed and elastic runs; base `converged` on the output area error and generator displacement instead of the raster area CV.
 
 ## Caveats
 
 - One-factor-at-a-time around three bases plus 20 pair runs: interactions between non-anchor options (for example rate x ramp) are not measured.
-- One family of inputs (US states and districts), all connected: the audit says nothing about `prescale_components` on inputs with disconnected parts such as Alaska and Hawaii, where it is needed. Outline specs were tested only on F. The districts' elastic base was run with fewer factors because of cost.
+- One family of inputs (US states and districts), all connected: `prescale_components` on inputs with disconnected parts and the group springs with group-level metrics are covered by the follow-up page. Outline specs were tested only on F. The districts' elastic base was run with fewer factors because of cost.
 - Repeated runs were identical, but F and E trajectories are sensitive (small option changes move single states by 0.5 R or more), so single-run differences on F and E generalize less than those on P.
 - Failed fixed-outline anchor runs have NaN compactness in the data and are drawn as crosses.

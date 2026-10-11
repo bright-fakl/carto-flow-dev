@@ -11,7 +11,7 @@ updated: 2026-10-09 22:15
 inputs: US states (49 incl. DC), congressional districts (432), 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6), the three strong-anisotropy runs of the adaptive-recompute page (preset_balanced settings, area_scale 1e-6), the multiresolution coarse level of the states; MorphOptions defaults of fix/stall-detection (stall rule on, recompute_every 10, dt 0.2), n_iter 400 (counties 300), each run with refresh_on_rise off (None) and on (0.01); NUMBA_NUM_THREADS=4
 kind: exploration
 topic: flow
-status: on-hold
+status: superseded
 related: exploration-overview
 ---
 
