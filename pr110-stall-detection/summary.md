@@ -20,7 +20,9 @@ topic: flow
 - Stall rule: a cycle is a fixed window of `max(recompute_every, 10)` iterations counted from iteration 1, independent of when the field is recomputed. Per cycle the minimum of the mean ratio (`mean/mean_tol`) and of the max ratio (`max/max_tol`) is recorded; a ratio below 1 is satisfied. A component counts only while it is still violated (cycle minimum above 1) and its minimum is lower than that component's best so far by at least `stall_min_improvement` (default 2%); improvements of a satisfied component do not count. A cycle is progress if a component counts. The run stalls after `stall_patience` consecutive cycles without progress (default 4; it was a cumulative count of 5 mean-error increases). `None` still disables it.
 - `MorphOptions.recompute_on_rise` (see below): opt-in in the second-to-last commit; the last commit (8441681) sets its default to 0.01 and can be dropped. The tables below set it explicitly, and make_figures.py runs the stall comparisons with the fixed schedule.
 - Best iterate: a run that ends without converging (`STALLED` or `COMPLETED`) returns the iterate with the lowest per-iteration score `max(mean ratio, max ratio)` (geometry, landmarks and coords from the same iteration). The final iterate keeps its snapshot, listed before the best one.
-- `Cartogram.best_iteration`; the rule that ended the run is `Cartogram.status` (`CONVERGED`, `STALLED`, `COMPLETED`).
+- `History.best_iteration` marks the returned snapshot: `Cartogram.best` (and `Cartogram.best_iteration`) is the returned state, `Cartogram.last` the final iterate; the best snapshot is recorded in iteration order. The rule that ended the run is `Cartogram.status` (`CONVERGED`, `STALLED`, `COMPLETED`).
+- Accessors default to `best`. `animate_morph_history`, `animate_fields` and `animate_workflow_fields` stop at the best iteration unless called with `through="last"`. Before this change the animation of a non-converged run ended on the final iterate, not on the returned state.
+- Deprecated: `Cartogram.latest` (returns `best`), `CartogramWorkflow.latest` (use `last`), `History.latest()` (use `last()`).
 
 ## Strong anisotropy (trajectories.png)
 
