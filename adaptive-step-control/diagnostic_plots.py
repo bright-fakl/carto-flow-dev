@@ -29,7 +29,7 @@ import carto_flow.flow_cartogram.stepsize as stepsize
 from carto_flow.flow_cartogram import CartogramWorkflow, MorphOptions, morph_gdf
 from carto_flow.flow_cartogram.grid import build_multilevel_grids
 from carto_flow.flow_cartogram.stall import cycle_length
-from carto_flow.flow_cartogram.stepsize import CONTESTED_FRACTION, DEAD_BAND_FRACTION, THRESHOLD, WINDOW, StepController
+from carto_flow.flow_cartogram.stepsize import DEAD_BAND_FRACTION, THRESHOLD, WINDOW, StepController
 from make_figures import LATE_BAND, fixed_dead_band, options_for, source, true_errors
 
 warnings.filterwarnings("ignore")
@@ -76,8 +76,7 @@ def replay(log_errors, scores, window, initial_score, dead_band):
             flipped = (np.abs(e) > dead_band) & (np.abs(previous) > dead_band) & (np.sign(e) != np.sign(previous))
         recent = (recent + [flipped])[-WINDOW:]
         inverted = np.any(recent, axis=0)
-        contested = np.abs(e) >= CONTESTED_FRACTION * np.abs(e).max()
-        share.append(float(inverted[contested].mean()))
+        share.append(float(inverted.mean()))
         share_all.append(float(inverted.mean()))
         previous = e
     return share, share_all, fraction, shrinks
@@ -172,8 +171,7 @@ def plot(key, title, runs):
         c = COLORS[a]
         axes[0].plot(x, r["true_max"], color=c, label=label, linewidth=1.3)
         axes[0].axvline(r["it"], color=c, linestyle=":", linewidth=1.2)
-        axes[1].plot(x, r["share"], color=c, linewidth=1.3, label=("contested regions, " + ON) if a else ("contested regions, " + OFF))
-        axes[1].plot(x, r["share_all"], color=c, linewidth=0.8, linestyle=":", alpha=0.7)
+        axes[1].plot(x, r["share"], color=c, linewidth=1.3, label=("inverted regions, " + ON) if a else ("inverted regions, " + OFF))
         axes[2].plot(x, r["fraction"], color=c, linewidth=1.6, label=("actual (" + ON + ")") if a else ("predicted (open loop on the constant-dt run)"),
                      linestyle="-" if a else "--")
         axes[3].plot(x, r["true_mean"], color=c, linewidth=1.3)
@@ -187,12 +185,12 @@ def plot(key, title, runs):
     r = runs[True]
     axes[0].axhline(r["max_tol"] * 100, color="black", linestyle="--", linewidth=0.8, label=f"max tolerance {r['max_tol'] * 100:.3g} %")
     axes[3].axhline(r["mean_tol"] * 100, color="black", linestyle="--", linewidth=0.8, label=f"mean tolerance {r['mean_tol'] * 100:.3g} %")
-    axes[1].axhline(THRESHOLD, color="black", linestyle="--", linewidth=0.8, label=f"threshold {THRESHOLD} on the contested share (triangles: shrink events; open: predicted on the constant-dt run)")
+    axes[1].axhline(THRESHOLD, color="black", linestyle="--", linewidth=0.8, label=f"threshold {THRESHOLD} on the share of inverted regions (triangles: shrink events; open: predicted on the constant-dt run)")
     axes[0].set_yscale("log")
     axes[3].set_yscale("log")
     axes[2].set_ylim(0, 1.05)
     axes[0].set_ylabel("true max area error %")
-    axes[1].set_ylabel("share with a sign change\n(solid: contested regions,\ndotted: all regions)")
+    axes[1].set_ylabel("share of regions with a\nrecent sign change")
     axes[2].set_ylabel("fraction of dt")
     axes[3].set_ylabel("true mean area error %")
     axes[3].set_xlabel("iteration (dotted: stopping iteration)")

@@ -3,19 +3,21 @@ pr: 123
 url: https://github.com/bright-fakl/carto-flow/pull/123
 issue: 94, 109
 title: Adaptive step size for the flow cartogram
-description: MorphOptions.adaptive_dt (default on) shrinks the step when the regions' area errors alternate in sign and limits the first steps of a run that starts near the target. The sign of an error counts above a dead band tied to the max tolerance, and the step shrinks only when the contested regions (the largest errors) oscillate. 30 of 32 tight-tolerance runs converge against 17, the late-phase oscillation of the true maximum error drops by a factor of 3 to 9, a continuation from a converged cartogram takes 1 iteration instead of 4, the districts multiresolution run at 0.5 % / 1 % converges (149 against 173 iterations), and the 12 default-tolerance runs take at most 5 more iterations. Two tight districts runs without recompute_on_rise stall as constant dt does.
+description: MorphOptions.adaptive_dt (default on) shrinks the step when the regions' area errors alternate in sign and limits the first steps of a run that starts near the target. The sign of an error counts above a dead band tied to the max tolerance. All 32 tight-tolerance runs converge against 18 for constant dt, the late-phase oscillation of the true maximum error drops by a factor of 3 to 9, a continuation from a converged cartogram takes 1 iteration instead of 4, the districts multiresolution run at 0.5 % / 1 % converges (157 against 173 iterations), and the 12 default-tolerance runs are identical to constant dt.
 kind: pr
 topic: flow
 branch: feat/adaptive-step
 base: main
-date: 2026-10-12 15:00
+date: 2026-10-11 13:41
 related: exploration-adaptive-step, exact-density-coverage, flow-convergence-synthesis
-before: main @ 71b5157 (constant dt; reproduced with adaptive_dt=False)
-after: feat/adaptive-step @ f87960c
+before: main @ 7ba9f31 (constant dt; reproduced with adaptive_dt=False)
+after: feat/adaptive-step @ a76dfb4
 inputs: US states (49 incl. DC) and congressional districts (432), bundled; the three strong-anisotropy runs of the adaptive-recompute page (states, preset_balanced values, area_scale 1e-6, DirectionalTensor horizontal / tangential / tilted); 3,108 counties (prepared set, not bundled). MorphOptions defaults except where stated (dt 0.2, recompute_every 10, recompute_on_rise 0.01, exact rasterization, stall rule on, n_iter 400); NUMBA_NUM_THREADS=8, runs sequential. True error is the output area against the population share of the total output area. Cost = iterations + field recomputes x cost of one recompute in plain steps (states 9, 12, 24 at grids 128, 256, 512; districts 18, 21, 23; measured on adaptive-recompute-experiment).
 ---
 
-`make_figures.py` runs every experiment below and writes the figures and `data/tables.md` (all tables, one row per run); `REUSE=1` reuses the stored `data/*.json`. The counties part runs when `COUNTIES_PARQUET` points at a GeoDataFrame file with `GEOID`, `total_votes` and `geometry`. `diagnostic_plots.py` writes the diagnostics_*.png figures and `dead_band_sweep.py` the dead band tables (`data/tables_dead_band.md`, measured before the contested condition) and `contested_sweep.py` the contested-fraction tables (`data/tables_contested.md`); `region_420.py` writes the region_420*.png figures. The numbers in "How the rule was chosen" come from throwaway variants of the branch and are not regenerated; they were measured with the fixed dead band of 1e-3 that preceded the tied band.
+`make_figures.py` runs every experiment below and writes the figures and `data/tables.md` (all tables, one row per run); `REUSE=1` reuses the stored `data/*.json`. `diagnostic_plots.py` writes the diagnostics_*.png figures, `dead_band_sweep.py` the dead band tables (`data/tables_dead_band.md`), and `contested_check.py` the check of a condition that was dropped (`data/tables_contested_check.md`; it needs the earlier head of the branch). The counties part of `make_figures.py` runs when `COUNTIES_PARQUET` points at a GeoDataFrame file with `GEOID`, `total_votes` and `geometry`; it was not run for this version. The numbers in "How the rule was chosen" come from throwaway variants of the branch and are not regenerated.
+
+All measurements are on top of #124 (ring orientation in the exact rasterizer): before that fix some runs of the districts stalled because a region with a self-intersecting ring dropped out of the density field, which hid or mimicked effects of the step control (see "Considered and dropped").
 
 ## What changes
 
@@ -23,31 +25,31 @@ The step moves the fastest point `dt` grid cells whatever the error (`dt_prime =
 
 `MorphOptions.adaptive_dt` (default `True`; `False` is the constant step of main) multiplies `dt` by a fraction `f` in [1/8, 1]:
 
-- **Sign changes.** A region is inverted if the sign of its area error (current area against target, as `log2` of the ratio) changed in any of the last 3 iterations; a change is only recorded between two iterations in which the region's error exceeds a dead band of `0.1 * log2(1 + max_tol)` (4.1e-3 at the default tolerances, 4.3e-4 at 0.5 % / 1 %, 1.4e-4 at 0.2 % / 0.4 %; regions inside the dead band are skipped, the last significant sign is not kept). A region is contested if its error is at least 80 % of the largest error. When more than 30 % of the contested regions are inverted, `f` is multiplied by `1 - 0.6 s` (`s`: share of inverted regions among all regions), and the next 3 iterations cannot shrink it again. A region that is still far from its target while most other regions oscillate does not make the step smaller (see "Contested regions"). `f` never grows back. Apart from the dead band the rule uses neither the score nor the tolerances, and it does not depend on `recompute_on_rise`.
+- **Sign changes.** A region is inverted if the sign of its area error (current area against target, as `log2` of the ratio) changed in any of the last 3 iterations; a change is only recorded between two iterations in which the region's error exceeds a dead band of `0.1 * log2(1 + max_tol)` (4.1e-3 at the default tolerances, 1.4e-3 at 0.5 % / 1 %, 5.8e-4 at 0.2 % / 0.4 %; regions inside the dead band are skipped, the last significant sign is not kept). When more than 30 % of the regions are inverted, `f` is multiplied by `1 - 0.6 s` (`s`: share of inverted regions), and the next 3 iterations cannot shrink it again. `f` never grows back. Apart from the dead band the rule uses neither the score nor the tolerances, and it does not depend on `recompute_on_rise`.
 - **Restart.** In the first `max(recompute_every, 10)` iterations `f` is also limited to the score of the current state (for the first step: of the input geometries) divided by 10, not below 1/8. A run that starts far from the target (score above 10) is not affected.
 
-The constants (3 iterations, 0.1 for the dead band, 0.8 for the contested regions, 30 %, 0.6, 1/8, 10) are fixed in `stepsize.py`; the only option is the switch.
+The constants (3 iterations, 0.1 for the dead band, 30 %, 0.6, 1/8, 10) are fixed in `stepsize.py`; the only option is the switch. The controller is created for each morph call, so every level of a multiresolution run starts again at fraction 1.
 
 figure: inversion_share.png — Share of regions with a sign change in the last 3 iterations (orange) against the true maximum area error (blue, right axis), states at grid 256, dt 0.2, constant dt, every iteration recorded. The share is about 0 while the error falls from 1700 % to 10 % and 0.75 to 0.9 once the oscillation starts around iteration 112.
 
 ## Late phase
 
-figure: late_phase.png — Left: true maximum area error at each of the last 80 of 300 iterations, states at grid 256, dt 0.2, tolerances 1e-6 (unreachable), dead band as for a max tolerance of 0.4 %, stall rule off, every iteration recorded (default `recompute_on_rise`). Constant dt alternates between 0.3 % and 2.0 %; adaptive_dt between 0.06 % and 0.3 %. Right: highest and median over the last 50 iterations against dt.
+figure: late_phase.png — Left: true maximum area error at each of the last 80 of 300 iterations, states at grid 256, dt 0.2, tolerances 1e-6 (unreachable), dead band as for a max tolerance of 0.4 %, stall rule off, every iteration recorded (default `recompute_on_rise`). Right: highest and median over the last 50 iterations against dt.
 
 True maximum error over the last 50 of 300 iterations, with every iteration recorded and computed from the geometry of each snapshot (the cycle has period 2, so sampling every n-th iteration is not representative). The tolerances of these runs are unreachable (1e-6), so the dead band is set explicitly as for a max tolerance of 0.4 % (`0.1 * log2(1.004)` = 2.9e-4).
 
 | input | dt | recompute_on_rise | constant dt: lowest / median / highest % | adaptive_dt: lowest / median / highest % |
 |---|---|---|---|---|
-| states | 0.1 | 0.01 | 0.426 / 0.622 / 2.160 | 0.065 / 0.088 / 0.497 |
-| states | 0.1 | None | 0.228 / 4.159 / 17.562 | 0.108 / 1.392 / 6.683 |
-| states | 0.2 | 0.01 | 0.302 / 0.814 / 2.003 | 0.055 / 0.115 / 0.294 |
-| states | 0.2 | None | 0.303 / 5.322 / 14.540 | 0.055 / 0.728 / 1.877 |
-| states | 0.4 | 0.01 | 1.287 / 2.371 / 6.223 | 0.220 / 0.232 / 0.696 |
-| states | 0.4 | None | 1.114 / 8.717 / 19.548 | 0.081 / 1.194 / 3.110 |
-| districts | 0.2 | 0.01 | 0.388 / 0.964 / 2.742 | 0.015 / 0.278 / 0.663 |
-| districts | 0.2 | None | 2.849 / 5.947 / 14.051 | 0.074 / 1.156 / 2.400 |
+| states | 0.1 | 0.01 | 0.426 / 0.622 / 2.160 | 0.013 / 0.278 / 0.746 |
+| states | 0.1 | None | 0.228 / 4.159 / 17.562 | 0.060 / 1.111 / 3.785 |
+| states | 0.2 | 0.01 | 0.302 / 0.814 / 2.003 | 0.101 / 0.108 / 0.322 |
+| states | 0.2 | None | 0.303 / 5.322 / 14.540 | 0.075 / 0.482 / 1.435 |
+| states | 0.4 | 0.01 | 1.287 / 2.371 / 6.223 | 0.001 / 0.385 / 0.808 |
+| states | 0.4 | None | 1.114 / 8.717 / 19.548 | 0.061 / 1.128 / 3.184 |
+| districts | 0.2 | 0.01 | 0.388 / 0.964 / 2.742 | 0.034 / 0.335 / 0.813 |
+| districts | 0.2 | None | 2.849 / 5.947 / 14.051 | 0.171 / 1.958 / 4.034 |
 
-The highest error drops by a factor of 3 to 9 (2.0 to 0.29 % at dt 0.2). Without `recompute_on_rise` the field is stale for up to 10 iterations and the constant-dt cycle is much larger (14 to 20 %); the rule reduces it by a factor of 3 to 8, and what remains is the stale field, not the step. Against the version without the contested condition the highest error is slightly lower in the rows with the default recompute (dt 0.2: 0.32 to 0.29 %; dt 0.4: 0.81 to 0.70 %).
+The highest error drops by a factor of 3 to 9 with the default recompute (2.0 to 0.32 % at dt 0.2). Without `recompute_on_rise` the field is stale for up to 10 iterations and the constant-dt cycle is much larger (14 to 20 %); the rule reduces it by a factor of 4 to 10, and what remains is the stale field, not the step.
 
 figure: tight_traces.png — Score per iteration, states at grid 256, tolerances 0.2 % / 0.4 %, stall rule off. Constant dt oscillates between about 1.3 and 20 and converges when it happens to dip (148 and 100 iterations); with adaptive_dt the oscillation decays after the first shrinks.
 
@@ -58,33 +60,31 @@ figure: tight_traces.png — Score per iteration, states at grid 256, tolerances
 | | constant dt converges | adaptive_dt converges |
 |---|---|---|
 | `recompute_on_rise` 0.01 (16 runs) | 10 | 16 |
-| `recompute_on_rise` None (16 runs) | 7 | 14 |
-| total | 17 of 32 | 30 of 32 |
+| `recompute_on_rise` None (16 runs) | 8 | 16 |
+| total | 18 of 32 | 32 of 32 |
 
-Of the 17 runs where both converge the median cost ratio is 0.80 (range 0.19 to 1.11); one costs more than 5 % more (states at grid 256, 0.5 % / 1 %, dt 0.4, default recompute: 64 iterations (cost 160) against 70 (178)). States at grid 128, 0.5 % / 1 %, dt 0.2: 182 iterations (cost 776) against 70 (151). The true maximum error of the output is equal or lower in 29 of the 32 runs; in the three others it is higher but within the tolerance (0.89 against 0.95 %; 0.23 against 0.33 %; 0.73 against 0.99 %). The two runs that do not converge are the districts at grid 256 with `recompute_on_rise=None` and dt 0.4 (0.2 % / 0.4 % and 0.5 % / 1 %): constant dt stalls there too (62 % true maximum error in both modes); the version without the contested condition converged them (167 and 184 iterations). Versus that version, states at grid 128 with tolerances 0.2 % / 0.4 %, dt 0.2 and `recompute_on_rise=None` takes 182 iterations instead of 103 (constant dt stalls at 270).
+Of the 18 runs where both converge the median cost ratio is 0.78 (range 0.20 to 1.10); two cost more: states at grid 256, 0.5 % / 1 %, dt 0.4, default recompute (64 iterations, cost 160, against 68, 176) and districts at grid 256, 0.5 % / 1 %, dt 0.2, default recompute (156, 555 against 160, 559). States at grid 128, 0.5 % / 1 %, dt 0.2: 182 iterations (cost 776) against 71 (152). The true maximum error of the output is equal or lower in 27 of the 32 runs; in the five others it is higher but within the tolerance (0.34 against 0.20 %; 0.95 against 0.85 %; 0.99 against 0.85 %; 0.98 against 0.97 %; 0.24 against 0.23 %). The two districts runs at grid 256 with `recompute_on_rise=None` and dt 0.4 stall in constant dt with a 62 % true maximum error (a region that had dropped out of the field before #124 was merged; they stall at the same point on main) and converge with adaptive_dt (167 and 184 iterations).
 
 figure: cost_ratio.png — Cost with adaptive_dt over cost with constant dt per run (log scale). Left: the 12 runs at the default tolerances. Right: the 32 tight-tolerance runs. Triangles mark runs where only adaptive_dt converged (their ratio compares against a stalled or capped constant-dt run, so it understates the gain).
 
 ## Runs at the default tolerances
 
-12 runs; wall time is the minimum of two. Iterations with constant dt against adaptive_dt:
+12 runs; wall time is the minimum of two. All 12 are identical to constant dt in status, iterations and final error (the dead band at the default tolerances, 4.1e-3, is wider than the sign changes of the late cycle), and wall times agree within noise:
 
 | input | grid | dt | iterations, constant dt | iterations, adaptive_dt | wall s, constant dt / adaptive_dt |
 |---|---|---|---|---|---|
-| states | 128 | 0.2 | 62 | 62 | 0.14 / 0.15 |
-| states | 256 | 0.2 | 112 | 112 | 0.30 / 0.22 |
-| states | 512 | 0.2 | 214 | 214 | 0.55 / 0.56 |
-| districts | 256 | 0.2 | 145 | 145 | 0.57 / 0.59 |
-| states | 256 | 0.4 | 62 | 62 | 0.16 / 0.16 |
-| districts | 256 | 0.4 | 81 | 80 | 0.43 / 0.41 |
-| horizontal | 256 | 0.2 | 207 | 207 | 0.36 / 0.36 |
-| tangential | 256 | 0.2 | 187 | 187 | 0.31 / 0.33 |
-| tilted | 256 | 0.2 | 162 | 162 | 0.29 / 0.30 |
-| horizontal | 256 | 0.6 | 122 | 127 | 0.27 / 0.28 |
-| tangential | 256 | 0.6 | 118 | 123 | 0.28 / 0.29 |
-| tilted | 256 | 0.6 | 95 | 98 | 0.24 / 0.25 |
-
-Nine runs are identical or within one iteration; the three anisotropy runs at dt 0.6 (three times the default) take 3 to 5 more iterations (+3 to +4 %). The version without the contested condition left all 12 identical to constant dt; with it, the contested set is a few regions, and when they flip in one iteration the controller shrinks the step (5 to 6 shrinks in each of these runs, final fraction 0.59 to 0.70). Wall times agree within noise. The stopping point differs when the run shrinks, so the true maximum error of the output differs too (districts at dt 0.4: 4.8 % against 9.5 %; every output is within the 10 % tolerance). The held-out default-tolerance cases of the contested sweep (anisotropy at dt 0.4 and 0.8, states at grids 128 and 512, districts at dt 0.2 and 0.4) are within 12 % of constant dt in iterations (horizontal dt 0.8: 96 against 107, tangential dt 0.8: 109 against 122), most identical.
+| states | 128 | 0.2 | 62 | 62 | 0.14 / 0.14 |
+| states | 256 | 0.2 | 112 | 112 | 0.30 / 0.23 |
+| states | 512 | 0.2 | 214 | 214 | 0.54 / 0.55 |
+| districts | 256 | 0.2 | 145 | 145 | 0.57 / 0.56 |
+| states | 256 | 0.4 | 62 | 62 | 0.15 / 0.15 |
+| districts | 256 | 0.4 | 81 | 81 | 0.41 / 0.42 |
+| horizontal | 256 | 0.2 | 207 | 207 | 0.35 / 0.35 |
+| horizontal | 256 | 0.6 | 122 | 122 | 0.38 / 0.28 |
+| tangential | 256 | 0.2 | 187 | 187 | 0.32 / 0.30 |
+| tangential | 256 | 0.6 | 118 | 118 | 0.26 / 0.27 |
+| tilted | 256 | 0.2 | 162 | 162 | 0.27 / 0.28 |
+| tilted | 256 | 0.6 | 95 | 95 | 0.22 / 0.21 |
 
 ## Continuation from an existing geometry
 
@@ -93,13 +93,13 @@ A second `CartogramWorkflow.morph` on the result of a first run, tolerances 0.5 
 | input | grid | first run | constant dt: iterations (cost), score after iteration 1 | adaptive_dt: iterations (cost), score after iteration 1 |
 |---|---|---|---|---|
 | states | 256 | converged at 0.5 % / 1 % | 4 (28), 2.5 | 1 (13), 0.4 |
-| states | 512 | converged at 0.5 % / 1 % | 4 (52), 2.7 | 1 (25), 0.3 |
-| districts | 256 | converged at 0.5 % / 1 % | 4 (46), 2.3 | 1 (22), 0.3 |
 | states | 256 | converged at 5 % / 20 % | 92 (620), 1.6 | 3 (27), 1.5 |
+| states | 512 | converged at 0.5 % / 1 % | 4 (52), 2.7 | 1 (25), 0.3 |
 | states | 512 | converged at 5 % / 20 % | 4 (52), 8.0 | 3 (27), 8.0 |
+| districts | 256 | converged at 0.5 % / 1 % | 4 (46), 2.3 | 1 (22), 0.3 |
 | districts | 256 | converged at 5 % / 20 % | 7 (70), 7.0 | 13 (97), 7.0 |
 
-The restart limit is needed. In a throwaway variant without it (measured with the fixed dead band of 1e-3, before the contested condition) (states, grid 128, tolerances 0.5 % / 1 %, converged first run) the second run took 19 iterations (score 8.9, 18.7, 13.9 after the first three iterations) against 4 with constant dt and 1 with the limit: the first step undoes the convergence before any sign change can be seen, and the sign rule then shrinks the step for a run that has to converge again.
+The restart limit is needed. In a throwaway variant without it (measured with an earlier version of the rule: states, grid 128, tolerances 0.5 % / 1 %, converged first run) the second run took 19 iterations (score 8.9, 18.7, 13.9 after the first three iterations) against 4 with constant dt and 1 with the limit: the first step undoes the convergence before any sign change can be seen, and the sign rule then shrinks the step for a run that has to converge again.
 
 The districts at grid 256 started from a loose result are slower with adaptive_dt (7 against 13 iterations): the score of the start is 7, so the limit takes 70 % of the step although a full step was right.
 
@@ -111,88 +111,82 @@ figure: restart.png — Iterations of the second run on the output of a first ru
 
 | input | tolerances | dt | constant dt | adaptive_dt |
 |---|---|---|---|---|
-| states | default | 0.2 | 128: converged 63 it; cost 126 | same |
-| states | default | 0.4 | 128: converged 39; cost 93 | 128: converged 41; cost 95 |
-| states | 0.5 % / 1 % | 0.2 | 128: converged 94; cost 292 | 128: converged 69; cost 150 |
-| states | 0.5 % / 1 % | 0.4 | 128: converged 45; cost 126 | 128: converged 48; cost 111 |
-| districts | default | 0.2 | 128: converged 123; cost 447 | same |
-| districts | default | 0.4 | 128, 256, 512: stalled (120, 50, 50 it); cost 1317 | same stalls; cost 1317 |
-| districts | 0.5 % / 1 % | 0.2 | 128: converged 173; cost 947 | 128: converged 149; cost 671 |
-| districts | 0.5 % / 1 % | 0.4 | 128, 256, 512: stalled (140, 50, 50 it); cost 1499 | same stalls; cost 1520 |
+| states | default 5 % / 10 % | 0.2 | 128: converged 63; cost 126 | 128: converged 63; cost 126 |
+| states | default 5 % / 10 % | 0.4 | 128: converged 39; cost 93 | 128: converged 39; cost 93 |
+| states | 0.5 % / 1 % | 0.2 | 128: converged 94; cost 292 | 128: converged 70; cost 151 |
+| states | 0.5 % / 1 % | 0.4 | 128: converged 45; cost 126 | 128: converged 49; cost 112 |
+| districts | default 5 % / 10 % | 0.2 | 128: converged 123; cost 447 | 128: converged 123; cost 447 |
+| districts | default 5 % / 10 % | 0.4 | 128: converged 102; cost 480 | 128: converged 102; cost 480 |
+| districts | 0.5 % / 1 % | 0.2 | 128: converged 173; cost 947 | 128: converged 157; cost 715 |
+| districts | 0.5 % / 1 % | 0.4 | 128: stalled 160 256: stalled 50 512: stalled 50; cost 3154 | 128: stalled 170 256: stalled 50 512: stalled 50; cost 3509 |
 
-Equal or cheaper in six of the eight runs; the two districts runs at dt 0.4 stall at every level in both modes (sub-cell plateau; the step control does not address it), and two states runs take 2 to 3 more iterations. The districts at 0.5 % / 1 % and dt 0.2, which stalled with the dead band alone, converge at 149 iterations (see "Contested regions").
+Equal or cheaper in five of the eight runs (states 0.5 % / 1 % at dt 0.2 and 0.4, districts 0.5 % / 1 % at dt 0.2: 947 to 715, and the two default-tolerance dt 0.2 runs are equal); the districts at 0.5 % / 1 % and dt 0.4 stall at every level in both modes (grid 128 reaches a 5 to 6 % maximum error: not a step problem); the states at dt 0.4 with default tolerances take the same iterations.
 
 ## recompute_on_rise
 
-The tables above use both settings where it matters. The one false stall of an earlier design (states, dt 0.2, tolerances 0.2 % / 0.4 %, `recompute_on_rise=None`) does not occur: adaptive_dt converges in 152 iterations, constant dt in 192.
+The tables above use both settings where it matters. The one false stall of an earlier design (states, dt 0.2, tolerances 0.2 % / 0.4 %, `recompute_on_rise=None`) does not occur: adaptive_dt converges in 151 iterations, constant dt in 192.
 
-| input | dt | tolerances | recompute_on_rise | constant dt | adaptive_dt |
+| input | dt | tolerances | recompute_on_rise | constant dt: status, it, cost | adaptive_dt: status, it, cost |
 |---|---|---|---|---|---|
-| states | 0.2 | 0.2 / 0.4 % | 0.01 | converged, 148 it, cost 508 | converged, 123, 303 |
-| states | 0.2 | 0.2 / 0.4 % | None | converged, 192, 432 | converged, 152, 344 |
-| states | 0.4 | 0.2 / 0.4 % | 0.01 | converged, 100, 412 | converged, 71, 179 |
-| states | 0.4 | 0.2 / 0.4 % | None | stalled, 210, 462 | converged, 102, 234 |
-| tilted | 0.6 | default | 0.01 | converged, 95, 275 | converged, 98, 278 |
+| states | 0.2 | (0.002, 0.004) | 0.01 | converged, 148, 508 | converged, 118, 286 |
+| states | 0.2 | (0.002, 0.004) | None | converged, 192, 432 | converged, 151, 343 |
+| states | 0.4 | (0.002, 0.004) | 0.01 | converged, 100, 412 | converged, 70, 178 |
+| states | 0.4 | (0.002, 0.004) | None | stalled, 210, 462 | converged, 122, 278 |
+| tilted | 0.6 | default | 0.01 | converged, 95, 275 | converged, 95, 275 |
 | tilted | 0.6 | default | None | stalled, 130, 286 | stalled, 130, 286 |
-| horizontal | 0.6 | default | 0.01 | converged, 122, 338 | converged, 127, 343 |
-| horizontal | 0.6 | default | None | converged, 164, 368 | converged, 162, 366 |
+| horizontal | 0.6 | default | 0.01 | converged, 122, 338 | converged, 122, 338 |
+| horizontal | 0.6 | default | None | converged, 164, 368 | converged, 164, 368 |
 
 Tilted at dt 0.6 without `recompute_on_rise` stalls in both modes at the same iteration (the rule does not fire there).
 
 ## Counties
 
-3,108 counties, grid 256, 300 iterations (`data/tables.md`): constant dt and adaptive_dt give the same run (stalled at 210 iterations, best iteration 169, true mean 49.6 %, max 5018 %). The counties do not respond (targets far below one cell; not a step problem).
+3,108 counties, grid 256, 300 iterations: constant dt and adaptive_dt gave the same run before #124 (stalled at 210 iterations, best iteration 169, true mean 49.6 %, max 5018 %; targets far below one cell). Not re-measured on top of #124; whether the counties are affected by the ring orientation is open.
 
 ## Per-iteration diagnostics
 
-`diagnostic_plots.py` records every iteration of ten scenarios, with the settings of the tables above, for adaptive_dt off and on. Panels, same x axis: (1) true maximum area error from the geometry of each snapshot with the tolerance and the stopping iteration (dotted); (2) share of regions whose error sign changed in the last 3 iterations (the controller's detection and dead band): solid for the contested regions, which decide the shrink, dotted for all regions; the threshold 0.3 and the shrink events (filled triangles: on run; open triangles: events the controller would have produced on the constant-dt run); (3) fraction of dt: actual for the on run, predicted for the constant-dt run by replaying the controller on its recorded errors (open loop); (4) true mean area error with its tolerance.
+`diagnostic_plots.py` records every iteration of ten scenarios, with the settings of the tables above, for adaptive_dt off and on. Panels, same x axis: (1) true maximum area error from the geometry of each snapshot with the tolerance and the stopping iteration (dotted); (2) share of regions whose error sign changed in the last 3 iterations (the controller's detection and dead band), the threshold 0.3 and the shrink events (filled triangles: on run; open triangles: events the controller would have produced on the constant-dt run); (3) fraction of dt: actual for the on run, predicted for the constant-dt run by replaying the controller on its recorded errors (open loop); (4) true mean area error with its tolerance.
 
-### Scenarios where the rule costs or is inactive
+### Scenarios where the rule is inactive or costs
 
-figure: diagnostics_horizontal_dt06.png — Horizontal anisotropy, dt 0.6, default tolerances: 122 iterations against 127.
-figure: diagnostics_tangential_dt06.png — Tangential anisotropy, dt 0.6: 118 against 123.
-figure: diagnostics_tilted_dt06.png — Tilted anisotropy, dt 0.6: 95 against 98.
+figure: diagnostics_horizontal_dt06.png — Horizontal anisotropy, dt 0.6, default tolerances: 122 iterations in both modes.
+figure: diagnostics_tangential_dt06.png — Tangential anisotropy, dt 0.6: 118 in both modes.
+figure: diagnostics_tilted_dt06.png — Tilted anisotropy, dt 0.6: 95 in both modes.
 figure: diagnostics_districts_multires.png — Districts, coarse multiresolution level (grid 128), dt 0.2, default tolerances: 123 in both modes.
 figure: diagnostics_states_tight.png — States grid 256, dt 0.2, tolerances 0.5 % / 1 %: 112 in both modes.
 figure: diagnostics_districts_continuation.png — Districts grid 256, second run at 0.5 % / 1 % on a result converged at 5 % / 20 %: 7 against 13; panel 3 shows the restart limit.
 figure: diagnostics_tilted_stall.png — Tilted anisotropy, dt 0.6, `recompute_on_rise=None`: stalls at 130 iterations in both modes.
 
-- **Anisotropy at dt 0.6 (+3 to +5 iterations).** The contested set is a few regions, and the contested share jumps to 0.5 or 1 in single iterations (horizontal: iterations 104, 108, 114, 118, 122) while the maximum error is 24 % (tilted: 39 %), 2 to 4 times the tolerance. Each event multiplies the step by 0.87 to 0.98 (5 to 6 shrinks, fraction 0.59 to 0.70 at the stop), the constant-dt run would have shrunk at 104, 108, 112 and 119 and converged by a dip below 10 % at iteration 122, the on run converges at 127. The cost is five iterations of a smaller step in the last 20 iterations.
-- **Districts coarse level, default tolerances.** 3 shrinks (iterations 106, 111, 121, fraction 0.86); both runs converge at 123, the constant run by a dip at 123.
-- **States, 0.5 % / 1 %.** Identical to constant dt (112 iterations): the only shrink event is in the final iteration, after the last step.
-- **Continuation from a loose result.** The restart limit decides: the fraction falls from 1 to 0.27 in iterations 1 to 6 and stays there until the window ends after iteration 10; the maximum error is flat at about 2.6 to 2.7 % (tolerance 1 %) in iterations 5 to 9, and the run converges at 13 after the limit is lifted. The two shrink events (iterations 3 and 9, final fraction 0.85) are small. Constant dt oscillates (7.2, 4.3, 8.8, 4.9, 1.8, 3.6 %) and lands at 0.78 % at iteration 7. The limit is proportional to the score (about 2.7 here), which stays far from converged for 10 iterations, so the window of 10 iterations costs more than the first step it protects against.
-- **Remaining stall (tilted, dt 0.6, `recompute_on_rise=None`).** Both runs stall at 130 and neither gets below 20 % maximum error; the controller does not fire (no shrink events), because the contested region does not invert. The stall comes from the stale field, not from the step size.
+- **Anisotropy at dt 0.6, districts at default tolerances, states at 0.5 % / 1 %.** No shrink event in the anisotropy and districts runs (the dead band at the default tolerances is 4.1e-3), so the runs are identical to constant dt; the only shrink in the states run is in the final iteration, after the last step.
+- **Continuation from a loose result.** The restart limit decides: the fraction falls from 1 to 0.27 in iterations 1 to 6 and stays there until the window ends after iteration 10; the maximum error is flat at about 2.6 to 2.7 % (tolerance 1 %) in iterations 5 to 9, and the run converges at 13 after the limit is lifted. Constant dt oscillates (7.2, 4.3, 8.8, 4.9, 1.8, 3.6 %) and lands at 0.78 % at iteration 7. The limit is proportional to the score (about 2.7 here), which stays far from converged for 10 iterations, so the window of 10 iterations costs more than the first step it protects against.
+- **Remaining stall (tilted, dt 0.6, `recompute_on_rise=None`).** Both runs stall at 130 and neither gets below 20 % maximum error; the controller does not fire (no shrink events). The stall comes from the stale field, not from the step size.
 
 ### Scenarios that benefit
 
-figure: diagnostics_districts_multires_tight.png — Districts, coarse multiresolution level (grid 128), dt 0.2, tolerances 0.5 % / 1 %: 173 against 149 iterations.
-figure: diagnostics_states_tight_none.png — States grid 256, dt 0.2, tolerances 0.2 % / 0.4 %, `recompute_on_rise=None`: 192 against 152.
+figure: diagnostics_districts_multires_tight.png — Districts, coarse multiresolution level (grid 128), dt 0.2, tolerances 0.5 % / 1 %: 173 against 157 iterations.
+figure: diagnostics_states_tight_none.png — States grid 256, dt 0.2, tolerances 0.2 % / 0.4 %, `recompute_on_rise=None`: 192 against 151.
 figure: diagnostics_states_late.png — States grid 256, dt 0.4, unreachable tolerances, dead band as for a 0.4 % max tolerance, stall rule off: late phase.
 
-- **Districts coarse level, 0.5 % / 1 %.** Constant dt oscillates between 1 % and 6 % maximum error with the contested share alternating between 0 and 1 and lands below 1 % at iteration 173. The on run shrinks 8 times (iterations 106 to 144, fraction 0.18), the oscillation of the maximum error ends and the run converges at 149. This is the run that stalled with the dead band alone (see "Contested regions").
-- **Tight, `recompute_on_rise=None`.** The share of the constant-dt run jumps to 0.8 at each cycle, and its maximum error cycles between about 1 % and 60 %. With the rule, 4 shrinks (fraction 0.23) lower the peaks, and the run converges at 152 on a dip below 0.4 %.
-- **Late phase at dt 0.4.** Constant dt alternates between about 1 % and 6 % maximum error for 240 iterations. The rule shrinks 5 times between iterations 59 and 76 and holds the floor (0.125); the maximum error then alternates between about 0.2 % and 0.7 %.
+- **Districts coarse level, 0.5 % / 1 %.** Constant dt oscillates between 1 % and 6 % maximum error and lands below 1 % at iteration 173. The on run shrinks 6 times (final fraction 0.23), the oscillation of the maximum error ends and the run converges at 157.
+- **Tight, `recompute_on_rise=None`.** The share of the constant-dt run jumps to 0.8 at each cycle, and its maximum error cycles between about 1 % and 60 %. With the rule, 5 shrinks (fraction 0.20) lower the peaks, and the run converges at 151.
+- **Late phase at dt 0.4.** Constant dt alternates between about 1 % and 6 % maximum error for 240 iterations. The rule shrinks 3 times and holds a fraction of 0.21; the maximum error then alternates between about 0.1 % and 0.8 %.
 
-## Contested regions
+## Considered and dropped: a contested-regions condition
 
-With the dead band alone the districts multiresolution run at 0.5 % / 1 % and dt 0.2 (constant dt: 173 iterations) stalled at every level (170, 50, 50 iterations, true maximum error 6.4 %). The cause is one region. Region 420 is a thin district about 4 grid cells wide at grid 128; while it is still 29 times its tolerance (about 10 % error against 1 % at the stop) most other regions already oscillate around their targets. The oscillation shrinks the step (fraction 0.23 by iteration 136), the step then stays small because the fraction never grows back, region 420 crawls (flat at about 10 % from iteration 128), and the stall rule stops the run after 4 windows without progress. The controller is created for each morph call, so every finer level starts again at fraction 1 and the stall repeats at each level.
+Before #124 the districts multiresolution run at 0.5 % / 1 % and dt 0.2 stalled at every level with the first version of this rule (170, 50, 50 iterations, true maximum error 6.4 %; constant dt: 173 iterations). One region (a thin district about 4 grid cells wide at grid 128) stayed about 10 % off while the others oscillated within 3 %, the oscillation shrank the step, and the stall rule stopped the run. I added a condition that the step shrinks only when the regions with the largest errors (at least 80 % of the largest) oscillate.
 
-figure: region_420_errors.png — The error of region 420 (red) against the 90th percentile and the maximum of |error| over all other regions (blue), with the step fraction (orange, right axis), coarse level of the districts multiresolution run at 0.5 % / 1 %. Top: constant dt (converges at 173). Middle: adaptive_dt without the contested condition (stalls at 170: region 420 stays at about 10 % while the others fall below 3 %). Bottom: adaptive_dt as shipped (converges at 149, region 420 follows the others).
-figure: field_region_420.png — Density and velocity around region 420 in a window of 12 grid cells around its bounding box, with the signed errors of the regions. Top: constant dt, iteration 120 (region 420 at +5 %, a thin sliver between larger regions). Bottom: the stalled run at its last iteration (region 420 at +9.8 %, the other regions in this window close to their targets).
+The cause turned out to be the ring orientation of the exact rasterizer (fixed in #124, see [exact-ring-orientation](../exact-ring-orientation/index.html)): the polygon of that region had a small self-intersection, reached the rasterizer with the wrong sign and was missing from the density field, so it received no force from its own error. Repairing that polygon alone (an area change of 0.00 %) converged it. With #124 in, the condition costs more than it gains (13 single runs and 5 multiresolution runs, rows in `data/tables_contested_check.md`, script `contested_check.py`):
 
-The rule: the step shrinks only if more than 30 % of the contested regions (error at least 80 % of the largest error) are inverted; the amount stays `1 - 0.6 s` with `s` the share of inverted regions among all regions. In the stalled run the contested set is region 420 alone, which does not invert, so the step keeps its size. `contested_sweep.py` compares the fraction 0.8, 0.9 and 1.0 (1.0: only the region of the largest error) with constant dt (rows in `data/tables_contested.md`):
+| | constant dt | dead band only | contested condition (0.8) |
+|---|---|---|---|
+| sum of iterations over 13 single runs | 2674 | 1497 | 1631 |
+| districts multiresolution 0.5 % / 1 %, dt 0.2 | c173 | c157 | c152 |
+| districts multiresolution 0.2 % / 0.4 %, dt 0.2 | s270, s50, c3 | s240, c12 | stalls at all three levels |
+| districts 256, dt 0.4, 0.5 % / 1 %, `recompute_on_rise=None` | stalls, 62 % | converges, 184 iterations, 0.86 % | stalls, 62 % |
+| states 128, 0.1 % / 0.2 %, dt 0.2 | 400, not converged | 74 | 138 |
+| states 128, 0.2 % / 0.4 %, dt 0.2, `recompute_on_rise=None` | stalls at 270 | 103 | 182 |
 
-| set | constant dt | 0.8 | 0.9 | 1.0 |
-|---|---|---|---|---|
-| 11 original cases, sum of iterations | 1406 | 1353 | 1357 | 1370 |
-| 15 held-out fresh runs, sum | 1994 | 1601 | 1606 | 1532 |
-| multiresolution and continuations (held-out), sum | 316 | 208 | 210 | 208 |
-| districts multiresolution, 3 tolerances (1 % / 2 %, 0.5 % / 1 %, 0.2 % / 0.4 %) and states 0.2 % / 0.4 %, sum | 914 | 599 | 589 | 711 (one stall) |
-| districts grid 128, 4 tolerances x 4 dt, sum | 2776 | 2574 | 2575 | 2604 |
-
-The version without the contested condition (dead band only) took 1339 and 1509 iterations on the first two sets, and stalled one of the three districts multiresolution tolerances (c = 0.1 at 0.5 % / 1 %), so the contested condition costs 1 % and 6 % on the first two sets and removes the stalls: 0.8 and 0.9 converge in all four multiresolution runs, 1.0 stalls at 0.2 % / 0.4 %. The main differences between 0.8 and 0.9 are one anisotropy run at dt 0.8 (122 against 133 iterations) and districts multiresolution at 0.2 % / 0.4 % (234 against 205); 1.0 reduces the cost on the held-out fresh runs (states 128 at 0.1 % / 0.2 %: 76 against 138 iterations) but stalls one multiresolution run and is slower at states 256 with 0.2 % / 0.4 % and `recompute_on_rise=None` (171 against 152). 0.8 was kept: it converges everywhere that constant dt does and is not worse than 0.9 on the sums.
-
-Where the contested condition is worse than the dead band alone: states 128, tolerances 0.1 % / 0.2 %, dt 0.2: 138 against 74 iterations (constant dt: 400, not converged); the three anisotropy runs at dt 0.6 (+3 to +4 %) and at dt 0.8 (+11 to +12 %); the two tight districts runs at 256 with `recompute_on_rise=None` and dt 0.4 (stall, like constant dt); states 128, 0.2 % / 0.4 %, dt 0.2, `recompute_on_rise=None`: 182 against 103 iterations.
+so the condition was dropped; the rule is the dead-band rule described above.
 
 ## Further checks of the rule
 
@@ -210,7 +204,7 @@ figure: signed_errors_tangential_linear.png — The same lines on a linear axis,
 
 ## How the rule was chosen
 
-These numbers come from throwaway variants of the branch (states at grid 256, every iteration recorded, dt 0.2 unless stated). An earlier version of this page described a rule on the score (halve the step when the score rises by 1 %, recover by 25 % per iteration); the reviewer asked for a trigger that does not share the event of `recompute_on_rise`, a step that never recovers, and the sign of each region's error as the signal. The first design and its comparison with an error-driven step are in git history of the branch `feat/adaptive-step-v1` only.
+These numbers come from throwaway variants of the branch, measured before #124 and with the fixed band of 1e-3 (the detector and shrink tables are not regenerated) (states at grid 256, every iteration recorded, dt 0.2 unless stated). An earlier version of this page described a rule on the score (halve the step when the score rises by 1 %, recover by 25 % per iteration); the reviewer asked for a trigger that does not share the event of `recompute_on_rise`, a step that never recovers, and the sign of each region's error as the signal. The first design and its comparison with an error-driven step are in git history of the branch `feat/adaptive-step-v1` only.
 
 Detection (logging with the step unchanged, tolerances 1e-6, `recompute_on_rise` 0.01):
 
@@ -241,14 +235,15 @@ At threshold 0.1 regions flip sign while the error is still large (score around 
 
 ## Dead band
 
-These numbers were measured before the contested condition (the rule shrank when the share among all regions exceeded 30 %). The fixed band of 1e-3 was a compromise: a band of 1e-2 or more never fires (identical to constant dt); a smaller band (0 to 1e-4; this sweep was run by the reviewer) gives a calmer late phase and fewer iterations at tight tolerances but costs iterations at the default tolerances (tangential at dt 0.6: 185 against 162 with the fixed band; districts grid 128: 149 to 158 against 124). The band is therefore tied to the max tolerance, `c * log2(1 + max_tol)`. `dead_band_sweep.py` compares constant dt, the fixed band and c = 0.01, 0.03, 0.1 (rows in `data/tables_dead_band.md`). c = 0.03 was first chosen on 11 cases; the held-out cases below were not used for the choice. Iterations (status c converged, s stalled; true max error % of the output in `data/tables_dead_band.md`):
+The band is tied to the max tolerance, `c * log2(1 + max_tol)`, so a tight tolerance sees the sign of smaller errors. A fixed band of 1e-3 (the first version) cost iterations at the default tolerances (the dt 0.6 anisotropy runs +35 to 40 %), a band of 1e-2 or more never fires (identical to constant dt), and smaller bands (0 to 1e-4) give a calmer late phase and fewer iterations at tight tolerances but cost iterations at the default tolerances. `dead_band_sweep.py` compares constant dt, the fixed band and c = 0.01, 0.03, 0.1 (rows in `data/tables_dead_band.md`); c = 0.03 was first chosen on 11 cases, and the held-out cases below were not used for the choice. Sum of iterations (all converge unless noted):
 
 | set | constant dt | fixed 1e-3 | c 0.01 | c 0.03 | c 0.1 |
 |---|---|---|---|---|---|
-| 11 original cases, sum of iterations | 1406 | 1476 | 1454 | 1362 | 1339 |
-| 15 held-out fresh runs (anisotropy at dt 0.4 and 0.8, states at grids 128 and 512 at dt 0.4, districts at dt 0.2 and 0.4, states 128 and 256 at 1 % / 2 % and 0.1 % / 0.2 %), sum | 1994 | 1743 | 1689 | 1553 | 1509 |
-| held-out multiresolution (states, districts) and continuations, sum | 316 | 210 | 214 | 212 | 209 |
-| of which constant dt does not converge | 2 of 15 (400 and 260 iterations) | | | | |
+| 11 original cases | 1406 | 1476 | 1454 | 1362 | 1339 |
+| 15 held-out fresh runs (anisotropy at dt 0.4 and 0.8, states at grids 128 and 512 at dt 0.4, districts at dt 0.2 and 0.4, states 128 and 256 at 1 % / 2 % and 0.1 % / 0.2 %); constant dt does not converge in 2 of them (400 and 260 iterations) | 1994 | 1743 | 1689 | 1553 | 1509 |
+| held-out multiresolution (states, districts) and continuations | 316 | 210 | 214 | 210 | 209 |
+| districts multiresolution at 3 tolerances (1 % / 2 %, 0.5 % / 1 %, 0.2 % / 0.4 %) and states 0.2 % / 0.4 % | 914 | 599 | 721 (one stall) | 736 (one stall) | 644 |
+| districts grid 128, 4 tolerances x 4 dt | 2745 | 2952 | 3052 | 2766 | 2724 |
 
 Held-out cases where the choice matters (iterations):
 
@@ -262,21 +257,26 @@ Held-out cases where the choice matters (iterations):
 | states 256, 0.2 % / 0.4 %, dt 0.2 | 148 | 118 | 119 | 118 |
 | multires states 0.5 % / 1 % | 94 | 70 | 72 | 70 |
 
-Late phase (unreachable tolerance, band as for 0.4 %, highest true max error over the last 50 of 300 iterations, states grid 256): c = 0.03 / 0.1 / 0.3: 0.23 / 0.32 / 0.67 % (dt 0.2, rise on), 0.54 / 0.81 / 0.64 % (dt 0.4, rise on), 1.85 / 1.44 / 4.26 % (dt 0.2, rise None), 14.5 / 3.2 / 4.1 % (dt 0.4, rise None). c = 0.3 has the highest amplitude at dt 0.2; c = 0.1 is the lowest of the three in the two stale-field rows and higher than c = 0.03 only at dt 0.4 with the default recompute.
+Late phase (unreachable tolerance, band as for 0.4 %, median / highest true max error over the last 50 of 300 iterations, states grid 256):
 
-Choice: c = 0.1. It takes the same iterations as constant dt on all default-tolerance cases but one (tilted at dt 0.8: 76 against 86), keeps the tight-tolerance gains (32 of 32 converge), and has the lowest sums on both the original and the held-out cases (1339 against 1362 and 1509 against 1553 for c = 0.03). The held-out cases agree with the original choice in direction (tied band against fixed band) but c = 0.03 costs more at the default tolerances (tilted dt 0.8: 90; dt 0.6 anisotropy 129 / 128 / 108 against 122 / 118 / 95 for constant dt).
+| recompute_on_rise | dt | constant dt | fixed 1e-3 | c 0.01 | c 0.03 | c 0.1 | c 0.3 |
+|---|---|---|---|---|---|---|---|
+| 0.01 | 0.2 | 0.81 / 2.00 | 0.27 / 0.68 | 0.11 / 0.30 | 0.11 / 0.23 | 0.11 / 0.32 | 0.30 / 0.67 |
+| 0.01 | 0.4 | 2.37 / 6.22 | 0.23 / 0.57 | 0.23 / 0.50 | 0.22 / 0.54 | 0.38 / 0.81 | 0.24 / 0.64 |
+| None | 0.2 | 5.32 / 14.54 | 1.36 / 3.75 | 0.70 / 1.86 | 0.68 / 1.85 | 0.48 / 1.44 | 1.79 / 4.26 |
+| None | 0.4 | 8.72 / 19.55 | 1.56 / 4.35 | 6.45 / 15.40 | 5.55 / 14.46 | 1.13 / 3.18 | 1.42 / 4.06 |
 
-Where the tied band is worse: the coarse level of a districts multiresolution run is sensitive. Constant dt and the fixed band converge in all three tolerances tested (1 % / 2 %, 0.5 % / 1 %, 0.2 % / 0.4 %); each tied factor stalls in exactly one (c = 0.1 at 0.5 % / 1 %: 270 iterations, 6.4 % true maximum error; c = 0.05 at 1 % / 2 %; c = 0.03 and 0.01 at 0.2 % / 0.4 %). On the districts at grid 128 alone (4 tolerances, 4 dt values) the same 8 of 16 runs converge in every mode, and iterations are within 5 % of constant dt in total (c = 0.1: 2914, constant dt: 2776), so the failures are not a general effect; they are stalls on a sub-cell plateau that depend on the stopping point of an oscillation.
+Choice: c = 0.1. It takes the same iterations as constant dt on all default-tolerance cases but one (tilted at dt 0.8: 76 against 86), keeps the tight-tolerance gains (32 of 32 converge), has the lowest sums on every set, and is the only factor that converges the districts multiresolution at all three tolerances (c = 0.01 and 0.03 stall at 0.2 % / 0.4 %); c = 0.03 costs more at the default tolerances (tilted dt 0.8: 90; dt 0.6 anisotropy 129 / 128 / 108 against 122 / 118 / 95 for constant dt) and c = 0.01 and 0.03 are poor without `recompute_on_rise` at dt 0.4 (14 to 15 % highest error). c = 0.3 has the highest amplitude at dt 0.2 with the default recompute. The held-out cases agree with the original choice in direction (tied band against fixed band). Before #124 the districts multiresolution run at 0.5 % / 1 % stalled with c = 0.1; it converges now (157 iterations).
 
 ## Design alternatives and trade-offs
 
-1. Default `adaptive_dt=False`: no change for anyone; users with tight tolerances or large presets opt in. The cost of default-on is now: 3 to 5 more iterations on the dt 0.6 anisotropy runs (up to +12 % at dt 0.8), +6 iterations on the continuation from a loose result, and two tight districts runs that stall like constant dt.
-2. Let the step recover slowly: not done, as the reviewer asked for a decrease-only step; the stall of the districts level was a consequence of a permanent shrink and was removed by the contested condition instead.
+1. Default `adaptive_dt=False`: no change for anyone; users with tight tolerances or large presets opt in. The cost of default-on is now: 6 more iterations on the continuation from a loose result, a 3 % cost increase on two tight runs, and a stopping point that differs from constant dt when the rule fires (within the tolerance, not necessarily as close to the target as a constant step that lands low).
+2. Let the step recover slowly: not done, as the reviewer asked for a decrease-only step.
 3. Make the shrink depend on the error magnitude: measured earlier (with the fixed band), a proportional rule saves iterations at default tolerances (3 to 8 %) but needs a reference error; the share rule was kept.
-4. Expose the constants (band factor, contested fraction): not justified; fractions 0.8 and 0.9 give the same sums.
+4. Expose the constants (band factor): not justified.
 
 ## Not verified or not changed
 
-- Not tested: grid 1024, the `"center"` rasterizer, `prescale_components`; the districts at grid 512 (stall in both modes, sub-cell plateau) were dropped from the comparison. The dead band factor was chosen on 11 cases and the contested fraction on the same sets and the held-out ones; both were checked on about 40 more (fresh, multiresolution, continuation, late phase); every case set is small.
-- A restart from a loose result on the districts at grid 256 is slower (7 against 13 iterations); the districts multiresolution at 0.5 % / 1 % and dt 0.2 converges (see "Contested regions").
-- Existing tests pin behavior of the constant step (a deliberately diverging step, the best-iterate bookkeeping, the rise count of the recompute rule, the accuracy gain of exact rasterization at the stopping point) and now set `adaptive_dt=False`; with the control a run stops after a shrunk step at an error well inside the tolerance but not necessarily as low as a constant step that lands low (states at grid 256 with tight tolerances: 0.2 % / 0.4 % converged outputs have a true maximum error of 0.1 to 0.4 % in both modes).
+- Not tested: grid 1024, the `"center"` rasterizer, `prescale_components`; the districts at grid 512 (stall in both modes at 0.5 % / 1 %) were dropped from the comparison; the counties on top of #124. The dead band factor was chosen on 11 cases and checked on about 40 more (fresh, multiresolution, continuation, late phase); every case set is small.
+- A restart from a loose result on the districts at grid 256 is slower (7 against 13 iterations).
+- Existing tests pin behavior of the constant step (a deliberately diverging step, the best-iterate bookkeeping, the rise count of the recompute rule, the accuracy gain of exact rasterization at the stopping point) and now set `adaptive_dt=False`; with the control a run stops after a shrunk step at an error well inside the tolerance but not necessarily as low as a constant step that lands low.
