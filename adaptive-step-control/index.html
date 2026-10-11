@@ -76,7 +76,7 @@
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
-<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
 <dt>Related</dt><dd><a href="../exploration-adaptive-step/index.html">Error-dependent step size for the flow cartogram</a> <span class="meta">(exploration)</span><br><a href="../exact-density-coverage/index.html">Exact area-weighted density rasterization, as the default</a> <span class="meta">(pr)</span><br><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
 <dt>Referenced by</dt><dd><a href="../exact-ring-orientation/index.html">Exact density rasterizer, ring orientation from the signed area</a> <span class="meta">(pr)</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/123">https://github.com/bright-fakl/carto-flow/pull/123</a></dd>
@@ -84,6 +84,7 @@
 <dt>Branch</dt><dd>feat/adaptive-step</dd>
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-11 13:41</dd>
+<dt>Closed</dt><dd>2026-10-11 19:41</dd>
 <dt>Before</dt><dd>main @ 7ba9f31 (constant dt; reproduced with adaptive_dt=False)</dd>
 <dt>After</dt><dd>feat/adaptive-step @ a76dfb4</dd>
 <dt>Inputs</dt><dd>US states (49 incl. DC) and congressional districts (432), bundled; the three strong-anisotropy runs of the adaptive-recompute page (states, preset_balanced values, area_scale 1e-6, DirectionalTensor horizontal / tangential / tilted); 3,108 counties (prepared set, not bundled). MorphOptions defaults except where stated (dt 0.2, recompute_every 10, recompute_on_rise 0.01, exact rasterization, stall rule on, n_iter 400); NUMBA_NUM_THREADS=8, runs sequential. True error is the output area against the population share of the total output area. Cost = iterations + field recomputes x cost of one recompute in plain steps (states 9, 12, 24 at grids 128, 256, 512; districts 18, 21, 23; measured on adaptive-recompute-experiment).</dd>
