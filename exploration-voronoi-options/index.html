@@ -147,13 +147,13 @@
 <tr><td><code>boundary</code> spec</td><td>&quot;union&quot;</td><td>keep (a shape choice)</td></tr>
 <tr><td><code>ElasticBoundary(strength)</code></td><td>0.3 (docs use 0.02 to 0.05)</td><td>keep; use 0.02 to 0.05</td></tr>
 <tr><td><code>resolution</code></td><td>300</td><td>keep</td></tr>
-<tr><td><code>adjacency_spring</code> / <code>intra_group_spring</code></td><td>0.0 / None</td><td>advanced. <code>adjacency_spring</code> is redundant with the anchor. <code>intra_group_spring</code> is not: the [follow-up](../exploration-voronoi-followup/index.html) shows it keeps states whole on the fixed and elastic bases (0.54 to 0.94 and 0.42 to 0.83 at 0.5) and does little with premorph</td></tr>
+<tr><td><code>adjacency_spring</code> / <code>intra_group_spring</code></td><td>0.0 / None</td><td>advanced. <code>adjacency_spring</code> is redundant with the anchor. <code>intra_group_spring</code> is not: the <a href="../exploration-voronoi-followup/index.html">follow-up</a> shows it keeps states whole on the fixed and elastic bases (0.54 to 0.94 and 0.42 to 0.83 at 0.5) and does little with premorph</td></tr>
 <tr><td><code>fix_topology</code></td><td>None</td><td>dominated: 4 to 40 times the time, harmful with weights</td></tr>
 <tr><td><code>area_equalizer_rate</code> / <code>weight_ramp_iters</code></td><td>0.1 / 10</td><td>make internal</td></tr>
 <tr><td><code>relaxation</code></td><td>&quot;overrelax&quot;</td><td>make internal</td></tr>
 <tr><td><code>output_resolution</code> / <code>cell_smoothing_px</code></td><td>None / 3</td><td>make internal (cosmetic)</td></tr>
 <tr><td><code>AdhesiveBoundary</code>, elastic <code>adhesion_strength</code>, <code>density_smooth</code></td><td>-</td><td>dominated; deprecate the first two</td></tr>
-<tr><td><code>prescale_components</code></td><td>False</td><td>no effect on these inputs (all four were connected). BASIC option: on Alaska and Hawaii the [follow-up](../exploration-voronoi-followup/index.html) shows it is needed on every base (fixed outline 45 % area error without it, 0 % with it); the elastic base still fails on such input</td></tr>
+<tr><td><code>prescale_components</code></td><td>False</td><td>no effect on these inputs (all four were connected). BASIC option: on Alaska and Hawaii the <a href="../exploration-voronoi-followup/index.html">follow-up</a> shows it is needed on every base (fixed outline 45 % area error without it, 0 % with it); the elastic base still fails on such input</td></tr>
 <tr><td><code>distance_mode=&quot;geodesic&quot;</code></td><td>euclidean</td><td>unweighted only</td></tr>
 <tr><td><code>n_iter</code> / <code>area_cv_tol</code></td><td>30 / None</td><td>keep; 30 is too few for fixed and elastic runs</td></tr>
 </table>

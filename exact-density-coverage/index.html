@@ -88,7 +88,7 @@
 <dt>Inputs</dt><dd>US states (49 incl. DC) and congressional districts (432), bundled; MorphOptions defaults except where stated (grid 256, dt 0.2, recompute_on_rise 0.01, stall rule on); NUMBA_NUM_THREADS=8. True error is the output area against the population share of the total output area.</dd>
 </dl>
 <p class="desc">Each grid cell takes the area it covers of each region instead of the region at its center. Regions smaller than a cell take part, the coarse multiresolution level no longer plateaus, and rasterization is faster or equal from grid 256 up; accuracy at the stopping point is comparable, and far past convergence center sampling gets lower because its field goes exactly uniform. The default stays center.</p>
-<p>The prototype and its first measurements are on [exploration-area-coverage](../exploration-area-coverage/index.html); this page measures the code of the PR. <code>make_figures.py</code> regenerates every figure and <code>data/tables.md</code>. Counties are not bundled and are not run here; the exploration page found them unchanged.</p>
+<p>The prototype and its first measurements are on <a href="../exploration-area-coverage/index.html">exploration-area-coverage</a>; this page measures the code of the PR. <code>make_figures.py</code> regenerates every figure and <code>data/tables.md</code>. Counties are not bundled and are not run here; the exploration page found them unchanged.</p>
 <h2>What changes in the density field</h2>
 <h2>Multiresolution</h2>
 <table>
