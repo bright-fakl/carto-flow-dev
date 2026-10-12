@@ -76,13 +76,14 @@
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
-<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
 <dt>Related</dt><dd><a href="../exploration-default-dt/index.html">Default step size dt of the flow cartogram</a> <span class="meta">(exploration)</span><br><a href="../exploration-counties-subcell/index.html">Why the counties do not converge: targets below the grid resolution</a> <span class="meta">(exploration)</span><br><a href="../adaptive-step-control/index.html">Adaptive step size for the flow cartogram</a> <span class="meta">(pr)</span><br><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/127">https://github.com/bright-fakl/carto-flow/pull/127</a></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/115">#115</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
 <dt>Branch</dt><dd>feat/preset-review</dd>
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-12 00:02</dd>
+<dt>Closed</dt><dd>2026-10-12 00:10</dd>
 <dt>Before</dt><dd>main @ 2a03f40</dd>
 <dt>After</dt><dd>feat/preset-review @ e66fcd5</dd>
 <dt>Inputs</dt><dd>US states (49 incl. DC), congressional districts (432), bundled; 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled). MorphOptions at the preset values or as stated, with the stall rule, refresh-on-rise, adaptive_dt and exact rasterization at their defaults; NUMBA_NUM_THREADS=8. True error is the output area against the population share of the total output area. Cost = iterations + field recomputes x cost of one recompute in plain steps (states 9/12/24/71 at grids 128/256/512/1024, districts 18/21/23/47, counties 21/47.5/28.5/60).</dd>
