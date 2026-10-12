@@ -2,7 +2,7 @@
 pr: 125
 url: https://github.com/bright-fakl/carto-flow/pull/125
 issue: 85, 109
-title: Valid output regions of the flow cartogram, repaired by default
+title: Invalid output regions of the flow cartogram: warning and opt-in repair
 description: A region that is much narrower than a grid cell somewhere can be pinched during the morph until its boundary crosses itself, and the computed region is then not a valid polygon. The morph now warns and lists the regions (Cartogram.invalid_regions). get_geometry(repair=True) and to_geodataframe(repair=True) apply shapely.make_valid but add vertices, which breaks keyframe animations, so repair is off by default and not meant for animated geometries. Vertex-preserving options (a nudge, input densification) are measured; 94 to 100 % of the vertices at the crossings are shared with a neighbor, so a per-region repair tears the coverage.
 kind: pr
 topic: flow
