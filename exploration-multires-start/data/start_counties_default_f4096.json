@@ -1,0 +1,1 @@
+[{"input": "counties", "tol": "default", "start": 2048, "sub_cell_pct_at_start": 0.2574002574002574, "levels_run": [[2048, "stalled", 50], [4096, "stalled", 50]], "iterations": 100, "wall": 187.81594356196, "true_mean": 870.6036460323533, "true_max": 50426.13529188918, "invalid": 2, "reported_status": "stalled"}]
