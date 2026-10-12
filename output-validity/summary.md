@@ -3,7 +3,7 @@ pr: 125
 url: https://github.com/bright-fakl/carto-flow/pull/125
 issue: 85, 109
 title: Valid output regions of the flow cartogram, repaired by default
-description: A narrow channel of a region can close during the morph so that its boundary crosses itself, and the returned region is then not a valid polygon. Output regions are now made valid by default (area change 0.0003 % to 0.24 % in the typical cases), Cartogram.invalid_regions lists them, and partition_geometries repairs invalid input with a warning instead of returning wrong parts.
+description: A narrow channel of a region can close during the morph so that its boundary crosses itself and the computed region is not a valid polygon. The morph now warns and lists the regions (Cartogram.invalid_regions); shapely.make_valid repairs them on request in to_geodataframe but adds vertices, which breaks keyframe animations, so the computed geometries keep the vertices of the input. A vertex-preserving repair is prototyped.
 kind: pr
 topic: flow
 branch: fix/output-validity
@@ -45,12 +45,26 @@ The states stay valid in every run tried; the districts and the counties end wit
 
 ## What changes
 
-- `MorphOptions.repair_output` (default `True`) makes the returned geometries valid. The stored iterations (`snapshots`, animations of the whole run) are not repaired.
-- `Cartogram.invalid_regions` lists the indices that were invalid in the returned iterate (repaired or not).
-- With `repair_output=False` the output is returned as computed and a warning names the number and the first indices of the invalid regions.
+- The morph warns when regions of the returned iterate are invalid, and `Cartogram.invalid_regions` lists them.
+- `MorphOptions.repair_output` (default `False`): `Cartogram.to_geodataframe` makes the invalid regions valid with `shapely.make_valid` (zero-area parts dropped). The repair adds vertices, so it is off by default: the keyframe animations between cartograms (the population-over-years example) interpolate vertex by vertex and failed in the docs build when the repaired region had two more vertices than in the other keyframes. `get_geometry` and the snapshots are never repaired.
 - `partition_geometries` repairs invalid input geometries with `shapely.make_valid` and warns with the rows; it returned empty or wrong parts before.
+
+## A repair that keeps the vertices (prototype, not in the PR)
+
+A vertex-preserving repair moves the vertex that has crossed an edge back to the other side of that edge (the endpoint of the crossing segments with the smallest distance to the other segment; one pass per crossing, up to 20 passes). It keeps the vertex count and order. On the final geometries of the runs above:
+
+| run | invalid regions | valid after the nudge | area change: median / max | largest vertex move (grid cells) |
+|---|---|---|---|---|
+| issue 85 map | 1 | 1 | 0.00004 % / 0.000 % | 0.001 |
+| districts, grid 256 | 12 | 10 | 0.009 % / 0.43 % | 0.046 |
+| districts, grid 256, 0.5 % / 1 % | 12 | 8 | 0.015 % / 0.39 % | 0.036 |
+| districts, grid 512, 0.5 % / 1 % | 19 | 15 | 0.005 % / 2.9 % | 0.38 |
+| counties, grid 256 | 7 | 3 | 0 % / 0.012 % | 0.001 |
+| counties, grid 512 | 51 | 33 | 0.03 % / 8.5 % | 0.046 |
+
+It leaves 4 to 18 regions per run invalid (touching rings, several crossings at one vertex), so it is not a repair that can be on by default without more work. Preventing the crossings during the morph (limiting the step of a vertex by its distance to the nearest boundary) would keep every geometry valid and the vertices unchanged; a 2025 paper on topology-preserving line densification for flow-based cartograms ([arXiv 2511.08121](https://arxiv.org/abs/2511.08121)) takes another route to the same guarantee.
 
 ## Not included
 
-- The crossings are not prevented (that would need a limit on the vertex step near thin features); the iterations of the morph are unchanged, and the error metrics of the run still use the signed area of the unrepaired ring (the difference is the area change in the table).
+- The crossings are not prevented; the iterations of the morph are unchanged, and the error metrics of the run still use the signed area of the unrepaired ring (the difference is the area change in the table).
 - Input validation is #78.
