@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hierarchical flow morph: sub-cell regions with a grid fitted to each group</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Hierarchical flow morph: sub-cell regions with a grid fitted to each group</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-multires-start/index.html">Starting resolution and refinement of the multiresolution morph</a> <span class="meta">(exploration)</span><br><a href="../exploration-counties-subcell/index.html">Why the counties do not converge: targets below the grid resolution</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/129">#129</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/93">#93</a></dd>
+<dt>Created</dt><dd>2026-10-12 05:10</dd>
+<dt>Before</dt><dd>main @ c080423</dd>
+<dt>After</dt><dd>the same checkout; no morph is run</dd>
+<dt>Inputs</dt><dd>3,108 counties (prepared set, ESRI:102008, total_votes, GEOID, not bundled); the target area of a county is its vote share of the total area; a group grid is the square grid with margin 0.5 on the bounding box of the state&#x27;s original geometry.</dd>
+</dl>
+<p class="desc">Counties on a grid fitted to each state have 10.8 % of the counties below one cell at 128, 2.3 % at 256, 0.2 % at 512 and none at 1024, against 88.9 %, 67.3 %, 27.4 % and 5.3 % on one global grid. Only Texas (254 counties) has any at 512. This is the first feasibility check of morphing the groups first and the members on group-fitted grids; the stable outline of a group is not tested.</p>
+<p><code>group_subcell.py</code> regenerates <code>data/tables.md</code> (the tables below); it reads the counties from <code>COUNTIES_PARQUET</code> and runs no morph. It assumes each state ends with the sum of its counties&#x27; targets as area, which holds when the state stage has converged.</p>
+<p>The tables count counties whose target is below one cell of the grid. The other conditions for the idea (a fixed outline for each group, the error handed down from the group stage, the cost) are listed in issue 129 and not measured here.</p>
+<h2>Counties with a target below one cell: one global grid and a grid per state</h2>
+<table>
+<tr><th>grid</th><th>global grid</th><th>grid fitted to each state</th><th>states with at least one such county</th></tr>
+<tr><td>128</td><td>2762 (88.9 %)</td><td>335 (10.8 %)</td><td>25 of 49</td></tr>
+<tr><td>256</td><td>2093 (67.3 %)</td><td>73 (2.3 %)</td><td>7 of 49</td></tr>
+<tr><td>512</td><td>852 (27.4 %)</td><td>6 (0.2 %)</td><td>1 of 49</td></tr>
+<tr><td>1024</td><td>164 (5.3 %)</td><td>1 (0.0 %)</td><td>1 of 49</td></tr>
+</table>
+<h2>Smallest county of the states with the smallest values, in cells of the state grid</h2>
+<table>
+<tr><th>grid</th><th>state (counties): smallest county in cells</th></tr>
+<tr><td>128</td><td>48 (254): 0.00851, 16 (44): 0.079, 06 (58): 0.0962, 30 (56): 0.0996</td></tr>
+<tr><td>256</td><td>48 (254): 0.034, 16 (44): 0.316, 06 (58): 0.385, 30 (56): 0.398</td></tr>
+<tr><td>512</td><td>48 (254): 0.136, 16 (44): 1.26, 06 (58): 1.54, 30 (56): 1.59</td></tr>
+<tr><td>1024</td><td>48 (254): 0.545, 16 (44): 5.05, 06 (58): 6.16, 30 (56): 6.38</td></tr>
+</table>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
