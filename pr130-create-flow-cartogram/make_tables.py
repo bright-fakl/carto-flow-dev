@@ -20,7 +20,8 @@ INPUTS = {
 
 def summary(c):
     e = c.get_errors()
-    return f"{c.status.value}, {c.niterations} it, grid {c.options.grid.sx if c.options.grid is not None else c.options.grid_size}, mean {e.mean_error_pct:.3f} / max {e.max_error_pct:.2f} %"
+    grid = c.options.grid.sx if hasattr(c.options.grid, "sx") else c.options.grid
+    return f"{c.status.value}, {c.niterations} it, grid {grid}, mean {e.mean_error_pct:.3f} / max {e.max_error_pct:.2f} %"
 
 
 def same(a, b):
@@ -35,12 +36,12 @@ for name, gdf in INPUTS.items():
     new = create_flow_cartogram(gdf, "Population", options=opts)
     out.append(f"| {name} | `morph_gdf` (deprecated) | {summary(old)} | |")
     out.append(f"| {name} | `create_flow_cartogram` | {summary(new)} | {same(old, new):.3g} |")
-    lad = MorphOptions(show_progress=False, grid_size=LadderSpec(min_resolution=128, levels=4))
+    lad = MorphOptions(show_progress=False, grid=LadderSpec(min_resolution=128, levels=4))
     old = multiresolution_morph(gdf, "Population", min_resolution=128, levels=4, options=MorphOptions(show_progress=False))
     new = create_flow_cartogram(gdf, "Population", options=lad)
     out.append(f"| {name} | `multiresolution_morph(min_resolution=128, levels=4)` (deprecated) | {summary(old)} | |")
     out.append(f"| {name} | `create_flow_cartogram` with `LadderSpec(128, 4)` | {summary(new)} | {same(old, new):.3g} |")
-    auto = create_flow_cartogram(gdf, "Population", options=MorphOptions(show_progress=False, grid_size="auto"))
-    out.append(f"| {name} | `create_flow_cartogram` with `grid_size=\"auto\"` | {summary(auto)} | |")
+    auto = create_flow_cartogram(gdf, "Population", options=MorphOptions(show_progress=False, grid="auto"))
+    out.append(f"| {name} | `create_flow_cartogram` with `grid=\"auto\"` | {summary(auto)} | |")
 (HERE / "data" / "tables.md").write_text("\n".join(out) + "\n")
 print("\n".join(out))

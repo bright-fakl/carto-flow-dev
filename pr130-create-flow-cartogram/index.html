@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #130: create_flow_cartogram as the single entry point; GridSpec and LadderSpec in grid_size</title>
+<title>PR #130: create_flow_cartogram as the single entry point; GridSpec and LadderSpec in MorphOptions.grid</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,7 +72,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #130: create_flow_cartogram as the single entry point; GridSpec and LadderSpec in grid_size</h1>
+<h1>PR #130: create_flow_cartogram as the single entry point; GridSpec and LadderSpec in MorphOptions.grid</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
@@ -84,10 +84,10 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-12 08:30</dd>
 <dt>Before</dt><dd>main @ c080423</dd>
-<dt>After</dt><dd>feat/create-flow-cartogram @ ad63f61</dd>
+<dt>After</dt><dd>feat/create-flow-cartogram @ 7afb2e0</dd>
 <dt>Inputs</dt><dd>states (49) and districts (432), bundled; MorphOptions defaults; NUMBA_NUM_THREADS=8. Errors are the reported errors of the final cartogram. The difference column is the largest absolute difference of any geometry bound between the two calls.</dd>
 </dl>
-<p class="desc">One entry point, create_flow_cartogram, replaces morph_gdf and multiresolution_morph (both deprecated). MorphOptions.grid_size takes an int or tuple, GridSpec(size, margin, square), LadderSpec(min_resolution, levels, margin, square) or &quot;auto&quot;; a ladder runs from coarse to fine and ends at the first converged level, in create_flow_cartogram and CartogramWorkflow.morph. Voronoi premorph and the mosaic layout accept a ladder through their MorphOptions. Results of existing calls do not change.</p>
+<p class="desc">One entry point, create_flow_cartogram, replaces morph_gdf and multiresolution_morph (both deprecated). MorphOptions.grid takes an int or tuple, GridSpec(size, margin, square), LadderSpec(min_resolution, levels, margin, square), &quot;auto&quot; or a prebuilt Grid, and replaces grid_size (deprecated alias); a ladder runs from coarse to fine and ends at the first converged level, in create_flow_cartogram and CartogramWorkflow.morph. Voronoi premorph and the mosaic layout accept a ladder through their MorphOptions. Results of existing calls do not change.</p>
 <p><code>make_tables.py</code> regenerates <code>data/tables.md</code>. There are no figures: the change is an API change and the table shows that the new calls return the results of the deprecated ones.</p>
 <table>
 <tr><th>input</th><th>call</th><th>result</th><th>largest bounds difference to the deprecated call</th></tr>
@@ -95,12 +95,12 @@
 <tr><td>states</td><td><code>create_flow_cartogram</code></td><td>converged, 112 it, grid 256, mean 0.204 / max 0.79 %</td><td>0</td></tr>
 <tr><td>states</td><td><code>multiresolution_morph(min_resolution=128, levels=4)</code> (deprecated)</td><td>converged, 63 it, grid 128, mean 1.607 / max 9.18 %</td><td></td></tr>
 <tr><td>states</td><td><code>create_flow_cartogram</code> with <code>LadderSpec(128, 4)</code></td><td>converged, 63 it, grid 128, mean 1.607 / max 9.18 %</td><td>0</td></tr>
-<tr><td>states</td><td><code>create_flow_cartogram</code> with <code>grid_size=&quot;auto&quot;</code></td><td>converged, 63 it, grid 128, mean 1.607 / max 9.18 %</td><td></td></tr>
+<tr><td>states</td><td><code>create_flow_cartogram</code> with <code>grid=&quot;auto&quot;</code></td><td>converged, 63 it, grid 128, mean 1.607 / max 9.18 %</td><td></td></tr>
 <tr><td>districts</td><td><code>morph_gdf</code> (deprecated)</td><td>converged, 145 it, grid 256, mean 1.417 / max 9.76 %</td><td></td></tr>
 <tr><td>districts</td><td><code>create_flow_cartogram</code></td><td>converged, 145 it, grid 256, mean 1.417 / max 9.76 %</td><td>0</td></tr>
 <tr><td>districts</td><td><code>multiresolution_morph(min_resolution=128, levels=4)</code> (deprecated)</td><td>converged, 123 it, grid 128, mean 0.769 / max 9.05 %</td><td></td></tr>
 <tr><td>districts</td><td><code>create_flow_cartogram</code> with <code>LadderSpec(128, 4)</code></td><td>converged, 123 it, grid 128, mean 0.769 / max 9.05 %</td><td>0</td></tr>
-<tr><td>districts</td><td><code>create_flow_cartogram</code> with <code>grid_size=&quot;auto&quot;</code></td><td>converged, 123 it, grid 128, mean 0.769 / max 9.05 %</td><td></td></tr>
+<tr><td>districts</td><td><code>create_flow_cartogram</code> with <code>grid=&quot;auto&quot;</code></td><td>converged, 123 it, grid 128, mean 0.769 / max 9.05 %</td><td></td></tr>
 </table>
 
 <a class="back" href="../index.html">&larr; back to index</a>
