@@ -10,7 +10,7 @@ after: investigate/default-dt @ a4f0aea (scratch commit: preset_balanced dt 0.3,
 inputs: US states (49 incl. DC), congressional districts (432), 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6), the three strong-anisotropy runs of the adaptive-recompute page (preset_balanced settings, area_scale 1e-6), states with poverty counts and dot-density landmarks (issue 86, seeds 7 to 11); MorphOptions defaults of fix/stall-detection (grid 256, mean_tol 0.05, max_tol 0.10, recompute_every 10, refresh_on_rise 0.01, stall rule on), n_iter 400 (counties 300); dt swept as an option value; NUMBA_NUM_THREADS=4
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-overview
 ---
 

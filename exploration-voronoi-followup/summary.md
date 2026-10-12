@@ -3,7 +3,7 @@ title: Voronoi options follow-up: prescale_components on disconnected input, anc
 description: Three questions the option audit left open. prescale_components is required for Alaska and Hawaii on every base (45 % area error without it on the fixed outline, 0 % with it), but the elastic base still fails on disconnected input. generator_anchor 0.25 is close to 0.5 on states and districts. intra_group_spring keeps states together on the fixed and elastic bases and is not redundant with the anchor there; premorph already keeps states together, so the spring adds little.
 kind: exploration
 topic: voronoi
-status: open
+status: led-to
 related: exploration-voronoi-options
 date: 2026-10-11 12:30
 before: main @ 4ae2ea1 (PRs 110 to 112 merged)

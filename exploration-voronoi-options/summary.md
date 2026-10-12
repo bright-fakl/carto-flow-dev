@@ -10,7 +10,7 @@ after: feat/voronoi-premorph @ c57925a
 inputs: 49 contiguous US states with population (S); the same with lognormal weights, seed 1, sigma 1.5 (L); 432 congressional districts with population, group_by "State Name" (D); the 49 states without weights (U). RasterBackend(resolution=256), VoronoiOptions(n_iter=300, area_cv_tol=0.05) unless the factor changes it; flow reference = morph_gdf with MorphOptions.preset_balanced(n_iter=400); NUMBA_NUM_THREADS=8
 kind: exploration
 topic: voronoi
-status: open
+status: led-to
 related: pr111-voronoi-power-weights, pr112-voronoi-premorph
 ---
 

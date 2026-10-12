@@ -10,7 +10,7 @@ after: investigate/adaptive-step @ f9e3556 (prototype, not for merging)
 inputs: US states (49 incl. DC), congressional districts, 3,108 counties (ESRI:102008, total_votes, simplified 1 km, densified 5 km), states under the strong-anisotropy setups (horizontal, tangential, tilted; preset_balanced values, area_scale 1e-6); grid 256 unless stated, n_iter 400 (counties 300); default stall rule (stall_patience 4) unless stated
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-overview
 ---
 
