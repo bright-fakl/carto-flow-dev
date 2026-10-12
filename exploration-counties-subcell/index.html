@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Why the counties do not converge: targets below the grid resolution</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Why the counties do not converge: targets below the grid resolution</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exact-ring-orientation/index.html">Exact density rasterizer, ring orientation from the signed area</a> <span class="meta">(pr)</span><br><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/93">#93</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Created</dt><dd>2026-10-11 23:36</dd>
+<dt>Before</dt><dd>main @ 2a03f40</dd>
+<dt>After</dt><dd>the same checkout; grid, multiresolution and stall rule varied</dd>
+<dt>Inputs</dt><dd>3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled); MorphOptions defaults (adaptive_dt on, exact rasterization, error floor 1e-3) except where stated; n_iter 300; NUMBA_NUM_THREADS=8. True error is the output area against the vote share of the total output area.</dd>
+</dl>
+<p class="desc">At grid 256, 67 % of the 3,108 counties have a target area below one grid cell (27 % at 512, 5 % at 1024). Finer grids and multiresolution lower the mean error to about 20 % but every run stalls or plateaus; the worst regions are all sub-cell and are held at 0.1 to 1 cell, while the regions with a target of at least one cell have a median error of 2.6 %. The ring orientation fix does not change this.</p>
+<p><code>counties_check.py</code> regenerates <code>data/tables.md</code> (every table below). The counties are not bundled; the script reads the prepared set from <code>COUNTIES_PARQUET</code>.</p>
+<p>The counties never converged in the earlier flow work (stalled at 210 iterations at grid 256, true mean error about 50 %). This page checks whether the ring orientation fix (#124) or the resolution is the cause.</p>
+<h2>Targets below one grid cell</h2>
+<p>Votes range from 66 to 4263443 (median 12528); the target area of a county is its share of the total area.</p>
+<table>
+<tr><th>grid</th><th>counties with a target area below one cell</th><th>below 0.1 cell</th></tr>
+<tr><td>256</td><td>2093 (67 %)</td><td>296</td></tr>
+<tr><td>512</td><td>852 (27 %)</td><td>30</td></tr>
+<tr><td>1024</td><td>164 (5 %)</td><td>1</td></tr>
+<tr><td>2048</td><td>8 (0 %)</td><td>0</td></tr>
+</table>
+<h2>Single-level runs (stall rule on, 300 iterations)</h2>
+<table>
+<tr><th>grid</th><th>status, iterations</th><th>true mean / max error %</th><th>regions with target &lt; 1 cell: count, median error %</th><th>other regions: median error %, max error %</th><th>regions off by &gt; 10 % (of which target &lt; 1 cell)</th><th>invalid output regions</th></tr>
+<tr><td>256</td><td>stalled, 210</td><td>66.7 / 5738</td><td>2093, 43</td><td>12.1, 206</td><td>2366 (1802)</td><td>7</td></tr>
+<tr><td>512</td><td>completed, 300</td><td>20.6 / 1273</td><td>852, 28</td><td>2.6, 162</td><td>1143 (654)</td><td>51</td></tr>
+<tr><td>1024</td><td>stalled, 50</td><td>853.4 / 49408</td><td>164, 5338</td><td>118.7, 20920</td><td>2994 (164)</td><td>2</td></tr>
+</table>
+<h2>Multiresolution (128 to 1024, 4 levels)</h2>
+<p>Levels: stalled 120, stalled 120, stalled 140, stalled 110; true mean 22.1 %, max 3594 %, 1066 regions off by more than 10 % (11 s).</p>
+<h2>Stall rule off, grid 512 (reported mean / max error % at iteration)</h2>
+<table>
+<tr><th>1</th><th>50</th><th>100</th><th>200</th><th>300</th><th>500</th><th>800</th><th>1200</th><th>1500</th></tr>
+<tr><td>370.6 / 53342</td><td>294.6 / 45089</td><td>230.3 / 34919</td><td>111.5 / 13776</td><td>15.8 / 2001</td><td>11.7 / 963</td><td>9.3 / 5351</td><td>9.2 / 5351</td><td>10.5 / 7078</td></tr>
+</table>
+<h2>Worst regions, grid 512 (stall rule on)</h2>
+<table>
+<tr><th>county</th><th>error %</th><th>target (cells)</th><th>area (cells)</th></tr>
+<tr><td>48261</td><td>1273</td><td>0.033</td><td>0.45</td></tr>
+<tr><td>31007</td><td>788</td><td>0.070</td><td>0.62</td></tr>
+<tr><td>48301</td><td>734</td><td>0.011</td><td>0.09</td></tr>
+<tr><td>48033</td><td>722</td><td>0.071</td><td>0.58</td></tr>
+<tr><td>48269</td><td>667</td><td>0.027</td><td>0.21</td></tr>
+<tr><td>48173</td><td>497</td><td>0.111</td><td>0.66</td></tr>
+<tr><td>31165</td><td>484</td><td>0.125</td><td>0.73</td></tr>
+<tr><td>48137</td><td>456</td><td>0.182</td><td>1.01</td></tr>
+</table>
+<p>Sub-cell regions: target 458 cells in total, actual 557 cells; all other regions: target 26412, actual 26313. Regions with a target of at least one cell and an error above 10 %: 489 of 2256 (median error of that group 2.6 %).</p>
+<h2>Reading</h2>
+<ul><li>**The ring orientation fix does not change it.** With the fix the grid-256 run still stalls at 210 iterations (true mean 66.7 %; before the fix 49.6 %, the best iterate differs between the two).</li><li>**Resolution is the limit.** Most counties have a target below one cell at grid 256 (67 %), so the flow cannot shrink them to their targets: at grid 512 the worst regions have targets of 0.01 to 0.2 cells and stay at 0.1 to 1.1 cells. Together the sub-cell regions hold 458 cells of target and 557 cells of area, 0.4 % of the map, so the bulk is well resolved: of the 2,256 regions with a target of at least one cell, 489 are off by more than 10 % and their median error is 2.6 %.</li><li>**Finer grids and multiresolution help only in the mean.** The mean error falls from 66.7 % (256) to 20.6 % (512) and about 22 % with multiresolution to 1024, but every level stalls. A single level at 1024 stalls after 50 iterations because it starts too far from the target. With the stall rule off at grid 512 the mean error plateaus at 9 to 12 % from iteration 500 and the maximum error swings between about 1,000 % and 7,000 % late in the run.</li><li>**The tolerances apply to every region,** so a run with sub-cell regions cannot meet them and the stall rule stops it correctly. A warning for regions below one cell and a multiresolution trigger that accounts for them are the subject of #93; whether a cell-aware error criterion is wanted is open.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
