@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #125: Valid output regions of the flow cartogram, repaired by default</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #125: Valid output regions of the flow cartogram, repaired by default</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exact-ring-orientation/index.html">Exact density rasterizer, ring orientation from the signed area</a> <span class="meta">(pr)</span><br><a href="../adaptive-step-control/index.html">Adaptive step size for the flow cartogram</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/125">https://github.com/bright-fakl/carto-flow/pull/125</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/85">#85</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>fix/output-validity</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-11 20:06</dd>
+<dt>Before</dt><dd>main @ c24907e (output returned as computed)</dd>
+<dt>After</dt><dd>fix/output-validity @ 4ab1f28</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC) and congressional districts (432), bundled; the minority-population map of issue 85 (states simplified by 1000 m, grid 512); 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled). MorphOptions defaults except where stated; NUMBA_NUM_THREADS=8. The repair is shapely.make_valid, keeping the polygonal parts with more than a millionth of the area.</dd>
+</dl>
+<p class="desc">A narrow channel of a region can close during the morph so that its boundary crosses itself, and the returned region is then not a valid polygon. Output regions are now made valid by default (area change 0.0003 % to 0.24 % in the typical cases), Cartogram.invalid_regions lists them, and partition_geometries repairs invalid input with a warning instead of returning wrong parts.</p>
+<p><code>make_figures.py</code> regenerates the figure and <code>data/tables.md</code>; the counties rows run when <code>COUNTIES_PARQUET</code> points at a GeoDataFrame file with <code>total_votes</code> and <code>geometry</code>.</p>
+<h2>What goes wrong</h2>
+<p>Vertices move independently, so a channel of a region that is much narrower than a grid cell can close until one bank passes the other and the boundary of the region crosses itself. The returned region is then not a valid polygon; nothing in the result said so, and anything downstream (overlays, exports, <code>partition_geometries</code>) can misbehave. Issue 85 shows it for Maryland on the minority-population map: the morph converges, the output is invalid from iteration 181 on, and <code>partition_geometries</code> returns empty parts for it without an error.</p>
+<p>Maryland (issue 85) is valid up to snapshot 180 and invalid from snapshot 181 of 233. At the crossing the closest pair of non-adjacent vertices of the previous iteration is 0.0174 grid cells apart; the vertices there move 0.0204 cells per iteration (maximum 0.0227). The crossing is 0.000 cells from the ring of the part it belongs to (771 vertices, 562 cells^2).</p>
+<p>The input geometries are valid in every run below; the crossings come from the morph.</p>
+<h2>How common it is</h2>
+<table>
+<tr><th>run</th><th>status, iterations</th><th>invalid regions</th><th>regions with another part count after the repair</th><th>area change of the repaired regions: median / max</th><th>check + repair time (ms)</th></tr>
+<tr><td>states, grid 256</td><td>converged, 112</td><td>0 of 49</td><td></td><td></td><td>5.5</td></tr>
+<tr><td>states, grid 512, 0.2 % / 0.4 %</td><td>converged, 229</td><td>0 of 49</td><td></td><td></td><td>5.6</td></tr>
+<tr><td>districts, grid 256</td><td>converged, 145</td><td>12 of 432</td><td>9</td><td>0.0178 % / 0.179 %</td><td>36.1</td></tr>
+<tr><td>districts, grid 256, 0.5 % / 1 %</td><td>converged, 160</td><td>12 of 432</td><td>9</td><td>0.0274 % / 0.240 %</td><td>35.3</td></tr>
+<tr><td>districts, grid 512, 0.5 % / 1 %</td><td>stalled, 310</td><td>19 of 432</td><td>11</td><td>0.0027 % / 7.678 %</td><td>40.9</td></tr>
+<tr><td>issue 85: minority population, simplified states, grid 512</td><td>converged, 234</td><td>1 of 49</td><td>1</td><td>0.0003 % / 0.000 %</td><td>13.2</td></tr>
+<tr><td>counties, grid 256</td><td>stalled, 210</td><td>7 of 3108</td><td>3</td><td>0.0002 % / 0.037 %</td><td>28.4</td></tr>
+<tr><td>counties, grid 512</td><td>completed, 300</td><td>51 of 3108</td><td>35</td><td>0.0169 % / 2.915 %</td><td>53.9</td></tr>
+</table>
+<p>The states stay valid in every run tried; the districts and the counties end with 12 to 51 invalid regions at the larger grids and the tighter tolerances (the stalled district run at grid 512 is the exception to the small area change: one region changes by 7.7 %). Most repairs leave the part count of a Polygon region unchanged; a region with a pinched lobe of zero area loses the lobe, and a bowtie becomes a MultiPolygon of two parts. The check is one <code>shapely.is_valid</code> call per morph and the repair touches only the invalid regions; both are included in the time column.</p>
+<h2>What changes</h2>
+<ul><li><code>MorphOptions.repair_output</code> (default <code>True</code>) makes the returned geometries valid. The stored iterations (<code>snapshots</code>, animations of the whole run) are not repaired.</li><li><code>Cartogram.invalid_regions</code> lists the indices that were invalid in the returned iterate (repaired or not).</li><li>With <code>repair_output=False</code> the output is returned as computed and a warning names the number and the first indices of the invalid regions.</li><li><code>partition_geometries</code> repairs invalid input geometries with <code>shapely.make_valid</code> and warns with the rows; it returned empty or wrong parts before.</li></ul>
+<h2>Not included</h2>
+<ul><li>The crossings are not prevented (that would need a limit on the vertex step near thin features); the iterations of the morph are unchanged, and the error metrics of the run still use the signed area of the unrepaired ring (the difference is the area change in the table).</li><li>Input validation is #78.</li></ul>
+<div class="figure">
+<img src="maryland.png" alt="Maryland of the issue&#x27;s map, a window of 0.24 x 0.24 grid cells around the first self-intersection (red cross). Left: the last valid iteration, a narrow wedge between the banks of an inlet. Middle: the vertex has crossed the opposite bank. Right: after the repair.">
+<p class="caption">Maryland of the issue&#x27;s map, a window of 0.24 x 0.24 grid cells around the first self-intersection (red cross). Left: the last valid iteration, a narrow wedge between the banks of an inlet. Middle: the vertex has crossed the opposite bank. Right: after the repair.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
