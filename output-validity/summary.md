@@ -3,7 +3,7 @@ pr: 125
 url: https://github.com/bright-fakl/carto-flow/pull/125
 issue: 85, 109
 title: Valid output regions of the flow cartogram, repaired by default
-description: A region that is much narrower than a grid cell somewhere can be pinched during the morph until its boundary crosses itself, and the computed region is then not a valid polygon. The morph now warns and lists the regions (Cartogram.invalid_regions); shapely.make_valid repairs them on request in to_geodataframe but adds vertices, which breaks keyframe animations, so the computed geometries keep the vertices of the input. Vertex-preserving options (a nudge, input densification) are measured.
+description: A region that is much narrower than a grid cell somewhere can be pinched during the morph until its boundary crosses itself, and the computed region is then not a valid polygon. The morph now warns and lists the regions (Cartogram.invalid_regions). get_geometry(repair=True) and to_geodataframe(repair=True) apply shapely.make_valid but add vertices, which breaks keyframe animations, so repair is off by default and not meant for animated geometries. Vertex-preserving options (a nudge, input densification) are measured; 94 to 100 % of the vertices at the crossings are shared with a neighbor, so a per-region repair tears the coverage.
 kind: pr
 topic: flow
 branch: fix/output-validity
@@ -46,7 +46,7 @@ The states stay valid in every run tried; the districts and the counties end wit
 ## What changes
 
 - The morph warns when regions of the returned iterate are invalid, and `Cartogram.invalid_regions` lists them.
-- `MorphOptions.repair_output` (default `False`): `Cartogram.to_geodataframe` makes the invalid regions valid with `shapely.make_valid` (zero-area parts dropped). The repair adds vertices, so it is off by default: the keyframe animations between cartograms (the population-over-years example) interpolate vertex by vertex and failed in the docs build when the repaired region had two more vertices than in the other keyframes. `get_geometry` and the snapshots are never repaired.
+- `Cartogram.get_geometry(repair=True)` and `Cartogram.to_geodataframe(repair=True)` (also `CartogramWorkflow.to_geodataframe`) make the invalid regions valid with `shapely.make_valid` (zero-area parts dropped). The default is `False`: the repair adds vertices, and the keyframe animations between cartograms (the population-over-years example) interpolate vertex by vertex and failed in the docs build when the repaired region had two more vertices than in the other keyframes. Geometries that are animated should not be repaired.
 - `partition_geometries` repairs invalid input geometries with `shapely.make_valid` and warns with the rows; it returned empty or wrong parts before.
 
 ## Where the crossings happen
@@ -63,20 +63,18 @@ For each region that ends invalid, the gap between the two closest non-adjacent 
 
 The crossings are almost never across water: they are regions pinched at a thin neck (the region itself lies between the two boundary points), and in 7 to 20 % of the cases a thin wedge of a neighboring region is squeezed between two parts of the boundary. Maryland on the map of issue 85 is a pinched neck (the gap before the crossing is 0.017 grid cells); the median gap over the districts and counties is 0.03 to 0.18 cells. (The counts of invalid regions differ slightly from the table above because the runs here store every iteration.)
 
-## A repair that keeps the vertices (prototype, not in the PR)
+## Shared vertices (`shared_vertices.py`)
 
-A vertex-preserving repair moves the vertex that has crossed an edge back to the other side of that edge (the endpoint of the crossing segments with the smallest distance to the other segment; one pass per crossing, up to 20 passes). It keeps the vertex count and order. On the final geometries of the runs above:
+Adjacent regions share vertices (identical coordinates), and the morph keeps the copies identical. In the runs above 42 % to 87 % of all vertices are shared, and the vertices at the crossings almost always are:
 
-| run | invalid regions | valid after the nudge | area change: median / max | largest vertex move (grid cells) |
-|---|---|---|---|---|
-| issue 85 map | 1 | 1 | 0.00004 % / 0.000 % | 0.001 |
-| districts, grid 256 | 12 | 10 | 0.009 % / 0.43 % | 0.046 |
-| districts, grid 256, 0.5 % / 1 % | 12 | 8 | 0.015 % / 0.39 % | 0.036 |
-| districts, grid 512, 0.5 % / 1 % | 19 | 15 | 0.005 % / 2.9 % | 0.38 |
-| counties, grid 256 | 7 | 3 | 0 % / 0.012 % | 0.001 |
-| counties, grid 512 | 51 | 33 | 0.03 % / 8.5 % | 0.046 |
+| run | vertices at the crossings | shared with a neighbor |
+|---|---|---|
+| issue 85 map, grid 512 | 5 | 0 |
+| districts, grid 256 | 69 | 65 (94 %) |
+| counties, grid 256 | 13 | 13 (100 %) |
+| counties, grid 512 | 217 | 213 (98 %) |
 
-It leaves 4 to 18 regions per run invalid (touching rings, several crossings at one vertex), so it is not a repair that can be on by default without more work. Preventing the crossings during the morph (limiting the step of a vertex by its distance to the nearest boundary) would keep every geometry valid and the vertices unchanged; a 2025 paper on topology-preserving line densification for flow-based cartograms ([arXiv 2511.08121](https://arxiv.org/abs/2511.08121)) takes another route to the same guarantee.
+A repair of one region (`shapely.make_valid` adds the crossing point to that ring only; a nudge of a vertex moves one copy) therefore tears the coverage: the neighbor's border no longer matches. A vertex-preserving repair has to move all copies of a vertex together. A prototype that nudges the vertex that crossed an edge back (one copy only) made 1 of 1, 10 of 12, 8 of 12, 15 of 19, 3 of 7 and 33 of 51 invalid regions valid in the runs above (issue 85 map, districts at 256 twice and 512, counties at 256 and 512), with a median area change of at most 0.03 %, and was dropped: it leaves regions invalid and ignores the shared copies.
 
 ## Densifying the input (`densify_check.py`)
 
@@ -93,5 +91,5 @@ Densifying to 0.1 cell reduces the crossings a lot but does not remove them (and
 
 ## Not included
 
-- The crossings are not prevented; the iterations of the morph are unchanged, and the error metrics of the run still use the signed area of the unrepaired ring (the difference is the area change in the table).
+- The crossings are not prevented (a step limit near close boundary pairs would keep every geometry valid with the input's vertices; a cheap selection of the pairs to check is open); the iterations of the morph are unchanged, and the error metrics of the run still use the signed area of the unrepaired ring (the difference is the area change in the table).
 - Input validation is #78.
