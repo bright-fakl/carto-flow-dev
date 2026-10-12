@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stall parameters per level and an iteration budget for the multiresolution ladder</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Stall parameters per level and an iteration budget for the multiresolution ladder</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-multires-start/index.html">Starting resolution and refinement of the multiresolution morph</a> <span class="meta">(exploration)</span><br><a href="../adaptive-step-control/index.html">Adaptive step size for the flow cartogram</a> <span class="meta">(pr)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/93">#93</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Created</dt><dd>2026-10-12 23:30</dd>
+<dt>Before</dt><dd>main @ 5a4a5a2</dd>
+<dt>After</dt><dd>the same checkout; stall parameters of the coarse levels and the iteration budget varied through a per-level loop</dd>
+<dt>Inputs</dt><dd>states (49) and districts (432), bundled, with population, area-like, inverse-area, smooth (sigma 2) and lognormal (sigma 2) values; 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled). Tolerances 1 % / 3 %, n_iter 500 per level, adaptive_dt on, NUMBA_NUM_THREADS=8. Cost is iterations plus recomputes times the cost of one recompute at the grid of the last level (preset-review table; the 2048 value is extrapolated, so compare wall seconds for counties). True error is the output area against the target share of the total output area.</dd>
+</dl>
+<p class="desc">Treating the cartogram-cpp trigger (go to the next grid when the maximum error is not below 0.8 times its previous value) as a stall rule with short windows on the coarse levels lowers the cost by 20 to 60 % where the ladder already works and converges a skewed-value case that stalls with the defaults, but it leaves coarse levels unconverged where they are needed (districts from 64, counties) and makes those results much worse. A total iteration budget never binds except on counties, where it halves the cost at the same error. No change to the defaults is supported.</p>
+<p><code>stall_levels.py</code> runs the cases (levels in a loop, so each level has its own stall parameters; the stall window is patched through <code>alg.cycle_length</code>), <code>make_tables.py</code> writes <code>data/tables.md</code>. Counties are read from <code>COUNTIES_PARQUET</code>.</p>
+<p>Variants (window, patience, required improvement on the levels before the last; the last level always uses 10, 4, 2 %):</p>
+<ul><li><code>baseline</code>: 10, 4, 2 % on every level.</li><li><code>cpp</code>: 4, 1, 20 % (the cartogram-cpp trigger).</li><li><code>p1-20</code>: 10, 1, 20 %.</li><li><code>p2-10</code>: 10, 2, 10 %.</li><li><code>budget</code>: baseline parameters and a total of 600 iterations; each level before the last leaves 150 for the last, and unused iterations roll over.</li><li><code>cpp+budget</code>: both.</li></ul>
+<h2>Findings</h2>
+<ul><li>**Short windows on the coarse levels.** <code>p1-20</code> lowers the cost against the baseline on states with area-like values (430 against 673), states with lognormal values (1019 against 1758; the baseline stalls at a mean error of 15 %, <code>p1-20</code> converges), districts with inverse-area values (1725 against 2100, mean error 4.9 % against 18.7 %) and districts from 64 (709 against 877, same error).</li><li>**Where it fails.** Counties: the coarse levels end after 20 iterations and the finest level starts from a state that is not converged, ending at a mean error of 798 % against 19 %. Districts with smooth (sigma 2) values: mean 10.0 % and max 250 % against 4.3 % and 44.8 %.</li><li>**The cartogram-cpp window of 4 iterations** is worse than a window of 10 where levels are needed: districts from 64 end at a maximum error of 18 % (the baseline converges) after cutting each level at 8 iterations.</li><li>**Budget.** At 600 iterations it never binds on states and districts (identical to the baseline). On counties it reduces the iterations from 990 to 600 and the wall time from 21.7 s to 10.7 s at the same error, because the run returns its best iterate.</li><li>**Conclusion.** The gains come on inputs where the ladder works and the losses on inputs with many sub-cell regions, which the resolution warning already identifies. A stall-parameter change per level is not supported as a default. A total budget is a safe cap with no measured downside.</li></ul>
+<table>
+<tr><th>case</th><th>variant</th><th>status</th><th>iterations</th><th>recomputes</th><th>cost</th><th>seconds</th><th>true mean / max %</th><th>invalid</th><th>levels (grid, status, iterations)</th></tr>
+<tr><td>states-area</td><td>baseline</td><td>converged</td><td>193</td><td>40</td><td>673</td><td>1.3</td><td>0.86 / 2.7</td><td>6</td><td>64 stal 110, 128 stal 50, 256 conv 33</td></tr>
+<tr><td>states-area</td><td>cpp</td><td>converged</td><td>55</td><td>17</td><td>259</td><td>0.4</td><td>0.33 / 2.7</td><td>2</td><td>64 stal 12, 128 stal 16, 256 conv 27</td></tr>
+<tr><td>states-area</td><td>p1-20</td><td>converged</td><td>166</td><td>22</td><td>430</td><td>0.5</td><td>0.31 / 2.9</td><td>5</td><td>64 stal 20, 128 stal 30, 256 conv 116</td></tr>
+<tr><td>states-area</td><td>p2-10</td><td>converged</td><td>153</td><td>36</td><td>585</td><td>0.5</td><td>0.86 / 2.7</td><td>6</td><td>64 stal 90, 128 stal 30, 256 conv 33</td></tr>
+<tr><td>states-area</td><td>budget</td><td>converged</td><td>193</td><td>40</td><td>673</td><td>0.6</td><td>0.86 / 2.7</td><td>6</td><td>64 stal 110, 128 stal 50, 256 conv 33</td></tr>
+<tr><td>states-area</td><td>cpp+budget</td><td>converged</td><td>55</td><td>17</td><td>259</td><td>0.4</td><td>0.33 / 2.7</td><td>2</td><td>64 stal 12, 128 stal 16, 256 conv 27</td></tr>
+<tr><td>states-lognormal2</td><td>baseline</td><td>stalled</td><td>270</td><td>124</td><td>1758</td><td>0.9</td><td>15.25 / 106.5</td><td>36</td><td>64 stal 160, 128 stal 50, 256 stal 60</td></tr>
+<tr><td>states-lognormal2</td><td>cpp</td><td>completed</td><td>516</td><td>56</td><td>1188</td><td>0.9</td><td>1.58 / 9.4</td><td>36</td><td>64 stal 8, 128 stal 8, 256 comp 500</td></tr>
+<tr><td>states-lognormal2</td><td>p1-20</td><td>converged</td><td>383</td><td>53</td><td>1019</td><td>0.7</td><td>0.17 / 2.9</td><td>37</td><td>64 stal 20, 128 stal 20, 256 conv 343</td></tr>
+<tr><td>states-lognormal2</td><td>p2-10</td><td>stalled</td><td>230</td><td>120</td><td>1670</td><td>0.8</td><td>15.25 / 106.5</td><td>36</td><td>64 stal 140, 128 stal 30, 256 stal 60</td></tr>
+<tr><td>states-lognormal2</td><td>budget</td><td>stalled</td><td>270</td><td>124</td><td>1758</td><td>0.9</td><td>15.25 / 106.5</td><td>36</td><td>64 stal 160, 128 stal 50, 256 stal 60</td></tr>
+<tr><td>states-lognormal2</td><td>cpp+budget</td><td>completed</td><td>516</td><td>56</td><td>1188</td><td>0.9</td><td>1.58 / 9.4</td><td>36</td><td>64 stal 8, 128 stal 8, 256 comp 500</td></tr>
+<tr><td>districts-smooth2</td><td>baseline</td><td>stalled</td><td>570</td><td>74</td><td>2272</td><td>3.4</td><td>4.26 / 44.8</td><td>121</td><td>128 stal 170, 256 stal 100, 512 stal 300</td></tr>
+<tr><td>districts-smooth2</td><td>cpp</td><td>stalled</td><td>296</td><td>42</td><td>1262</td><td>2.0</td><td>6.03 / 130.3</td><td>108</td><td>128 stal 8, 256 stal 8, 512 stal 280</td></tr>
+<tr><td>districts-smooth2</td><td>p1-20</td><td>stalled</td><td>280</td><td>28</td><td>924</td><td>1.7</td><td>10.04 / 250.0</td><td>90</td><td>128 stal 20, 256 stal 20, 512 stal 240</td></tr>
+<tr><td>districts-smooth2</td><td>p2-10</td><td>stalled</td><td>520</td><td>62</td><td>1946</td><td>2.4</td><td>3.41 / 43.3</td><td>111</td><td>128 stal 110, 256 stal 60, 512 stal 350</td></tr>
+<tr><td>districts-smooth2</td><td>budget</td><td>stalled</td><td>570</td><td>74</td><td>2272</td><td>2.6</td><td>4.26 / 44.8</td><td>121</td><td>128 stal 170, 256 stal 100, 512 stal 300</td></tr>
+<tr><td>districts-smooth2</td><td>cpp+budget</td><td>stalled</td><td>296</td><td>42</td><td>1262</td><td>2.1</td><td>6.03 / 130.3</td><td>108</td><td>128 stal 8, 256 stal 8, 512 stal 280</td></tr>
+<tr><td>districts-inverse</td><td>baseline</td><td>stalled</td><td>490</td><td>70</td><td>2100</td><td>2.2</td><td>18.67 / 330.6</td><td>289</td><td>128 stal 230, 256 stal 140, 512 stal 120</td></tr>
+<tr><td>districts-inverse</td><td>cpp</td><td>stalled</td><td>466</td><td>72</td><td>2122</td><td>2.9</td><td>4.84 / 130.3</td><td>172</td><td>128 stal 8, 256 stal 8, 512 stal 450</td></tr>
+<tr><td>districts-inverse</td><td>p1-20</td><td>stalled</td><td>460</td><td>55</td><td>1725</td><td>2.4</td><td>4.93 / 126.7</td><td>162</td><td>128 stal 20, 256 stal 20, 512 stal 420</td></tr>
+<tr><td>districts-inverse</td><td>p2-10</td><td>stalled</td><td>310</td><td>44</td><td>1322</td><td>1.8</td><td>14.99 / 265.5</td><td>283</td><td>128 stal 160, 256 stal 70, 512 stal 80</td></tr>
+<tr><td>districts-inverse</td><td>budget</td><td>stalled</td><td>490</td><td>70</td><td>2100</td><td>2.6</td><td>18.67 / 330.6</td><td>289</td><td>128 stal 230, 256 stal 140, 512 stal 120</td></tr>
+<tr><td>districts-inverse</td><td>cpp+budget</td><td>stalled</td><td>466</td><td>72</td><td>2122</td><td>3.1</td><td>4.84 / 130.3</td><td>172</td><td>128 stal 8, 256 stal 8, 512 stal 450</td></tr>
+<tr><td>districts-pop64</td><td>baseline</td><td>converged</td><td>229</td><td>36</td><td>877</td><td>1.4</td><td>0.18 / 2.6</td><td>109</td><td>64 stal 110, 128 conv 119</td></tr>
+<tr><td>districts-pop64</td><td>cpp</td><td>stalled</td><td>244</td><td>53</td><td>1463</td><td>2.9</td><td>0.97 / 18.0</td><td>61</td><td>64 stal 8, 128 stal 8, 256 stal 8, 512 stal 220</td></tr>
+<tr><td>districts-pop64</td><td>p1-20</td><td>converged</td><td>169</td><td>30</td><td>709</td><td>1.5</td><td>0.18 / 2.6</td><td>109</td><td>64 stal 50, 128 conv 119</td></tr>
+<tr><td>districts-pop64</td><td>p2-10</td><td>converged</td><td>189</td><td>32</td><td>765</td><td>1.2</td><td>0.18 / 2.6</td><td>109</td><td>64 stal 70, 128 conv 119</td></tr>
+<tr><td>districts-pop64</td><td>budget</td><td>converged</td><td>229</td><td>36</td><td>877</td><td>1.2</td><td>0.18 / 2.6</td><td>109</td><td>64 stal 110, 128 conv 119</td></tr>
+<tr><td>districts-pop64</td><td>cpp+budget</td><td>stalled</td><td>244</td><td>53</td><td>1463</td><td>2.1</td><td>0.97 / 18.0</td><td>61</td><td>64 stal 8, 128 stal 8, 256 stal 8, 512 stal 220</td></tr>
+<tr><td>counties</td><td>baseline</td><td>stalled</td><td>990</td><td>99</td><td>24750</td><td>21.7</td><td>18.62 / 3076.1</td><td>139</td><td>512 stal 400, 1024 stal 280, 2048 stal 310</td></tr>
+<tr><td>counties</td><td>cpp</td><td>stalled</td><td>66</td><td>7</td><td>1746</td><td>4.5</td><td>853.40 / 49411.7</td><td>2</td><td>512 stal 8, 1024 stal 8, 2048 stal 50</td></tr>
+<tr><td>counties</td><td>p1-20</td><td>stalled</td><td>90</td><td>9</td><td>2250</td><td>4.8</td><td>797.63 / 46128.5</td><td>4</td><td>512 stal 20, 1024 stal 20, 2048 stal 50</td></tr>
+<tr><td>counties</td><td>p2-10</td><td>stalled</td><td>110</td><td>11</td><td>2750</td><td>5.1</td><td>746.91 / 43146.3</td><td>4</td><td>512 stal 30, 1024 stal 30, 2048 stal 50</td></tr>
+<tr><td>counties</td><td>budget</td><td>completed</td><td>600</td><td>60</td><td>15000</td><td>10.7</td><td>18.62 / 3076.1</td><td>139</td><td>512 stal 400, 1024 comp 50, 2048 comp 150</td></tr>
+<tr><td>counties</td><td>cpp+budget</td><td>stalled</td><td>66</td><td>7</td><td>1746</td><td>4.5</td><td>853.40 / 49411.7</td><td>2</td><td>512 stal 8, 1024 stal 8, 2048 stal 50</td></tr>
+</table>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
