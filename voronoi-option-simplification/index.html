@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #126: Voronoi option simplification: internal tuning settings deprecated, behavioral tests for the regular options</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #126: Voronoi option simplification: internal tuning settings deprecated, behavioral tests for the regular options</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>voronoi</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-voronoi-options/index.html">Voronoi cartogram options, their interactions and a simpler option set</a> <span class="meta">(exploration)</span><br><a href="../exploration-voronoi-followup/index.html">Voronoi options follow-up: prescale_components on disconnected input, anchor 0.25 against 0.5, group_by springs</a> <span class="meta">(exploration)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/126">https://github.com/bright-fakl/carto-flow/pull/126</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>feat/voronoi-option-simplification</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-11 23:51</dd>
+<dt>Before</dt><dd>main @ 2a03f40</dd>
+<dt>After</dt><dd>feat/voronoi-option-simplification @ 31303c7</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC), bundled; RasterBackend at the resolutions stated; NUMBA_NUM_THREADS=8.</dd>
+</dl>
+<p class="desc">Nine tuning settings (the relaxation schedule, the power-diagram offset rate and ramp, the output resolution, the cell smoothing, three elastic-boundary settings, adj_min_shared_length) warn when set to a non-default value and will stop being accepted in the next major release; AdhesiveBoundary and ElasticBoundary.adhesion_strength are deprecated; fix_topology with weights warns. Defaults and results are unchanged. 23 new tests cover the deprecations and the effect of the regular options (adjacency_spring 0.66 to 0.83, intra_group_spring 3 to 0 discontiguous groups).</p>
+<p><code>option_effects.py</code> regenerates <code>data/tables.md</code> (the numbers in the section &quot;Effect of the regular options&quot;).</p>
+<p>The proposal on <a href="../exploration-voronoi-options/index.html">exploration-voronoi-options</a> (with the change that advanced options stay regular options) is implemented as deprecations: nothing is removed, defaults and results are unchanged, and passing a non-default value of an internal setting works but warns.</p>
+<h2>What changes</h2>
+<table>
+<tr><th>setting</th><th>treatment</th></tr>
+<tr><td><code>RasterBackend.relaxation</code>, <code>ExactBackend.relaxation</code></td><td>internal: a non-default value warns</td></tr>
+<tr><td><code>RasterBackend.area_equalizer_rate</code>, <code>weight_ramp_iters</code>, <code>output_resolution</code>, <code>cell_smoothing_px</code></td><td>internal: a non-default value warns</td></tr>
+<tr><td><code>ElasticBoundary.step_scale</code>, <code>density_smooth</code>, <code>min_boundary_points</code></td><td>internal: a non-default value warns</td></tr>
+<tr><td><code>VoronoiOptions.adj_min_shared_length</code></td><td>internal: a non-default value warns</td></tr>
+<tr><td><code>AdhesiveBoundary</code>, <code>ElasticBoundary.adhesion_strength</code></td><td>deprecated: use warns; removed in the next major release</td></tr>
+<tr><td><code>fix_topology</code> with <code>weights</code></td><td>stays a regular option; a warning says it makes the run much slower and can move generators away from their weighted positions</td></tr>
+<tr><td><code>weights</code>, <code>premorph</code>, <code>boundary</code>, <code>group_by</code>, <code>backend</code>, <code>options</code>, <code>resolution</code>, <code>generator_anchor</code>, <code>distance_mode</code>, <code>adjacency_spring</code>, <code>intra_group_spring</code>, <code>ElasticBoundary.strength</code>, <code>n_iter</code>, <code>tol</code>, <code>area_cv_tol</code>, <code>area_error_tol</code>, <code>simplify_tol</code>, <code>prescale_components</code></td><td>regular options, documented</td></tr>
+</table>
+<p>The warnings say &quot;next major release&quot;, not a version number (#122). The documentation lists the internal and deprecated settings in one section of the algorithm page, drops them from the parameter tables and the how-to notebooks (the AdhesiveBoundary section, the relaxation-schedule section, the adhesion and equalizer arguments of the topology example), and gives the effect of each regular option (<code>adjacency_spring</code> has little effect with <code>premorph</code>; <code>ElasticBoundary(strength)</code> 0.02 to 0.05 gives a smooth outline). The <code>&quot;circle&quot;</code> boundary is described as it is built: centered at the mean of the convex hull vertices with the radius that encloses the union, not the minimum enclosing circle.</p>
+<h2>Effect of the regular options</h2>
+<p>The behavioral tests (<code>tests/test_voronoi_options.py</code>) assert these directions on the 49 states:</p>
+<h2>adjacency_spring (resolution 150, 60 iterations, no weights)</h2>
+<table>
+<tr><th>adjacency_spring</th><th>fraction of input-adjacent pairs that stay adjacent</th></tr>
+<tr><td>0.0</td><td>0.661</td></tr>
+<tr><td>0.1</td><td>0.697</td></tr>
+<tr><td>0.3</td><td>0.725</td></tr>
+<tr><td>0.6</td><td>0.826</td></tr>
+</table>
+<h2>intra_group_spring with group_by (resolution 100, adjacency_spring 0.1, 60 iterations)</h2>
+<table>
+<tr><th>group_by</th><th>intra_group_spring</th><th>discontiguous groups</th></tr>
+<tr><td>Division</td><td>None</td><td>3</td></tr>
+<tr><td>Division</td><td>0.5</td><td>0</td></tr>
+<tr><td>Division</td><td>1.0</td><td>0</td></tr>
+</table>
+<h2>ElasticBoundary strength (resolution 120, 40 iterations)</h2>
+<table>
+<tr><th>strength</th><th>area of the cell union / area of the input union</th></tr>
+<tr><td>0.0</td><td>1.000</td></tr>
+<tr><td>0.05</td><td>1.025</td></tr>
+<tr><td>0.3</td><td>1.010</td></tr>
+</table>
+<h2>boundary (resolution 100, 20 iterations)</h2>
+<table>
+<tr><th>boundary</th><th>union area / input union area</th><th>roundness 4 pi A / P^2</th><th>share of the input covered</th></tr>
+<tr><td>union</td><td>1.00</td><td>0.07</td><td>1.000</td></tr>
+<tr><td>bbox</td><td>1.69</td><td>0.76</td><td>1.000</td></tr>
+<tr><td>convex_hull</td><td>1.35</td><td>0.83</td><td>1.000</td></tr>
+<tr><td>circle</td><td>3.17</td><td>1.00</td><td>1.000</td></tr>
+</table>
+<h2>simplify_tol (resolution 120, 10 iterations)</h2>
+<table>
+<tr><th>simplify_tol (m)</th><th>vertices of the cell union</th></tr>
+<tr><td>None</td><td>14572</td></tr>
+<tr><td>20000.0</td><td>3589</td></tr>
+<tr><td>100000.0</td><td>3419</td></tr>
+</table>
+<ul><li>**adjacency_spring** raises the share of input-adjacent pairs that stay adjacent from 0.66 to 0.83 (the test asserts a gain above 0.05 at 0.6).</li><li>**intra_group_spring** with \<code>group_by\</code> removes the discontiguous groups (3 to 0 for the census divisions).</li><li>**ElasticBoundary** deforms the outline (the union area changes by 2.5 % at strength 0.05; 0 keeps the area exactly).</li><li>**boundary** sets the outline: the bbox, the convex hull and the circle all cover the input and are much rounder than the union (roundness 0.76, 0.83, 1.00 against 0.07).</li><li>**simplify_tol** cuts the outline vertices (14,572 to 3,419 at 100 km).</li></ul>
+<h2>Evidence that nothing else changed</h2>
+<ul><li>All 99 existing and new Voronoi tests pass with \<code>DeprecationWarning\</code> from \<code>carto_flow\</code> turned into an error, so no internal path passes a deprecated value; the full suite passes (926 tests).</li><li>The three how-to notebooks that were edited execute without errors and without deprecation warnings.</li><li>The code paths are untouched: only warnings, documentation and tests were added, so results are identical.</li></ul>
+<h2>Not included</h2>
+<ul><li>Removing the settings (next major release).</li><li>Basing \<code>metrics[&quot;converged&quot;]\</code> on the output area error and the generator displacement instead of the raster area CV (listed as a guard in the proposal) is a behavior change and is left for a separate change.</li><li>A warning for \<code>n_iter\</code> below what fixed and elastic weighted runs need (the proposal suggested raising the default or documenting 300 with \<code>area_cv_tol\</code> 0.05).</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
