@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #127: Review of the MorphOptions presets: iteration limits, dt and the premorph preset</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #127: Review of the MorphOptions presets: iteration limits, dt and the premorph preset</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-default-dt/index.html">Default step size dt of the flow cartogram</a> <span class="meta">(exploration)</span><br><a href="../exploration-counties-subcell/index.html">Why the counties do not converge: targets below the grid resolution</a> <span class="meta">(exploration)</span><br><a href="../adaptive-step-control/index.html">Adaptive step size for the flow cartogram</a> <span class="meta">(pr)</span><br><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/127">https://github.com/bright-fakl/carto-flow/pull/127</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/115">#115</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>feat/preset-review</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-12 00:02</dd>
+<dt>Before</dt><dd>main @ 2a03f40</dd>
+<dt>After</dt><dd>feat/preset-review @ e66fcd5</dd>
+<dt>Inputs</dt><dd>US states (49 incl. DC), congressional districts (432), bundled; 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled). MorphOptions at the preset values or as stated, with the stall rule, refresh-on-rise, adaptive_dt and exact rasterization at their defaults; NUMBA_NUM_THREADS=8. True error is the output area against the population share of the total output area. Cost = iterations + field recomputes x cost of one recompute in plain steps (states 9/12/24/71 at grids 128/256/512/1024, districts 18/21/23/47, counties 21/47.5/28.5/60).</dd>
+</dl>
+<p class="desc">With the current algorithm the three presets stopped before converging (30, 100 and 300 iterations against 43, 112 and 425 needed on the states): the bundled states ended with a mean area error of 42 %, 13 % and 49 %. The iteration limits are raised (150, 500, 1000) and the presets documented; dt 0.3 for balanced is not adopted because the districts end with more self-intersecting regions; premorph needs no preset of its own; none of the presets converges on the counties.</p>
+<p>The scripts are in this directory: <code>presets_now.py</code> (<code>LABEL=before</code> on main, <code>LABEL=after</code> on the branch), <code>preset_matrix.py</code>, <code>hq_dt.py</code> and <code>make_tables.py</code> (writes <code>data/tables.md</code>, the tables below); <code>common.py</code> holds the datasets, the cost model and one measured run. The counties run when <code>COUNTIES_PARQUET</code> points at the prepared set.</p>
+<h2>Findings</h2>
+<ul><li>**The three presets stopped before converging.** Their <code>n_iter</code> (30, 100, 300) dates from before the stall rule, the exact rasterization and the adaptive step; the current algorithm needs 43, 112 and 425 iterations on the states and 79, 145 and 519 on the districts at the preset values. The presets returned a best iterate that had not converged (states: true mean error 42 %, 13 %, 49 %) without a warning.</li><li>**Fix: <code>n_iter</code> 150, 500, 1000.** Grid, <code>dt</code> and tolerances are unchanged. All three converge on the states and the districts within their tolerances.</li><li>**<code>preset_balanced()</code> equals <code>MorphOptions()</code>.** It stays as a named alias (the docs, the examples and <code>premorph</code> use it).</li><li>**dt: 0.2 stays.** With the adaptive step a larger dt cuts the cost by 25 to 35 %, but the districts end with more self-intersecting regions (12 at dt 0.2, 19 at 0.3 and 0.4 at grid 256, 20 to 38 at grid 128), and at grid 512 they stall at dt 0.4 with the default tolerances and at dt 0.3 with the tight ones (matrix below). The earlier suggestion of dt 0.3 for <code>balanced</code> (<a href="../exploration-default-dt/index.html">exploration-default-dt</a>) predates the adaptive step and is not adopted.</li><li>**<code>high_quality</code> keeps dt 0.1.** Against dt 0.2 it needs about twice the iterations (425 against 216 on the states, 519 against 268 on the districts) and ends with half the maximum error and fewer self-intersecting districts (11 against 20). At tolerances of 0.5 % / 1 % dt 0.2 stalls on the districts.</li><li>**<code>fast</code> is a preview.** On the states it is within 11 % maximum error; on the districts at grid 128 the maximum error is 22 % and 32 of 432 regions end self-intersecting.</li><li>**<code>premorph</code>** builds on <code>preset_balanced().copy_with(n_iter=400)</code>; the flow morph converges in 112 (states) and 145 (districts) iterations, so 400 leaves room and no preset of its own is needed.</li><li>**Counties.** None of the presets converges (stalls at 120, 210 and 50 iterations): most targets are below one grid cell (<a href="../exploration-counties-subcell/index.html">exploration-counties-subcell</a>). <code>high_quality</code> single-level at grid 512 stalls after 50 iterations because it starts too far from the target.</li></ul>
+<h2>The presets before and after</h2>
+<table>
+<tr><th>input</th><th>preset</th><th>before (n_iter as listed)</th><th>after</th></tr>
+<tr><td>states</td><td>fast</td><td>completed, 30 it, cost 57, 0.12 s; true mean 42.24 / max 395.2 %; invalid 0</td><td>converged, 43 it, cost 88, 0.13 s; true mean 3.15 / max 10.6 %; invalid 0</td></tr>
+<tr><td>states</td><td>balanced</td><td>completed, 100 it, cost 220, 0.20 s; true mean 13.14 / max 133.8 %; invalid 0</td><td>converged, 112 it, cost 256, 0.25 s; true mean 0.20 / max 0.8 %; invalid 0</td></tr>
+<tr><td>states</td><td>high_quality</td><td>completed, 300 it, cost 1020, 0.74 s; true mean 49.11 / max 447.3 %; invalid 0</td><td>converged, 425 it, cost 1457, 0.95 s; true mean 0.09 / max 0.6 %; invalid 0</td></tr>
+<tr><td>states</td><td>default</td><td>converged, 112 it, cost 256, 0.23 s; true mean 0.20 / max 0.8 %; invalid 0</td><td>converged, 112 it, cost 256, 0.22 s; true mean 0.20 / max 0.8 %; invalid 0</td></tr>
+<tr><td>districts</td><td>fast</td><td>completed, 30 it, cost 84, 0.23 s; true mean 64.26 / max 825.6 %; invalid 2</td><td>converged, 79 it, cost 295, 0.39 s; true mean 3.34 / max 21.6 %; invalid 32</td></tr>
+<tr><td>districts</td><td>balanced</td><td>completed, 100 it, cost 310, 0.42 s; true mean 37.37 / max 509.2 %; invalid 3</td><td>converged, 145 it, cost 460, 0.58 s; true mean 1.42 / max 9.8 %; invalid 12</td></tr>
+<tr><td>districts</td><td>high_quality</td><td>completed, 300 it, cost 990, 1.27 s; true mean 47.77 / max 714.0 %; invalid 4</td><td>converged, 519 it, cost 1738, 2.22 s; true mean 0.08 / max 0.9 %; invalid 11</td></tr>
+<tr><td>districts</td><td>default</td><td>converged, 145 it, cost 460, 0.52 s; true mean 1.42 / max 9.8 %; invalid 12</td><td>converged, 145 it, cost 460, 0.55 s; true mean 1.42 / max 9.8 %; invalid 12</td></tr>
+<tr><td>counties</td><td>fast</td><td>completed, 30 it, cost 93, 0.68 s; true mean 482.90 / max 29597.1 %; invalid 2</td><td>stalled, 120 it, cost 372, 1.42 s; true mean 105.89 / max 12048.7 %; invalid 18</td></tr>
+<tr><td>counties</td><td>balanced</td><td>completed, 100 it, cost 575, 1.34 s; true mean 292.88 / max 18100.9 %; invalid 4</td><td>stalled, 210 it, cost 1208, 2.33 s; true mean 66.68 / max 5738.0 %; invalid 7</td></tr>
+<tr><td>counties</td><td>high_quality</td><td>stalled, 50 it, cost 192, 0.92 s; true mean 855.61 / max 49485.2 %; invalid 0</td><td>stalled, 50 it, cost 192, 0.98 s; true mean 855.61 / max 49485.2 %; invalid 0</td></tr>
+<tr><td>counties</td><td>default</td><td>stalled, 210 it, cost 1208, 2.36 s; true mean 66.68 / max 5738.0 %; invalid 7</td><td>stalled, 210 it, cost 1208, 2.34 s; true mean 66.68 / max 5738.0 %; invalid 7</td></tr>
+</table>
+<h2>Grid, dt and tolerance sets (n_iter 500; iterations / cost / invalid output regions)</h2>
+<p>**states**</p>
+<table>
+<tr><th>grid</th><th>dt</th><th>loose 15/25 %</th><th>default 5/10 %</th><th>tight 1/3 %</th></tr>
+<tr><td>128</td><td>0.2</td><td>61 / 124 / 0</td><td>62 / 125 / 0</td><td>66 / 138 / 0</td></tr>
+<tr><td>128</td><td>0.3</td><td>43 / 88 / 0</td><td>47 / 101 / 0</td><td>50 / 113 / 0</td></tr>
+<tr><td>128</td><td>0.4</td><td>35 / 80 / 0</td><td>36 / 81 / 0</td><td>45 / 108 / 0</td></tr>
+<tr><td>256</td><td>0.2</td><td>110 / 242 / 0</td><td>112 / 256 / 0</td><td>112 / 256 / 0</td></tr>
+<tr><td>256</td><td>0.3</td><td>75 / 171 / 0</td><td>76 / 172 / 0</td><td>78 / 186 / 0</td></tr>
+<tr><td>256</td><td>0.4</td><td>59 / 131 / 0</td><td>62 / 146 / 0</td><td>64 / 160 / 0</td></tr>
+<tr><td>512</td><td>0.2</td><td>212 / 740 / 0</td><td>214 / 742 / 0</td><td>216 / 744 / 0</td></tr>
+<tr><td>512</td><td>0.3</td><td>143 / 503 / 0</td><td>145 / 505 / 0</td><td>148 / 532 / 0</td></tr>
+<tr><td>512</td><td>0.4</td><td>110 / 374 / 0</td><td>111 / 399 / 0</td><td>112 / 400 / 0</td></tr>
+</table>
+<p>**districts**</p>
+<table>
+<tr><th>grid</th><th>dt</th><th>loose 15/25 %</th><th>default 5/10 %</th><th>tight 1/3 %</th></tr>
+<tr><td>128</td><td>0.2</td><td>108 / 360 / 20</td><td>118 / 424 / 23</td><td>133 / 547 / 26</td></tr>
+<tr><td>128</td><td>0.3</td><td>79 / 295 / 32</td><td>92 / 398 / 38</td><td>111 / 561 / 33</td></tr>
+<tr><td>128</td><td>0.4</td><td>71 / 305 / 28</td><td>99 / 567 / 28</td><td>113 / 671 / 27</td></tr>
+<tr><td>256</td><td>0.2</td><td>143 / 458 / 12</td><td>145 / 460 / 12</td><td>152 / 509 / 12</td></tr>
+<tr><td>256</td><td>0.3</td><td>101 / 353 / 18</td><td>104 / 377 / 19</td><td>107 / 401 / 19</td></tr>
+<tr><td>256</td><td>0.4</td><td>77 / 308 / 19</td><td>81 / 354 / 19</td><td>84 / 378 / 19</td></tr>
+<tr><td>512</td><td>0.2</td><td>261 / 882 / 16</td><td>264 / 885 / 18</td><td>268 / 912 / 20</td></tr>
+<tr><td>512</td><td>0.3</td><td>180 / 594 / 19</td><td>182 / 619 / 21</td><td>230 / 1702 / 21 (stalled)</td></tr>
+<tr><td>512</td><td>0.4</td><td>139 / 484 / 21</td><td>190 / 1317 / 22 (stalled)</td><td>190 / 1317 / 22 (stalled)</td></tr>
+</table>
+<h2>dt for the high-quality preset (grid 512, n_iter 1000)</h2>
+<table>
+<tr><th>input</th><th>dt</th><th>tolerances</th><th>iterations</th><th>cost</th><th>true mean / max %</th><th>invalid regions</th></tr>
+<tr><td>states</td><td>0.1</td><td>1/3 %</td><td>425 (converged)</td><td>1457</td><td>0.09 / 0.6</td><td>0</td></tr>
+<tr><td>states</td><td>0.1</td><td>0.5/1 %</td><td>425 (converged)</td><td>1457</td><td>0.09 / 0.6</td><td>0</td></tr>
+<tr><td>states</td><td>0.15</td><td>1/3 %</td><td>285 (converged)</td><td>981</td><td>0.15 / 1.1</td><td>0</td></tr>
+<tr><td>states</td><td>0.15</td><td>0.5/1 %</td><td>289 (converged)</td><td>1033</td><td>0.13 / 0.9</td><td>0</td></tr>
+<tr><td>states</td><td>0.2</td><td>1/3 %</td><td>216 (converged)</td><td>744</td><td>0.49 / 2.8</td><td>0</td></tr>
+<tr><td>states</td><td>0.2</td><td>0.5/1 %</td><td>219 (converged)</td><td>771</td><td>0.11 / 0.7</td><td>0</td></tr>
+<tr><td>districts</td><td>0.1</td><td>1/3 %</td><td>519 (converged)</td><td>1738</td><td>0.08 / 0.9</td><td>11</td></tr>
+<tr><td>districts</td><td>0.1</td><td>0.5/1 %</td><td>519 (converged)</td><td>1738</td><td>0.08 / 0.9</td><td>11</td></tr>
+<tr><td>districts</td><td>0.15</td><td>1/3 %</td><td>352 (converged)</td><td>1180</td><td>0.22 / 1.9</td><td>15</td></tr>
+<tr><td>districts</td><td>0.15</td><td>0.5/1 %</td><td>355 (converged)</td><td>1206</td><td>0.06 / 0.7</td><td>15</td></tr>
+<tr><td>districts</td><td>0.2</td><td>1/3 %</td><td>268 (converged)</td><td>912</td><td>0.17 / 1.8</td><td>20</td></tr>
+<tr><td>districts</td><td>0.2</td><td>0.5/1 %</td><td>310 (stalled)</td><td>1828</td><td>0.05 / 1.5</td><td>19</td></tr>
+</table>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
