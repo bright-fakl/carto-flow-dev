@@ -84,12 +84,12 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-12 04:10</dd>
 <dt>Before</dt><dd>main @ b5a37be (no check, integer resolutions only)</dd>
-<dt>After</dt><dd>feat/multires-auto @ 3e5b7e3</dd>
+<dt>After</dt><dd>feat/multires-auto @ 08e8486</dd>
 <dt>Inputs</dt><dd>states (49) and districts (432) bundled, 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled); MorphOptions defaults; NUMBA_NUM_THREADS=8. Error columns are the reported errors of the final cartogram.</dd>
 </dl>
-<p class="desc">multiresolution_morph and CartogramWorkflow.morph_multiresolution warn when the coarsest grid cannot resolve the smallest target region (fewer than 2.5 cells) or when more than 1 % of the regions are below one cell at the finest grid, and accept min_resolution=&quot;auto&quot; and levels=&quot;auto&quot;. States and districts choose 128 and converge at the first level without a warning; counties choose 512, run to 2048 and get the warning. Defaults are unchanged.</p>
+<p class="desc">morph_gdf, multiresolution_morph and the workflow morph methods warn when the grid cannot resolve the smallest target region (fewer than 2.5 cells) or when more than 1 % of the regions are below one cell at the finest grid; the multiresolution methods accept min_resolution=&quot;auto&quot; and levels=&quot;auto&quot;. States and districts choose 128 and converge at the first level without a warning; counties choose 512, run to 2048 and get the warning. Defaults are unchanged.</p>
 <p><code>make_tables.py</code> regenerates <code>data/tables.md</code> (every table below). Counties are read from <code>COUNTIES_PARQUET</code> when set. There are no figures: the change adds warnings and an opt-in value; defaults and results of existing calls are unchanged.</p>
-<p>The rule: with $r(N)$ the smallest target region in cells at grid $N$, <code>&quot;auto&quot;</code> picks the smallest power of two from 64 to 512 with $r(N) \ge 2.5$ (512 if none), and doubles up to 2048; the morph ends at the first converged level. The warning fires when $r &lt; 2.5$ at the coarsest grid or when more than 1 % of the regions are below one cell at the finest grid. The measurements behind the thresholds are on <code>exploration-multires-start</code>.</p>
+<p>The rule: with $r(N)$ the smallest target region in cells at grid $N$, <code>&quot;auto&quot;</code> picks the smallest power of two from 64 to 512 with $r(N) \ge 2.5$ (512 if none), and doubles up to 2048; the morph ends at the first converged level. The warning fires (for a ladder at its coarsest and finest grid, for a single-resolution morph at the grid in use, once per call) when $r &lt; 2.5$ at the coarsest grid or when more than 1 % of the regions are below one cell at the finest grid. The measurements behind the thresholds are on <code>exploration-multires-start</code>.</p>
 <h2>Smallest target region in cells and the automatic ladder</h2>
 <table>
 <tr><th>input</th><th>regions</th><th>64</th><th>128</th><th>256</th><th>512</th><th>auto min_resolution</th><th>auto levels</th></tr>
@@ -112,6 +112,16 @@
 <tr><td>counties</td><td>96, 4</td><td>Grid resolution: the smallest target region covers 0.0004 cells at the coarsest grid (96); at least 2.5 cells are needed to resolve it (no grid up to 2048 does); 338 of 3108 target regions (11 %) are smaller than one cell at the finest grid (768); they cannot be resolved and the morph is unlikely to converge.</td></tr>
 <tr><td>counties</td><td>128, 5</td><td>Grid resolution: the smallest target region covers 0.00071 cells at the coarsest grid (128); at least 2.5 cells are needed to resolve it (no grid up to 2048 does).</td></tr>
 <tr><td>counties</td><td>512, 3</td><td>Grid resolution: the smallest target region covers 0.011 cells at the coarsest grid (512); at least 2.5 cells are needed to resolve it (no grid up to 2048 does).</td></tr>
+</table>
+<h2>Single-resolution morph (morph_gdf), warning for the grid in use</h2>
+<table>
+<tr><th>input</th><th>grid_size</th><th>warning</th></tr>
+<tr><td>states</td><td>256</td><td>none</td></tr>
+<tr><td>states</td><td>512</td><td>none</td></tr>
+<tr><td>districts</td><td>256</td><td>none</td></tr>
+<tr><td>districts</td><td>512</td><td>none</td></tr>
+<tr><td>counties</td><td>256</td><td>Grid resolution: the smallest target region covers 0.0028 cells at the grid (256); at least 2.5 cells are needed to resolve it (no grid up to 2048 does); 2096 of 3108 target regions (67 %) are smaller than one cell at the grid (256); they cannot be resolved and the morph is unlikely to converge.</td></tr>
+<tr><td>counties</td><td>512</td><td>Grid resolution: the smallest target region covers 0.011 cells at the grid (512); at least 2.5 cells are needed to resolve it (no grid up to 2048 does); 856 of 3108 target regions (28 %) are smaller than one cell at the grid (512); they cannot be resolved and the morph is unlikely to converge.</td></tr>
 </table>
 <h2>Automatic ladder, default options</h2>
 <table>

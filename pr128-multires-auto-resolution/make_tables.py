@@ -9,7 +9,7 @@ from pathlib import Path
 import geopandas as gpd
 
 from carto_flow import data
-from carto_flow.flow_cartogram import MorphOptions, multiresolution_morph
+from carto_flow.flow_cartogram import MorphOptions, morph_gdf, multiresolution_morph
 from carto_flow.flow_cartogram.grid import build_multilevel_grids
 from carto_flow.flow_cartogram.resolution import auto_levels, auto_start, check_resolution
 
@@ -41,6 +41,15 @@ for name, (gdf, col, _) in INPUTS.items():
             warnings.simplefilter("always")
             check_resolution(gdf.total_bounds, t, n, lv)
         out.append(f"| {name} | {n}, {lv} | {w[0].message if w else 'none'} |")
+
+out += ["\n## Single-resolution morph (morph_gdf), warning for the grid in use\n", "| input | grid_size | warning |", "|---|---|---|"]
+for name, (gdf, col, extra) in INPUTS.items():
+    for n in (256, 512):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            morph_gdf(gdf, col, options=MorphOptions(show_progress=False, grid_size=n, n_iter=10, recompute_every=5, **extra))
+        msg = next((str(x.message) for x in w if str(x.message).startswith("Grid resolution")), "none")
+        out.append(f"| {name} | {n} | {msg} |")
 
 out += ["\n## Automatic ladder, default options\n", "| input | levels run (grid, status, iterations) | mean / max error % (reported) | warning |", "|---|---|---|---|"]
 for name, (gdf, col, extra) in INPUTS.items():

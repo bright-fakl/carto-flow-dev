@@ -23,6 +23,17 @@
 | counties | 128, 5 | Grid resolution: the smallest target region covers 0.00071 cells at the coarsest grid (128); at least 2.5 cells are needed to resolve it (no grid up to 2048 does). |
 | counties | 512, 3 | Grid resolution: the smallest target region covers 0.011 cells at the coarsest grid (512); at least 2.5 cells are needed to resolve it (no grid up to 2048 does). |
 
+## Single-resolution morph (morph_gdf), warning for the grid in use
+
+| input | grid_size | warning |
+|---|---|---|
+| states | 256 | none |
+| states | 512 | none |
+| districts | 256 | none |
+| districts | 512 | none |
+| counties | 256 | Grid resolution: the smallest target region covers 0.0028 cells at the grid (256); at least 2.5 cells are needed to resolve it (no grid up to 2048 does); 2096 of 3108 target regions (67 %) are smaller than one cell at the grid (256); they cannot be resolved and the morph is unlikely to converge. |
+| counties | 512 | Grid resolution: the smallest target region covers 0.011 cells at the grid (512); at least 2.5 cells are needed to resolve it (no grid up to 2048 does); 856 of 3108 target regions (28 %) are smaller than one cell at the grid (512); they cannot be resolved and the morph is unlikely to converge. |
+
 ## Automatic ladder, default options
 
 | input | levels run (grid, status, iterations) | mean / max error % (reported) | warning |
