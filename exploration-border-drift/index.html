@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Border pile-up of dots carried with a flow cartogram: re-evaluation and a distance remap</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Border pile-up of dots carried with a flow cartogram: re-evaluation and a distance remap</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-hierarchical-morph/index.html">Hierarchical flow morph: sub-cell regions with a grid fitted to each group</a> <span class="meta">(exploration)</span><br><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/86">#86</a></dd>
+<dt>Created</dt><dd>2026-10-13 01:30</dd>
+<dt>Before</dt><dd>main @ e78c5a9</dd>
+<dt>After</dt><dd>the same checkout; dots, tracers and the remap run after the morph</dd>
+<dt>Inputs</dt><dd>49 states (bundled) with poverty counts, dot density with n_dots = round(max / 25000), normalization &quot;maximum&quot; (about 1,480 dots per seed), MorphOptions defaults with area_scale 1e-6 and n_iter 400 unless stated; the two-region case is two unit squares with values 1 and 4 and 20,000 uniform dots each, tolerances 0.5 % / 1 %. NUMBA_NUM_THREADS=8.</dd>
+</dl>
+<p class="desc">Dots carried along with the flow cartogram are over-represented near region borders also on the current code (border-band z-score +3.8 at the defaults; the exact rasterizer, the adaptive step and recompute_on_rise do not change it). With the field recomputed every iteration it falls with the grid size (+4.0, +2.8, +2.1, +1.3 at 128 to 1024). On a two-region case with a 4:1 contrast the shrinking region is emptied along the border by the same amount at every grid size. A post-morph remap of the distance to the border, built per region from tracer points carried through the same morph, lowers the mean z-score over 8 dot seeds from 4.3 to 1.1 with a median move of 0.7 % of the region width; 50 tracers per region are enough; sectors around the centroid do not help on the states; pooling the regions is worse (2.8).</p>
+<p><code>border_band.py</code>, <code>resolution_scan.py</code>, <code>two_regions.py</code>, <code>distance_remap.py</code> (writes a cache that <code>sector_remap.py</code> reads), <code>sector_remap.py</code> and <code>toy_remap.py</code> produce the data in <code>data/</code>; <code>make_tables.py</code> writes <code>data/tables.md</code> (every table below). The border-band z-score counts the dots inside a band (6 % of <code>sqrt(area)</code> wide) along the border of their own region and compares it with the number expected for uniform dots, as a binomial z-score summed over regions. The z-score of the start geometry is about +0.6; for a uniform sample its standard deviation over seeds is about 1.</p>
+<h2>Findings</h2>
+<ul><li>**The effect is still there.** At the defaults the z-score is +3.8 (dot seed 7); over 8 seeds it is 4.3 on average (sd 1.1). The center rasterizer (+3.55), <code>adaptive_dt</code> off (+3.77) and <code>recompute_on_rise</code> do not change it, so #119 and #123 did not affect it.</li><li>**It falls with the grid size** when the field is recomputed every iteration: +4.0, +2.8, +2.1 and +1.3 at grids 128, 256, 512 and 1024. With the default recompute interval it is +2.7 at grid 512.</li><li>**Two regions.** With a 4:1 contrast the dots of the shrinking region are absent from a strip of about 8 % of its width along the shared border at every grid size, and the dots of the growing region pile up there (2.2 to 2.8 times the expected number at grid 128, 1.5 to 2.7 at grid 512 with the field recomputed every iteration). In this case about a third of the dots of the growing region end outside it (10 % inside the other region), so a correction that works on positions inside the region cannot fix them. In the states, all dots stay in their own state.</li><li>**Distance remap.** Tracer points, uniform in each original region, are carried through the same morph. For each region the distribution G of their distance to the morphed border is compared with the distribution F of a uniform sample of the morphed region, and a dot at distance d moves along the direction to its nearest border point to F⁻¹(G(d)). Over 8 dot seeds the mean z-score falls from 4.3 to 1.1 (residual sd 1.3). The median dot moves 0.7 % of <code>sqrt(area)</code>, the 95th percentile 2.4 %, the largest 8 %.</li><li>**Pooling the regions is worse**, as expected from the different sizes and distortion profiles: one remap in units of <code>sqrt(area)</code> for all regions gives a mean z-score of 2.8.</li><li>**A limited set of reference points is enough**: 50 tracers per region give a mean z-score of 1.14 (2000: 1.10), with a median move of 1.4 % instead of 0.7 %.</li><li>**Sectors around the centroid** (the angular sector of the nearest border point decides which remap applies) do not help on the states (mean z 1.21, 1.18 and 1.71 for 4, 8 and 16 sectors) and get worse with fewer tracers. On the two-region case they bring the shrinking region to 0.8 to 1.1 times the expected number (8 sectors) where a single remap leaves 0.2 to 0.7.</li><li>**Not tested:** a boundary-driven map from the vertex displacements (mean-value coordinates) and a polar map around the centroid. Both give a smooth map but do not give a uniform density without a further correction.</li></ul>
+<h2>Border band z-score on the current code (dot seed 7)</h2>
+<table>
+<tr><th>variant</th><th>status</th><th>iterations</th><th>observed vs expected</th><th>z</th></tr>
+<tr><td>start</td><td>-</td><td>0</td><td>458 vs 447.0</td><td>0.63</td></tr>
+<tr><td>defaults (grid 256, recompute_every 10)</td><td>converged</td><td>112</td><td>500 vs 435.0</td><td>3.77</td></tr>
+<tr><td>grid 512</td><td>converged</td><td>214</td><td>483 vs 436.3</td><td>2.71</td></tr>
+<tr><td>recompute_every 1</td><td>converged</td><td>106</td><td>482 vs 439.3</td><td>2.47</td></tr>
+<tr><td>grid 512, recompute_every 1</td><td>converged</td><td>209</td><td>463 vs 439.9</td><td>1.33</td></tr>
+<tr><td>defaults, density_rasterization center</td><td>converged</td><td>113</td><td>496 vs 434.8</td><td>3.55</td></tr>
+<tr><td>defaults, adaptive_dt off</td><td>converged</td><td>112</td><td>500 vs 435.0</td><td>3.77</td></tr>
+<tr><td>defaults, dt 0.05</td><td>completed</td><td>400</td><td>481 vs 435.9</td><td>2.61</td></tr>
+</table>
+<h2>Field recomputed every iteration, grid size</h2>
+<table>
+<tr><th>variant</th><th>status</th><th>iterations</th><th>observed vs expected</th><th>z</th></tr>
+<tr><td>grid 128, recompute_every 1</td><td>converged</td><td>55</td><td>509 vs 439.8</td><td>4.0</td></tr>
+<tr><td>grid 256, recompute_every 1</td><td>converged</td><td>106</td><td>488 vs 439.3</td><td>2.81</td></tr>
+<tr><td>grid 512, recompute_every 1</td><td>converged</td><td>209</td><td>477 vs 439.9</td><td>2.14</td></tr>
+<tr><td>grid 1024, recompute_every 1</td><td>completed</td><td>400</td><td>462 vs 439.8</td><td>1.28</td></tr>
+</table>
+<h2>Two squares (A: value 1, B: value 4), observed / expected dots by distance to the shared border (in sqrt(area))</h2>
+<table>
+<tr><th>variant</th><th>region</th><th>0-0.01</th><th>0.01-0.02</th><th>0.02-0.04</th><th>0.04-0.08</th><th>0.08-0.16</th><th>0.16-0.32</th><th>0.32-0.64</th><th>0.64-1</th></tr>
+<tr><td>grid 128</td><td>A</td><td>0.00</td><td>0.00</td><td>0.02</td><td>0.13</td><td>0.53</td><td>1.33</td><td>1.29</td><td>0.83</td></tr>
+<tr><td>grid 128</td><td>B</td><td>2.25</td><td>2.50</td><td>2.51</td><td>2.84</td><td>0.79</td><td>0.90</td><td>0.92</td><td>0.84</td></tr>
+<tr><td>grid 256</td><td>A</td><td>0.00</td><td>0.00</td><td>0.02</td><td>0.13</td><td>0.51</td><td>1.34</td><td>1.29</td><td>0.83</td></tr>
+<tr><td>grid 256</td><td>B</td><td>1.85</td><td>2.06</td><td>2.40</td><td>2.81</td><td>0.82</td><td>0.90</td><td>0.93</td><td>0.85</td></tr>
+<tr><td>grid 512</td><td>A</td><td>0.00</td><td>0.00</td><td>0.02</td><td>0.12</td><td>0.48</td><td>1.34</td><td>1.30</td><td>0.83</td></tr>
+<tr><td>grid 512</td><td>B</td><td>1.62</td><td>1.91</td><td>2.28</td><td>2.77</td><td>0.83</td><td>0.92</td><td>0.94</td><td>0.86</td></tr>
+<tr><td>grid 512, recompute_every 1</td><td>A</td><td>0.00</td><td>0.00</td><td>0.01</td><td>0.10</td><td>0.44</td><td>1.35</td><td>1.31</td><td>0.81</td></tr>
+<tr><td>grid 512, recompute_every 1</td><td>B</td><td>1.49</td><td>1.74</td><td>2.16</td><td>2.71</td><td>0.85</td><td>0.91</td><td>0.94</td><td>0.87</td></tr>
+</table>
+<h2>Distance remap on the states, 8 dot seeds (z-score of the border band)</h2>
+<table>
+<tr><th>seed</th><th>before</th><th>per region</th><th>pooled</th><th>shift per region: median / 95th pct / max (in sqrt(area))</th><th>shift pooled: median / 95th pct / max</th></tr>
+<tr><td>0</td><td>3.19</td><td>0.0</td><td>1.45</td><td>0.0068 / 0.0244 / 0.078</td><td>0.0055 / 0.0066 / 0.007</td></tr>
+<tr><td>1</td><td>6.14</td><td>3.71</td><td>4.81</td><td>0.0067 / 0.0246 / 0.08</td><td>0.0054 / 0.0065 / 0.007</td></tr>
+<tr><td>2</td><td>3.77</td><td>1.57</td><td>2.73</td><td>0.0072 / 0.0241 / 0.078</td><td>0.0055 / 0.0066 / 0.007</td></tr>
+<tr><td>3</td><td>5.56</td><td>2.38</td><td>4.12</td><td>0.0069 / 0.0245 / 0.081</td><td>0.0054 / 0.0065 / 0.007</td></tr>
+<tr><td>4</td><td>3.48</td><td>0.23</td><td>1.68</td><td>0.0069 / 0.0247 / 0.074</td><td>0.0055 / 0.0066 / 0.007</td></tr>
+<tr><td>5</td><td>5.22</td><td>1.62</td><td>3.25</td><td>0.0071 / 0.0241 / 0.079</td><td>0.0054 / 0.0065 / 0.007</td></tr>
+<tr><td>6</td><td>3.13</td><td>-0.58</td><td>1.86</td><td>0.0072 / 0.0247 / 0.081</td><td>0.0057 / 0.0066 / 0.007</td></tr>
+<tr><td>7</td><td>3.77</td><td>0.06</td><td>2.15</td><td>0.007 / 0.0245 / 0.078</td><td>0.0056 / 0.0066 / 0.007</td></tr>
+</table>
+<p>Mean z over the seeds: before 4.28, per region 1.12, pooled 2.76.</p>
+<h2>Fewer reference points and sectors around the centroid (states, 8 seeds; z before: mean 4.28)</h2>
+<table>
+<tr><th>sectors</th><th>tracers per region</th><th>z mean</th><th>z sd</th><th>z max</th><th>shift median</th><th>shift 95th pct</th></tr>
+<tr><td>1</td><td>2000</td><td>1.1</td><td>1.34</td><td>3.65</td><td>0.0072</td><td>0.0247</td></tr>
+<tr><td>1</td><td>500</td><td>1.18</td><td>1.26</td><td>3.59</td><td>0.0072</td><td>0.0294</td></tr>
+<tr><td>1</td><td>200</td><td>1.15</td><td>1.51</td><td>4.35</td><td>0.0098</td><td>0.0339</td></tr>
+<tr><td>1</td><td>100</td><td>0.97</td><td>1.48</td><td>4.0</td><td>0.0131</td><td>0.0463</td></tr>
+<tr><td>1</td><td>50</td><td>1.14</td><td>1.39</td><td>3.48</td><td>0.0139</td><td>0.0499</td></tr>
+<tr><td>4</td><td>2000</td><td>1.21</td><td>1.19</td><td>3.42</td><td>0.0076</td><td>0.0381</td></tr>
+<tr><td>8</td><td>2000</td><td>1.18</td><td>1.28</td><td>3.71</td><td>0.0083</td><td>0.0381</td></tr>
+<tr><td>16</td><td>2000</td><td>1.71</td><td>1.01</td><td>3.54</td><td>0.0086</td><td>0.0389</td></tr>
+<tr><td>8</td><td>500</td><td>1.63</td><td>1.15</td><td>4.06</td><td>0.011</td><td>0.0454</td></tr>
+<tr><td>8</td><td>200</td><td>2.07</td><td>1.12</td><td>3.77</td><td>0.0153</td><td>0.0589</td></tr>
+</table>
+<h2>Two squares after the remap (grid 256), observed / expected by distance to the shared border</h2>
+<table>
+<tr><th>sectors</th><th>when</th><th>region</th><th>0-0.01</th><th>0.01-0.02</th><th>0.02-0.04</th><th>0.04-0.08</th><th>0.08-0.16</th><th>0.16-0.32</th><th>0.32-0.64</th><th>0.64-1</th></tr>
+<tr><td>1</td><td>before</td><td>A</td><td>0.00</td><td>0.00</td><td>0.02</td><td>0.12</td><td>0.51</td><td>1.33</td><td>1.30</td><td>0.83</td></tr>
+<tr><td>1</td><td>before</td><td>B</td><td>1.90</td><td>2.03</td><td>2.41</td><td>2.76</td><td>0.83</td><td>0.90</td><td>0.94</td><td>0.86</td></tr>
+<tr><td>1</td><td>after</td><td>A</td><td>0.43</td><td>0.22</td><td>0.45</td><td>0.74</td><td>0.95</td><td>0.94</td><td>1.01</td><td>1.37</td></tr>
+<tr><td>1</td><td>after</td><td>B</td><td>1.85</td><td>2.10</td><td>2.46</td><td>2.81</td><td>0.80</td><td>0.91</td><td>0.93</td><td>0.85</td></tr>
+<tr><td>4</td><td>before</td><td>A</td><td>0.00</td><td>0.00</td><td>0.02</td><td>0.12</td><td>0.50</td><td>1.33</td><td>1.30</td><td>0.83</td></tr>
+<tr><td>4</td><td>before</td><td>B</td><td>1.85</td><td>2.07</td><td>2.35</td><td>2.82</td><td>0.81</td><td>0.91</td><td>0.93</td><td>0.86</td></tr>
+<tr><td>4</td><td>after</td><td>A</td><td>0.70</td><td>1.00</td><td>0.70</td><td>0.98</td><td>0.91</td><td>0.85</td><td>1.03</td><td>1.24</td></tr>
+<tr><td>4</td><td>after</td><td>B</td><td>1.79</td><td>1.88</td><td>2.42</td><td>2.80</td><td>0.79</td><td>0.91</td><td>0.94</td><td>0.86</td></tr>
+<tr><td>8</td><td>before</td><td>A</td><td>0.00</td><td>0.00</td><td>0.02</td><td>0.13</td><td>0.50</td><td>1.33</td><td>1.30</td><td>0.83</td></tr>
+<tr><td>8</td><td>before</td><td>B</td><td>1.83</td><td>2.05</td><td>2.38</td><td>2.80</td><td>0.82</td><td>0.90</td><td>0.93</td><td>0.86</td></tr>
+<tr><td>8</td><td>after</td><td>A</td><td>1.11</td><td>0.77</td><td>1.12</td><td>0.79</td><td>0.83</td><td>0.85</td><td>1.08</td><td>1.16</td></tr>
+<tr><td>8</td><td>after</td><td>B</td><td>1.89</td><td>1.92</td><td>2.34</td><td>2.79</td><td>0.87</td><td>0.90</td><td>0.93</td><td>0.86</td></tr>
+<tr><td>16</td><td>before</td><td>A</td><td>0.00</td><td>0.00</td><td>0.02</td><td>0.12</td><td>0.50</td><td>1.33</td><td>1.30</td><td>0.83</td></tr>
+<tr><td>16</td><td>before</td><td>B</td><td>1.77</td><td>2.03</td><td>2.38</td><td>2.75</td><td>0.82</td><td>0.91</td><td>0.94</td><td>0.86</td></tr>
+<tr><td>16</td><td>after</td><td>A</td><td>1.14</td><td>0.82</td><td>0.87</td><td>0.91</td><td>0.84</td><td>0.84</td><td>1.10</td><td>1.13</td></tr>
+<tr><td>16</td><td>after</td><td>B</td><td>1.92</td><td>2.27</td><td>2.27</td><td>2.78</td><td>0.86</td><td>0.87</td><td>0.94</td><td>0.86</td></tr>
+</table>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
