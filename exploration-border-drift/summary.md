@@ -12,7 +12,7 @@ after: the same checkout; dots, tracers and the remap run after the morph
 inputs: 49 states (bundled) with poverty counts, dot density with n_dots = round(max / 25000), normalization "maximum" (about 1,480 dots per seed), MorphOptions defaults with area_scale 1e-6 and n_iter 400 unless stated; the two-region case is two unit squares with values 1 and 4 and 20,000 uniform dots each, tolerances 0.5 % / 1 %. NUMBA_NUM_THREADS=8.
 ---
 
-`border_band.py`, `resolution_scan.py`, `two_regions.py`, `distance_remap.py` (writes a cache that `sector_remap.py` reads), `sector_remap.py` and `toy_remap.py` produce the data in `data/`; `make_tables.py` writes `data/tables.md` (every table below). The border-band z-score counts the dots inside a band (6 % of `sqrt(area)` wide) along the border of their own region and compares it with the number expected for uniform dots, as a binomial z-score summed over regions. The z-score of the start geometry is about +0.6; for a uniform sample its standard deviation over seeds is about 1.
+`border_band.py`, `resolution_scan.py`, `two_regions.py`, `distance_remap.py` (writes a cache that `sector_remap.py` reads), `sector_remap.py` and `toy_remap.py` produce the data in `data/`; `make_tables.py` writes `data/tables.md` (every table below) and `make_figures.py` the figures (it reads the cache that `distance_remap.py` writes to `data/states_morph.pkl`, which is not committed). The border-band z-score counts the dots inside a band (6 % of `sqrt(area)` wide) along the border of their own region and compares it with the number expected for uniform dots, as a binomial z-score summed over regions. The z-score of the start geometry is about +0.6; for a uniform sample its standard deviation over seeds is about 1.
 
 ## Findings
 
@@ -24,6 +24,12 @@ inputs: 49 states (bundled) with poverty counts, dot density with n_dots = round
 - **A limited set of reference points is enough**: 50 tracers per region give a mean z-score of 1.14 (2000: 1.10), with a median move of 1.4 % instead of 0.7 %.
 - **Sectors around the centroid** (the angular sector of the nearest border point decides which remap applies) do not help on the states (mean z 1.21, 1.18 and 1.71 for 4, 8 and 16 sectors) and get worse with fewer tracers. On the two-region case they bring the shrinking region to 0.8 to 1.1 times the expected number (8 sectors) where a single remap leaves 0.2 to 0.7.
 - **Not tested:** a boundary-driven map from the vertex displacements (mean-value coordinates) and a polar map around the centroid. Both give a smooth map but do not give a uniform density without a further correction.
+
+figure: fig_resolution.png — Border band z-score of the dots on the current code. Left: dot seed 7 for the defaults and single changes (the start geometry is 0.6); the center rasterizer and adaptive_dt off do not change it. Right: with the field recomputed every iteration it falls with the grid size.
+figure: fig_two_regions.png — Two squares with values 1 and 4, observed / expected dots by distance to the shared border. The shrinking region A is empty along the border at every grid size; the growing region B has 1.5 to 2.8 times the expected dots there, less with a finer grid and recompute_every 1.
+figure: fig_remap_states.png — The distance remap on the states. Left: z-score of the border band for 8 dot seeds (grey lines) and their mean (blue), without correction, with a remap per region and with one pooled remap. Right: mean z-score against the number of tracer points per region, with one and with 8 sectors around the centroid.
+figure: fig_remap_toy.png — The remap on the two-region case (grid 256). The shrinking region A moves toward the expected counts, more with 8 sectors; the growing region B is not corrected because a third of its dots lie outside it.
+figure: fig_map.png — California and Nevada, dot seed 7. Left and middle: the dots before and after the remap, with the 6 % border band shaded. Right: zoom on the shared border; each arrow goes from the dot carried by the flow to its corrected position.
 
 ## Border band z-score on the current code (dot seed 7)
 
