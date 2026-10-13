@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #133: Area scaling of the landmarks along the flow and uniform point landmarks</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #133: Area scaling of the landmarks along the flow and uniform point landmarks</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-border-drift/index.html">Border pile-up of dots carried with a flow cartogram: re-evaluation, a distance remap and a reference-point warp</a> <span class="meta">(exploration)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/133">https://github.com/bright-fakl/carto-flow/pull/133</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/86">#86</a></dd>
+<dt>Branch</dt><dd>feat/landmark-area-scaling</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-13 18:00</dd>
+<dt>Before</dt><dd>main @ 5a4a5a2 (landmarks carried by the flow)</dd>
+<dt>After</dt><dd>feat/landmark-area-scaling @ a2fc8a7</dd>
+<dt>Inputs</dt><dd>49 states (bundled) with poverty counts, dot density with n_dots = round(max / 25000), normalization &quot;maximum&quot; (about 1,480 dots), 8 seeds; MorphOptions defaults with area_scale 1e-6 (grid 256); NUMBA_NUM_THREADS=8. The border-band z-score counts the dots inside a band of 6 % of sqrt(area) along the border of their own region against the number expected for uniform dots (binomial, summed over regions).</dd>
+</dl>
+<p class="desc">The morph sums the divergence of the velocity field along the path of every landmark vertex (Cartogram.landmark_area_scaling) at no measurable cost, and Cartogram.get_landmarks(uniform=True) uses it to remap the distance of point landmarks to the border of their region so that landmarks that were uniform before the morph are uniform again. On the states with 8 seeds of about 1,480 dots the mean border-band z-score is 4.28 for the carried dots, 0.86 with uniform=True and 0.63 on the original map; the median dot moves 0.7 % of the width of its region.</p>
+<p><code>make_figures.py</code> regenerates the figures and <code>data/tables.md</code>; it uses <code>get_landmarks(uniform=True)</code> of the library. The cost: within the same checkout, disabling the accumulation does not change the morph time (0.229 against 0.228 s at grid 256 and 0.53 against 0.54 s at grid 512, 1,480 dots, minimum of 5 runs); <code>get_landmarks(uniform=True)</code> takes about 0.2 s for these dots. More on the mechanism, the measurements and the alternatives that were tried is on <code>exploration-border-drift</code>.</p>
+<table>
+<tr><th>seed</th><th>original map</th><th>carried by the flow</th><th>get_landmarks(uniform=True)</th><th>shift: median / 95th pct (x sqrt(area))</th></tr>
+<tr><td>0</td><td>-0.11</td><td>3.19</td><td>0.12</td><td>0.0063 / 0.0248</td></tr>
+<tr><td>1</td><td>2.31</td><td>6.14</td><td>3.02</td><td>0.0072 / 0.0274</td></tr>
+<tr><td>2</td><td>0.98</td><td>3.77</td><td>1.1</td><td>0.007 / 0.0291</td></tr>
+<tr><td>3</td><td>0.98</td><td>5.56</td><td>2.49</td><td>0.0074 / 0.0269</td></tr>
+<tr><td>4</td><td>-0.29</td><td>3.48</td><td>-0.17</td><td>0.0067 / 0.0274</td></tr>
+<tr><td>5</td><td>1.15</td><td>5.22</td><td>0.47</td><td>0.0077 / 0.0302</td></tr>
+<tr><td>6</td><td>-0.58</td><td>3.13</td><td>-0.35</td><td>0.0068 / 0.0302</td></tr>
+<tr><td>7</td><td>0.63</td><td>3.77</td><td>0.18</td><td>0.0077 / 0.0276</td></tr>
+<tr><td>mean</td><td>0.63</td><td>4.28</td><td>0.86</td><td>0.0071 / 0.0279</td></tr>
+</table>
+<table>
+<tr><th>dots (observed / expected, mean over 8 seeds)</th><th>0-0.01</th><th>0.01-0.02</th><th>0.02-0.04</th><th>0.04-0.06</th><th>0.06-0.1</th><th>0.1-0.2</th><th>0.2-0.4</th><th>0.4-0.6</th></tr>
+<tr><td>original</td><td>1.03</td><td>1.04</td><td>1.00</td><td>1.03</td><td>1.00</td><td>0.99</td><td>0.98</td><td>1.18</td></tr>
+<tr><td>carried</td><td>1.40</td><td>1.27</td><td>1.10</td><td>1.02</td><td>0.96</td><td>0.93</td><td>0.90</td><td>0.88</td></tr>
+<tr><td>uniform</td><td>1.09</td><td>0.99</td><td>1.00</td><td>1.05</td><td>0.97</td><td>0.98</td><td>1.00</td><td>0.85</td></tr>
+</table>
+<div class="figure">
+<img src="fig_map.png" alt="California (blue) and Nevada (orange), dot seed 7. Left: the original map. Middle: the dots carried by the flow crowd the border band (z 3.8 over all states). Right: the same dots after get_landmarks(uniform=True) (z 0.2).">
+<p class="caption">California (blue) and Nevada (orange), dot seed 7. Left: the original map. Middle: the dots carried by the flow crowd the border band (z 3.8 over all states). Right: the same dots after get_landmarks(uniform=True) (z 0.2).</p>
+</div><div class="figure">
+<img src="fig_profile.png" alt="Pooled distance profile of the dots on the 49 states (observed / expected, 8 seeds): flat on the original map, 1.4 times the expected number in the first 1 % of the distance after the flow, flat again after the correction.">
+<p class="caption">Pooled distance profile of the dots on the 49 states (observed / expected, 8 seeds): flat on the original map, 1.4 times the expected number in the first 1 % of the distance after the flow, flat again after the correction.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
