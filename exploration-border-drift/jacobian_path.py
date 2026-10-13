@@ -75,7 +75,7 @@ def run(grid_size=256, n_seeds=8):
     return out, (sets, Pf, geoms, logJ, ratio, cuts)
 
 
-def proxy_remap(geoms, P, owner, cdot, edges=EDGES):
+def proxy_remap(geoms, P, owner, cdot, edges=EDGES, n_grid=201):
     """Remap the distance to the border so that the dot density follows from the area scaling of the flow along the paths
     (the area-average of the density ratio in a bin is the harmonic mean of c over the dots in it)."""
     import distance_remap as dr
@@ -98,7 +98,7 @@ def proxy_remap(geoms, P, owner, cdot, edges=EDGES):
         ok = np.isfinite(chat)
         if ok.sum() < 2:
             continue
-        sgrid = np.linspace(0, 0.5, 201)
+        sgrid = np.linspace(0, 0.5, n_grid)
         cfun = np.interp(sgrid, centers[ok], chat[ok])
         A = np.array([poly.buffer(-s_ * sc).area if s_ > 0 else poly.area for s_ in sgrid])
         F = 1 - A / poly.area
@@ -106,6 +106,77 @@ def proxy_remap(geoms, P, owner, cdot, edges=EDGES):
         G = np.concatenate([[0], np.cumsum(dens)])
         G = G / G[-1] * F[-1]
         dn = np.interp(np.interp(d[ins], sgrid, G), F, sgrid) * sc
+        u = dr.inward_direction(poly, P[sel][ins])
+        Q[sel[ins]] = P[sel][ins] + (dn - d[ins] * sc)[:, None] * u
+    return Q
+
+
+def proxy_remap_fast(geoms, P, owner, cdot, w=0.15, edges=(0, 0.01, 0.02, 0.04, 0.06, 0.1, 0.15)):
+    """The same remap to first order in the distance: the area at distance d from the border is A - perimeter * d, so only the
+    band d < w x sqrt(area) matters and no polygon has to be buffered. d' = w C(d) / C(w) with C the integral of the
+    density ratio over the distance."""
+    import distance_remap as dr
+
+    edges = np.asarray(edges, dtype=float)
+    centers = 0.5 * (edges[:-1] + edges[1:])
+    sgrid = np.linspace(0, w, 31)
+    Q = P.copy()
+    for r in np.unique(owner):
+        sel = np.where(owner == r)[0]
+        poly = geoms[r]
+        sc = np.sqrt(poly.area)
+        d = dr.signed_distance(poly, P[sel]) / sc
+        ins = d > 0
+        chat = np.full(len(centers), np.nan)
+        for b in range(len(centers)):
+            m = ins & (d >= edges[b]) & (d < edges[b + 1])
+            if m.any():
+                chat[b] = 1.0 / np.mean(1.0 / cdot[sel][m])
+        ok = np.isfinite(chat)
+        band = ins & (d < w)
+        if ok.sum() < 2 or not band.any():
+            continue
+        cfun = np.interp(sgrid, centers[ok], chat[ok])
+        C = np.concatenate([[0], np.cumsum(0.5 * (cfun[1:] + cfun[:-1]) * np.diff(sgrid))])
+        dn = np.interp(d[band], sgrid, C) / C[-1] * w
+        u = dr.inward_direction(poly, P[sel][band])
+        Q[sel[band]] = P[sel][band] + ((dn - d[band]) * sc)[:, None] * u
+    return Q
+
+
+def proxy_remap_sampled(geoms, P, owner, cdot, n_ref=400, edges=EDGES, seed=0):
+    """The same remap, with the distribution F of the distance to the border of a uniform sample of the region taken from
+    n_ref sample points instead of from polygon buffers."""
+    import distance_remap as dr
+
+    rng = np.random.default_rng(seed)
+    centers = 0.5 * (edges[:-1] + edges[1:])
+    Q = P.copy()
+    for r in np.unique(owner):
+        sel = np.where(owner == r)[0]
+        poly = geoms[r]
+        sc = np.sqrt(poly.area)
+        d = dr.signed_distance(poly, P[sel]) / sc
+        ins = d > 0
+        if ins.sum() < 3:
+            continue
+        chat = np.full(len(centers), np.nan)
+        for b in range(len(centers)):
+            m = ins & (d >= edges[b]) & (d < edges[b + 1])
+            if m.any():
+                chat[b] = 1.0 / np.mean(1.0 / cdot[sel][m])
+        ok = np.isfinite(chat)
+        if ok.sum() < 2:
+            continue
+        ref = np.sort(shapely.distance(shapely.points(dr.uniform_in(poly, n_ref)), poly.boundary) / sc)
+        sgrid = np.linspace(0, ref[int(0.98 * n_ref)], 60)
+        F = np.searchsorted(ref, sgrid, side="right") / n_ref
+        cfun = np.interp(sgrid, centers[ok], chat[ok])
+        dens = np.diff(F) * 0.5 * (cfun[1:] + cfun[:-1])
+        G = np.concatenate([[0], np.cumsum(dens)])
+        G = G / G[-1] * F[-1]
+        keep = np.concatenate([[True], np.diff(F) > 0])  # F must be strictly increasing to be inverted
+        dn = np.interp(np.interp(d[ins], sgrid, G), F[keep], sgrid[keep]) * sc
         u = dr.inward_direction(poly, P[sel][ins])
         Q[sel[ins]] = P[sel][ins] + (dn - d[ins] * sc)[:, None] * u
     return Q

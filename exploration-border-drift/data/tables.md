@@ -165,3 +165,31 @@ The step of every iteration is fitted from the displacements of the dots; the re
 | 6 | 3.13 | -1.1 | 0.0066 / 0.0316 |
 | 7 | 3.77 | -0.35 | 0.0079 / 0.0284 |
 | mean | 4.28 | 0.65 | |
+
+## Without snapshots: the area scaling summed in place, and the first velocity field only (states, grid 256, 8 seeds)
+
+`inplace`: log J summed during the morph (no `save_internals`, no `snapshot_every`); F of the remap from 400 sample points per region. `first field only`: the divergence profile of the first velocity field per region and the area ratio of the region, no sum along the paths (F from polygon buffers).
+
+| seed | before | in place (sampled F) | first field only |
+|---|---|---|---|
+| 0 | 3.19 | 0.12 | 2.38 |
+| 1 | 6.14 | 3.48 | 5.56 |
+| 2 | 3.77 | 1.28 | 3.36 |
+| 3 | 5.56 | 1.33 | 4.87 |
+| 4 | 3.48 | -0.87 | 2.61 |
+| 5 | 5.22 | 0.64 | 3.54 |
+| 6 | 3.13 | -0.4 | 2.2 |
+| 7 | 3.77 | -0.23 | 2.55 |
+| mean | 4.28 | 0.67 | 3.38 |
+
+## Cost of the correction (states, one dot seed with 1480 dots, grid 256, 112 iterations)
+
+Morph time without the sum in place: 0.31, 0.214, 0.218 s (3 runs after a warm-up); with the sum in place in a Python wrapper: 0.236, 0.235, 0.232 s, of which 0.0141, 0.0136, 0.0136 s in the sum itself. Memory: one float per dot, and the divergence of the current field (one grid) while it is in use.
+
+| remap | seconds | z after (before: 3.19) | median shift (x sqrt(area)) |
+|---|---|---|---|
+| 26 distance points, polygon buffers | 14.8 | 0.12 | 0.006 |
+| first order, no buffers | 0.04 | 1.51 | 0.0009 |
+| 200 sample points per region | 0.13 | 0.35 | 0.0073 |
+| 400 sample points per region | 0.17 | 0.52 | 0.0067 |
+| 1000 sample points per region | 0.36 | 0.06 | 0.0061 |

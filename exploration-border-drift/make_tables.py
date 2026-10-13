@@ -74,4 +74,12 @@ for cls in ("expanding", "shrinking"):
 out += ["\n## Remap from the velocity field (no tracers), z-score of the border band\n", "| seed | before | after | shift: median / 95th pct (in sqrt(area)) |", "|---|---|---|---|"]
 out += [f"| {r['seed']} | {r['before']} | {r['proxy']} | {r['shift_median']} / {r['shift_p95']} |" for r in j["seeds"]]
 out.append(f"| mean | {statistics.mean([r['before'] for r in j['seeds']]):.2f} | {statistics.mean([r['proxy'] for r in j['seeds']]):.2f} | |")
+ip = json.loads((D / "inplace_proxy.json").read_text())
+sp = json.loads((D / "inplace_sampled.json").read_text())
+out += ["\n## Without snapshots: the area scaling summed in place, and the first velocity field only (states, grid 256, 8 seeds)\n", "`inplace`: log J summed during the morph (no `save_internals`, no `snapshot_every`); F of the remap from 400 sample points per region. `first field only`: the divergence profile of the first velocity field per region and the area ratio of the region, no sum along the paths (F from polygon buffers).\n", "| seed | before | in place (sampled F) | first field only |", "|---|---|---|---|"]
+out += [f"| {a['seed']} | {a['before']} | {a['inplace']} | {b['first_field']} |" for a, b in zip(sp["seeds"], ip["seeds"])]
+out.append(f"| mean | {statistics.mean([r['before'] for r in sp['seeds']]):.2f} | {statistics.mean([r['inplace'] for r in sp['seeds']]):.2f} | {statistics.mean([r['first_field'] for r in ip['seeds']]):.2f} |")
+cs = json.loads((D / "cost.json").read_text())
+out += ["\n## Cost of the correction (states, one dot seed with %d dots, grid 256, %d iterations)\n" % (cs["landmarks"], cs["iterations"]), f"Morph time without the sum in place: {', '.join(str(x) for x in cs['morph_seconds_without'])} s (3 runs after a warm-up); with the sum in place in a Python wrapper: {', '.join(str(x) for x in cs['morph_seconds_with'])} s, of which {', '.join(str(x) for x in cs['seconds_in_the_sum'])} s in the sum itself. Memory: one float per dot, and the divergence of the current field (one grid) while it is in use.\n", "| remap | seconds | z after (before: %s) | median shift (x sqrt(area)) |" % cs["z_before"], "|---|---|---|---|"]
+out += [f"| {r['grid_points'] if isinstance(r['grid_points'], str) else str(r['grid_points']) + ' distance points, polygon buffers'} | {r['seconds']} | {r['z']} | {r['shift_median']} |" for r in cs["remap"]]
 (D / "tables.md").write_text("\n".join(out) + "\n")
