@@ -128,7 +128,7 @@ def states(n_seeds=8, n_tracers=2000):
     L = np.array([[p.x, p.y] for p in fin.landmarks])
     geoms = [x.buffer(0) for x in fin.geometry]
     import pickle
-    pickle.dump({"L": L, "geoms": [shapely.to_wkb(x) for x in geoms], "owner_t": owner_t, "dot_sets": dot_sets, "status": cart.status.value, "iterations": int(cart.niterations)}, open(HERE / "data" / "states_morph.pkl", "wb"))
+    pickle.dump({"L": L, "geoms": [shapely.to_wkb(x) for x in geoms], "owner_t": owner_t, "tr_orig": tr, "geoms_raw": [shapely.to_wkb(x) for x in fin.geometry], "dot_sets": dot_sets, "status": cart.status.value, "iterations": int(cart.niterations)}, open(HERE / "data" / "states_morph.pkl", "wb"))
     sizes = [len(P) for _, P in dot_sets]
     cuts = np.cumsum([0] + sizes)
     tracers_f = L[cuts[-1]:]

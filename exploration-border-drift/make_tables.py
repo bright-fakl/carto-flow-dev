@@ -38,9 +38,21 @@ out += ["\n## Fewer reference points and sectors around the centroid (states, 8 
 out += [f"| {r['sectors']} | {r['tracers_per_region']} | {r['z_mean']} | {r['z_sd']} | {r['z_max']} | {r['shift_median']} | {r['shift_p95']} |" for r in sr["rows"]]
 
 tr = json.loads((D / "toy_remap.json").read_text())
-out += ["\n## Two squares after the remap (grid 256), observed / expected by distance to the shared border\n", f"| sectors | when | region | {hdr} |", "|---|---|---|" + "---|" * (len(edges) - 1)]
+out += ["\n## Two squares after the remap (grid 256), observed / expected by distance to the shared border\n", f"| sectors | dots outside their region | when | region | share of the region's dots inside it | {hdr} |", "|---|---|---|---|---|" + "---|" * (len(edges) - 1)]
 for r in tr["rows"]:
     for when in ("before", "after"):
         for k in ("0", "1"):
-            out.append(f"| {r['sectors']} | {when} | {'A' if k == '0' else 'B'} | " + " | ".join("-" if v is None else f"{v:.2f}" for v in r[when][k]) + " |")
+            ins = "-" if when == "before" else f"{r['inside_own'][k]:.3f}"
+            out.append(f"| {r['sectors']} | {'pulled back' if r['signed'] else 'left alone'} | {when} | {'A' if k == '0' else 'B'} | {ins} | " + " | ".join("-" if v is None else f"{v:.2f}" for v in r[when][k]) + " |")
+
+w = json.loads((D / "landmark_warp.json").read_text())
+out += ["\n## Original map and the flow, z-score of the border band per dot seed\n", "| seed | original map | carried by the flow |", "|---|---|---|"]
+out += [f"| {i} | {a} | {b} |" for i, (a, b) in enumerate(zip(w["original_z"], w["flow_z"]))]
+out.append(f"| mean | {statistics.mean(w['original_z']):.2f} | {statistics.mean(w['flow_z']):.2f} |")
+out += ["\n## Reference-point warp (thin-plate spline through boundary vertices and carried interior points), 8 seeds\n", "| boundary vertices | interior points | z mean (sd) | dots inside their region | shift against the flow: median / 95th pct | carried tracers against the warp: median / 95th pct |", "|---|---|---|---|---|---|"]
+out += [f"| {r['boundary_vertices']} | {r['interior_points']} | {r['z_mean']} ({r['z_sd']}) | {r['inside']} | {r['shift_vs_flow_median']} / {r['shift_vs_flow_p95']} | {r['tracer_diff_median']} / {r['tracer_diff_p95']} |" for r in w["variants"]]
+pe = w["profiles"]["edges"]
+ph = " | ".join(f"{a:g}-{b:g}" for a, b in zip(pe[:-1], pe[1:]))
+out += ["\n## Pooled distance profile on the states, observed / expected (mean over 8 seeds)\n", f"| dots | {ph} |", "|---|" + "---|" * (len(pe) - 1)]
+out += [f"| {k} | " + " | ".join(f"{x:.2f}" for x in v) + " |" for k, v in w["profiles"]["rows"].items()]
 (D / "tables.md").write_text("\n".join(out) + "\n")

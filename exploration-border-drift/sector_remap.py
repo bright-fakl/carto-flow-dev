@@ -41,8 +41,8 @@ def sector_of(poly, q, K):
 
 
 class SectorRemap:
-    def __init__(self, geoms, tracers, owner_t, K, n_tracers=None, n_ref=20000):
-        self.geoms, self.K = geoms, K
+    def __init__(self, geoms, tracers, owner_t, K, n_tracers=None, n_ref=20000, signed=False):
+        self.geoms, self.K, self.signed = geoms, K, signed
         self.table = {}
         for r, poly in enumerate(geoms):
             T = tracers[owner_t == r]
@@ -54,7 +54,7 @@ class SectorRemap:
             qr, dref, _ = nearest_border(poly, ref)
             secr = sector_of(poly, qr, K)
             for k in range(K):
-                gd = np.sort(d[(sec == k) & (d >= 0)])
+                gd = np.sort(d[(sec == k) & ((d >= 0) | signed)])
                 fd = np.sort(dref[secr == k])
                 self.table[(r, k)] = (gd, fd, len(T), len(ref))
 
@@ -66,7 +66,7 @@ class SectorRemap:
             q, d, u = nearest_border(poly, P[sel])
             sec = sector_of(poly, q, self.K)
             for k in range(self.K):
-                m = (sec == k) & (d > 0)
+                m = (sec == k) & ((d > 0) | self.signed)
                 gd, fd, nt, nr = self.table[(r, k)]
                 if not m.any() or len(gd) < 5 or len(fd) < 5:
                     continue
@@ -74,7 +74,7 @@ class SectorRemap:
                 uq = np.searchsorted(gd, d[m], side="right") / (len(gd) + 1)
                 dn = np.interp(uq, (np.arange(len(fd)) + 0.5) / len(fd), fd)
                 sel_k = sel[m]
-                Q[sel_k] = P[sel_k] + (dn - d[m])[:, None] * u[m]
+                Q[sel_k] = P[sel_k] + (dn - d[m])[:, None] * u[m] * np.where(d[m] >= 0, 1.0, -1.0)[:, None]
         return Q
 
 

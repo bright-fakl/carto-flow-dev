@@ -3,7 +3,7 @@
     NUMBA_NUM_THREADS=8 uv run python distance_remap.py   # once, writes data/states_morph.pkl
     uv run python make_figures.py
 
-Writes fig_resolution.png, fig_two_regions.png, fig_remap_states.png, fig_remap_toy.png and fig_map.png next to itself.
+Writes fig_resolution.png, fig_two_regions.png, fig_remap_states.png, fig_remap_toy.png, fig_profile_states.png, fig_map.png and fig_map_zoom.png next to itself.
 """
 import json
 import pickle
@@ -123,13 +123,14 @@ def fig_remap_toy():
     edges = np.array(t["edges"])
     x = np.arange(len(edges) - 1)
     labels = [f"{a:g}-{b:g}" for a, b in zip(edges[:-1], edges[1:])]
-    fig, axes = plt.subplots(1, 2, figsize=(10, 3.6), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(10, 3.8), sharey=True)
+    pick = {"8 sectors, dots inside the region only": next(r for r in t["rows"] if r["sectors"] == 8 and not r["signed"]),
+            "8 sectors, dots outside pulled back": next(r for r in t["rows"] if r["sectors"] == 8 and r["signed"])}
     for ax, key, title in zip(axes, ("0", "1"), ("A: value 1, shrinks", "B: value 4, grows")):
-        r1 = next(r for r in t["rows"] if r["sectors"] == 1)
-        r8 = next(r for r in t["rows"] if r["sectors"] == 8)
-        ax.plot(x, r1["before"][key], color=GRAY, marker="o", markersize=4, linewidth=1.8, label="no correction")
-        ax.plot(x, r1["after"][key], color=BLUE, marker="o", markersize=4, linewidth=1.8, label="remap per region")
-        ax.plot(x, r8["after"][key], color=ORANGE, marker="o", markersize=4, linewidth=1.8, label="remap, 8 sectors")
+        first = next(iter(pick.values()))
+        ax.plot(x, first["before"][key], color=GRAY, marker="o", markersize=4, linewidth=1.8, label="no correction")
+        for (lab, r), c in zip(pick.items(), (BLUE, ORANGE)):
+            ax.plot(x, r["after"][key], color=c, marker="o", markersize=4, linewidth=1.8, label=lab)
         ax.axhline(1, color=INK, linestyle="--", linewidth=0.8)
         ax.set_xticks(x)
         ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
@@ -143,25 +144,33 @@ def fig_remap_toy():
 def fig_map():
     import border_band as bb
     import distance_remap as dr
+    import landmark_warp as lw
 
     z = pickle.load(open(D / "states_morph.pkl", "rb"))
-    L, owner_t, dot_sets = z["L"], z["owner_t"], z["dot_sets"]
+    L, owner_t, dot_sets, tr_orig = z["L"], z["owner_t"], z["dot_sets"], z["tr_orig"]
     geoms = [shapely.from_wkb(x) for x in z["geoms"]]
+    final = [shapely.from_wkb(x) for x in z["geoms_raw"]]
+    orig = list(bb.g.geometry)
     cuts = np.cumsum([0] + [len(P) for _, P in dot_sets])
     tracers = L[cuts[-1]:]
-    m = dr.Remap(geoms, tracers, owner_t, False)
-    owner, _ = dot_sets[7]
-    P = L[cuts[7]:cuts[8]]
-    Q = m.apply(P, owner)
+    k = 7
+    owner, P0 = dot_sets[k]
+    P = L[cuts[k]:cuts[k + 1]]
+    bb.owner = owner
+    Q = dr.Remap(geoms, tracers, owner_t, False).apply(P, owner)
+    W = P0.copy()
+    for r in np.unique(owner):
+        sel = owner_t == r
+        W[owner == r] = lw.warp_region(orig[r], final[r], 16, 0, tr_orig[sel], tracers[sel])(P0[owner == r])
+    zs = {"orig": bb.band_z(orig, P0)[2], "flow": bb.band_z(geoms, P)[2], "remap": bb.band_z(geoms, Q)[2], "warp": bb.band_z(geoms, W)[2]}
     names = list(bb.g["State Name"])
     pick = [names.index("California"), names.index("Nevada")]
-    fig, axes = plt.subplots(1, 3, figsize=(14, 5.2), gridspec_kw={"width_ratios": [1, 1, 1]})
-    allb = shapely.union_all([geoms[i] for i in pick]).bounds
     shared = geoms[pick[0]].boundary.intersection(geoms[pick[1]].boundary)
+    shared_o = orig[pick[0]].boundary.intersection(orig[pick[1]].boundary)
 
-    def draw(ax, pts, title, zoom=None):
+    def draw(ax, polys, pts, title, lim, dot=7):
         for i in pick:
-            poly = geoms[i]
+            poly = polys[i]
             inner = poly.buffer(-0.06 * np.sqrt(poly.area))
             for pp in getattr(poly, "geoms", [poly]):
                 ax.fill(*pp.exterior.xy, color="#f1f0ec", zorder=1)
@@ -171,27 +180,55 @@ def fig_map():
             for pp in getattr(poly, "geoms", [poly]):
                 ax.plot(*pp.exterior.xy, color=GRAY, linewidth=1, zorder=3)
             sel = np.isin(owner, [i])
-            ax.scatter(pts[sel, 0], pts[sel, 1], s=7 if zoom is None else 22, color=BLUE if i == pick[0] else ORANGE, zorder=4)
-        lim = allb if zoom is None else zoom
+            ax.scatter(pts[sel, 0], pts[sel, 1], s=dot, color=BLUE if i == pick[0] else ORANGE, zorder=4)
         ax.set_xlim(lim[0], lim[2])
         ax.set_ylim(lim[1], lim[3])
         ax.set_aspect("equal")
-        ax.set_title(title)
+        ax.set_title(title, fontsize=10)
         ax.set_xticks([])
         ax.set_yticks([])
         ax.grid(False)
 
-    draw(axes[0], P, "Carried by the flow")
-    draw(axes[1], Q, "After the distance remap")
-    zb = shared.buffer(0.18 * np.sqrt(geoms[pick[1]].area)).bounds
-    draw(axes[2], P, "Zoom: dot before, arrow to after", zoom=zb)
-    for i in pick:
-        sel = np.where(np.isin(owner, [i]))[0]
-        for j in sel:
-            if zb[0] <= P[j, 0] <= zb[2] and zb[1] <= P[j, 1] <= zb[3]:
-                axes[2].annotate("", xy=Q[j], xytext=P[j], arrowprops={"arrowstyle": "->", "color": INK, "linewidth": 0.9}, zorder=5)
-    fig.suptitle("California (blue) and Nevada (orange), dot seed 7; the border band (6 % of sqrt(area)) is shaded", fontsize=9, y=0.98)
+    lim_o = shapely.union_all([orig[i] for i in pick]).bounds
+    lim_f = shapely.union_all([geoms[i] for i in pick]).bounds
+    fig, axes = plt.subplots(1, 4, figsize=(16, 5))
+    draw(axes[0], orig, P0, f"Original map\nborder band z = {zs['orig']:.1f} (all states)", lim_o)
+    draw(axes[1], geoms, P, f"Carried by the flow\nz = {zs['flow']:.1f}", lim_f)
+    draw(axes[2], geoms, Q, f"Distance remap\nz = {zs['remap']:.1f}", lim_f)
+    draw(axes[3], geoms, W, f"Reference-point warp (16 vertices)\nz = {zs['warp']:.1f}", lim_f)
+    fig.suptitle("California (blue) and Nevada (orange), dot seed 7; the z-score is over all 49 states; the border band (6 % of sqrt(area)) is shaded", fontsize=9, y=1.0)
     save(fig, "fig_map.png")
+
+    zb = shared.buffer(0.18 * np.sqrt(geoms[pick[1]].area)).bounds
+    fig, axes = plt.subplots(1, 2, figsize=(9, 6))
+    for ax, T, title in zip(axes, (Q, W), ("Distance remap: dot carried by the flow, arrow to the corrected position", "Reference-point warp: same")):
+        draw(ax, geoms, P, title, zb, dot=22)
+        ax.set_title(title, fontsize=8)
+        for i in pick:
+            for j in np.where(np.isin(owner, [i]))[0]:
+                if zb[0] <= P[j, 0] <= zb[2] and zb[1] <= P[j, 1] <= zb[3]:
+                    ax.annotate("", xy=T[j], xytext=P[j], arrowprops={"arrowstyle": "->", "color": INK, "linewidth": 0.9}, zorder=5)
+    save(fig, "fig_map_zoom.png")
+
+
+def fig_profile_states():
+    w = json.loads((D / "landmark_warp.json").read_text())
+    edges = np.array(w["profiles"]["edges"])
+    x = np.arange(len(edges) - 1)
+    labels = [f"{a:g}-{b:g}" for a, b in zip(edges[:-1], edges[1:])]
+    styles = {"original": (GRAY, "--"), "flow": (ORANGE, "-"), "distance remap": (BLUE, "-"), "warp (16 boundary vertices)": (AQUA, "-"), "warp (64 boundary vertices, 1 interior point)": ("#4a3aa7", "-")}
+    fig, ax = plt.subplots(figsize=(8.5, 4))
+    for name, (c, ls) in styles.items():
+        if name in w["profiles"]["rows"]:
+            ax.plot(x, w["profiles"]["rows"][name], color=c, linestyle=ls, marker="o", markersize=4, linewidth=1.8, label=name)
+    ax.axhline(1, color=INK, linewidth=0.8)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=8)
+    ax.set_xlabel("distance to the border of the region (x sqrt(area))")
+    ax.set_ylabel("observed / expected dots (8 seeds, 49 states)")
+    ax.legend(frameon=False, fontsize=8)
+    ax.set_title("Pooled distance profile of the dots")
+    save(fig, "fig_profile_states.png")
 
 
 if __name__ == "__main__":
@@ -199,5 +236,7 @@ if __name__ == "__main__":
     fig_two_regions()
     fig_remap_states()
     fig_remap_toy()
+    if (D / "landmark_warp.json").exists():
+        fig_profile_states()
     if (D / "states_morph.pkl").exists():
         fig_map()
