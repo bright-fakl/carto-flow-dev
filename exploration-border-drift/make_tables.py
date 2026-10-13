@@ -55,4 +55,23 @@ pe = w["profiles"]["edges"]
 ph = " | ".join(f"{a:g}-{b:g}" for a, b in zip(pe[:-1], pe[1:]))
 out += ["\n## Pooled distance profile on the states, observed / expected (mean over 8 seeds)\n", f"| dots | {ph} |", "|---|" + "---|" * (len(pe) - 1)]
 out += [f"| {k} | " + " | ".join(f"{x:.2f}" for x in v) + " |" for k, v in w["profiles"]["rows"].items()]
+v = json.loads((D / "velocity_profile.json").read_text())
+ve = v["edges"]
+vh = " | ".join(f"{a:g}-{b:g}" for a, b in zip(ve[:-1], ve[1:]))
+out += ["\n## Velocity field against the distance to the border (median over the regions, states)\n", "Divergence relative to its value deep inside the region (1 = uniform scaling), and normal velocity (outward) divided by divergence x sqrt(area); the disk with uniform scaling gives 0.282 at the border and falls with slope -0.5.\n", f"| grid | field | quantity | {vh} |", "|---|---|---|" + "---|" * (len(ve) - 1)]
+for g in ("grid 128", "grid 256", "grid 512"):
+    for tag in ("first", "last"):
+        out.append(f"| {g} | {tag} | divergence | " + " | ".join(f"{x:.2f}" for x in v[g][tag]["div"]) + " |")
+        out.append(f"| {g} | {tag} | normal velocity | " + " | ".join(f"{x:.2f}" for x in v[g][tag]["vn"]) + " |")
+
+j = json.loads((D / "jacobian_path.json").read_text())
+je = j["edges"]
+jh = " | ".join(f"{a:g}-{b:g}" for a, b in zip(je[:-1], je[1:]))
+out += ["\n## Dot density predicted from the velocity field along the dot paths, against the observed one (states, grid 256, 8 seeds)\n", f"The step of every iteration is fitted from the displacements of the dots; the residual of the fit is {j['fit'][0]:.4f} (median) and {j['fit'][1]:.4f} (95th percentile). Predicted: harmonic mean of exp(-log J) times the area ratio over the dots in the bin.\n", f"| regions | | {jh} |", "|---|---|" + "---|" * (len(je) - 1)]
+for cls in ("expanding", "shrinking"):
+    for k in ("observed", "predicted"):
+        out.append(f"| {cls} | {k} | " + " | ".join(f"{x:.2f}" for x in j["pooled"][cls][k]) + " |")
+out += ["\n## Remap from the velocity field (no tracers), z-score of the border band\n", "| seed | before | after | shift: median / 95th pct (in sqrt(area)) |", "|---|---|---|---|"]
+out += [f"| {r['seed']} | {r['before']} | {r['proxy']} | {r['shift_median']} / {r['shift_p95']} |" for r in j["seeds"]]
+out.append(f"| mean | {statistics.mean([r['before'] for r in j['seeds']]):.2f} | {statistics.mean([r['proxy'] for r in j['seeds']]):.2f} | |")
 (D / "tables.md").write_text("\n".join(out) + "\n")

@@ -231,11 +231,71 @@ def fig_profile_states():
     save(fig, "fig_profile_states.png")
 
 
+def fig_velocity_profile():
+    v = json.loads((D / "velocity_profile.json").read_text())
+    edges = np.array(v["edges"])
+    x = 0.5 * (edges[:-1] + edges[1:])
+    fig, (a, b) = plt.subplots(1, 2, figsize=(10.5, 3.9))
+    colors = {"grid 128": BLUE, "grid 256": AQUA, "grid 512": ORANGE}
+    for key, c in colors.items():
+        a.plot(x, v[key]["first"]["div"], color=c, marker="o", markersize=4, linewidth=1.8, label=f"{key}, first field")
+        a.plot(x, v[key]["last"]["div"], color=c, marker="s", markersize=3, linewidth=1.0, linestyle="--", label=f"{key}, last field")
+        b.plot(x, v[key]["first"]["vn"], color=c, marker="o", markersize=4, linewidth=1.8, label=key)
+    a.axhline(1, color=INK, linewidth=0.8)
+    a.set_xlabel("distance to the border of the region (x sqrt(area))")
+    a.set_ylabel("divergence / divergence deep inside")
+    a.set_title("Area scaling rate against the distance to the border")
+    a.legend(frameon=False, fontsize=7, loc="lower right")
+    xs = np.linspace(0, 0.45, 50)
+    b.plot(xs, 0.5 * (1 / np.sqrt(np.pi) - xs), color=GRAY, linestyle="--", linewidth=1.2, label="disk, uniform scaling")
+    b.set_xlabel("distance to the border of the region (x sqrt(area))")
+    b.set_ylabel("normal velocity (outward) / (divergence x sqrt(area))")
+    b.set_title("Normal velocity, first field")
+    b.legend(frameon=False, fontsize=8)
+    save(fig, "fig_velocity_profile.png")
+
+
+def fig_jacobian():
+    j = json.loads((D / "jacobian_path.json").read_text())
+    edges = np.array(j["edges"])
+    x = np.arange(len(edges) - 1)
+    labels = [f"{a:g}-{b:g}" for a, b in zip(edges[:-1], edges[1:])]
+    fig, axes = plt.subplots(1, 3, figsize=(14, 3.8), gridspec_kw={"width_ratios": [1, 1, 0.9]})
+    for ax, cls in zip(axes[:2], ("expanding", "shrinking")):
+        ax.plot(x, j["pooled"][cls]["observed"], color=ORANGE, marker="o", markersize=4, linewidth=1.8, label="observed (dots in the bin / expected)")
+        ax.plot(x, j["pooled"][cls]["predicted"], color=BLUE, marker="s", markersize=4, linewidth=1.8, label="predicted from the velocity field along the paths")
+        ax.axhline(1, color=INK, linewidth=0.8)
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=8)
+        ax.set_xlabel("distance to the border (x sqrt(area))")
+        ax.set_title(f"{cls} regions")
+    axes[0].set_ylabel("dot density relative to uniform")
+    axes[0].legend(frameon=False, fontsize=7, loc="upper right")
+    seeds = j["seeds"]
+    for sd in seeds:
+        axes[2].plot([0, 1], [sd["before"], sd["proxy"]], color=GRAY, linewidth=0.8, alpha=0.7, marker="o", markersize=3)
+    m0, m1 = np.mean([sd["before"] for sd in seeds]), np.mean([sd["proxy"] for sd in seeds])
+    axes[2].plot([0, 1], [m0, m1], color=BLUE, marker="o", markersize=7, linewidth=2.5)
+    axes[2].text(1.05, m1, f"{m1:.1f}", color=BLUE, va="center")
+    axes[2].text(0.05, m0 + 0.1, f"{m0:.1f}", color=BLUE)
+    axes[2].set_xticks([0, 1])
+    axes[2].set_xticklabels(["no correction", "remap from the\nvelocity field"])
+    axes[2].set_xlim(-0.3, 1.5)
+    axes[2].set_ylabel("border band z-score (8 seeds)")
+    axes[2].axhline(0, color=INK, linewidth=0.8)
+    axes[2].grid(axis="x", visible=False)
+    save(fig, "fig_jacobian.png")
+
+
 if __name__ == "__main__":
     fig_resolution()
     fig_two_regions()
     fig_remap_states()
     fig_remap_toy()
+    if (D / "velocity_profile.json").exists():
+        fig_velocity_profile()
+    if (D / "jacobian_path.json").exists():
+        fig_jacobian()
     if (D / "landmark_warp.json").exists():
         fig_profile_states()
     if (D / "states_morph.pkl").exists():

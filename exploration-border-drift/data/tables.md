@@ -121,3 +121,47 @@ Mean z over the seeds: before 4.28, per region 1.12, pooled 2.76.
 | distance remap | 1.06 | 1.04 | 1.01 | 1.04 | 0.99 | 0.98 | 0.99 | 0.98 |
 | warp (16 boundary vertices) | 0.77 | 0.93 | 1.01 | 1.05 | 1.03 | 0.98 | 0.96 | 0.82 |
 | warp (64 boundary vertices, 1 interior point) | 1.07 | 1.16 | 1.08 | 1.03 | 1.01 | 0.96 | 0.92 | 0.72 |
+
+## Velocity field against the distance to the border (median over the regions, states)
+
+Divergence relative to its value deep inside the region (1 = uniform scaling), and normal velocity (outward) divided by divergence x sqrt(area); the disk with uniform scaling gives 0.282 at the border and falls with slope -0.5.
+
+| grid | field | quantity | 0-0.01 | 0.01-0.02 | 0.02-0.04 | 0.04-0.06 | 0.06-0.1 | 0.1-0.15 | 0.15-0.2 | 0.2-0.3 | 0.3-0.4 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| grid 128 | first | divergence | 0.83 | 0.81 | 0.86 | 0.88 | 0.91 | 0.96 | 0.99 | 1.00 | 1.00 |
+| grid 128 | first | normal velocity | 0.22 | 0.16 | 0.19 | 0.17 | 0.17 | 0.15 | 0.13 | 0.10 | 0.05 |
+| grid 128 | last | divergence | 0.79 | 0.84 | 0.86 | 0.91 | 0.90 | 0.97 | 0.99 | 1.00 | 1.01 |
+| grid 128 | last | normal velocity | 0.16 | 0.18 | 0.18 | 0.17 | 0.15 | 0.13 | 0.12 | 0.06 | 0.04 |
+| grid 256 | first | divergence | 0.79 | 0.79 | 0.84 | 0.91 | 0.97 | 1.00 | 1.00 | 1.00 | 1.00 |
+| grid 256 | first | normal velocity | 0.20 | 0.19 | 0.18 | 0.17 | 0.15 | 0.15 | 0.10 | 0.10 | 0.04 |
+| grid 256 | last | divergence | 0.68 | 0.78 | 0.85 | 0.91 | 0.95 | 0.99 | 1.00 | 1.00 | 1.00 |
+| grid 256 | last | normal velocity | 0.17 | 0.16 | 0.17 | 0.15 | 0.15 | 0.12 | 0.10 | 0.06 | 0.02 |
+| grid 512 | first | divergence | 0.80 | 0.85 | 0.91 | 0.99 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| grid 512 | first | normal velocity | 0.16 | 0.20 | 0.17 | 0.17 | 0.15 | 0.15 | 0.12 | 0.07 | 0.05 |
+| grid 512 | last | divergence | 0.66 | 0.78 | 0.88 | 0.97 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| grid 512 | last | normal velocity | 0.17 | 0.15 | 0.17 | 0.16 | 0.12 | 0.12 | 0.11 | 0.05 | 0.05 |
+
+## Dot density predicted from the velocity field along the dot paths, against the observed one (states, grid 256, 8 seeds)
+
+The step of every iteration is fitted from the displacements of the dots; the residual of the fit is 0.0000 (median) and 0.0000 (95th percentile). Predicted: harmonic mean of exp(-log J) times the area ratio over the dots in the bin.
+
+| regions | | 0-0.01 | 0.01-0.02 | 0.02-0.04 | 0.04-0.06 | 0.06-0.1 | 0.1-0.2 | 0.2-0.4 | 0.4-0.6 |
+|---|---|---|---|---|---|---|---|---|---|
+| expanding | observed | 1.53 | 1.37 | 1.16 | 1.01 | 0.93 | 0.90 | 0.88 | 0.94 |
+| expanding | predicted | 1.59 | 1.39 | 1.19 | 1.06 | 0.97 | 0.92 | 0.90 | 0.90 |
+| shrinking | observed | 1.00 | 0.96 | 0.91 | 1.04 | 1.07 | 1.00 | 0.98 | 0.65 |
+| shrinking | predicted | 1.11 | 1.02 | 1.00 | 1.03 | 0.99 | 1.00 | 0.98 | 0.97 |
+
+## Remap from the velocity field (no tracers), z-score of the border band
+
+| seed | before | after | shift: median / 95th pct (in sqrt(area)) |
+|---|---|---|---|
+| 0 | 3.19 | 0.0 | 0.0062 / 0.0251 |
+| 1 | 6.14 | 3.07 | 0.0073 / 0.0275 |
+| 2 | 3.77 | 1.28 | 0.0072 / 0.0296 |
+| 3 | 5.56 | 1.91 | 0.007 / 0.0284 |
+| 4 | 3.48 | -0.46 | 0.0071 / 0.0292 |
+| 5 | 5.22 | 0.87 | 0.0074 / 0.0317 |
+| 6 | 3.13 | -1.1 | 0.0066 / 0.0316 |
+| 7 | 3.77 | -0.35 | 0.0079 / 0.0284 |
+| mean | 4.28 | 0.65 | |
