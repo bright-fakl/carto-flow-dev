@@ -4,7 +4,7 @@ title: Stall parameters per level and an iteration budget for the multiresolutio
 description: Treating the cartogram-cpp trigger (go to the next grid when the maximum error is not below 0.8 times its previous value) as a stall rule with short windows on the coarse levels lowers the cost by 20 to 60 % where the ladder already works and converges a skewed-value case that stalls with the defaults, but it leaves coarse levels unconverged where they are needed (districts from 64, counties) and makes those results much worse. A total iteration budget never binds except on counties, where it halves the cost at the same error. No change to the defaults is supported.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-multires-start, adaptive-step-control
 date: 2026-10-12 23:30
 before: main @ 5a4a5a2

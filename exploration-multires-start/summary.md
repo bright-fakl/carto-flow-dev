@@ -4,7 +4,7 @@ title: Starting resolution and refinement of the multiresolution morph
 description: What the start grid, the finest grid and the tolerance of the coarse levels do to a multiresolution flow cartogram on states, districts and counties, for population and for other value distributions. The share of regions with a target below one cell predicts the failures; the smallest region in cells is a better start rule than that share (districts converge from 128, 2.7 cells, and fail from 96, 1.5 cells). A start at the finest grid diverges on fine grids (1024 and 2048) where the ladder reaches them, and coarse levels at four times the tolerance let the ladder refine to the finest grid in 1 to 16 iterations per level. Counties converge in no variant.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-counties-subcell, flow-convergence-synthesis, adaptive-step-control
 date: 2026-10-12 02:25
 before: main @ b5a37be
