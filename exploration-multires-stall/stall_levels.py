@@ -46,6 +46,16 @@ def _counting(self, rho):
 
 
 alg.VelocityComputerFFTW.compute = _counting
+_StallMonitor = alg.StallMonitor
+
+
+class MaxOnlyStallMonitor(_StallMonitor):
+    """Progress is judged on the maximum error alone (as in cartogram-cpp); the mean error never counts."""
+
+    def update(self, step, mean_ratio, max_ratio):
+        return super().update(step, float("inf"), max_ratio)
+
+
 CYCLE = [10]
 alg.cycle_length = lambda recompute_every: CYCLE[0]
 
@@ -90,6 +100,9 @@ VARIANTS = {
     "p2-10": {"coarse": (10, 2, 0.1), "budget": None},
     "budget": {"coarse": BASE, "budget": 600},
     "cpp+budget": {"coarse": (4, 1, 0.2), "budget": 600},
+    "max-cpp": {"coarse": (4, 1, 0.2), "budget": None, "max_only": True},
+    "max-p1-20": {"coarse": (10, 1, 0.2), "budget": None, "max_only": True},
+    "max-p2-10": {"coarse": (10, 2, 0.1), "budget": None, "max_only": True},
 }
 N_ITER = 500
 FINAL_RESERVE = 150
@@ -120,6 +133,7 @@ def run(case, variant):
         if remaining is not None:
             n_iter = max(min(N_ITER, remaining - (0 if last else FINAL_RESERVE)), 10)
         CYCLE[0] = window
+        alg.StallMonitor = MaxOnlyStallMonitor if (v.get("max_only") and not last) else _StallMonitor
         o = MorphOptions(show_progress=False, mean_tol=TOL[0], max_tol=TOL[1], n_iter=n_iter, recompute_every=min(10, n_iter),
                          stall_patience=patience, stall_min_improvement=imp, grid=g, prescale_components=(i == 0), **extra)
         r = wf.morph(options=o)
@@ -129,6 +143,7 @@ def run(case, variant):
         if r.status.value == "converged":
             break
     wall = time.perf_counter() - t
+    alg.StallMonitor = _StallMonitor
     geoms = list(wf.last.get_geometry())
     a = np.array([x.area for x in geoms])
     err = np.abs(a / (gdf["v"].to_numpy(float) / gdf["v"].sum() * a.sum()) - 1) * 100
