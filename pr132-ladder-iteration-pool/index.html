@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #132: n_iter is the total number of iterations of a ladder of resolutions</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #132: n_iter is the total number of iterations of a ladder of resolutions</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-multires-stall/index.html">Stall parameters per level and an iteration budget for the multiresolution ladder</a> <span class="meta">(exploration)</span><br><a href="../pr128-multires-auto-resolution/index.html">Resolution warnings and automatic ladder for the multiresolution morph</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/132">https://github.com/bright-fakl/carto-flow/pull/132</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/93">#93</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
+<dt>Branch</dt><dd>feat/ladder-iteration-pool</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-13 00:30</dd>
+<dt>Before</dt><dd>main @ 5a4a5a2</dd>
+<dt>After</dt><dd>feat/ladder-iteration-pool @ 29c00df</dd>
+<dt>Inputs</dt><dd>the cases of exploration-multires-stall (states with area-like and lognormal sigma-2 values, districts with smooth sigma-2, inverse-area and population values, 3,108 counties not bundled); tolerances 1 % / 3 %, n_iter 500, adaptive_dt on, NUMBA_NUM_THREADS=8. True error is the output area against the target share of the total output area.</dd>
+</dl>
+<p class="desc">A ladder (LadderSpec or &quot;auto&quot; in MorphOptions.grid) shares one iteration total: each level may use what the previous levels left, and the ladder stops when the total is used up. A list of options keeps one n_iter per level. Ladders that end before the total (states, districts) are unchanged; counties at 500 iterations stop at grid 1024 and the districts with smooth sigma-2 values end completed.</p>
+<p><code>make_tables.py</code> regenerates <code>data/tables.md</code>. &quot;Per level&quot; is the ladder with a list of options (500 iterations for every level, the old behavior); &quot;total&quot; is a single <code>MorphOptions</code> with <code>n_iter=500</code>. There are no figures.</p>
+<table>
+<tr><th>case</th><th>n_iter</th><th>per level (list of options)</th><th>total (single options)</th></tr>
+<tr><td>states-area</td><td>500</td><td>converged, 193 it, 1.3 s, mean 0.86 / max 2.7 %: 64 stal 110, 128 stal 50, 256 conv 33</td><td>converged, 193 it, 0.6 s, mean 0.86 / max 2.7 %: 64 stal 110, 128 stal 50, 256 conv 33</td></tr>
+<tr><td>states-lognormal2</td><td>500</td><td>stalled, 270 it, 0.8 s, mean 15.25 / max 106.5 %: 64 stal 160, 128 stal 50, 256 stal 60</td><td>stalled, 270 it, 0.9 s, mean 15.25 / max 106.5 %: 64 stal 160, 128 stal 50, 256 stal 60</td></tr>
+<tr><td>districts-smooth2</td><td>500</td><td>stalled, 570 it, 3.1 s, mean 4.26 / max 44.8 %: 128 stal 170, 256 stal 100, 512 stal 300</td><td>completed, 500 it, 2.2 s, mean 3.64 / max 58.0 %: 128 stal 170, 256 stal 100, 512 comp 230</td></tr>
+<tr><td>districts-inverse</td><td>500</td><td>stalled, 490 it, 2.0 s, mean 18.67 / max 330.6 %: 128 stal 230, 256 stal 140, 512 stal 120</td><td>stalled, 490 it, 2.0 s, mean 18.67 / max 330.6 %: 128 stal 230, 256 stal 140, 512 stal 120</td></tr>
+<tr><td>districts-pop64</td><td>500</td><td>converged, 229 it, 0.9 s, mean 0.18 / max 2.6 %: 64 stal 110, 128 conv 119</td><td>converged, 229 it, 1.0 s, mean 0.18 / max 2.6 %: 64 stal 110, 128 conv 119</td></tr>
+<tr><td>counties</td><td>500</td><td>stalled, 720 it, 15.3 s, mean 2.18 / max 473.4 %: 512 stal 410, 1024 stal 190, 2048 stal 120</td><td>completed, 500 it, 6.7 s, mean 6.46 / max 496.4 %: 512 stal 410, 1024 comp 90</td></tr>
+</table>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
