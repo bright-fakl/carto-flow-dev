@@ -84,32 +84,33 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-13 18:00</dd>
 <dt>Before</dt><dd>main @ 5a4a5a2 (landmarks carried by the flow)</dd>
-<dt>After</dt><dd>feat/landmark-area-scaling @ a2fc8a7</dd>
+<dt>After</dt><dd>feat/landmark-area-scaling @ ef3273e</dd>
 <dt>Inputs</dt><dd>49 states (bundled) with poverty counts, dot density with n_dots = round(max / 25000), normalization &quot;maximum&quot; (about 1,480 dots), 8 seeds; MorphOptions defaults with area_scale 1e-6 (grid 256); NUMBA_NUM_THREADS=8. The border-band z-score counts the dots inside a band of 6 % of sqrt(area) along the border of their own region against the number expected for uniform dots (binomial, summed over regions).</dd>
 </dl>
-<p class="desc">The morph sums the divergence of the velocity field along the path of every landmark vertex (Cartogram.landmark_area_scaling) at no measurable cost, and Cartogram.get_landmarks(uniform=True) uses it to remap the distance of point landmarks to the border of their region so that landmarks that were uniform before the morph are uniform again. On the states with 8 seeds of about 1,480 dots the mean border-band z-score is 4.28 for the carried dots, 0.86 with uniform=True and 0.63 on the original map; the median dot moves 0.7 % of the width of its region.</p>
-<p><code>make_figures.py</code> regenerates the figures and <code>data/tables.md</code>; it uses <code>get_landmarks(uniform=True)</code> of the library. The cost: within the same checkout, disabling the accumulation does not change the morph time (0.229 against 0.228 s at grid 256 and 0.53 against 0.54 s at grid 512, 1,480 dots, minimum of 5 runs); <code>get_landmarks(uniform=True)</code> takes about 0.2 s for these dots. More on the mechanism, the measurements and the alternatives that were tried is on <code>exploration-border-drift</code>.</p>
+<p class="desc">The morph sums the divergence of the velocity field along the path of every landmark vertex at no measurable cost; every snapshot stores the area scaling, and Cartogram.get_landmarks(iteration, uniform=True) remaps the distance of point landmarks to the border of their region so that landmarks that were uniform before the morph are uniform again, at any saved iteration. The distribution of the distance to the border is computed deterministically (distance transform, once per cartogram), so the correction changes smoothly between frames of an animation. On the states with 8 seeds of about 1,480 dots the mean border-band z-score is 4.28 for the carried dots, 0.47 with uniform=True and 0.63 on the original map; the median dot moves 0.8 % of the width of its region.</p>
+<p><code>make_figures.py</code> regenerates the figures and <code>data/tables.md</code>, <code>frames.py</code> the table of the frames; they use <code>get_landmarks(uniform=True)</code> of the library. The cost: within the same checkout, disabling the accumulation does not change the morph time (0.229 against 0.228 s at grid 256 and 0.53 against 0.54 s at grid 512, 1,480 dots, minimum of 5 runs); <code>get_landmarks(uniform=True)</code> takes 0.35 s the first time (it includes the distribution of the distance to the border of every region) and 0.054 s afterwards for these dots. More on the mechanism, the measurements and the alternatives that were tried is on <code>exploration-border-drift</code>.</p>
+<p>Frames: 29 snapshots of one morph (every 4 iterations), correction vector of every corrected dot over the frames. Second difference of the correction: 0.008 % of the width of the region in the median, 0.12 % at the 95th percentile; increment of the correction between two frames relative to the carried motion: 0.011 in the median, 0.135 at the 95th percentile. A version with the distribution of the distance taken from 400 random sample points per region had 0.14 % and 1.1 % and 0.66 at the 95th percentile.</p>
 <table>
 <tr><th>seed</th><th>original map</th><th>carried by the flow</th><th>get_landmarks(uniform=True)</th><th>shift: median / 95th pct (x sqrt(area))</th></tr>
-<tr><td>0</td><td>-0.11</td><td>3.19</td><td>0.12</td><td>0.0063 / 0.0248</td></tr>
-<tr><td>1</td><td>2.31</td><td>6.14</td><td>3.02</td><td>0.0072 / 0.0274</td></tr>
-<tr><td>2</td><td>0.98</td><td>3.77</td><td>1.1</td><td>0.007 / 0.0291</td></tr>
-<tr><td>3</td><td>0.98</td><td>5.56</td><td>2.49</td><td>0.0074 / 0.0269</td></tr>
-<tr><td>4</td><td>-0.29</td><td>3.48</td><td>-0.17</td><td>0.0067 / 0.0274</td></tr>
-<tr><td>5</td><td>1.15</td><td>5.22</td><td>0.47</td><td>0.0077 / 0.0302</td></tr>
-<tr><td>6</td><td>-0.58</td><td>3.13</td><td>-0.35</td><td>0.0068 / 0.0302</td></tr>
-<tr><td>7</td><td>0.63</td><td>3.77</td><td>0.18</td><td>0.0077 / 0.0276</td></tr>
-<tr><td>mean</td><td>0.63</td><td>4.28</td><td>0.86</td><td>0.0071 / 0.0279</td></tr>
+<tr><td>0</td><td>-0.11</td><td>3.19</td><td>-0.23</td><td>0.0069 / 0.0265</td></tr>
+<tr><td>1</td><td>2.31</td><td>6.14</td><td>3.07</td><td>0.0078 / 0.0287</td></tr>
+<tr><td>2</td><td>0.98</td><td>3.77</td><td>0.99</td><td>0.0073 / 0.0305</td></tr>
+<tr><td>3</td><td>0.98</td><td>5.56</td><td>1.68</td><td>0.0074 / 0.0307</td></tr>
+<tr><td>4</td><td>-0.29</td><td>3.48</td><td>-0.52</td><td>0.0077 / 0.0292</td></tr>
+<tr><td>5</td><td>1.15</td><td>5.22</td><td>0.52</td><td>0.0079 / 0.0329</td></tr>
+<tr><td>6</td><td>-0.58</td><td>3.13</td><td>-1.27</td><td>0.007 / 0.033</td></tr>
+<tr><td>7</td><td>0.63</td><td>3.77</td><td>-0.46</td><td>0.0084 / 0.0303</td></tr>
+<tr><td>mean</td><td>0.63</td><td>4.28</td><td>0.47</td><td>0.0076 / 0.0302</td></tr>
 </table>
 <table>
 <tr><th>dots (observed / expected, mean over 8 seeds)</th><th>0-0.01</th><th>0.01-0.02</th><th>0.02-0.04</th><th>0.04-0.06</th><th>0.06-0.1</th><th>0.1-0.2</th><th>0.2-0.4</th><th>0.4-0.6</th></tr>
 <tr><td>original</td><td>1.03</td><td>1.04</td><td>1.00</td><td>1.03</td><td>1.00</td><td>0.99</td><td>0.98</td><td>1.18</td></tr>
 <tr><td>carried</td><td>1.40</td><td>1.27</td><td>1.10</td><td>1.02</td><td>0.96</td><td>0.93</td><td>0.90</td><td>0.88</td></tr>
-<tr><td>uniform</td><td>1.09</td><td>0.99</td><td>1.00</td><td>1.05</td><td>0.97</td><td>0.98</td><td>1.00</td><td>0.85</td></tr>
+<tr><td>uniform</td><td>1.10</td><td>1.03</td><td>0.97</td><td>1.00</td><td>0.99</td><td>1.00</td><td>0.98</td><td>0.91</td></tr>
 </table>
 <div class="figure">
-<img src="fig_map.png" alt="California (blue) and Nevada (orange), dot seed 7. Left: the original map. Middle: the dots carried by the flow crowd the border band (z 3.8 over all states). Right: the same dots after get_landmarks(uniform=True) (z 0.2).">
-<p class="caption">California (blue) and Nevada (orange), dot seed 7. Left: the original map. Middle: the dots carried by the flow crowd the border band (z 3.8 over all states). Right: the same dots after get_landmarks(uniform=True) (z 0.2).</p>
+<img src="fig_map.png" alt="California (blue) and Nevada (orange), dot seed 7. Left: the original map. Middle: the dots carried by the flow crowd the border band (z 3.8 over all states). Right: the same dots after get_landmarks(uniform=True).">
+<p class="caption">California (blue) and Nevada (orange), dot seed 7. Left: the original map. Middle: the dots carried by the flow crowd the border band (z 3.8 over all states). Right: the same dots after get_landmarks(uniform=True).</p>
 </div><div class="figure">
 <img src="fig_profile.png" alt="Pooled distance profile of the dots on the 49 states (observed / expected, 8 seeds): flat on the original map, 1.4 times the expected number in the first 1 % of the distance after the flow, flat again after the correction.">
 <p class="caption">Pooled distance profile of the dots on the 49 states (observed / expected, 8 seeds): flat on the original map, 1.4 times the expected number in the first 1 % of the distance after the flow, flat again after the correction.</p>

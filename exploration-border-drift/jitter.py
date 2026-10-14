@@ -35,6 +35,9 @@ from velocity_profile import sample
 warnings.filterwarnings("ignore")
 HERE = Path(__file__).resolve().parent
 GRID = 256
+import os
+
+SKIP = bool(os.environ.get("SKIP"))
 EVERY = 4
 
 
@@ -113,12 +116,22 @@ def main():
         ov_s = profile_from_probes(geoms, Pf[n_d:n_d + n_s], cs, sreg, True)
         ov_r = profile_from_probes(geoms, Pf[n_d + n_s:], cr, rregion, False)
         carried.append(P)
+        if SKIP:
+            print("frame", it, flush=True)
+            continue
         variants["A dots, F sampled"].append(proxy_remap_sampled(geoms, P, owner, cdots) - P)
         variants["B structured probes, F sampled"].append(proxy_remap_sampled(geoms, P, owner, cdots, chat_override=ov_s) - P)
         variants["C random probes, F sampled"].append(proxy_remap_sampled(geoms, P, owner, cdots, chat_override=ov_r) - P)
         variants["E structured probes, F from buffers"].append(proxy_remap(geoms, P, owner, cdots, n_grid=13, chat_override=ov_s) - P)
         print("frame", it, flush=True)
+    import pickle
+
+    pickle.dump({"frames": [s.iteration for s in frames], "geoms": [[shapely.to_wkb(x) for x in s.geometry] for s in frames],
+                 "dots": [np.array([[p.x, p.y] for p in s.landmarks])[:n_d] for s in frames], "logJ": [st["hist"][s.iteration][:n_d] for s in frames],
+                 "owner": owner, "orig": [shapely.to_wkb(x) for x in orig]}, open(HERE / "data" / "frames.pkl", "wb"))
     res = {"frames": [s.iteration for s in frames], "variants": {}}
+    if SKIP:
+        return
     sc_final = np.array([np.sqrt(shapely.buffer(frames[-1].geometry[o], 0).area) for o in owner])
     carried = np.array(carried)
     for name, deltas in variants.items():
