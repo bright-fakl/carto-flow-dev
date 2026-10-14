@@ -144,7 +144,7 @@ def proxy_remap_fast(geoms, P, owner, cdot, w=0.15, edges=(0, 0.01, 0.02, 0.04, 
     return Q
 
 
-def proxy_remap_sampled(geoms, P, owner, cdot, n_ref=400, edges=EDGES, seed=0):
+def proxy_remap_sampled(geoms, P, owner, cdot, n_ref=400, edges=EDGES, seed=0, chat_override=None):
     """The same remap, with the distribution F of the distance to the border of a uniform sample of the region taken from
     n_ref sample points instead of from polygon buffers."""
     import distance_remap as dr
@@ -165,6 +165,8 @@ def proxy_remap_sampled(geoms, P, owner, cdot, n_ref=400, edges=EDGES, seed=0):
             m = ins & (d >= edges[b]) & (d < edges[b + 1])
             if m.any():
                 chat[b] = 1.0 / np.mean(1.0 / cdot[sel][m])
+        if chat_override is not None and r in chat_override:
+            chat = chat_override[r]
         ok = np.isfinite(chat)
         if ok.sum() < 2:
             continue

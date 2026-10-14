@@ -193,3 +193,57 @@ Morph time without the sum in place: 0.31, 0.214, 0.218 s (3 runs after a warm-u
 | 200 sample points per region | 0.13 | 0.35 | 0.0073 |
 | 400 sample points per region | 0.17 | 0.52 | 0.0067 |
 | 1000 sample points per region | 0.36 | 0.06 | 0.0061 |
+
+## Border sections: do they differ, and does a per-section correction help? (states, grid 256, 8 seeds)
+
+A morph with the dots and, per region, probe points along the inward normals at 24 points spread along the border (11 distances from 0 to 12 cells and 4 from 0.1 to 0.3 of sqrt(area)), all with the area scaling summed in place. Remaps of the dots, z-score of the border band: pooled c(d) from the dots (PR 133); per-section c(d) from the probes with a first-order strip remap (d' = w C(d) / C(w)); pooled c(d) from the probes with the full remap of PR 133.
+
+| seed | before | pooled, from the dots | per section, strip, from the probes | pooled, from the probes |
+|---|---|---|---|---|
+| 0 | 3.19 | 0.41 | 1.1 | -1.16 |
+| 1 | 6.14 | 3.3 | 4.35 | 2.73 |
+| 2 | 3.77 | 0.81 | 2.15 | 0.41 |
+| 3 | 5.56 | 1.8 | 3.07 | 1.97 |
+| 4 | 3.48 | -0.35 | 1.33 | -0.75 |
+| 5 | 5.22 | 0.64 | 2.32 | 0.58 |
+| 6 | 3.13 | -0.4 | 0.0 | -1.79 |
+| 7 | 3.77 | -0.35 | 1.28 | -0.23 |
+| mean | 4.28 | 0.73 | 1.95 | 0.22 |
+
+### Dot density by the kind of border section (the nearest border section faces another state or the outside)
+
+| border | | 0-0.01 | 0.01-0.02 | 0.02-0.04 | 0.04-0.06 | 0.06-0.1 | 0.1-0.2 | 0.2-0.4 | 0.4-0.6 |
+|---|---|---|---|---|---|---|---|---|---|
+| border with another state | observed / expected | 1.37 | 1.21 | 1.07 | 1.01 | 0.99 | 0.94 | 0.91 | 0.82 |
+| border with another state | predicted from the probes of that kind | 1.37 | 1.38 | 1.19 | 1.06 | 1.00 | 0.96 | 0.93 | 0.00 |
+| border with another state | predicted from the pooled probes | 1.37 | 1.35 | 1.17 | 1.07 | 1.00 | 0.96 | 0.93 | 0.00 |
+| border with the outside | observed / expected | 1.45 | 1.40 | 1.10 | 1.06 | 0.89 | 0.90 | 0.88 | 0.78 |
+| border with the outside | predicted from the probes of that kind | 1.46 | 1.34 | 1.17 | 1.07 | 0.95 | 0.91 | 0.89 | 0.00 |
+| border with the outside | predicted from the pooled probes | 1.67 | 1.45 | 1.22 | 1.06 | 0.95 | 0.91 | 0.89 | 0.00 |
+
+### Florida: crowding c = (A_final / A_original) / J of the probes by border section
+
+| section | neighbor | c at 1 cell | c at 3 cells | c at 0.2 sqrt(area) |
+|---|---|---|---|---|
+| 0 | Georgia | 1.0 | 0.87 | 0.87 |
+| 1 | Georgia | 1.09 | 0.86 | 0.86 |
+| 2 | outside | 1.22 | 1.22 | 1.22 |
+| 3 | outside | 1.01 | 0.85 | 0.85 |
+| 4 | outside | 1.05 | 0.86 | 0.85 |
+| 5 | outside | 1.1 | 0.86 | 0.85 |
+| 6 | outside | 1.16 | 0.86 | 0.85 |
+| 7 | outside | 1.08 | 0.86 | 0.86 |
+| 8 | outside | 1.11 | 1.1 | 1.1 |
+| 9 | outside | 1.07 | 0.86 | 0.85 |
+| 10 | outside | 1.13 | 0.87 | 0.85 |
+| 11 | outside | 1.24 | 0.86 | 0.85 |
+| 12 | outside | 2.13 | 2.13 | 2.13 |
+| 13 | outside | 1.31 | 0.86 | 0.85 |
+| 15 | outside | 1.08 | 0.87 | 0.85 |
+| 16 | outside | 1.18 | 0.89 | 0.86 |
+| 17 | outside | 1.27 | 0.85 | 0.86 |
+| 18 | outside | 0.97 | 0.88 | 0.88 |
+| 19 | outside | 1.39 | 1.03 | 0.85 |
+| 20 | outside | 1.14 | 0.9 | 0.9 |
+| 22 | Alabama | 1.97 | 1.97 | 1.97 |
+| 23 | Alabama | 1.15 | 0.89 | 0.89 |

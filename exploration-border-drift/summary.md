@@ -12,7 +12,7 @@ after: the same checkout; dots, tracers and the remap run after the morph
 inputs: 49 states (bundled) with poverty counts, dot density with n_dots = round(max / 25000), normalization "maximum" (about 1,480 dots per seed), MorphOptions defaults with area_scale 1e-6 and n_iter 400 unless stated; the two-region case is two unit squares with values 1 and 4 and 20,000 uniform dots each, tolerances 0.5 % / 1 %. NUMBA_NUM_THREADS=8.
 ---
 
-`border_band.py`, `resolution_scan.py`, `two_regions.py`, `where_are_the_dots.py`, `distance_remap.py` (writes a cache that the following scripts read), `sector_remap.py`, `toy_remap.py` and `landmark_warp.py`, `velocity_profile.py`, `jacobian_path.py`, `inplace_proxy.py` and `cost.py` produce the data in `data/`; `make_tables.py` writes `data/tables.md` (every table below) and `make_figures.py` the figures. The cache `data/states_morph.pkl` is not committed. The border-band z-score counts the dots inside a band (6 % of `sqrt(area)` wide) along the border of their own region and compares it with the number expected for uniform dots, as a binomial z-score summed over regions; its standard deviation over seeds for a uniform sample is about 1.
+`border_band.py`, `resolution_scan.py`, `two_regions.py`, `where_are_the_dots.py`, `distance_remap.py` (writes a cache that the following scripts read), `sector_remap.py`, `toy_remap.py` and `landmark_warp.py`, `velocity_profile.py`, `jacobian_path.py`, `inplace_proxy.py`, `cost.py` and `sections.py` produce the data in `data/`; `make_tables.py` writes `data/tables.md` (every table below) and `make_figures.py` the figures. The cache `data/states_morph.pkl` is not committed. The border-band z-score counts the dots inside a band (6 % of `sqrt(area)` wide) along the border of their own region and compares it with the number expected for uniform dots, as a binomial z-score summed over regions; its standard deviation over seeds for a uniform sample is about 1.
 
 figure: fig_velocity_profile.png — Velocity field against the distance to the border of the region (median over the regions, first and last field of the morph, three grid sizes). Left: the divergence relative to its value deep inside; it is 1 (uniform scaling) beyond about 0.15 of sqrt(area) and falls to 0.7 to 0.8 in a band along the border whose width shrinks with the cell size. Right: the normal velocity, which is close to linear in the distance with the slope of a disk under uniform scaling and an offset of about 0.08 below it.
 figure: fig_jacobian.png — Dot density predicted from the velocity field along the dot paths, against the observed one (left and middle), and the border-band z-score of 8 seeds before and after a remap built from the prediction (right).
@@ -39,6 +39,8 @@ figure: fig_remap_toy.png — The remap on the two-region case (grid 256). The s
 - **Distance remap.** Tracer points, uniform in each original region, are carried through the same morph. For each region the distribution G of their distance to the morphed border is compared with the distribution F of a uniform sample of the morphed region, and a dot at distance d moves along the direction to its nearest border point to F⁻¹(G(d)). Over 8 dot seeds the mean z-score falls from 4.3 to 1.1 (residual sd 1.3). The median dot moves 0.7 % of `sqrt(area)`, the 95th percentile 2.4 %, the largest 8 %.
 - **Pooling the regions is worse**, as expected from the different sizes and distortion profiles: one remap in units of `sqrt(area)` for all regions gives a mean z-score of 2.8. **A limited set of reference points is enough**: 50 tracers per region give a mean z-score of 1.14 (2000: 1.10). **Sectors around the centroid** (the angular sector of the nearest border point decides which remap applies) do not help on the states (1.21, 1.18 and 1.71 for 4, 8 and 16 sectors).
 - **Reference-point warp.** Each region is warped by a thin-plate spline through M of its boundary vertices (original to morphed position; the vertices exist in the input and the result) and optionally carried interior points; the dots, which are uniform in the original region, are mapped with the warp instead of the flow, so no tracers are needed. Over 8 seeds the mean z-score is 1.13 for 8 vertices, 0.86 for 16, 1.89 for 32, 2.44 for 64 and 2.87 for 128: the more of the boundary detail the warp carries, the closer it gets to the flow and to its clustering. With 16 vertices 2.2 % of the dots end outside their region (6.1 % with 8, 0.7 % with 32), the median dot moves 1.6 % of `sqrt(area)` against the flow position (95th percentile 6.6 %), and the profile undershoots at the border (0.77) and deep inside (0.82). Adding the carried point nearest to the centroid changes little.
+- **Border sections.** Within a region, the crowding differs somewhat between sections: for Florida, the first cell of the probes along the normals shows c between 1.0 and 1.4 (Georgia 1.0 to 1.09, Alabama 1.15, coast 1.0 to 1.39, with a few sections that have too few probes), and c is the interior value (about 0.86) beyond 3 cells almost everywhere. Over all regions the observed excess near a border with another state (1.37, 1.21, 1.07 in the first three bins) and near the coast (1.45, 1.40, 1.10) is similar. A profile from the probes of the same kind of section predicts the coast better (1.46 against 1.45 observed) than the pooled profile (1.67); for the borders with other states they agree (1.37). So the pooled profile of PR 133 is off by about 0.2 in the first bin for some sections, which is small and confined to the first one to two cells.
+- **Probes along the normals.** Probe points placed along the inward normals at 24 points of the border of every region (about 400 probes per region), carried with the morph, give a region profile that is good enough: the mean z-score is 0.22 (the dots as their own sample: 0.73 in the same run). A per-section remap from them with a first-order strip normalization (d' = w C(d) / C(w), no sampling of the area) only reaches 1.95, because the strip does not compensate the excess with the deficit deeper inside; a per-section remap with the full distribution of the distance (F) per section has not been tested. The reduced one-dimensional model without carried points has not been tested.
 - **Not tested:** mean-value coordinates, and a warp that keeps the relative position to reference points exactly (the thin-plate spline interpolates the displacements of the reference points, and the relative configuration of the dots is only approximately kept).
 
 ## Border band z-score on the current code (dot seed 7)
@@ -236,6 +238,60 @@ Morph time without the sum in place: 0.31, 0.214, 0.218 s (3 runs after a warm-u
 | 200 sample points per region | 0.13 | 0.35 | 0.0073 |
 | 400 sample points per region | 0.17 | 0.52 | 0.0067 |
 | 1000 sample points per region | 0.36 | 0.06 | 0.0061 |
+
+## Border sections: do they differ, and does a per-section correction help? (states, grid 256, 8 seeds)
+
+A morph with the dots and, per region, probe points along the inward normals at 24 points spread along the border (11 distances from 0 to 12 cells and 4 from 0.1 to 0.3 of sqrt(area)), all with the area scaling summed in place. Remaps of the dots, z-score of the border band: pooled c(d) from the dots (PR 133); per-section c(d) from the probes with a first-order strip remap (d' = w C(d) / C(w)); pooled c(d) from the probes with the full remap of PR 133.
+
+| seed | before | pooled, from the dots | per section, strip, from the probes | pooled, from the probes |
+|---|---|---|---|---|
+| 0 | 3.19 | 0.41 | 1.1 | -1.16 |
+| 1 | 6.14 | 3.3 | 4.35 | 2.73 |
+| 2 | 3.77 | 0.81 | 2.15 | 0.41 |
+| 3 | 5.56 | 1.8 | 3.07 | 1.97 |
+| 4 | 3.48 | -0.35 | 1.33 | -0.75 |
+| 5 | 5.22 | 0.64 | 2.32 | 0.58 |
+| 6 | 3.13 | -0.4 | 0.0 | -1.79 |
+| 7 | 3.77 | -0.35 | 1.28 | -0.23 |
+| mean | 4.28 | 0.73 | 1.95 | 0.22 |
+
+### Dot density by the kind of border section (the nearest border section faces another state or the outside)
+
+| border | | 0-0.01 | 0.01-0.02 | 0.02-0.04 | 0.04-0.06 | 0.06-0.1 | 0.1-0.2 | 0.2-0.4 | 0.4-0.6 |
+|---|---|---|---|---|---|---|---|---|---|
+| border with another state | observed / expected | 1.37 | 1.21 | 1.07 | 1.01 | 0.99 | 0.94 | 0.91 | 0.82 |
+| border with another state | predicted from the probes of that kind | 1.37 | 1.38 | 1.19 | 1.06 | 1.00 | 0.96 | 0.93 | 0.00 |
+| border with another state | predicted from the pooled probes | 1.37 | 1.35 | 1.17 | 1.07 | 1.00 | 0.96 | 0.93 | 0.00 |
+| border with the outside | observed / expected | 1.45 | 1.40 | 1.10 | 1.06 | 0.89 | 0.90 | 0.88 | 0.78 |
+| border with the outside | predicted from the probes of that kind | 1.46 | 1.34 | 1.17 | 1.07 | 0.95 | 0.91 | 0.89 | 0.00 |
+| border with the outside | predicted from the pooled probes | 1.67 | 1.45 | 1.22 | 1.06 | 0.95 | 0.91 | 0.89 | 0.00 |
+
+### Florida: crowding c = (A_final / A_original) / J of the probes by border section
+
+| section | neighbor | c at 1 cell | c at 3 cells | c at 0.2 sqrt(area) |
+|---|---|---|---|---|
+| 0 | Georgia | 1.0 | 0.87 | 0.87 |
+| 1 | Georgia | 1.09 | 0.86 | 0.86 |
+| 2 | outside | 1.22 | 1.22 | 1.22 |
+| 3 | outside | 1.01 | 0.85 | 0.85 |
+| 4 | outside | 1.05 | 0.86 | 0.85 |
+| 5 | outside | 1.1 | 0.86 | 0.85 |
+| 6 | outside | 1.16 | 0.86 | 0.85 |
+| 7 | outside | 1.08 | 0.86 | 0.86 |
+| 8 | outside | 1.11 | 1.1 | 1.1 |
+| 9 | outside | 1.07 | 0.86 | 0.85 |
+| 10 | outside | 1.13 | 0.87 | 0.85 |
+| 11 | outside | 1.24 | 0.86 | 0.85 |
+| 12 | outside | 2.13 | 2.13 | 2.13 |
+| 13 | outside | 1.31 | 0.86 | 0.85 |
+| 15 | outside | 1.08 | 0.87 | 0.85 |
+| 16 | outside | 1.18 | 0.89 | 0.86 |
+| 17 | outside | 1.27 | 0.85 | 0.86 |
+| 18 | outside | 0.97 | 0.88 | 0.88 |
+| 19 | outside | 1.39 | 1.03 | 0.85 |
+| 20 | outside | 1.14 | 0.9 | 0.9 |
+| 22 | Alabama | 1.97 | 1.97 | 1.97 |
+| 23 | Alabama | 1.15 | 0.89 | 0.89 |
 
 ## Where the dots of B are (two squares, grid 256), by distance to the shared border
 

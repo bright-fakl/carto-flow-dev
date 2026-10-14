@@ -82,4 +82,15 @@ out.append(f"| mean | {statistics.mean([r['before'] for r in sp['seeds']]):.2f} 
 cs = json.loads((D / "cost.json").read_text())
 out += ["\n## Cost of the correction (states, one dot seed with %d dots, grid 256, %d iterations)\n" % (cs["landmarks"], cs["iterations"]), f"Morph time without the sum in place: {', '.join(str(x) for x in cs['morph_seconds_without'])} s (3 runs after a warm-up); with the sum in place in a Python wrapper: {', '.join(str(x) for x in cs['morph_seconds_with'])} s, of which {', '.join(str(x) for x in cs['seconds_in_the_sum'])} s in the sum itself. Memory: one float per dot, and the divergence of the current field (one grid) while it is in use.\n", "| remap | seconds | z after (before: %s) | median shift (x sqrt(area)) |" % cs["z_before"], "|---|---|---|---|"]
 out += [f"| {r['grid_points'] if isinstance(r['grid_points'], str) else str(r['grid_points']) + ' distance points, polygon buffers'} | {r['seconds']} | {r['z']} | {r['shift_median']} |" for r in cs["remap"]]
+sc_ = json.loads((D / "sections.json").read_text())
+out += ["\n## Border sections: do they differ, and does a per-section correction help? (states, grid 256, 8 seeds)\n", "A morph with the dots and, per region, probe points along the inward normals at 24 points spread along the border (11 distances from 0 to 12 cells and 4 from 0.1 to 0.3 of sqrt(area)), all with the area scaling summed in place. Remaps of the dots, z-score of the border band: pooled c(d) from the dots (PR 133); per-section c(d) from the probes with a first-order strip remap (d' = w C(d) / C(w)); pooled c(d) from the probes with the full remap of PR 133.\n", "| seed | before | pooled, from the dots | per section, strip, from the probes | pooled, from the probes |", "|---|---|---|---|---|"]
+out += [f"| {r['seed']} | {r['before']} | {r['pooled_from_dots']} | {r['sections_from_probes']} | {r['pooled_from_probes']} |" for r in sc_["seeds"]]
+out.append("| mean | " + " | ".join(f"{statistics.mean([r[k] for r in sc_['seeds']]):.2f}" for k in ("before", "pooled_from_dots", "sections_from_probes", "pooled_from_probes")) + " |")
+kh = " | ".join(f"{a:g}-{b:g}" for a, b in zip(je[:-1], je[1:]))
+out += ["\n### Dot density by the kind of border section (the nearest border section faces another state or the outside)\n", f"| border | | {kh} |", "|---|---|" + "---|" * (len(je) - 1)]
+for name, d_ in sc_["kinds"].items():
+    for key, lab in (("observed", "observed / expected"), ("predicted_by_kind", "predicted from the probes of that kind"), ("predicted_pooled", "predicted from the pooled probes")):
+        out.append(f"| {name} | {lab} | " + " | ".join(f"{x:.2f}" for x in d_[key]) + " |")
+out += ["\n### Florida: crowding c = (A_final / A_original) / J of the probes by border section\n", "| section | neighbor | c at 1 cell | c at 3 cells | c at 0.2 sqrt(area) |", "|---|---|---|---|---|"]
+out += [f"| {r['section']} | {r['neighbor']} | {r['c_at_1_cell']} | {r['c_at_3_cells']} | {r['c_at_0.2']} |" for r in sc_["florida"]]
 (D / "tables.md").write_text("\n".join(out) + "\n")
