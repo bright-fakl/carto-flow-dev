@@ -1,1 +1,1 @@
-{"frames": 29, "first_call_seconds": 0.347, "later_calls_seconds_median": 0.054, "second_difference_median_pct": 0.008, "second_difference_p95_pct": 0.12, "increment_over_motion_median": 0.011, "increment_over_motion_p95": 0.135, "final_correction_median_pct": 0.695}
+{"frames": 29, "first_call_seconds": 0.375, "later_calls_seconds_median": 0.079, "second_difference_median_pct": 0.008, "second_difference_p95_pct": 0.132, "increment_over_motion_median": 0.01, "increment_over_motion_p95": 0.177, "final_correction_median_pct": 0.631}

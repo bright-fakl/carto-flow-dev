@@ -21,7 +21,7 @@ g = data.load_us_census(population=True, poverty=True)
 col = "Below Poverty Level"
 d = prop.generate_dot_density(g, columns=[col], n_dots=round(g[col].max() / 25000), normalization="maximum", seed=0)
 owner = np.array([list(g.index).index(o) for o in d["original_index"]])
-c = flow.create_flow_cartogram(g, "Population", landmarks=gpd.GeoSeries(list(d.geometry), crs=g.crs), options=flow.MorphOptions(area_scale=1e-6, show_progress=False, snapshot_every=4))
+c = flow.create_flow_cartogram(g, "Population", landmarks=gpd.GeoSeries(list(d.geometry), crs=g.crs), options=flow.MorphOptions(area_scale=1e-6, show_progress=False, snapshot_every=4, landmark_probes=50))
 snaps = c.snapshots.snapshots
 times, deltas, carried = [], [], []
 for s in snaps:

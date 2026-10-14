@@ -3,7 +3,7 @@ pr: 133
 url: https://github.com/bright-fakl/carto-flow/pull/133
 issue: 86
 title: Area scaling of the landmarks along the flow and uniform point landmarks
-description: The morph sums the divergence of the velocity field along the path of every landmark vertex at no measurable cost; every snapshot stores the area scaling, and Cartogram.get_landmarks(iteration, uniform=True) remaps the distance of point landmarks to the border of their region so that landmarks that were uniform before the morph are uniform again, at any saved iteration. The distribution of the distance to the border is computed deterministically (distance transform, once per cartogram), so the correction changes smoothly between frames of an animation. On the states with 8 seeds of about 1,480 dots the mean border-band z-score is 4.28 for the carried dots, 0.47 with uniform=True and 0.63 on the original map; the median dot moves 0.8 % of the width of its region.
+description: Probe points (MorphOptions.landmark_probes) make the correction available for lines, polygons, other point sets and displacement coordinates. The morph sums the divergence of the velocity field along the path of every landmark vertex at no measurable cost; every snapshot stores the area scaling, and Cartogram.get_landmarks(iteration, uniform=True) remaps the distance of point landmarks to the border of their region so that landmarks that were uniform before the morph are uniform again, at any saved iteration. The distribution of the distance to the border is computed deterministically (distance transform, once per cartogram), so the correction changes smoothly between frames of an animation. On the states with 8 seeds of about 1,480 dots the mean border-band z-score is 4.28 for the carried dots, 0.47 with uniform=True and 0.63 on the original map; the median dot moves 0.8 % of the width of its region.
 kind: pr
 topic: flow
 branch: feat/landmark-area-scaling
@@ -11,7 +11,7 @@ base: main
 date: 2026-10-13 18:00
 related: exploration-border-drift
 before: main @ 5a4a5a2 (landmarks carried by the flow)
-after: feat/landmark-area-scaling @ ef3273e
+after: feat/landmark-area-scaling @ f936c10
 inputs: 49 states (bundled) with poverty counts, dot density with n_dots = round(max / 25000), normalization "maximum" (about 1,480 dots), 8 seeds; MorphOptions defaults with area_scale 1e-6 (grid 256); NUMBA_NUM_THREADS=8. The border-band z-score counts the dots inside a band of 6 % of sqrt(area) along the border of their own region against the number expected for uniform dots (binomial, summed over regions).
 ---
 
@@ -39,3 +39,16 @@ figure: fig_profile.png — Pooled distance profile of the dots on the 49 states
 | original | 1.03 | 1.04 | 1.00 | 1.03 | 1.00 | 0.99 | 0.98 | 1.18 |
 | carried | 1.40 | 1.27 | 1.10 | 1.02 | 0.96 | 0.93 | 0.90 | 0.88 |
 | uniform | 1.10 | 1.03 | 0.97 | 1.00 | 0.99 | 1.00 | 0.98 | 0.91 |
+
+## Probe points (MorphOptions.landmark_probes), dots corrected with the profile from the probes, 8 seeds
+
+`probes.py` writes `data/probes.json`. 0 probes: the dots measure the crowding themselves.
+
+| probes per region | mean z (sd over 8 seeds) | get_landmarks(uniform=True), s | morph, s |
+|---|---|---|---|
+| 0 | 0.47 (1.32) | 0.338 | 0.24 |
+| 25 | 0.78 (1.06) | 0.337 | 0.255 |
+| 50 | 0.11 (1.17) | 0.343 | 0.258 |
+| 100 | 1.02 (1.23) | 0.362 | 0.258 |
+
+Frames with 50 probes per region (29 frames): second difference of the correction 0.008 % / 0.132 % of the width (median / 95th percentile), increment relative to the carried motion 0.01 / 0.177, first call 0.375 s, later calls 0.079 s. The z-scores of the four rows differ by less than their noise; a larger number of probes does not improve them.
