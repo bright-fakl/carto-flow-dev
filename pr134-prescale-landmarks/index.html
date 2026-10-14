@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #134: prescale_components moves the landmarks and the displacement coordinates with their component</title>
+<title>PR #134: prescale_components moves the landmarks with their component; the Voronoi premorph follows VoronoiOptions.prescale_components</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,7 +72,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #134: prescale_components moves the landmarks and the displacement coordinates with their component</h1>
+<h1>PR #134: prescale_components moves the landmarks with their component; the Voronoi premorph follows VoronoiOptions.prescale_components</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
@@ -84,15 +84,23 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-14 20:00</dd>
 <dt>Before</dt><dd>main @ 5a4a5a2 (landmarks not scaled with the components)</dd>
-<dt>After</dt><dd>fix/prescale-landmarks @ 85a0adf</dd>
+<dt>After</dt><dd>fix/prescale-landmarks @ bf7f4c7</dd>
 <dt>Inputs</dt><dd>two separate unit squares (values 1 and 4), 300 uniform random dots in each, MorphOptions(grid=128, prescale_components=True, mean_tol=0.005, max_tol=0.01).</dd>
 </dl>
-<p class="desc">The pre-scaling scaled every connected component of the geometries to its target area but left the landmarks and the displacement coordinates where they were, so they started outside a region that was scaled down. With two separate squares (values 1 and 4, 300 dots each) 39 % of the dots of the shrunken square were inside it at the end; they are all inside after the fix. Contiguous inputs such as the US states (one component, factor 1) are unchanged.</p>
+<p class="desc">The pre-scaling scaled every connected component of the geometries to its target area but left the landmarks and the displacement coordinates where they were, so they started outside a region that was scaled down. With two separate squares (values 1 and 4, 300 dots each) 39 % of the dots of the shrunken square were inside it at the end; they are all inside after the fix. Contiguous inputs such as the US states (one component, factor 1) are unchanged. VoronoiOptions.prescale_components now also pre-scales a premorph that does not set it itself (MorphOptions.prescale_components is None by default, which behaves as False): on the 52 US regions the premorph converges in 58 instead of 168 iterations.</p>
 <p><code>make_figures.py</code> runs the case in a checkout of main (<code>before</code>) and of the fix (<code>after</code>) and writes the figure and <code>data/tables.md</code>.</p>
 <table>
 <tr><th></th><th>share of the dots inside their region (square 1, square 2)</th><th>final areas</th></tr>
 <tr><td>Before the fix</td><td>0.39, 1.0</td><td>0.4, 1.6</td></tr>
 <tr><td>After the fix</td><td>1.0, 1.0</td><td>0.4, 1.6</td></tr>
+</table>
+<h2>Voronoi premorph (the 52 US regions with Alaska, Hawaii and Puerto Rico)</h2>
+<p><code>voronoi_premorph.py</code> writes <code>data/voronoi.md</code>. The cascade shortens the premorph; the total time is the same within noise (the Voronoi run dominates), and the cell area errors are those of the pre-scaled Voronoi run (without any pre-scaling the cells are off by 6.3 % on average and 35 % at most).</p>
+<table>
+<tr><th>case</th><th>premorph iterations</th><th>premorph mean / max error %</th><th>Voronoi cell area error mean / max %</th><th>seconds</th></tr>
+<tr><td>premorph=True, VoronoiOptions.prescale_components=True (cascades)</td><td>58</td><td>1.3 / 8.4</td><td>0.0 / 0.1</td><td>2.2</td></tr>
+<tr><td>premorph=MorphOptions(prescale_components=False), Voronoi flag on (the behavior before)</td><td>168</td><td>1.2 / 9.8</td><td>0.0 / 0.0</td><td>2.1</td></tr>
+<tr><td>premorph=True, no pre-scaling</td><td>168</td><td>1.2 / 9.8</td><td>6.33 / 35.4</td><td>2.1</td></tr>
 </table>
 <div class="figure">
 <img src="fig_before_after.png" alt="Left: the input. Middle: before the fix the dots of the first square, which the pre-scaling shrinks to 0.4 of its area, are mostly outside it (orange). Right: after the fix the dots are scaled with their square and all are inside.">
