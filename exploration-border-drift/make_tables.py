@@ -93,4 +93,7 @@ for name, d_ in sc_["kinds"].items():
         out.append(f"| {name} | {lab} | " + " | ".join(f"{x:.2f}" for x in d_[key]) + " |")
 out += ["\n### Florida: crowding c = (A_final / A_original) / J of the probes by border section\n", "| section | neighbor | c at 1 cell | c at 3 cells | c at 0.2 sqrt(area) |", "|---|---|---|---|---|"]
 out += [f"| {r['section']} | {r['neighbor']} | {r['c_at_1_cell']} | {r['c_at_3_cells']} | {r['c_at_0.2']} |" for r in sc_["florida"]]
+jt = json.loads((D / "jitter.json").read_text())
+out += ["\n## Smoothness of the corrected dots over the frames of an animation (states, one dot seed, %d frames every 4 iterations)\n" % len(jt["frames"]), "The correction vector of every dot over the frames; second difference in units of the width of the region, and the increment of the correction relative to the carried motion between two frames, over the dots that are corrected.\n", "| profile from, distribution F of the distance from | second difference: median / 95th pct (% of the width) | increment / carried motion: median / 95th pct | median correction at the end (% of the width) |", "|---|---|---|---|"]
+out += [f"| {k} | {v['second_difference_median_pct']} / {v['second_difference_p95_pct']} | {v['increment_over_motion_median']} / {v['increment_over_motion_p95']} | {v['final_median_pct']} |" for k, v in jt["variants"].items()]
 (D / "tables.md").write_text("\n".join(out) + "\n")

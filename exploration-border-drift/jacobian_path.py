@@ -75,7 +75,7 @@ def run(grid_size=256, n_seeds=8):
     return out, (sets, Pf, geoms, logJ, ratio, cuts)
 
 
-def proxy_remap(geoms, P, owner, cdot, edges=EDGES, n_grid=201):
+def proxy_remap(geoms, P, owner, cdot, edges=EDGES, n_grid=201, chat_override=None):
     """Remap the distance to the border so that the dot density follows from the area scaling of the flow along the paths
     (the area-average of the density ratio in a bin is the harmonic mean of c over the dots in it)."""
     import distance_remap as dr
@@ -95,6 +95,8 @@ def proxy_remap(geoms, P, owner, cdot, edges=EDGES, n_grid=201):
             m = ins & (d >= edges[b]) & (d < edges[b + 1])
             if m.sum():
                 chat[b] = 1.0 / np.mean(1.0 / cdot[sel][m])
+        if chat_override is not None and r in chat_override:
+            chat = chat_override[r]
         ok = np.isfinite(chat)
         if ok.sum() < 2:
             continue

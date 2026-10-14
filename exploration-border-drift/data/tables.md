@@ -247,3 +247,14 @@ A morph with the dots and, per region, probe points along the inward normals at 
 | 20 | outside | 1.14 | 0.9 | 0.9 |
 | 22 | Alabama | 1.97 | 1.97 | 1.97 |
 | 23 | Alabama | 1.15 | 0.89 | 0.89 |
+
+## Smoothness of the corrected dots over the frames of an animation (states, one dot seed, 29 frames every 4 iterations)
+
+The correction vector of every dot over the frames; second difference in units of the width of the region, and the increment of the correction relative to the carried motion between two frames, over the dots that are corrected.
+
+| profile from, distribution F of the distance from | second difference: median / 95th pct (% of the width) | increment / carried motion: median / 95th pct | median correction at the end (% of the width) |
+|---|---|---|---|
+| A dots, F sampled | 0.135 / 1.086 | 0.033 / 0.663 | 0.635 |
+| B structured probes, F sampled | 0.147 / 1.237 | 0.038 / 0.728 | 0.84 |
+| C random probes, F sampled | 0.143 / 1.1 | 0.036 / 0.66 | 0.707 |
+| E structured probes, F from buffers | 0.011 / 0.107 | 0.011 / 0.141 | 0.769 |
