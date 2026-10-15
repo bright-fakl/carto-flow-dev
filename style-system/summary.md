@@ -59,7 +59,7 @@ The visual channels of a map plot are `fill`, `edge`, `hatch`, `alpha`, `linewid
 | label | `label_color` (and `labels` for the text) | `label_cmap`, `label_fontsize`, `label_fontsize_range` | `label_legend`, `label_legend_kwargs` |
 
 - The fill channel uses matplotlib and geopandas names without prefix (`facecolor`, `cmap`, `norm`, `vmin`, `vmax`, `legend`). Every other channel uses its channel name as prefix for its palette and guide parameters.
-- A channel parameter takes a literal, a column name (or built-in quantity such as `"errors_pct"`), or a per-geometry array, the rule the symbol plot already has. A column name that is also a color name is read as the color, as in the symbol plot; the docs say so.
+- A channel parameter takes a literal, a column name (or built-in quantity such as `"errors_pct"`), or a per-geometry array, the rule the symbol plot already has. For the fill channel this is open decision 1 (geopandas passthrough); the rule below holds for all other channels. A column name that is also a color name is read as the color, as in the symbol plot; the docs say so.
 - Layers other than the main geometry use a layer prefix with the channel names: `reference_facecolor`, `reference_edgecolor`, `reference_linewidth`, `reference_alpha` (the original or base layer), `complement_*`, `assigned_*` / `unassigned_*` (tiles).
 - Matplotlib keyword overrides of an element are `<element>_kwargs` dicts everywhere (`legend_kwargs`, `arrows_kwargs`, `label_kwargs`, `cell_kwargs`, `point_kwargs`).
 - Booleans that show an element are `show_<element>`; `legend` is the one switch of the guide of the fill channel (a colorbar for a continuous role, a legend for a categorical one).
