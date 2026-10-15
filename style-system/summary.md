@@ -95,7 +95,24 @@ Found by reading the plot code. These are hard-coded today and become style fiel
 - Legend frame and text, grid lines of the non-map plots, the axes and tick colors of the convergence plots.
 - Animations: figure and axes facecolor, the `savefig` facecolor (without it the saved video has a white frame around a tinted axes), the colorbar outline.
 
-Left to call arguments on purpose: the data-encoding channels of the symbol plot (`alpha_range`, `linewidth_range`, `edge_cmap`, hatches and their legends), the Voronoi `cell_style`, `point_style` and `geometry_style` dicts, tile colors of tilings, `show_axes`, titles. They encode data or are structural, not look; an explicit value always wins over the style, and the style only provides the default for the edge color and width they do not set.
+Left to call arguments: the mappings of data to a visual channel (which column drives it, `alpha_range`, `linewidth_range`, `hatch_map`, `edge_cmap` when a dict maps categories, legend toggles), `show_axes` and titles. The rule is: **the call says what is encoded, the style says what it looks like by default.** So the defaults that are hard-coded today become style defaults, and an explicit argument still wins:
+
+| element | what the call keeps | what the style provides |
+|---|---|---|
+| `edge_cmap` (default `viridis`) | which column or weights drive the edge color | the palette, by data role (`cmap` for numeric, `categorical_colors` for categories) when `edge_cmap` is not given |
+| hatches | the column and `hatch_map` | the default hatch cycle and hatch line width (low priority; stays in code in PR B unless wanted) |
+| Voronoi `cell_style`, `point_style`, `geometry_style`, `adjacency_style`, `displacement_style` | per-element matplotlib keyword overrides (they stay as the last, most specific layer) | the defaults those dicts override: edge and fill colors, marker colors (from `boundary_*`, `reference_*`, `series_colors`) |
+| tile colors (`assigned_color` `#d4e6f1`, `unassigned_color` `#f5f5f5`) | the argument | the defaults: assigned = a pale tint of the sequential palette, unassigned = `reference_fill` |
+
+### Coordination with the data-driven channels of the symbol plot
+
+The symbol plot already has a per-symbol system: each of face color, edge color, alpha, line width, hatch and label color/size is a literal, a column name or an array, with its own `cmap`, `norm`, range and legend arguments. The new style system should not duplicate it, but the two need three points of contact:
+
+1. One role resolution. Every color channel decides continuous, diverging or categorical from its data in the same way as the fill (one shared helper), and takes the palette for that role from the style. Today each channel has its own default palette argument.
+2. One legend default. The per-channel `*_legend_kwds` start from the style's legend size and frame.
+3. Same precedence. Channel argument, then style, then library default, so `facecolor="gdp", cmap="Reds"` behaves as before.
+
+This belongs to PR B, where the symbol plot is refactored around a shared channel resolver; PR A (flow) has only the fill channel and needs no more than the role detection.
 
 ### Other cartograms
 
