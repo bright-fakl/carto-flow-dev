@@ -3,7 +3,7 @@ pr: 134
 url: https://github.com/bright-fakl/carto-flow/pull/134
 issue: 86
 title: prescale_components moves the landmarks with their component; the Voronoi premorph follows VoronoiOptions.prescale_components
-description: The pre-scaling scaled every connected component of the geometries to its target area but left the landmarks and the displacement coordinates where they were, so they started outside a region that was scaled down. With two separate squares (values 1 and 4, 300 dots each) 39 % of the dots of the shrunken square were inside it at the end; they are all inside after the fix. Contiguous inputs such as the US states (one component, factor 1) are unchanged. VoronoiOptions.prescale_components now also pre-scales a premorph that does not set it itself (MorphOptions.prescale_components is None by default, which behaves as False): on the 52 US regions the premorph converges in 58 instead of 168 iterations.
+description: The pre-scaling scaled every connected component of the geometries to its target area but left the landmarks where they were, so they started outside a region that was scaled down. Displacement coordinates stay unscaled by default (a grid carried along to show the deformation of the plane may be wanted without the pre-scaling); MorphOptions.prescale_coords scales them too. With two separate squares (values 1 and 4, 300 dots each) 39 % of the dots of the shrunken square were inside it at the end; they are all inside after the fix. Contiguous inputs such as the US states (one component, factor 1) are unchanged. VoronoiOptions.prescale_components now also pre-scales a premorph that does not set it itself (MorphOptions.prescale_components is None by default, which behaves as False): on the 52 US regions the premorph converges in 58 instead of 168 iterations.
 kind: pr
 topic: flow
 branch: fix/prescale-landmarks
@@ -11,7 +11,7 @@ base: main
 date: 2026-10-14 20:00
 related: pr133-landmark-uniform
 before: main @ 5a4a5a2 (landmarks not scaled with the components)
-after: fix/prescale-landmarks @ bf7f4c7
+after: fix/prescale-landmarks @ c64374f
 inputs: two separate unit squares (values 1 and 4), 300 uniform random dots in each, MorphOptions(grid=128, prescale_components=True, mean_tol=0.005, max_tol=0.01).
 ---
 
