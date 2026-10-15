@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #144: PlotStyle for the Voronoi and proportional plots</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #144: PlotStyle for the Voronoi and proportional plots</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>voronoi, proportional, infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../plot-style-core/index.html">PlotStyle sets the look of the flow plots and animations</a> <span class="meta">(pr)</span><br><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/144">https://github.com/bright-fakl/carto-flow/pull/144</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/99">#99</a></dd>
+<dt>Branch</dt><dd>feat/plot-style-voronoi-proportional</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-16 15:00</dd>
+<dt>Before</dt><dd>main @ f094a69 (equal to style=&quot;classic&quot;, except the complement fix)</dd>
+<dt>After</dt><dd>feat/plot-style-voronoi-proportional @ 9891042</dd>
+<dt>Inputs</dt><dd>bundled US states; a population-weighted Voronoi cartogram (RasterBackend 256, ElasticBoundary 0.02, 100 iterations); the race partitions of the proportional example; 600 poverty dots.</dd>
+</dl>
+<p class="desc">Part B1 of the style system. The Voronoi plots and animation and plot_partitions and plot_dot_density take style=, with the surface, the palettes by data role, the boundary and the colorbar of the style, and norm= (Voronoi also center= and categorical=). New PlotStyle fields reference_* and annotation_size. The fill drawing of the flow plots moves to a shared module. Fixes the black complement of plot_partitions for continuous values. The default look of these plots changes; style=&quot;classic&quot; gives the earlier look.</p>
+<p><code>make_figures.py</code> draws each plot in classic, default and dark on the PR branch. <code>classic</code> is the look before this PR: the facecolors of the Voronoi categorical, column, <code>area_error_pct</code> and comparison plots and of the partition and dot-density plots are identical to <code>main</code>, except for the complement fix below.</p>
+<h2>Voronoi</h2>
+<h2>Proportional</h2>
+<h2>Fix: the complement of plot_partitions</h2>
+<h2>What changes</h2>
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>shared</td><td><code>carto_flow/_fill.py</code> draws the fill of a <code>GeoDataFrame</code> for the flow and Voronoi plots</td></tr>
+<tr><td>style fields</td><td><code>reference_facecolor</code>, <code>reference_edgecolor</code>, <code>reference_linewidth</code>, <code>reference_alpha</code> (default and dark set them), <code>annotation_size</code></td></tr>
+<tr><td>Voronoi calls</td><td><code>norm=</code>, <code>center=</code>, <code>categorical=</code>, <code>legend_kwargs=</code>, <code>legend_label=</code>, <code>style=</code>; <code>legend_kwds</code> is a deprecated alias</td></tr>
+<tr><td>animation</td><td>the style is re-entered in the frame callback; <code>save_animation</code> saves the frames with the surface of the figure</td></tr>
+<tr><td>not yet</td><td>the fixed colors of the displacement arrows, centroid markers, topology overlays and animation cells; the symbol plot</td></tr>
+</table>
+<h2>Checks</h2>
+<p>Suite 1211 passed, ruff and mypy clean; the Voronoi, proportional and flow gallery examples and the eight edited notebooks run without error.</p>
+<div class="figure">
+<img src="fig_complement_fix.png" alt="On `main` the complement is black when the partitions are colored by a continuous value (3 x 3 grid, two columns split): the missing color value became NaN and got the bad color of the colormap. Left: `main`. Right: this PR with `style=&quot;classic&quot;`, where the complement has `complement_facecolor` (`#e0e0e0`).">
+<p class="caption">On <code>main</code> the complement is black when the partitions are colored by a continuous value (3 x 3 grid, two columns split): the missing color value became NaN and got the bad color of the colormap. Left: <code>main</code>. Right: this PR with <code>style=&quot;classic&quot;</code>, where the complement has <code>complement_facecolor</code> (<code>#e0e0e0</code>).</p>
+</div><div class="figure">
+<img src="fig_dot_density.png" alt="`plot_dot_density`: categorical colors and the reference layer of the style.">
+<p class="caption"><code>plot_dot_density</code>: categorical colors and the reference layer of the style.</p>
+</div><div class="figure">
+<img src="fig_partitions_area.png" alt="`plot_partitions` by partition area: sequential palette, log scale where the areas span more than a decade, reference fill for the complement.">
+<p class="caption"><code>plot_partitions</code> by partition area: sequential palette, log scale where the areas span more than a decade, reference fill for the complement.</p>
+</div><div class="figure">
+<img src="fig_partitions_category.png" alt="`plot_partitions(facecolor=&quot;category&quot;)`: the categorical colors and the edge of the style.">
+<p class="caption"><code>plot_partitions(facecolor=&quot;category&quot;)</code>: the categorical colors and the edge of the style.</p>
+</div><div class="figure">
+<img src="fig_voronoi_cells.png" alt="Cells colored by index (`facecolor=None`): classic uses `tab20`; default and dark cycle the ten categorical colors of the style (neighboring cells can share a color).">
+<p class="caption">Cells colored by index (<code>facecolor=None</code>): classic uses <code>tab20</code>; default and dark cycle the ten categorical colors of the style (neighboring cells can share a color).</p>
+</div><div class="figure">
+<img src="fig_voronoi_errors.png" alt="`area_error_pct`: classic `RdBu_r` over the data range; default and dark diverging `RdYlBu_r` symmetric around 0.">
+<p class="caption"><code>area_error_pct</code>: classic <code>RdBu_r</code> over the data range; default and dark diverging <code>RdYlBu_r</code> symmetric around 0.</p>
+</div><div class="figure">
+<img src="fig_voronoi_population.png" alt="Population: classic (linear, scientific notation), default (log colorbar, ticks 1M to 20M, outlined) and dark.">
+<p class="caption">Population: classic (linear, scientific notation), default (log colorbar, ticks 1M to 20M, outlined) and dark.</p>
+</div><div class="figure">
+<img src="fig_voronoi_region.png" alt="A text column (Region): classic draws the categories with the sequential default; default and dark use the categorical palette.">
+<p class="caption">A text column (Region): classic draws the categories with the sequential default; default and dark use the categorical palette.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
