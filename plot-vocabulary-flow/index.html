@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #137: One parameter vocabulary for the flow plot, animate and preview functions</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #137: One parameter vocabulary for the flow plot, animate and preview functions</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/137">https://github.com/bright-fakl/carto-flow/pull/137</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/99">#99</a></dd>
+<dt>Branch</dt><dd>feat/plot-vocabulary-flow</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-15 18:00</dd>
+<dt>Before</dt><dd>main @ 8f3d49b</dd>
+<dt>After</dt><dd>feat/plot-vocabulary-flow @ ce479e1</dd>
+<dt>Inputs</dt><dd>bundled US states, MorphOptions(grid=64, n_iter=20); the flow gallery examples plot_flow_animation, plot_flow_animation_density, plot_flow_animation_velocity.</dd>
+</dl>
+<p class="desc">First part of the parameter vocabulary of the style-system proposal. facecolor is the fill (a column, a built-in quantity, an array or a color) of the flow plots and animations, replacing column, color_by and color_values; colorbar, colorbar_label and colorbar_kwargs become legend, legend_label and legend_kwargs. Old names stay as deprecated aliases. Strings resolve as column, then built-in quantity, then color, with a warning on ambiguity. No change of output. The symbol, Voronoi and proportional modules follow in separate PRs.</p>
+<p>No figures: the change is parameter names and the resolution of string arguments; the output is unchanged. On the bundled states the facecolors of the default plot, <code>facecolor=&quot;Population&quot;</code> and <code>facecolor=&quot;density&quot;</code> are identical to <code>main</code> with <code>column=</code> (<code>np.array_equal</code> on the RGBA arrays of the collection).</p>
+<h2>Renames</h2>
+<table>
+<tr><th>function</th><th>old</th><th>new</th></tr>
+<tr><td><code>Cartogram.plot</code>, <code>plot_cartogram</code>, <code>plot_comparison</code></td><td><code>column</code></td><td><code>facecolor</code></td></tr>
+<tr><td><code>animate_morph_history</code>, <code>animate_workflow</code></td><td><code>color_by</code></td><td><code>facecolor</code></td></tr>
+<tr><td><code>animate_geometry_keyframes</code></td><td><code>column</code>, <code>color_values</code></td><td><code>facecolor</code></td></tr>
+<tr><td>the three animations above</td><td><code>colorbar</code>, <code>colorbar_label</code>, <code>colorbar_kwargs</code></td><td><code>legend</code>, <code>legend_label</code>, <code>legend_kwargs</code></td></tr>
+<tr><td><code>Cartogram.plot</code>, <code>plot_cartogram</code></td><td><code>legend_kwds</code></td><td><code>legend_kwargs</code></td></tr>
+<tr><td>both <code>preview_modulator</code> functions</td><td><code>show_colorbar</code>, <code>colorbar_kwargs</code>, <code>diff_colorbar_kwargs</code>, <code>heatmap_colorbar_kwargs</code></td><td><code>legend</code>, <code>legend_kwargs</code>, <code>diff_legend_kwargs</code>, <code>heatmap_legend_kwargs</code></td></tr>
+<tr><td><code>DensityPlotOptions</code>, <code>VelocityPlotOptions</code></td><td><code>colorbar</code>, <code>colorbar_kwargs</code></td><td><code>legend</code>, <code>legend_kwargs</code></td></tr>
+</table>
+<h2>Behavior</h2>
+<table>
+<tr><th>input</th><th>result</th></tr>
+<tr><td><code>facecolor=&quot;Population&quot;</code> (a column)</td><td>data fill</td></tr>
+<tr><td><code>facecolor=&quot;errors_pct&quot;</code>, <code>&quot;density&quot;</code></td><td>built-in quantity (static plots: the columns <code>_morph_error_pct</code>, <code>_morph_density</code>)</td></tr>
+<tr><td><code>facecolor=&quot;#d4e6f1&quot;</code></td><td>constant fill; with <code>legend=True</code> in an animation no colorbar is drawn (one axes, checked)</td></tr>
+<tr><td>a column that is also a built-in quantity or a color</td><td>read as the column, <code>UserWarning</code></td></tr>
+<tr><td>a string that is none of these</td><td><code>ValueError</code> (before: <code>column=&quot;typo&quot;</code> drew an uncolored map without a message)</td></tr>
+<tr><td>old name</td><td>works, <code>DeprecationWarning</code>; old and new together raise <code>TypeError</code></td></tr>
+</table>
+<h2>Checks</h2>
+<p>Suite 1101 passed, ruff and mypy clean. The three flow gallery examples run without deprecation warnings from the library. The edited notebooks were not executed.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
