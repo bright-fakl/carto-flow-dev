@@ -59,10 +59,23 @@ The visual channels of a map plot are `fill`, `edge`, `hatch`, `alpha`, `linewid
 | label | `label_color` (and `labels` for the text) | `label_cmap`, `label_fontsize`, `label_fontsize_range` | `label_legend`, `label_legend_kwargs` |
 
 - The fill channel uses matplotlib and geopandas names without prefix (`facecolor`, `cmap`, `norm`, `vmin`, `vmax`, `legend`). Every other channel uses its channel name as prefix for its palette and guide parameters.
-- A channel parameter takes a literal, a column name (or built-in quantity such as `"errors_pct"`), or a per-geometry array, the rule the symbol plot already has. For the fill channel this is open decision 1 (geopandas passthrough); the rule below holds for all other channels. A column name that is also a color name is read as the color, as in the symbol plot; the docs say so.
+- A channel parameter takes a literal, a column name (or built-in quantity such as `"errors_pct"`), or a per-geometry array, the rule the symbol plot already has. For the fill channel this is open decision 1 (geopandas passthrough); the rule below holds for all other channels. A string is resolved by the rule in "Resolving a string parameter" below.
 - Layers other than the main geometry use a layer prefix with the channel names: `reference_facecolor`, `reference_edgecolor`, `reference_linewidth`, `reference_alpha` (the original or base layer), `complement_*`, `assigned_*` / `unassigned_*` (tiles).
 - Matplotlib keyword overrides of an element are `<element>_kwargs` dicts everywhere (`legend_kwargs`, `arrows_kwargs`, `label_kwargs`, `cell_kwargs`, `point_kwargs`).
 - Booleans that show an element are `show_<element>`; `legend` is the one switch of the guide of the fill channel (a colorbar for a continuous role, a legend for a categorical one).
+
+### Resolving a string parameter
+
+A channel parameter that is a string can be a column name, a built-in quantity of the function (`"errors_pct"`, `"density"`, `"area"`) or a color literal (`"red"`, `"#d4e6f1"`, `"C0"`, a gray level such as `"0.5"`). The symbol plot already has this ambiguity and resolves it as follows (`_resolve_color` in `symbol_cartogram/visualization.py`): if the string is a column and also a valid color, it is treated as the **column** and a `UserWarning` is issued; if it is only a color, it is a color; if it is neither, a `ValueError` lists the available columns. This proposal keeps that rule for all functions and extends it to the built-in quantities:
+
+1. an existing column of the data,
+2. else a built-in quantity of the function,
+3. else a color (or the special values `"none"` and `"face"` for edges, which are never columns),
+4. else an error that lists the columns and built-in quantities.
+
+A `UserWarning` is issued when a string matches more than one of the three kinds, and it says how to force each reading: pass the values (`gdf["wheat"]`, an array) to bind data, pass a color tuple (`matplotlib.colors.to_rgb("wheat")`) for a color. Values given by a style (`Channel.value`) are always literals and are never looked up as columns.
+
+Why the column wins: a column that exists in the frame is something the user put there, while color names are a large and unmanaged vocabulary (about 150 CSS names plus single letters, `C0`-`C9`, gray levels such as `"0.5"`), and many are plausible data columns (`wheat`, `gold`, `olive`, `salmon`, `coral`, `snow`, `tan`, `r`, `g`, `b`, a pivoted column named `1`). If the literal won, the call would silently draw a constant color where the user asked for a data-driven map, and the figure would look plausible. If the column wins and the user wanted the literal, the warning appears and the fix is one tuple. An error on every ambiguity would be stricter, but it would break a call that worked as soon as the data gained a column, so it is not proposed.
 
 ### Renames
 
@@ -70,7 +83,7 @@ Found by listing the parameters of all public plot, animate and preview function
 
 | concept | names found now | one name |
 |---|---|---|
-| fill by data or color | `column` (flow `plot`, `plot_cartogram`, `plot_comparison`, `animate_geometry_keyframes`, `preview_modulator`; symbol `plot`, `plot_comparison`; Voronoi `plot`, `plot_cartogram`, `plot_comparison`), `color_by` (flow `animate_morph_history`, `animate_workflow`; proportional `plot_partitions`; symbol tiling `plot`), `color_values`, symbol `facecolor` (already a column or a literal; `column` is its backward-compatible shorthand), tiling `face_color` | **decision pending, see "Open decisions"**: one binding parameter for the fill channel |
+| fill by data or color | `column` (flow `plot`, `plot_cartogram`, `plot_comparison`, `animate_geometry_keyframes`, `preview_modulator`; symbol `plot`, `plot_comparison`; Voronoi `plot`, `plot_cartogram`, `plot_comparison`), `color_by` (flow `animate_morph_history`, `animate_workflow`; proportional `plot_partitions`; symbol tiling `plot`), `color_values`, symbol `facecolor` (already a column or a literal; `column` is its backward-compatible shorthand), tiling `face_color` | `facecolor` for every plot (decision 14); `column`, `color_by` and `color_values` are deprecated aliases; `color_values` becomes `facecolor=[arrays]` for keyframes |
 | fill colormap | `cmap`, symbol tiling `colormap`, `heatmap_cmap`, `diff_cmap` | `cmap`; the flow modulator preview keeps `heatmap_cmap` and `diff_cmap` for its two extra panels, named `<panel>_cmap` |
 | constant fill | `facecolor`, `face_color`, `assigned_color`, `unassigned_color`, `background_color`, `base_color`, `complement_color` | `facecolor`; `assigned_facecolor`, `unassigned_facecolor`, `reference_facecolor`, `complement_facecolor` |
 | edge color | `edgecolor`, `edge_color`, `tile_edgecolor`, `core_edgecolor`, `ring_edgecolor`, `background_edgecolor`, `base_edgecolor`, `complement_edgecolor` | `edgecolor`; the `tile_` prefix is dropped, `core_edgecolor` and `ring_edgecolor` stay (`core_` and `ring_` are layers) |
@@ -191,6 +204,99 @@ Hold, morph and return durations, easing and the loop are about time and are alr
 
 Preset bundles for `MorphOptions` and layout options already exist as classmethods and do not share fields with a plotting style. No shared mechanism is proposed; the convention (`copy_with`, classmethod presets) is already the same.
 
+## Examples
+
+Sketches of the proposed API (nothing is implemented).
+
+**The same call shape for the fill channel in every cartogram type**
+
+| call | note |
+|---|---|
+| `cart.plot(facecolor="Population")` | flow; was column="Population" |
+| `sym.plot(facecolor="Population")` | symbol; unchanged |
+| `vor.plot(facecolor="Population")` | Voronoi; was column= |
+| `plot_comparison(cart, facecolor="Population")` |  |
+| `animate_morph_history(cart, facecolor="density", legend=True)` | was color_by="density", colorbar=True |
+| `plot_partitions(gdf, facecolor="area")` | proportional; was color_by="area" |
+
+**Literal, data, scale and role in one parameter set**
+
+| call | note |
+|---|---|
+| `cart.plot(facecolor="#d4e6f1")` | constant fill |
+| `cart.plot(facecolor="Population", cmap="Blues")` | data-driven, palette named in the call |
+| `cart.plot(facecolor="Population", norm="log")` | also a Normalize instance |
+| `cart.plot(facecolor="Population", center=0)` | diverging around 0 |
+| `cart.plot(facecolor="Region", categorical=True)` | force the categorical role |
+| `cart.plot(facecolor=gdf["wheat"])` | force data when a column name is also a color name |
+
+**Other channels follow the same rule**
+
+| call | note |
+|---|---|
+| `sym.plot(facecolor="gdp", edgecolor="region", edge_cmap="Set2", linewidth="pop", linewidth_range=(0.5, 3), hatch="party", alpha="density", alpha_range=(0.3, 1))` | one data-driven channel each |
+| `sym.plot(facecolor="gdp", legend=True, edge_legend=True, hatch_legend=False)` |  |
+| `sym.plot(labels="name", label_color="black", label_fontsize=7)` | `label=` deprecated for `labels=` |
+| `plot_adjacency(sym, edgecolor="weight", edge_cmap="viridis", edge_legend=True)` | was colorbar=True |
+
+**Guides and element dicts use `*_kwargs`**
+
+| call | note |
+|---|---|
+| `cart.plot(facecolor="Population", legend=True, legend_kwargs={"shrink": 0.6}, legend_label="People")` |  |
+| `animate_geometry_keyframes(frames, facecolor=[a0, a1, a2], legend=True)` | was color_values=..., colorbar=True |
+| `vor.plot_displacement(arrows_kwargs={"color": "k"}, cell_kwargs={"alpha": 0.5})` | was *_style dicts |
+
+**Layers use a prefix plus the channel name**
+
+| call | note |
+|---|---|
+| `plot_dot_density(gdf, reference_facecolor="#f0f0f0", reference_edgecolor="#888", marker="o", markersize=4)` |  |
+| `sym.plot_tiling(assigned_facecolor="#d4e6f1", unassigned_facecolor="#f5f5f5", core_edgecolor="k")` |  |
+
+**Selecting a style**
+
+| call | note |
+|---|---|
+| `cart.plot(facecolor="Population")` | default style |
+| `cart.plot(facecolor="Population", style="dark")` | a registered name |
+| `cart.plot(facecolor="Population", style=PlotStyle.classic())` | today's look |
+| `with carto_flow.style_context("dark"): cart.plot(facecolor="Population")` | a block, for example one gallery script |
+| `carto_flow.set_style("dark")` | the session, like plt.style.use |
+
+**A style that sets fill, edge and hatch predictably**
+
+| call | note |
+|---|---|
+| `my = PlotStyle.default().copy_with(channels={"fill": Channel(value="#d4e6f1"), "edge": Channel(value="#444444", palettes=Palettes(sequential="Oranges")), "linewidth": Channel(value=0.6, range=(0.5, 2.5))}, hatch_cycle=("//", "..", "xx"))` | the fill is pale and the edges dark and thin when not data-driven; an edge bound to numeric data uses the orange ramp |
+| `register_style("house", my)` | |
+| `sym.plot(style="house")` | pale fill, dark thin edges |
+| `sym.plot(facecolor="gdp", style="house")` | fill from the sequential palette of the style |
+| `sym.plot(edgecolor="weight", style="house")` | edge from the orange ramp |
+
+**Slides and animation**
+
+| call | note |
+|---|---|
+| `register_style("talk", PlotStyle.default().copy_with(rc_update={"xtick.labelsize": 20, "axes.labelsize": 22}))` |  |
+| `keyframes, times = morph_timeline(snapshots)` |  |
+| `anim = animate_geometry_keyframes(keyframes, keyframe_times=times, style="talk", figsize=(16, 9), legend=True)` |  |
+| `save_animation(anim, "map.mp4", fps=30, dpi=120)` | the saved frame has the style's surface color |
+
+**The look in the user's own matplotlib code**
+
+| call | note |
+|---|---|
+| `with plt.rc_context(my.rc_params()): fig, ax = plt.subplots()` | the style in the user's own matplotlib code |
+| `style.apply(fig)` | a figure the plot function did not create |
+
+**Old names**
+
+| call | note |
+|---|---|
+| `cart.plot(column="Population")` | works; DeprecationWarning: use facecolor= |
+| `animate_morph_history(cart, colorbar=True)` | works; DeprecationWarning: use legend=True |
+
 ## Scope and order
 
 0. PR 0 (vocabulary): the renames of the table above in all plot, animate and preview functions of the four cartogram types, with deprecated aliases, the vocabulary test and the docs. No change of output.
@@ -217,8 +323,9 @@ Precedence (call over style over library default) for every resolved setting; ro
 11. Accessibility checks are not part of the style system; users can check a style with external tools. The built-in palettes start from matplotlib's perceptually reasonable maps.
 12. Palettes of `default` and `dark`: as listed under Presets, adjusted on the PR A palette figure.
 13. All plotting functions use one parameter vocabulary (channels with fixed parameter names, `*_kwargs`, `legend`, layer prefixes); the old names are deprecated aliases for one minor release.
+14. The fill channel is bound by `facecolor` in every function (a column, a built-in quantity, an array or a literal); `column`, `color_by` and `color_values` are deprecated aliases, and the flow plots translate to `GeoDataFrame.plot` themselves.
 
 ## Open decisions
 
-1. **Binding the fill channel.** Review found that merging `column` into `facecolor` (so that `facecolor` takes a column or a color) breaks the flow functions that forward `**kwargs` to `GeoDataFrame.plot`, where `facecolor` is a literal and `column` is the binding; a column named `red` or `k` would also silently become a color, and an array of strings is ambiguous (categories or colors?). Options: (a) keep geopandas semantics for the fill: `column` binds data, `facecolor` is a literal only, and the other channels keep their existing dual use (`edgecolor="col"` in the symbol plot) because geopandas has no equivalent; (b) one rule everywhere, `facecolor` takes a column or a literal, `column` and `color_by` become deprecated aliases, and the flow plots translate to geopandas themselves. (a) breaks nothing and is inconsistent between the fill and the other channels; (b) is consistent and changes the meaning of `facecolor` in the flow plots.
-2. Items to verify: whether geopandas takes its default edge color from `patch.edgecolor` (then the `edge` channel value is partly an `rc` entry) and the ordered-categorical rule.
+1. Items to verify: whether geopandas takes its default edge color from `patch.edgecolor` (then the `edge` channel value is partly an `rc` entry) and the ordered-categorical rule.
+2. Ambiguous strings: the rule under "Resolving a string parameter" (column, then built-in quantity, then color, with a warning on multiple matches) is a recommendation to be confirmed; the alternatives are literal first (silent wrong map) and an error on ambiguity (breaks working calls when the data gains a column).
