@@ -1,6 +1,6 @@
 ---
 title: Style system and presets for plots and animations
-description: Proposal for issue 99. PlotStyle is a frozen dataclass that builds on matplotlib: an rcParams dict for text and surface settings (loadable from a matplotlib stylesheet), plus library-specific fields (palettes per data role with optional per-channel overrides, color scale, boundary, colorbar, reference geometry) and a defaults mapping for the appearance parameters of single plot functions. The call says which data drives a channel; the style supplies the default look of everything else, and an explicit argument wins. Presets default (new look of all library plots), dark and classic (today's output), a registry for custom styles, a per-call style argument, a style_context manager and a session-level set_style. Animation timing is a separate morph_timeline helper. The first PR covers the flow plots and animations; symbol, Voronoi and proportional plots follow.
+description: Proposal for issue 99. PlotStyle is a frozen dataclass that builds on matplotlib: an rcParams dict for text and surface settings (loadable from a matplotlib stylesheet), plus library-specific fields (the appearance of each visual channel when it is not data-driven and its palettes or range when it is, color scale, colorbar, reference layer) and a defaults mapping for the remaining parameters. The plot functions first get one consistent parameter vocabulary, so that every channel has the same parameter names in every function; the style addresses channels, not function-specific names. The call says which data drives a channel; the style supplies the default look of everything else, and an explicit argument wins. Presets default (new look of all library plots), dark and classic (today's output), a registry for custom styles, a per-call style argument, a style_context manager and a session-level set_style. Animation timing is a separate morph_timeline helper. The first PR covers the flow plots and animations; symbol, Voronoi and proportional plots follow.
 issue: 99
 kind: proposal
 topic: flow, infra
@@ -40,7 +40,51 @@ The first six rows are look. Frame size and motion are not look; see "Figure siz
 1. **The call says what is encoded; the style says what it looks like.** The call carries the binding of data to a channel (which column or array drives fill, edge, alpha, line width, hatch or label), legend toggles, `show_axes`, titles and `norm=`. The style carries the default value of every appearance parameter: colors, palettes, ranges, widths and sizes. An explicit argument of the call always wins over the style.
 2. **Precedence:** explicit argument of the call, then the style, then the library default. For this to work, defaults that are in signatures today (`cmap="RdYlGn_r"`, `cmap="viridis"`, `edge_cmap="viridis"`) become `None` in the signature and are resolved inside.
 3. **Build on matplotlib, do not duplicate it.** Whatever `rcParams` can express stays in `rcParams`; the style adds only what matplotlib cannot express.
-4. **Predictable palettes.** A palette follows the data type of its channel and nothing else; it does not depend on the channel or on which other channels are present.
+4. **Predictable palettes.** A palette follows the data type of its channel and the channel's own override, never other channels.
+5. **One vocabulary.** The same visual concept has the same parameter name in every plot function of every cartogram type. The style addresses channels, so a style works for all functions only if the parameters are named consistently; the renames are done first (PR 0 below).
+
+## Parameter vocabulary
+
+### Channels
+
+The visual channels of a map plot are `fill`, `edge`, `hatch`, `alpha`, `linewidth` and `label` (text). Each has the same parameters wherever it exists:
+
+| channel | binding or literal | palette or range | guide |
+|---|---|---|---|
+| fill | `facecolor` | `cmap`, `norm`, `vmin`, `vmax` | `legend`, `legend_kwargs`, `legend_label` |
+| edge | `edgecolor` | `edge_cmap`, `edge_norm` | `edge_legend`, `edge_legend_kwargs` |
+| hatch | `hatch` | `hatch_map` | `hatch_legend`, `hatch_legend_kwargs` |
+| alpha | `alpha` | `alpha_range` | `alpha_legend`, `alpha_legend_kwargs` |
+| linewidth | `linewidth` | `linewidth_range` | `linewidth_legend`, `linewidth_legend_kwargs` |
+| label | `label_color` (and `labels` for the text) | `label_cmap`, `label_fontsize`, `label_fontsize_range` | `label_legend`, `label_legend_kwargs` |
+
+- The fill channel uses matplotlib and geopandas names without prefix (`facecolor`, `cmap`, `norm`, `vmin`, `vmax`, `legend`). Every other channel uses its channel name as prefix for its palette and guide parameters.
+- A channel parameter takes a literal, a column name (or built-in quantity such as `"errors_pct"`), or a per-geometry array, the rule the symbol plot already has. A column name that is also a color name is read as the color, as in the symbol plot; the docs say so.
+- Layers other than the main geometry use a layer prefix with the channel names: `reference_facecolor`, `reference_edgecolor`, `reference_linewidth`, `reference_alpha` (the original or base layer), `complement_*`, `assigned_*` / `unassigned_*` (tiles).
+- Matplotlib keyword overrides of an element are `<element>_kwargs` dicts everywhere (`legend_kwargs`, `arrows_kwargs`, `label_kwargs`, `cell_kwargs`, `point_kwargs`).
+- Booleans that show an element are `show_<element>`; `legend` is the one switch of the guide of the fill channel (a colorbar for a continuous role, a legend for a categorical one).
+
+### Renames
+
+Found by listing the parameters of all public plot, animate and preview functions. Old names stay for one minor release as aliases with a `DeprecationWarning`, using the mechanism the library already has for `grid_size`.
+
+| concept | names found now | one name |
+|---|---|---|
+| fill by data or color | `column` (flow `plot`, `plot_cartogram`, `plot_comparison`, `animate_geometry_keyframes`, `preview_modulator`; symbol, Voronoi), `color_by` (flow `animate_morph_history`, `animate_workflow`; proportional `plot_partitions`; symbol tiling `plot`), `color_values`, symbol `facecolor`, `face_color` | `facecolor` (column, built-in quantity, array, or literal); `color_values` becomes `facecolor=[arrays]` for keyframes |
+| fill colormap | `cmap`, symbol tiling `colormap`, `heatmap_cmap`, `diff_cmap` | `cmap`; the flow modulator preview keeps `heatmap_cmap` and `diff_cmap` for its two extra panels, named `<panel>_cmap` |
+| constant fill | `facecolor`, `face_color`, `assigned_color`, `unassigned_color`, `background_color`, `base_color`, `complement_color` | `facecolor`; `assigned_facecolor`, `unassigned_facecolor`, `reference_facecolor`, `complement_facecolor` |
+| edge color | `edgecolor`, `edge_color`, `tile_edgecolor`, `core_edgecolor`, `ring_edgecolor`, `background_edgecolor`, `base_edgecolor`, `complement_edgecolor` | `edgecolor`; the `tile_` prefix is dropped, `core_edgecolor` and `ring_edgecolor` stay (`core_` and `ring_` are layers) |
+| line width | `linewidth`, `edge_width`, `tile_linewidth`, `pool_linewidth`, `background_linewidth`, `base_linewidth`, `complement_linewidth` | `linewidth` with the layer prefixes above; `edge_width` becomes `linewidth` of the adjacency links |
+| alpha | `alpha`, `edge_alpha`, `arrow_alpha`, `tile_alpha`, `background_alpha`, `base_alpha`, `complement_alpha` | `alpha` with layer prefix; `arrow_alpha`, `arrow_color` move into `arrows_kwargs` |
+| colorbar switch and options | `colorbar` (animations, adjacency), `show_colorbar` (modulator preview), `legend` (flow plot, others), `colorbar_kwargs`, `colorbar_kwds`, `colorbar_label`, `legend_kwds` | `legend`, `legend_kwargs`, `legend_label` |
+| `*_kwds` | symbol `legend_kwds`, `edge_legend_kwds`, `hatch_legend_kwds`, ... | `*_kwargs` |
+| element style dicts | Voronoi `cell_style`, `point_style`, `geometry_style`, `adjacency_style`, `displacement_style`, `centroid_style`, `position_style` | `cell_kwargs`, `point_kwargs`, ... |
+| text size | `tick_fontsize`, `label_fontsize` | `tick_labelsize` (matplotlib name), `label_fontsize` |
+| markers | `node_size` | `markersize` |
+
+Left as they are because they are a different concept: `normalization` (dot density) and `normalize` (compactness) are not color norms; `show_*` toggles; `figsize`, `title`, `show_axes`.
+
+A test lists every public plot, animate and preview function and fails if a parameter whose name matches a channel pattern (`color`, `cmap`, `alpha`, `linewidth`, `hatch`, `legend`, `colorbar`, `style`, `kwds`) is not in the vocabulary, so the vocabulary cannot drift.
 
 ## Design
 
@@ -55,23 +99,22 @@ A frozen dataclass in a new module `carto_flow/style.py`, exported from the pack
 | field | meaning |
 |---|---|
 | `palettes` | a `Palettes(sequential, sequential_range, diverging, categorical)` that applies to every color channel: `sequential` and `diverging` are colormaps (name or `Colormap`), `sequential_range` is the `(lo, hi)` truncation of the sequential map, `categorical` is a colormap name or a list of colors |
-| `channel_palettes` | optional overrides per channel, `{"edge": Palettes(sequential="Oranges"), "label": ...}`; the channels are `fill`, `edge` (also lines, arrows and adjacency links) and `label`; a field left `None` falls back to `palettes` |
+| `channels` | `{"fill": Channel(...), "edge": Channel(...), ...}` for the channels of the vocabulary; a `Channel` has `value` (what the channel looks like when it is not data-driven: a color, a width, an alpha, a hatch pattern or `None`), `palettes` (a `Palettes` that overrides the style-wide one for this channel; a field left `None` falls back) and `range` (the output range of a scalar channel when data-driven: `alpha`, `linewidth`, `label_fontsize`). For `hatch`, `palettes.categorical` is a cycle of hatch patterns |
 | `color_scale` | `"linear"`, `"log"` or `"auto"` (log when all values are positive and span more than `log_span` decades) |
 | `log_span` | decades that trigger `"auto"`, default 1.0 |
 | `tick_format` | `"plain"` or `"si"` (`1M`, `2.5k`); with a log norm, ticks at 1, 2, 5 per decade |
-| `boundary_color`, `boundary_width` | region edge color and width, where the call does not pass `edgecolor` / `linewidth` (to be checked: whether geopandas takes its default edge from `patch.edgecolor`; if so these move to `rc`) |
 | `colorbar_orientation`, `colorbar_shrink`, `colorbar_pad`, `colorbar_aspect` | colorbar placement |
 | `colorbar_outline_color`, `colorbar_outline_width` | colorbar spines |
-| `reference_fill`, `reference_edge`, `reference_width` | context geometry (original outline in comparisons, `background_*` of the partition plot, `base_*` of dot density) |
+| `reference_facecolor`, `reference_edgecolor`, `reference_linewidth`, `reference_alpha` | the reference layer (original outline in comparisons, background of the partition plot, base of dot density), named like the call parameters |
 | `annotation_size` | in-map labels; their color stays automatic (white or black by fill luminance) unless the call sets it |
 
-**3. `defaults`: a mapping for appearance parameters of single plot functions.** The long tail (the symbol plot alone has about 40 appearance parameters) cannot each be a typed field. `defaults` is keyed by parameter name, for example `{"alpha_range": (0.3, 1.0), "linewidth_range": (0.5, 3.0), "hatch_linewidth": 0.8}`. It applies to every plot function that has a parameter of that name, when the call does not set it; functions without such a parameter ignore it. Names are validated when a style is created or registered, against the parameter names of the public plot functions, so a typo raises an error. These parameter names are treated as public API (a rename would break styles that use them). Voronoi's `cell_style`, `point_style` and other element dicts stay as the last, most specific override of the call; the defaults they override come from the style fields above.
+**3. `defaults`: a mapping for the remaining parameters.** What is neither a channel nor a typed field (legend keyword dicts, label placement, tile layer colors) is keyed by parameter name, for example `{"legend_kwargs": {"frameon": False}}`. Because the vocabulary gives each concept one name in every function, a name-keyed default reaches all functions that have the parameter. Names are validated when a style is created or registered against the parameter names of the public plot functions, so a typo raises an error; the names are public API. The element dicts of the call (`cell_kwargs`, `point_kwargs`, ...) stay the last, most specific override; the defaults they override come from the channels and fields above.
 
 Methods: `copy_with(**changes)` (the convention of `MorphOptions`), `colormap(role, channel)` (the palette object, truncated where it applies), `norm(values, role, center=None)`, `colorbar(fig, ax, mappable, label)` and `legend(ax, ...)` (apply the colorbar and legend settings, so users of plain matplotlib can reuse them), `apply(fig)` (surface and text on a figure and its axes), `rc_params()` (the `rc` dict, for `plt.rc_context(style.rc_params())` in the user's own code), `to_dict()` / `from_dict()` (sharing a style as a file). Validation at construction: color and colormap names, `cmap_range` in 0..1 with lo < hi, enumerated values.
 
 ### Palettes by data role and channel
 
-A role (sequential, diverging, categorical) is a property of the data; a channel (fill, edge, label) is where the color is drawn. The style therefore has one set of role palettes, `palettes`, and optional per-channel sets, `channel_palettes`. Each channel's own data decides the role (the plot function detects it); the palette is then `channel_palettes[channel].<role>` if set, else `palettes.<role>`.
+A role (sequential, diverging, categorical) is a property of the data; a channel (fill, edge, label, hatch) is where it is drawn. The style therefore has one set of role palettes, `palettes`, and optional per-channel sets, `channels[channel].palettes`. Each channel's own data decides the role (the plot function detects it); the palette is then `channels[channel].palettes.<role>` if set, else `palettes.<role>`. A channel that is not data-driven uses `channels[channel].value`.
 
 | role | detected when | palette field | colorbar or legend |
 |---|---|---|---|
@@ -80,8 +123,8 @@ A role (sequential, diverging, categorical) is a property of the data; a channel
 | categorical | categorical, string or boolean dtype, or `categorical=True` | `categorical` | legend (sizes from `rc`) |
 
 - The rule is local: the palette depends on the role of the channel's own data and on the channel, never on other channels. A continuous fill with a categorical edge uses `palettes.sequential` and `palettes.categorical`; no counting or cycling.
-- An edge map is not a role: an edge can be continuous, diverging or categorical, and `channel_palettes["edge"]` can override any of the three. The built-in presets set no channel overrides, so the default behavior is "numeric data is always drawn with the style's ramp, wherever it appears".
-- Call arguments (`cmap=`, `edge_cmap=`, `label_cmap=`) name a palette for that channel and override the style whatever the role.
+- An edge map is not a role: an edge can be continuous, diverging or categorical, and `channels["edge"].palettes` can override any of the three. The built-in presets set no channel overrides, so the default behavior is "numeric data is always drawn with the style's ramp, wherever it appears".
+- Call arguments (`cmap=`, `edge_cmap=`, `label_cmap=`) name a palette for that channel and override the style whatever the role. A user gets a predictable look for every channel from two rules: not bound to data, it uses `channels[channel].value`; bound to data, it uses the palette for the role of its data (or the `range` of a scalar channel).
 - The role palettes of a preset are designed together (similar saturation and lightness, tuned to the surface); a figure in PR A checks that a continuous fill with a categorical edge reads as one family.
 - Integer-coded categories (FIPS-like codes) are numeric and take the sequential palette unless `categorical=True` is passed (the same as geopandas). An ordered categorical dtype is categorical with a sequential palette sampled at the number of levels (to be confirmed).
 - New call arguments this needs: `center=`, `categorical=`, `norm=`.
@@ -140,13 +183,14 @@ Preset bundles for `MorphOptions` and layout options already exist as classmetho
 
 ## Scope and order
 
-1. PR A: `style.py` with only what the flow plots and animations use (`rc`, `palettes`, `channel_palettes`, `color_scale`, `tick_format`, `boundary_*`, `colorbar_*`, `defaults`), `Cartogram.plot`, `plot_cartogram`, `plot_comparison`, the field plots, the six `animate_*` functions, `save_animation`, `norm=`, `center=`, `categorical=`, `set_style` and `style_context`, the `dark` preset, `morph_timeline`, the palette figure, before/after figures (classic against default), a docs page on styling.
-2. PR B: symbol, Voronoi and proportional plots; `reference_*`, `annotation_size`, the hatch and range defaults; the shared channel resolver. Until B lands those plots keep their current look, so the docs gallery is consistent only after B.
+0. PR 0 (vocabulary): the renames of the table above in all plot, animate and preview functions of the four cartogram types, with deprecated aliases, the vocabulary test and the docs. No change of output.
+1. PR A: `style.py` with only what the flow plots and animations use (`rc`, `palettes`, `channels` for `fill`, `edge` and `label`, `color_scale`, `tick_format`, `colorbar_*`, `defaults`), `Cartogram.plot`, `plot_cartogram`, `plot_comparison`, the field plots, the six `animate_*` functions (with `legend` replacing `colorbar`), `save_animation`, `norm=`, `center=`, `categorical=`, `set_style` and `style_context`, the `dark` preset, `morph_timeline`, the palette figure, before/after figures (classic against default), a docs page on styling.
+2. PR B: symbol, Voronoi and proportional plots; the `reference_*` layer, `annotation_size`, the `hatch`, `alpha` and `linewidth` channels; the shared channel resolver. Until B lands those plots keep their current look, so the docs gallery is consistent only after B.
 3. Issue 82: the talk visuals as gallery examples, using the `talk` recipe.
 
 ## Tests
 
-Precedence (call over style over library default) for every resolved setting; role detection (numeric, string, boolean, categorical dtype, integer codes, `center=`); `style_context` isolation across threads; rcParams unchanged after a plot call, also after an exception; the saved animation frame has the surface color; `norm=` accepted by every animation; unknown names in `defaults` raise; the registry rejects overwriting `default` and `classic`; `classic` output is identical to the output before the PR.
+Precedence (call over style over library default) for every resolved setting; role detection (numeric, string, boolean, categorical dtype, integer codes, `center=`); `style_context` isolation across threads; rcParams unchanged after a plot call, also after an exception; the saved animation frame has the surface color; `norm=` accepted by every animation; unknown names in `defaults` raise; the registry rejects overwriting `default` and `classic`; `classic` output is identical to the output before the PR; every deprecated alias gives the same result as the new name and warns; the vocabulary test passes.
 
 ## Decisions (from review)
 
@@ -157,13 +201,13 @@ Precedence (call over style over library default) for every resolved setting; ro
 5. One palette per data role, detected from the data, local to the channel; no colormap cycle.
 6. Users can register styles; `style="name"` is accepted.
 7. The style builds on matplotlib: an `rc` dict plus library-specific fields and a `defaults` mapping.
-8. The style holds the default of every appearance parameter, including the per-channel palettes and ranges; the call holds the data binding.
-
+8. The style holds the default of every appearance parameter, per channel (`value`, `palettes`, `range`); the call holds the data binding.
 9. `set_style(...)` exists for session-level use; `style_context` and `style=` override it.
 10. A `dark` preset is included. In the docs the gallery images are built with `default`; the light-and-dark theme question for static images (for example a dark variant of each image shown with Material's `#only-dark` / `#only-light` suffix) is part of issue 82, not of the style PRs.
 11. Accessibility checks are not part of the style system; users can check a style with external tools. The built-in palettes start from matplotlib's perceptually reasonable maps.
 12. Palettes of `default` and `dark`: as listed under Presets, adjusted on the PR A palette figure.
+13. All plotting functions use one parameter vocabulary (channels with fixed parameter names, `*_kwargs`, `legend`, layer prefixes); the old names are deprecated aliases for one minor release.
 
 ## Open decisions
 
-None open at the design level. Items to verify during PR A: whether geopandas takes its default edge color from `patch.edgecolor` (then `boundary_*` move to `rc`), that `rc_context` covers the animation artists, and the ordered-categorical rule.
+None open at the design level. Items to verify during PR A: whether geopandas takes its default edge color from `patch.edgecolor` (then the `edge` channel value is partly an `rc` entry), that `rc_context` covers the animation artists, and the ordered-categorical rule.
