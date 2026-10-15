@@ -105,7 +105,7 @@
 <h2>Decisions</h2>
 <ul><li>The adjacency links are a layer with the prefix <code>link_</code> because the <code>edge</code> names are the edge channel of the symbols. A line has a color, so <code>link_color</code> and not <code>link_edgecolor</code>.</li><li>The <code>plot_tiling</code> functions keep <code>tile_edgecolor</code>, <code>tile_linewidth</code> and <code>tile_alpha</code>: they forward <code>**kwargs</code> to the symbol plot, where <code>edgecolor</code>, <code>linewidth</code> and <code>alpha</code> belong to the symbols. The tiles are a layer with its own prefix, like <code>core_</code>, <code>ring_</code> and <code>pool_</code>.</li><li><code>Tiling.plot(color_by=...)</code> stays: it selects a scheme (uniform, aspect, index, x, y, random), not a column.</li><li>When <code>column</code> and <code>facecolor</code> are both given, <code>facecolor</code> wins and <code>column</code> warns, as in the old shorthand.</li></ul>
 <h2>Checks</h2>
-<p>Suite 1112 passed, ruff and mypy clean. The nine symbol gallery examples above run without deprecation warnings from the library. The edited notebooks were not executed. By position, <code>plot_displacement</code> moved <code>show_symbols</code> up by one and <code>SymbolCartogram.plot</code> has <code>facecolor</code> where <code>column</code> was.</p>
+<p>Suite 1112 passed, ruff and mypy clean. The nine symbol gallery examples above run without deprecation warnings from the library. The edited notebooks were executed locally without error. By position, <code>plot_displacement</code> moved <code>show_symbols</code> up by one and <code>SymbolCartogram.plot</code> has <code>facecolor</code> where <code>column</code> was.</p>
 
 <a class="back" href="../index.html">&larr; back to index</a>
 

@@ -39,4 +39,4 @@ No figures: the change is parameter names. On the 3 x 3 grid the facecolors of t
 
 ## Checks
 
-Suite 1120 passed, ruff and mypy clean. The edited notebooks were not executed.
+Suite 1120 passed, ruff and mypy clean. The edited notebooks were executed locally without error.

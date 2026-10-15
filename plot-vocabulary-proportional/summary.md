@@ -42,4 +42,4 @@ When `palette` and a colormap name were both given, the dict now replaces the na
 
 ## Checks
 
-Suite 1129 passed, ruff and mypy clean. The proportional gallery examples run without deprecation warnings from the library. The edited notebooks were not executed.
+Suite 1129 passed, ruff and mypy clean. The proportional gallery examples run without deprecation warnings from the library. The edited notebooks were executed locally without error.

@@ -39,4 +39,4 @@ No figures: the change is parameter names. On the 3 x 3 grid the facecolors of `
 
 ## Checks
 
-Suite 1112 passed, ruff and mypy clean. The nine symbol gallery examples above run without deprecation warnings from the library. The edited notebooks were not executed. By position, `plot_displacement` moved `show_symbols` up by one and `SymbolCartogram.plot` has `facecolor` where `column` was.
+Suite 1112 passed, ruff and mypy clean. The nine symbol gallery examples above run without deprecation warnings from the library. The edited notebooks were executed locally without error. By position, `plot_displacement` moved `show_symbols` up by one and `SymbolCartogram.plot` has `facecolor` where `column` was.
