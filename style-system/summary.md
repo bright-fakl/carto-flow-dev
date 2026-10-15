@@ -54,6 +54,10 @@ A frozen dataclass in a new module `carto_flow/style.py`, exported from the pack
 | `log_span` | decades that trigger `"auto"`, default 1.0 |
 | `colorbar_orientation`, `colorbar_shrink`, `colorbar_pad`, `colorbar_aspect` | colorbar placement |
 | `colorbar_outline_color`, `colorbar_outline_width` | colorbar spines |
+| `reference_fill`, `reference_edge`, `reference_width` | context geometry drawn under or beside a cartogram (original outline in comparisons, `background_*` of the partition plot, `base_*` of dot density) |
+| `series_colors` | short color cycle for annotation overlays and line series (convergence lines, threshold lines, displacement arrows, adjacency and centroid markers, velocity arrows) |
+| `annotation_size`, `legend_size` | in-map labels (symbol and cell labels) and legend text; label color stays automatic (white or black by fill luminance) unless the call sets it |
+| `grid_color` | grid and axes lines of non-map plots (convergence, histograms) |
 | `tick_format` | `"plain"` or `"si"` (`1M`, `2.5k`); with a log norm the ticks are placed at 1, 2, 5 per decade |
 
 Methods: `copy_with(**changes)` (the convention of `MorphOptions`), `colormap()` (the truncated colormap object), `norm(values)` (the `Normalize` or `LogNorm` the scale implies), `colorbar(fig, ax, mappable, label)` (applies the colorbar fields and tick labeling, so users of plain matplotlib can reuse it), `apply(fig)` (surface and text colors on a figure and its axes).
@@ -81,9 +85,30 @@ The docs gallery and notebooks use `PlotStyle.default()` without per-script code
 
 Precedence for every setting: explicit argument of the call, then the style, then the library default. For this to work the library defaults that are now in signatures (`cmap="RdYlGn_r"`, `cmap="viridis"`) become `None` in the signature and are resolved inside, with the same effective default as now.
 
-### Matplotlib stylesheets
+### Elements the plot functions do not style now but should
 
-A `PlotStyle` is not an `rcParams` dict, because the main fields (truncated colormap, log colorbar, boundary color relative to the surface) are not rcParams. `PlotStyle` does not conflict with `plt.style.context`; the style only sets what it names. A `PlotStyle.rc_params()` method could return the font and color subset for users' own plots; I would add it only if asked.
+Found by reading the plot code. These are hard-coded today and become style fields (the new fields above):
+
+- Overlay and line colors: Voronoi uses `#e74c3c`, `#27ae60`, `#e67e00`, `#2c7bb6`, black and gray for centroids, displacement, thresholds and convergence lines; the flow convergence plots use `gray`; the flow field animations draw velocity arrows in `black`.
+- Reference geometry: Voronoi comparison draws the original as `#f0f0f0` with `#888888` edges, the symbol plot draws it as `lightgray`, the partition plot and dot density have their own `background_*` and `base_*` parameters.
+- Font sizes: titles 10-12 pt, labels 8-9 pt, colorbar labels 8-9 pt, legends 8 pt, set per call.
+- Legend frame and text, grid lines of the non-map plots, the axes and tick colors of the convergence plots.
+- Animations: figure and axes facecolor, the `savefig` facecolor (without it the saved video has a white frame around a tinted axes), the colorbar outline.
+
+Left to call arguments on purpose: the data-encoding channels of the symbol plot (`alpha_range`, `linewidth_range`, `edge_cmap`, hatches and their legends), the Voronoi `cell_style`, `point_style` and `geometry_style` dicts, tile colors of tilings, `show_axes`, titles. They encode data or are structural, not look; an explicit value always wins over the style, and the style only provides the default for the edge color and width they do not set.
+
+### Other cartograms
+
+The proposed fields are enough for the colors, type and surfaces of all four cartogram types once the fields above are added; no cartogram-specific keywords are needed in the style. What is cartogram-specific (symbol sizes and shapes, hatch patterns, Voronoi point markers, tile layout) is geometry or data encoding and stays in the plot functions' own arguments. A function that needs a color the style does not name takes it from `series_colors` by position.
+
+### Matplotlib stylesheets and rcParams
+
+A `PlotStyle` is not an `rcParams` dict, because the main fields (colormap roles and truncation, log colorbar, boundary color relative to the surface, reference geometry) are not rcParams. The two systems combine like this:
+
+- A user's `plt.style.use(...)` or `rcParams` still applies to everything the style leaves at `None` (`classic` leaves everything). `PlotStyle.default()` sets values explicitly, so for the elements it names (surface, text color, font sizes, boundary, colormaps) it wins over a stylesheet; an explicit argument of the call wins over both.
+- Generic text and axes settings (font family and sizes, text and tick colors, axes and figure facecolor, grid color, `savefig.facecolor`) are applied through one `matplotlib.rc_context` that the plot functions open while drawing, so every element is covered, including legends and tick labels, without styling each artist. The context is open while the animation creates its artists and while `save_animation` saves, so the saved frame uses the surface color.
+- The library-specific fields are applied by explicit calls on the artists.
+- `PlotStyle.rc_params()` returns the generic subset as a dict, so a user can reuse the look in own matplotlib code with `plt.rc_context(style.rc_params())`. 
 
 ### Data types: continuous, diverging, categorical
 
@@ -118,7 +143,7 @@ Preset bundles for `MorphOptions` and layout options already exist as classmetho
 
 ## Decisions (from review)
 
-1. Name: `PlotStyle`.
+1. Name: `PlotStyle`; the old-look preset is `classic`.
 2. Figure size and dpi: not in the style (the plot functions are mostly axes-level).
 3. The default preset is a good-looking style and may differ from today's output; `classic` keeps the old look; no `slides` preset (size is not a style).
 4. The docs use one consistent style (`default`).
@@ -127,5 +152,4 @@ Preset bundles for `MorphOptions` and layout options already exist as classmetho
 
 ## Still open
 
-1. Name of the old-look preset: `classic` (proposed).
-2. Which look the new default should have beyond the talk palette: proposed as the talk palette with ordinary type sizes; the diverging and categorical palettes are not decided (suggested: `RdBu_r`-based diverging truncated like the sequential one, and `tab10`-like categorical softened toward the surface).
+1. Which look the new default should have beyond the talk palette: proposed as the talk palette with ordinary type sizes; the diverging and categorical palettes are not decided (suggested: `RdBu_r`-based diverging truncated like the sequential one, and `tab10`-like categorical softened toward the surface).
