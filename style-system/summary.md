@@ -1,6 +1,6 @@
 ---
 title: Style system and presets for plots and animations
-description: Proposal for issue 99. A frozen PlotStyle dataclass (surface, boundary, text, colormap with truncation, color scale, typography, colorbar, figure size) with the built-in presets default and slides, a small registry for custom presets, a per-call style argument and a style_context manager. Explicit arguments beat the style, the style beats the library defaults, and the default look does not change. Animation timing is a separate morph_timeline helper, not part of the style. The flow animations accept norm=, and a log norm gets real-number tick labels from the style. First PR covers the flow plots and animations; symbol, Voronoi and proportional plots follow.
+description: Proposal for issue 99. A frozen PlotStyle dataclass (surface, boundary, text, colormaps per data role, color scale, typography, colorbar) with a default preset that is the new look of all library plots and a classic preset that reproduces today's output, a small registry for custom presets, a per-call style argument and a style_context manager. Explicit arguments beat the style and the style beats the library defaults. Figure size and dpi are not part of the style. Animation timing is a separate morph_timeline helper, not part of the style. The flow animations accept norm=, and a log norm gets real-number tick labels from the style. First PR covers the flow plots and animations; symbol, Voronoi and proportional plots follow.
 issue: 99
 kind: proposal
 topic: flow, infra
@@ -38,7 +38,7 @@ The first seven rows are look. The last row is timing, which is a different conc
 
 ### `PlotStyle`
 
-A frozen dataclass in a new module `carto_flow/style.py`, exported from the package. Every field defaults to `None` (meaning: leave the matplotlib or library default alone), so `PlotStyle()` changes nothing.
+A frozen dataclass in a new module `carto_flow/style.py`, exported from the package. A field set to `None` leaves the matplotlib or library default alone; `PlotStyle()` is therefore the classic look, and `PlotStyle.default()` sets the fields of the new look.
 
 | field | meaning |
 |---|---|
@@ -55,15 +55,19 @@ A frozen dataclass in a new module `carto_flow/style.py`, exported from the pack
 | `colorbar_orientation`, `colorbar_shrink`, `colorbar_pad`, `colorbar_aspect` | colorbar placement |
 | `colorbar_outline_color`, `colorbar_outline_width` | colorbar spines |
 | `tick_format` | `"plain"` or `"si"` (`1M`, `2.5k`); with a log norm the ticks are placed at 1, 2, 5 per decade |
-| `figsize`, `dpi` | used when the plot function creates the figure, and by `save_animation` as default |
 
 Methods: `copy_with(**changes)` (the convention of `MorphOptions`), `colormap()` (the truncated colormap object), `norm(values)` (the `Normalize` or `LogNorm` the scale implies), `colorbar(fig, ax, mappable, label)` (applies the colorbar fields and tick labeling, so users of plain matplotlib can reuse it), `apply(fig)` (surface and text colors on a figure and its axes).
 
 ### Presets and registry
 
-- `PlotStyle.default()`: all `None`, today's output (nothing changes unless a style is selected).
-- `PlotStyle.slides()`: the talk look for a 16:9 frame (surface, boundary, truncated `YlGnBu`, `color_scale="auto"`, 20/22 pt, vertical colorbar with outline, 1920 x 1080 at dpi 120).
-- Custom presets: `register_style("social", PlotStyle.slides().copy_with(figsize=(9, 9), colorbar_orientation="horizontal", colorbar_shrink=0.62, colorbar_pad=0.04, colorbar_aspect=32))`; `get_style(name)`; `style="social"` is accepted wherever a style is. The 1080 x 1080 social look of `ANIMATION-STYLE.md` is this example in the docs, not a third built-in preset.
+- `PlotStyle.default()`: the new look of the library, used when nothing else is selected. It is the talk look with ordinary type sizes (tinted surface, boundary slightly darker than the surface, truncated `YlGnBu`, `color_scale="auto"`, outlined colorbar). It changes the output of every flow plot and animation, so the PR carries before/after figures and a CHANGELOG entry under Changed.
+- `PlotStyle.classic()`: all fields `None`, today's output, for users who want the old look.
+- No size in a preset name or preset. The large type of the talk (20 / 22 pt) and the frame sizes (1920 x 1080, 1080 x 1080) are recipes in the docs: `register_style("talk", PlotStyle.default().copy_with(tick_size=20, label_size=22))`, with `figsize` and `dpi` passed to the call.
+- Custom presets: `register_style(name, style)`, `get_style(name)`, and `style="name"` is accepted wherever a style is.
+
+### Axes-level and figure-level functions
+
+The plot functions are mostly axes-level (`ax=None` creates a figure; about 30 of them), a few are figure-level (the animations, `plot_comparison`, some Voronoi plots) and some have both `ax` and `figsize`. The style follows that: it always applies to the axes it draws on (axes facecolor, boundary, text, colorbar or legend). The figure facecolor is set only when the function creates the figure; on a figure the user passed in, the user calls `style.apply(fig)`. Hence `figsize` and `dpi` stay call arguments: a style that forced a size would be wrong for a plot placed in a user's subplot grid.
 
 ### Selecting a style
 
@@ -72,6 +76,8 @@ Methods: `copy_with(**changes)` (the convention of `MorphOptions`), `colormap()`
 3. Otherwise `PlotStyle.default()`.
 
 No global setter: process-wide state is easy to forget in notebooks.
+
+The docs gallery and notebooks use `PlotStyle.default()` without per-script code, so the docs have one consistent style; the talk visuals of issue 82 use the `talk` recipe above.
 
 Precedence for every setting: explicit argument of the call, then the style, then the library default. For this to work the library defaults that are now in signatures (`cmap="RdYlGn_r"`, `cmap="viridis"`) become `None` in the signature and are resolved inside, with the same effective default as now.
 
@@ -98,7 +104,7 @@ Rules: the role is decided by the data and the call, never by the style; the sty
 
 ### Animation timing is not part of the style
 
-Hold, morph and return durations, easing and the loop are about time, not appearance, and they are already expressed through `keyframe_times` and `linear_over("time")`. Proposal: a small helper `morph_timeline(snapshots, hold_start=1.5, morph=7.0, hold_end=2.5, back=5.0, easing="cosine")` returning `(keyframes, times)` to pass to `animate_geometry_keyframes`, replacing the talk's `loop_timeline` and `ease_inv`. Optional `back=0` for a time series that plays forward only. `fps` and `dpi` stay explicit arguments; `figsize` and `dpi` defaults come from the style.
+Hold, morph and return durations, easing and the loop are about time, not appearance, and they are already expressed through `keyframe_times` and `linear_over("time")`. Proposal: a small helper `morph_timeline(snapshots, hold_start=1.5, morph=7.0, hold_end=2.5, back=5.0, easing="cosine")` returning `(keyframes, times)` to pass to `animate_geometry_keyframes`, replacing the talk's `loop_timeline` and `ease_inv`. Optional `back=0` for a time series that plays forward only. `fps`, `dpi` and `figsize` stay explicit arguments.
 
 ### Other parts (issue point 4)
 
@@ -106,15 +112,20 @@ Preset bundles for `MorphOptions` and layout options already exist as classmetho
 
 ## Scope and order
 
-1. PR A: `style.py`, flow `Cartogram.plot`, `plot_cartogram`, `plot_comparison`, the six `animate_*` functions and `save_animation`; `norm=`; `morph_timeline`; tests with before/after figures of the default (unchanged) and `slides`; docs page on styling.
-2. PR B: symbol, Voronoi and proportional plots (their existing `facecolor`, `edgecolor`, `cell_style` parameters stay and win over the style).
-3. Issue 82: the talk visuals as gallery examples under `style_context(PlotStyle.slides())`.
+1. PR A: `style.py`, flow `Cartogram.plot`, `plot_cartogram`, `plot_comparison`, the six `animate_*` functions and `save_animation`; `norm=`; `morph_timeline`; tests; before/after figures (classic against default) and a docs page on styling.
+2. PR B: symbol, Voronoi and proportional plots (their existing `facecolor`, `edgecolor`, `cell_style` parameters stay and win over the style). Until B lands those plots keep their current look, so the docs gallery is consistent only after B.
+3. Issue 82: the talk visuals as gallery examples, using the `talk` recipe.
 
-## Open decisions
+## Decisions (from review)
 
-1. Name: `PlotStyle` (proposed) or `Style`.
-2. Should `figsize` and `dpi` be in the style (proposed, so a preset reproduces a frame size), or stay call arguments only.
-3. Built-in presets: `default` and `slides` (proposed), or also a built-in `social`.
-4. Docs gallery: keep the current docs look (proposed) and use `slides` only for the talk visuals of issue 82, or move the whole gallery to one style.
-5. Data types: one palette per role (sequential, diverging, categorical) with the role detected from the data (proposed), or a single `cmap` field and the user switches per call.
-6. `style=` as a string name: accept registered names (proposed) or only objects.
+1. Name: `PlotStyle`.
+2. Figure size and dpi: not in the style (the plot functions are mostly axes-level).
+3. The default preset is a good-looking style and may differ from today's output; `classic` keeps the old look; no `slides` preset (size is not a style).
+4. The docs use one consistent style (`default`).
+5. One palette per data role (sequential, diverging, categorical), detected from the data.
+6. Users can register styles; `style="name"` is accepted.
+
+## Still open
+
+1. Name of the old-look preset: `classic` (proposed).
+2. Which look the new default should have beyond the talk palette: proposed as the talk palette with ordinary type sizes; the diverging and categorical palettes are not decided (suggested: `RdBu_r`-based diverging truncated like the sequential one, and `tab10`-like categorical softened toward the surface).
