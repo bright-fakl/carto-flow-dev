@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #143: PlotStyle sets the look of the flow plots and animations</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #143: PlotStyle sets the look of the flow plots and animations</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow, infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span><br><a href="../plot-vocabulary-flow/index.html">One parameter vocabulary for the flow plot, animate and preview functions</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/143">https://github.com/bright-fakl/carto-flow/pull/143</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/99">#99</a></dd>
+<dt>Branch</dt><dd>feat/plot-style</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-16 09:00</dd>
+<dt>Before</dt><dd>main @ b6a7810 (equal to style=&quot;classic&quot;)</dd>
+<dt>After</dt><dd>feat/plot-style @ 4cc98b1</dd>
+<dt>Inputs</dt><dd>bundled US states with population, MorphOptions.preset_balanced(area_scale=1e-6, n_iter=400); the same plot in the styles classic, default and dark.</dd>
+</dl>
+<p class="desc">PR A of the style system. A frozen PlotStyle (matplotlib rc dict, palettes by data role, channels, color scale, colorbar fields) with the built-in styles default (the new look), dark and classic (the look before styles), a registry, style=, style_context and set_style. The flow plots and animations take style=, norm=, center= and categorical=, the data role is decided by the data, and a log colorbar has real-number ticks. morph_timeline builds the keyframes of a hold, eased morph, hold and return. The default look of every flow plot changes; style=&quot;classic&quot; gives the earlier look.</p>
+<p><code>make_figures.py</code> draws each plot in the three styles on the PR branch. <code>classic</code> is the look before this PR: the facecolors of the default, <code>Population</code> and <code>density</code> plots are identical to <code>main</code>, and the first frame of the workflow and keyframe animations is pixel-identical. Judge the new default look on the figures below.</p>
+<h2>Palettes of the built-in styles</h2>
+<h2>Plots</h2>
+<h2>What a call can do</h2>
+<table>
+<tr><th>call</th><th>effect</th></tr>
+<tr><td><code>cartogram.plot(facecolor=&quot;Population&quot;, style=&quot;dark&quot;)</code></td><td>one plot in a style</td></tr>
+<tr><td><code>with style_context(&quot;dark&quot;): ...</code>, <code>set_style(&quot;dark&quot;)</code></td><td>a block, the session</td></tr>
+<tr><td><code>facecolor=&quot;Population&quot;, norm=&quot;log&quot;</code></td><td>a normalization of the call; also a <code>Normalize</code> instance</td></tr>
+<tr><td><code>facecolor=&quot;Population&quot;, center=1e7</code></td><td>diverging around the center</td></tr>
+<tr><td><code>facecolor=&quot;STATE&quot;, categorical=True</code></td><td>the categorical role for numeric data</td></tr>
+<tr><td><code>cmap=&quot;Reds&quot;</code></td><td>wins over the palette of the style</td></tr>
+<tr><td><code>morph_timeline(cartogram)</code></td><td>keyframes and times of hold, eased morph, hold, return</td></tr>
+</table>
+<h2>Checks</h2>
+<p>Suite 1180 passed, ruff and mypy clean; the flow gallery examples and the eight flow notebooks run without error. Tests cover the style fields and validation, the palettes and norms, the colorbar ticks, the selection order (call, block, session, default), thread isolation, rcParams restored after an exception, the classic look against plain geopandas, the roles, the shared normalization of the comparison, the animation frames after the axes is cleared, the saved frame color and <code>morph_timeline</code>.</p>
+<h2>Not in this PR</h2>
+<p><code>defaults</code>, the reference layer, annotation sizes and the hatch, alpha and per-channel palette use (they need the symbol plot), <code>to_dict</code> / <code>from_dict</code>, and the symbol, Voronoi and proportional plots (PR B). Saving an animation to a directory of PNG frames writes no frames, on <code>main</code> as well.</p>
+<div class="figure">
+<img src="fig_animation_frame.png" alt="A frame of `animate_geometry_keyframes` (Population, `legend=True`).">
+<p class="caption">A frame of <code>animate_geometry_keyframes</code> (Population, <code>legend=True</code>).</p>
+</div><div class="figure">
+<img src="fig_categorical.png" alt="Region (a text column): classic draws the categories with `RdYlGn_r`; default and dark use the categorical palette of the style.">
+<p class="caption">Region (a text column): classic draws the categories with <code>RdYlGn_r</code>; default and dark use the categorical palette of the style.</p>
+</div><div class="figure">
+<img src="fig_comparison.png" alt="`plot_comparison`: classic and default; the two panels share the normalization of the values of both.">
+<p class="caption"><code>plot_comparison</code>: classic and default; the two panels share the normalization of the values of both.</p>
+</div><div class="figure">
+<img src="fig_density.png" alt="Population density.">
+<p class="caption">Population density.</p>
+</div><div class="figure">
+<img src="fig_errors.png" alt="Area errors: classic (`RdYlGn_r`, range of the data) and default and dark (diverging `RdYlBu_r`, symmetric around 0).">
+<p class="caption">Area errors: classic (<code>RdYlGn_r</code>, range of the data) and default and dark (diverging <code>RdYlBu_r</code>, symmetric around 0).</p>
+</div><div class="figure">
+<img src="fig_palettes.png" alt="The sequential, diverging and categorical palettes of classic (the former `RdYlGn_r` for everything), default (`YlGnBu` truncated to 0.22-1.0, `RdYlBu_r`, `tab10` mixed 15 % toward the surface) and dark (`viridis` truncated to 0.25-1.0, `RdYlBu_r`, `tab10`).">
+<p class="caption">The sequential, diverging and categorical palettes of classic (the former <code>RdYlGn_r</code> for everything), default (<code>YlGnBu</code> truncated to 0.22-1.0, <code>RdYlBu_r</code>, <code>tab10</code> mixed 15 % toward the surface) and dark (<code>viridis</code> truncated to 0.25-1.0, <code>RdYlBu_r</code>, <code>tab10</code>).</p>
+</div><div class="figure">
+<img src="fig_population.png" alt="Population: classic (linear colorbar in scientific notation), default (tinted surface, log colorbar with ticks at 1, 2 and 5 per decade written 1M, 2M, 5M, outlined colorbar) and dark.">
+<p class="caption">Population: classic (linear colorbar in scientific notation), default (tinted surface, log colorbar with ticks at 1, 2 and 5 per decade written 1M, 2M, 5M, outlined colorbar) and dark.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
