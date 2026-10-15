@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #142: One resolve_fill for the facecolor of the flow and Voronoi plots</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #142: One resolve_fill for the facecolor of the flow and Voronoi plots</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../plot-vocabulary-flow/index.html">One parameter vocabulary for the flow plot, animate and preview functions</a> <span class="meta">(pr)</span><br><a href="../plot-vocabulary-voronoi/index.html">One parameter vocabulary for the Voronoi plot functions</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/142">https://github.com/bright-fakl/carto-flow/pull/142</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/99">#99</a></dd>
+<dt>Branch</dt><dd>refactor/resolve-fill</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-16 05:00</dd>
+<dt>Before</dt><dd>main @ 8214930</dd>
+<dt>After</dt><dd>refactor/resolve-fill</dd>
+<dt>Inputs</dt><dd>the 49 US states (flow plots, 64 x 64 grid), a 3 x 3 grid (Voronoi plots).</dd>
+</dl>
+<p class="desc">The static flow plots and the Voronoi plots each had their own copy of the rules for facecolor (None, a string that is a column, a built-in quantity or a color, a numeric array, a color array). They share resolve_fill in _plot_params.py, which returns (kind, value). The flow animations, the proportional plot_partitions and the symbol plot keep their own handling on top of classify_string. No change of output.</p>
+<p>No figures: a refactor. The facecolors of the default, column, built-in and array fills of the flow plots and of the categorical, column, <code>area_error_pct</code> and comparison plots of the Voronoi module are identical to the output before the change (<code>np.array_equal</code>).</p>
+<table>
+<tr><th>kind</th><th>meaning</th><th>example</th></tr>
+<tr><td><code>none</code></td><td>no fill given</td><td><code>None</code></td></tr>
+<tr><td><code>column</code>, <code>builtin</code>, <code>color</code></td><td>a string, in this order, with a warning when it matches more than one</td><td><code>&quot;Population&quot;</code>, <code>&quot;density&quot;</code>, <code>&quot;#d4e6f1&quot;</code></td></tr>
+<tr><td><code>values</code></td><td>numeric array with one value per geometry</td><td><code>gdf[&quot;Population&quot;].to_numpy()</code></td></tr>
+<tr><td><code>color</code></td><td>any other value (an array of colors)</td><td><code>[&quot;red&quot;, &quot;blue&quot;, ...]</code></td></tr>
+</table>
+<p>Each module passes its own built-in names and decides what <code>none</code> means (flow: the errors, Voronoi: categorical by index). Tests: <code>test_resolve_fill_kinds</code>, the flow and Voronoi vocabulary tests and the Voronoi suite (104 passed); ruff and mypy clean.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
