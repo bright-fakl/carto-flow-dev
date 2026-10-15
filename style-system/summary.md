@@ -1,6 +1,6 @@
 ---
 title: Style system and presets for plots and animations
-description: Proposal for issue 99. PlotStyle is a frozen dataclass that builds on matplotlib: an rcParams dict for text and surface settings (loadable from a matplotlib stylesheet), plus library-specific fields (one palette per data role, color scale, boundary, colorbar, reference geometry) and a defaults mapping for the appearance parameters of single plot functions. The call says which data drives a channel; the style supplies the default look of everything else, and an explicit argument wins. Presets default (new look of all library plots) and classic (today's output), a registry for custom styles, a per-call style argument and a style_context manager. Animation timing is a separate morph_timeline helper. The first PR covers the flow plots and animations; symbol, Voronoi and proportional plots follow.
+description: Proposal for issue 99. PlotStyle is a frozen dataclass that builds on matplotlib: an rcParams dict for text and surface settings (loadable from a matplotlib stylesheet), plus library-specific fields (palettes per data role with optional per-channel overrides, color scale, boundary, colorbar, reference geometry) and a defaults mapping for the appearance parameters of single plot functions. The call says which data drives a channel; the style supplies the default look of everything else, and an explicit argument wins. Presets default (new look of all library plots), dark and classic (today's output), a registry for custom styles, a per-call style argument, a style_context manager and a session-level set_style. Animation timing is a separate morph_timeline helper. The first PR covers the flow plots and animations; symbol, Voronoi and proportional plots follow.
 issue: 99
 kind: proposal
 topic: flow, infra
@@ -54,11 +54,8 @@ A frozen dataclass in a new module `carto_flow/style.py`, exported from the pack
 
 | field | meaning |
 |---|---|
-| `cmap` | sequential colormap, used for every continuous channel (name or `Colormap`) |
-| `cmap_range` | `(lo, hi)` truncation of `cmap`, default `(0, 1)` |
-| `edge_cmap` | sequential colormap for edge and line channels; `None` (default) means the same as `cmap` |
-| `diverging_cmap` | colormap for data with a meaningful center, used for every such channel |
-| `categorical_colors` | colormap name or list of colors, used for every categorical channel |
+| `palettes` | a `Palettes(sequential, sequential_range, diverging, categorical)` that applies to every color channel: `sequential` and `diverging` are colormaps (name or `Colormap`), `sequential_range` is the `(lo, hi)` truncation of the sequential map, `categorical` is a colormap name or a list of colors |
+| `channel_palettes` | optional overrides per channel, `{"edge": Palettes(sequential="Oranges"), "label": ...}`; the channels are `fill`, `edge` (also lines, arrows and adjacency links) and `label`; a field left `None` falls back to `palettes` |
 | `color_scale` | `"linear"`, `"log"` or `"auto"` (log when all values are positive and span more than `log_span` decades) |
 | `log_span` | decades that trigger `"auto"`, default 1.0 |
 | `tick_format` | `"plain"` or `"si"` (`1M`, `2.5k`); with a log norm, ticks at 1, 2, 5 per decade |
@@ -72,19 +69,20 @@ A frozen dataclass in a new module `carto_flow/style.py`, exported from the pack
 
 Methods: `copy_with(**changes)` (the convention of `MorphOptions`), `colormap(role, family)` (the palette object, truncated where it applies), `norm(values, role, center=None)`, `colorbar(fig, ax, mappable, label)` and `legend(ax, ...)` (apply the colorbar and legend settings, so users of plain matplotlib can reuse them), `apply(fig)` (surface and text on a figure and its axes), `rc_params()` (the `rc` dict, for `plt.rc_context(style.rc_params())` in the user's own code), `to_dict()` / `from_dict()` (sharing a style as a file). Validation at construction: color and colormap names, `cmap_range` in 0..1 with lo < hi, enumerated values.
 
-### Palettes by data role
+### Palettes by data role and channel
 
-The style holds one palette per role, and the plot function picks the role from the data of each channel:
+A role (sequential, diverging, categorical) is a property of the data; a channel (fill, edge, label) is where the color is drawn. The style therefore has one set of role palettes, `palettes`, and optional per-channel sets, `channel_palettes`. Each channel's own data decides the role (the plot function detects it); the palette is then `channel_palettes[channel].<role>` if set, else `palettes.<role>`.
 
-| role | detected when | palette | colorbar or legend |
+| role | detected when | palette field | colorbar or legend |
 |---|---|---|---|
-| sequential | numeric column (default) | `cmap` (or `edge_cmap` for edge and line channels when set), `cmap_range`, `color_scale`, `tick_format` | colorbar |
-| diverging | the call gives `center=`, or the plot function declares it for its own columns (the signed error columns) | `diverging_cmap`, symmetric norm around the center | colorbar |
-| categorical | categorical, string or boolean dtype, or `categorical=True` | `categorical_colors` | legend (sizes from `rc`) |
+| sequential | numeric column (default) | `sequential`, `sequential_range`; `color_scale`, `tick_format` apply | colorbar |
+| diverging | the call gives `center=`, or the plot function declares it for its own columns (the signed error columns) | `diverging`, symmetric norm around the center | colorbar |
+| categorical | categorical, string or boolean dtype, or `categorical=True` | `categorical` | legend (sizes from `rc`) |
 
-- The rule is local: the palette depends on the role of the channel's own data, never on other channels. A continuous fill with a categorical edge uses `cmap` and `categorical_colors`, with no counting or cycling.
-- Two continuous variables on fill and edge share `cmap` unless `edge_cmap` is set in the style or in the call (`edge_cmap=` in the call overrides). The built-in presets leave `edge_cmap` as `None`, so the default behavior is "numeric data is always drawn with the style's ramp".
-- The three role palettes of `default` are designed together (similar saturation and lightness, tuned to the surface); a figure in PR A checks that a continuous fill with a categorical edge reads as one family.
+- The rule is local: the palette depends on the role of the channel's own data and on the channel, never on other channels. A continuous fill with a categorical edge uses `palettes.sequential` and `palettes.categorical`; no counting or cycling.
+- An edge map is not a role: an edge can be continuous, diverging or categorical, and `channel_palettes["edge"]` can override any of the three. The built-in presets set no channel overrides, so the default behavior is "numeric data is always drawn with the style's ramp, wherever it appears".
+- Call arguments (`cmap=`, `edge_cmap=`, `label_cmap=`) name a palette for that channel and override the style whatever the role.
+- The role palettes of a preset are designed together (similar saturation and lightness, tuned to the surface); a figure in PR A checks that a continuous fill with a categorical edge reads as one family.
 - Integer-coded categories (FIPS-like codes) are numeric and take the sequential palette unless `categorical=True` is passed (the same as geopandas). An ordered categorical dtype is categorical with a sequential palette sampled at the number of levels (to be confirmed).
 - New call arguments this needs: `center=`, `categorical=`, `norm=`.
 
@@ -96,17 +94,20 @@ The style holds one palette per role, and the plot function picks the role from 
 ### Presets and registry
 
 - `PlotStyle.default()`: the new look of the library, used when nothing else is selected. It is the talk look with ordinary type sizes (tinted surface, boundary slightly darker than the surface, truncated `YlGnBu`, `color_scale="auto"`, outlined colorbar). It changes the output of every flow plot and animation, so the PR carries before/after figures and a prominent CHANGELOG entry under Changed.
+- `PlotStyle.dark()`: the same design on a dark surface (dark surface and boundary slightly lighter than it, light text, `viridis` truncated to 0.25-1.0, the same diverging and categorical maps without the softening). It is a separate preset, not derived from `default`, because the sequential ramps and the contrast relations invert.
 - `PlotStyle.classic()`: no rc entries and every library field `None`, today's output. `PlotStyle()` equals `classic()`.
+- Palettes of `default`, to be checked on the PR A palette figure: sequential `YlGnBu` truncated to 0.22-1.0; diverging `RdYlBu_r` (its pale-yellow center differs from the blue-gray surface, which a white-centered map would not); categorical `tab10` mixed 15 % toward the surface so fills do not glare.
 - No size in a preset name or preset. The large type of the talk (20 / 22 pt) and the frame sizes are recipes in the docs: `register_style("talk", PlotStyle.default().copy_with(rc={**default.rc, "xtick.labelsize": 20, "axes.labelsize": 22}))`, with `figsize` and `dpi` passed to the call.
 - Custom presets: `register_style(name, style)`, `get_style(name)`, and `style="name"` is accepted wherever a style is. The built-in names `default` and `classic` cannot be overwritten (`overwrite=True` is not offered for them); other names raise on a duplicate unless `overwrite=True`.
 
 ### Selecting a style
 
-1. `style=` on the plot and animation functions: a `PlotStyle`, a registered name, or `None`. `None` means "use the context style, else `default`"; to get no styling at all, pass `classic`.
+1. `style=` on the plot and animation functions: a `PlotStyle`, a registered name, or `None`. `None` means "use the context or session style"; to get no styling at all, pass `classic`.
 2. `with carto_flow.style_context(style): ...` sets the style for a block, for example a docs gallery script (a `contextvars.ContextVar`, so it is safe in threads and async code). It accepts a name or an object.
-3. Otherwise `PlotStyle.default()`.
+3. `carto_flow.set_style(style)` sets the session-level style (like `plt.style.use`); `set_style(None)` resets to `default`; `get_style()` returns the style in effect. It is process-wide state by design, documented as such.
+4. Otherwise `PlotStyle.default()`.
 
-There is no global setter. This costs notebook users a `with` block or a `style=` argument per call; see "Open decisions".
+Order of precedence for the style itself: `style=` of the call, then `style_context`, then `set_style`, then `default`.
 
 ### Axes-level and figure-level functions
 
@@ -139,7 +140,7 @@ Preset bundles for `MorphOptions` and layout options already exist as classmetho
 
 ## Scope and order
 
-1. PR A: `style.py` with only what the flow plots and animations use (`rc`, `cmap`, `cmap_range`, `edge_cmap`, `diverging_cmap`, `categorical_colors`, `color_scale`, `tick_format`, `boundary_*`, `colorbar_*`, `defaults`), `Cartogram.plot`, `plot_cartogram`, `plot_comparison`, the field plots, the six `animate_*` functions, `save_animation`, `norm=`, `center=`, `categorical=`, `morph_timeline`, the palette figure, before/after figures (classic against default), a docs page on styling.
+1. PR A: `style.py` with only what the flow plots and animations use (`rc`, `palettes`, `channel_palettes`, `color_scale`, `tick_format`, `boundary_*`, `colorbar_*`, `defaults`), `Cartogram.plot`, `plot_cartogram`, `plot_comparison`, the field plots, the six `animate_*` functions, `save_animation`, `norm=`, `center=`, `categorical=`, `set_style` and `style_context`, the `dark` preset, `morph_timeline`, the palette figure, before/after figures (classic against default), a docs page on styling.
 2. PR B: symbol, Voronoi and proportional plots; `reference_*`, `annotation_size`, the hatch and range defaults; the shared channel resolver. Until B lands those plots keep their current look, so the docs gallery is consistent only after B.
 3. Issue 82: the talk visuals as gallery examples, using the `talk` recipe.
 
@@ -156,11 +157,13 @@ Precedence (call over style over library default) for every resolved setting; ro
 5. One palette per data role, detected from the data, local to the channel; no colormap cycle.
 6. Users can register styles; `style="name"` is accepted.
 7. The style builds on matplotlib: an `rc` dict plus library-specific fields and a `defaults` mapping.
-8. The style holds the default of every appearance parameter, including `edge_cmap` and ranges; the call holds the data binding.
+8. The style holds the default of every appearance parameter, including the per-channel palettes and ranges; the call holds the data binding.
+
+9. `set_style(...)` exists for session-level use; `style_context` and `style=` override it.
+10. A `dark` preset is included. In the docs the gallery images are built with `default`; the light-and-dark theme question for static images (for example a dark variant of each image shown with Material's `#only-dark` / `#only-light` suffix) is part of issue 82, not of the style PRs.
+11. Accessibility checks are not part of the style system; users can check a style with external tools. The built-in palettes start from matplotlib's perceptually reasonable maps.
+12. Palettes of `default` and `dark`: as listed under Presets, adjusted on the PR A palette figure.
 
 ## Open decisions
 
-1. Notebook use without a global setter: keep (proposed), or add a session-level `set_style(...)` like `plt.style.use`.
-2. Dark mode: no dark preset is proposed. The docs site has light and dark themes and the gallery images are static, so the docs' consistent style is the light one on both themes. A dark preset would need its own palettes (sequential ramps invert on a dark surface).
-3. Accessibility checks (text contrast, colorblind-safe categorical colors, grayscale) are not part of PR A; to be added as a test of the built-in presets or a later PR.
-4. The diverging and categorical palettes of `default` are not chosen (suggested: a truncated `RdBu_r` and a `tab10`-like set softened toward the surface); to be decided on the palette figure in PR A.
+None open at the design level. Items to verify during PR A: whether geopandas takes its default edge color from `patch.edgecolor` (then `boundary_*` move to `rc`), that `rc_context` covers the animation artists, and the ordered-categorical rule.
