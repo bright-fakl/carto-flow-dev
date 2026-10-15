@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #140: One parameter vocabulary for the proportional plot functions</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #140: One parameter vocabulary for the proportional plot functions</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>proportional</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../plot-vocabulary-voronoi/index.html">One parameter vocabulary for the Voronoi plot functions</a> <span class="meta">(pr)</span><br><a href="../plot-vocabulary-symbol/index.html">One parameter vocabulary for the symbol plot functions</a> <span class="meta">(pr)</span><br><a href="../plot-vocabulary-flow/index.html">One parameter vocabulary for the flow plot, animate and preview functions</a> <span class="meta">(pr)</span><br><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/140">https://github.com/bright-fakl/carto-flow/pull/140</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/99">#99</a></dd>
+<dt>Branch</dt><dd>feat/plot-vocabulary-proportional</dd>
+<dt>Base</dt><dd>feat/plot-vocabulary-voronoi</dd>
+<dt>Created</dt><dd>2026-10-16 01:00</dd>
+<dt>Before</dt><dd>main @ 93165f3</dd>
+<dt>After</dt><dd>feat/plot-vocabulary-proportional</dd>
+<dt>Inputs</dt><dd>a 3 x 3 grid of squares with two random columns and one random share; plot_partitions on the split partition, plot_dot_density with 20 dots per category.</dd>
+</dl>
+<p class="desc">Fourth and last part of the parameter vocabulary of the style-system proposal. facecolor binds the fill of plot_partitions (area, category, a column, a list of columns or a color; color_by is a deprecated alias), cmap accepts the category dict (palette is deprecated), the background and complement layers use *_facecolor, and plot_dot_density uses markersize and the reference_ layer. No change of output. Stacked on the Voronoi PR.</p>
+<p>No figures: the change is parameter names. On the 3 x 3 grid the facecolors of the default, <code>facecolor=&quot;category&quot;</code> with a dict, <code>facecolor=&quot;rv&quot;</code> (one column) and the dot-density plot, the marker sizes and the base polygons are identical to <code>main</code> with the old names (<code>np.array_equal</code>).</p>
+<h2>Renames</h2>
+<table>
+<tr><th>function</th><th>old</th><th>new</th></tr>
+<tr><td><code>plot_partitions</code></td><td><code>color_by</code></td><td><code>facecolor</code> (<code>None</code>/<code>&quot;area&quot;</code>, <code>&quot;category&quot;</code>, a column name, a list of columns or a color)</td></tr>
+<tr><td><code>plot_partitions</code></td><td><code>background_color</code>, <code>complement_color</code>, <code>complement_color_by</code></td><td><code>background_facecolor</code>, <code>complement_facecolor</code> (a column or a color)</td></tr>
+<tr><td><code>plot_partitions</code>, <code>plot_dot_density</code></td><td><code>palette</code></td><td><code>cmap</code> accepts the <code>{category: color}</code> dict</td></tr>
+<tr><td><code>plot_dot_density</code></td><td><code>size</code>, <code>base_color</code>, <code>base_edgecolor</code>, <code>base_linewidth</code>, <code>base_alpha</code></td><td><code>markersize</code>, <code>reference_facecolor</code>, <code>reference_edgecolor</code>, <code>reference_linewidth</code>, <code>reference_alpha</code></td></tr>
+</table>
+<h2>Behavior of <code>facecolor</code> in <code>plot_partitions</code></h2>
+<table>
+<tr><th>input</th><th>result</th></tr>
+<tr><td><code>None</code> or <code>&quot;area&quot;</code></td><td>partition area, continuous colormap (the default; it does not look up a column named <code>area</code>)</td></tr>
+<tr><td><code>&quot;category&quot;</code></td><td>categorical by partition</td></tr>
+<tr><td>a column name</td><td>all partitions colored by that column (as the one-element list was)</td></tr>
+<tr><td>a list of columns</td><td>one column per partition</td></tr>
+<tr><td>a color</td><td>constant fill, no colorbar or legend</td></tr>
+<tr><td>a column that is also <code>&quot;area&quot;</code>, <code>&quot;category&quot;</code> or a color</td><td>the column, <code>UserWarning</code></td></tr>
+<tr><td>any other string</td><td><code>ValueError</code></td></tr>
+</table>
+<p>When <code>palette</code> and a colormap name were both given, the dict now replaces the name and the unlisted categories take the <code>tab10</code> colors.</p>
+<h2>Checks</h2>
+<p>Suite 1129 passed, ruff and mypy clean. The proportional gallery examples run without deprecation warnings from the library. The edited notebooks were not executed.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
