@@ -43,11 +43,12 @@ figure: fig_animation_frame.png — A frame of `animate_geometry_keyframes` (Pop
 | `style=("dark", talk_fonts)`, `PlotStyle.dark() \| talk_fonts` | a sequence of styles, or `a \| b`: what the right style sets wins; `rc`, palettes and channels merge field by field |
 | `facecolor="Population", vmin=0, vmax=3e7` | the limits fix a linear normalization; with `norm="log"` they are the limits of the log scale; with a `Normalize` instance they raise |
 | `norm="linear"`, `color_scale="linear"`, `log_span=3` | keep a linear scale for data that spans more than one decade |
+| `register_style(...)`, `unregister_style(name)` | add and remove a style; registered styles live in the memory of the process (the how-to shows registering them at startup) |
 | `morph_timeline(cartogram)` | keyframes and times of hold, eased morph, hold, return |
 
 ## Checks
 
-Suite 1191 passed, ruff and mypy clean; the flow gallery examples and the eight flow notebooks run without error. Tests cover the style fields and validation, the palettes and norms, the colorbar ticks, the selection order (call, block, session, default), thread isolation, rcParams restored after an exception, the classic look against plain geopandas, the roles, the shared normalization of the comparison, the animation frames after the axes is cleared, the saved frame color and `morph_timeline`, merging and sequences of styles, and the limits of a call.
+Suite 1192 passed, ruff and mypy clean; the flow gallery examples and the eight flow notebooks run without error. Tests cover the style fields and validation, the palettes and norms, the colorbar ticks, the selection order (call, block, session, default), thread isolation, rcParams restored after an exception, the classic look against plain geopandas, the roles, the shared normalization of the comparison, the animation frames after the axes is cleared, the saved frame color and `morph_timeline`, merging and sequences of styles, and the limits of a call.
 
 ## Not in this PR
 
