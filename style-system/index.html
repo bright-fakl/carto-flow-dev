@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Style system and presets for plots and animations</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Style system and presets for plots and animations</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>proposal</dd>
+<dt>Topic</dt><dd>flow, infra</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-border-drift/index.html">Border pile-up of dots carried with a flow cartogram: re-evaluation, a distance remap and a reference-point warp</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/99">#99</a></dd>
+<dt>Inputs</dt><dd>ANIMATION-STYLE.md, reference_implementation.py and style.py of the GeoDC talk bundle; the plot and animation signatures of the four cartogram types (survey below).</dd>
+</dl>
+<p class="desc">Proposal for issue 99. A frozen PlotStyle dataclass (surface, boundary, text, colormap with truncation, color scale, typography, colorbar, figure size) with the built-in presets default and slides, a small registry for custom presets, a per-call style argument and a style_context manager. Explicit arguments beat the style, the style beats the library defaults, and the default look does not change. Animation timing is a separate morph_timeline helper, not part of the style. The flow animations accept norm=, and a log norm gets real-number tick labels from the style. First PR covers the flow plots and animations; symbol, Voronoi and proportional plots follow.</p>
+<p>A design proposal. Nothing is implemented. Issue 82 (talk visuals in the docs) depends on it.</p>
+<h2>What the talk style consists of</h2>
+<p>Collected from <code>ANIMATION-STYLE.md</code> and the talk&#x27;s <code>style.py</code> (about 30 lines repeated by every script):</p>
+<table>
+<tr><th>group</th><th>settings</th></tr>
+<tr><td>surface</td><td><code>#eef1f4</code> on the figure and every axes, also as <code>savefig</code> facecolor</td></tr>
+<tr><td>boundary</td><td><code>#dde4ea</code>, linewidth 1.5 (slightly darker than the surface)</td></tr>
+<tr><td>text</td><td><code>#222222</code>; tick labels 20 pt, labels 22 pt</td></tr>
+<tr><td>colormap</td><td><code>YlGnBu</code> truncated to 0.22-1.0, so no fill is close to the surface</td></tr>
+<tr><td>color scale</td><td>log for a variable spanning more than about one decade; tick labels in real numbers (<code>1M</code>, <code>2M</code>, <code>5M</code>), never &quot;log10&quot;</td></tr>
+<tr><td>colorbar</td><td>outline <code>#7a848c</code>, linewidth 1.0; horizontal (shrink 0.62, pad 0.04, aspect 32) in the square frame, vertical on the right in the 16:9 frame</td></tr>
+<tr><td>frame</td><td>1080 x 1080 at dpi 120 (social), or 1920 x 1080 (slides)</td></tr>
+<tr><td>motion</td><td>hold 1.5 s, eased morph 7 s, hold 2.5 s, eased return 5 s; cosine easing; fixed extent; solver snapshots as keyframes</td></tr>
+</table>
+<p>The first seven rows are look. The last row is timing, which is a different concern (see &quot;Animation timing&quot;).</p>
+<h2>What the library offers now (survey)</h2>
+<ul><li>Flow: <code>Cartogram.plot</code> / <code>plot_cartogram</code> take <code>cmap</code> (default <code>RdYlGn_r</code>), <code>legend</code> and <code>**kwargs</code> for <code>GeoDataFrame.plot</code>. The six <code>animate_*</code> functions take <code>cmap</code> (default <code>viridis</code>), <code>colorbar</code>, <code>colorbar_label</code>, <code>colorbar_kwargs</code>, <code>title</code>, <code>figsize</code>. The color normalization is built inside as <code>plt.Normalize(vmin, vmax)</code>; <code>norm=</code> is not accepted, which is why the talk passes log10 values and relabels the ticks by hand.</li><li>Symbol: <code>SymbolCartogram.plot</code> has 38 parameters (<code>cmap</code>, <code>norm</code>, <code>facecolor</code>, <code>edgecolor</code>, <code>linewidth</code>, ten legend options, label options). Voronoi has its own <code>cell_style</code>, <code>point_style</code>, <code>geometry_style</code> dicts. Proportional has <code>background_*</code> and <code>complement_*</code> parameters.</li><li>No shared object, no way to set the look once, no surface color, no typography, no colormap truncation.</li></ul>
+<h2>Proposed design</h2>
+<h3><code>PlotStyle</code></h3>
+<p>A frozen dataclass in a new module <code>carto_flow/style.py</code>, exported from the package. Every field defaults to <code>None</code> (meaning: leave the matplotlib or library default alone), so <code>PlotStyle()</code> changes nothing.</p>
+<table>
+<tr><th>field</th><th>meaning</th></tr>
+<tr><td><code>background</code></td><td>facecolor of the figure and the axes (also used by <code>save_animation</code> as <code>savefig</code> facecolor)</td></tr>
+<tr><td><code>boundary_color</code>, <code>boundary_width</code></td><td>region edge color and width, used where the call does not pass <code>edgecolor</code> / <code>linewidth</code></td></tr>
+<tr><td><code>text_color</code>, <code>font_family</code></td><td>tick labels, labels, title</td></tr>
+<tr><td><code>tick_size</code>, <code>label_size</code>, <code>title_size</code></td><td>font sizes in points</td></tr>
+<tr><td><code>cmap</code></td><td>sequential colormap (continuous data): name or <code>Colormap</code></td></tr>
+<tr><td><code>cmap_range</code></td><td><code>(lo, hi)</code> truncation of <code>cmap</code>, default <code>(0, 1)</code></td></tr>
+<tr><td><code>diverging_cmap</code></td><td>colormap for data with a meaningful center (errors, differences, election margins)</td></tr>
+<tr><td><code>categorical_colors</code></td><td>colormap name or list of colors for categories</td></tr>
+<tr><td><code>color_scale</code></td><td><code>&quot;linear&quot;</code>, <code>&quot;log&quot;</code> or <code>&quot;auto&quot;</code> (log when all values are positive and span more than <code>log_span</code> decades, else linear)</td></tr>
+<tr><td><code>log_span</code></td><td>decades that trigger <code>&quot;auto&quot;</code>, default 1.0</td></tr>
+<tr><td><code>colorbar_orientation</code>, <code>colorbar_shrink</code>, <code>colorbar_pad</code>, <code>colorbar_aspect</code></td><td>colorbar placement</td></tr>
+<tr><td><code>colorbar_outline_color</code>, <code>colorbar_outline_width</code></td><td>colorbar spines</td></tr>
+<tr><td><code>tick_format</code></td><td><code>&quot;plain&quot;</code> or <code>&quot;si&quot;</code> (<code>1M</code>, <code>2.5k</code>); with a log norm the ticks are placed at 1, 2, 5 per decade</td></tr>
+<tr><td><code>figsize</code>, <code>dpi</code></td><td>used when the plot function creates the figure, and by <code>save_animation</code> as default</td></tr>
+</table>
+<p>Methods: <code>copy_with(**changes)</code> (the convention of <code>MorphOptions</code>), <code>colormap()</code> (the truncated colormap object), <code>norm(values)</code> (the <code>Normalize</code> or <code>LogNorm</code> the scale implies), <code>colorbar(fig, ax, mappable, label)</code> (applies the colorbar fields and tick labeling, so users of plain matplotlib can reuse it), <code>apply(fig)</code> (surface and text colors on a figure and its axes).</p>
+<h3>Presets and registry</h3>
+<ul><li><code>PlotStyle.default()</code>: all <code>None</code>, today&#x27;s output (nothing changes unless a style is selected).</li><li><code>PlotStyle.slides()</code>: the talk look for a 16:9 frame (surface, boundary, truncated <code>YlGnBu</code>, <code>color_scale=&quot;auto&quot;</code>, 20/22 pt, vertical colorbar with outline, 1920 x 1080 at dpi 120).</li><li>Custom presets: <code>register_style(&quot;social&quot;, PlotStyle.slides().copy_with(figsize=(9, 9), colorbar_orientation=&quot;horizontal&quot;, colorbar_shrink=0.62, colorbar_pad=0.04, colorbar_aspect=32))</code>; <code>get_style(name)</code>; <code>style=&quot;social&quot;</code> is accepted wherever a style is. The 1080 x 1080 social look of <code>ANIMATION-STYLE.md</code> is this example in the docs, not a third built-in preset.</li></ul>
+<h3>Selecting a style</h3>
+<p>1. <code>style=</code> argument on the plot and animation functions (a <code>PlotStyle</code>, a registered name, or <code>None</code>). 2. <code>with carto_flow.style_context(PlotStyle.slides()): ...</code> sets the style for a block, for example a docs gallery script (a <code>contextvars.ContextVar</code>, so it is safe in threads and async code). 3. Otherwise <code>PlotStyle.default()</code>.</p>
+<p>No global setter: process-wide state is easy to forget in notebooks.</p>
+<p>Precedence for every setting: explicit argument of the call, then the style, then the library default. For this to work the library defaults that are now in signatures (<code>cmap=&quot;RdYlGn_r&quot;</code>, <code>cmap=&quot;viridis&quot;</code>) become <code>None</code> in the signature and are resolved inside, with the same effective default as now.</p>
+<h3>Matplotlib stylesheets</h3>
+<p>A <code>PlotStyle</code> is not an <code>rcParams</code> dict, because the main fields (truncated colormap, log colorbar, boundary color relative to the surface) are not rcParams. <code>PlotStyle</code> does not conflict with <code>plt.style.context</code>; the style only sets what it names. A <code>PlotStyle.rc_params()</code> method could return the font and color subset for users&#x27; own plots; I would add it only if asked.</p>
+<h3>Data types: continuous, diverging, categorical</h3>
+<p>The look of a map depends on the kind of data as well as on the style: a log scale, a truncated sequential colormap and a colorbar make sense for continuous data and none of them for categories (which need a distinct-color palette and a legend). The style therefore holds one palette per role, and the plot function picks the role from the data:</p>
+<table>
+<tr><th>role</th><th>detected when</th><th>style fields used</th><th>colorbar or legend</th></tr>
+<tr><td>sequential</td><td>numeric column (default)</td><td><code>cmap</code>, <code>cmap_range</code>, <code>color_scale</code>, <code>tick_format</code></td><td>colorbar</td></tr>
+<tr><td>diverging</td><td>the plot says so (<code>center=</code> given, or the built-in error and difference columns such as <code>_morph_error_pct</code>)</td><td><code>diverging_cmap</code>, symmetric norm around the center</td><td>colorbar</td></tr>
+<tr><td>categorical</td><td>categorical, string or boolean dtype, or <code>categorical=True</code></td><td><code>categorical_colors</code></td><td>legend (font sizes from the style)</td></tr>
+</table>
+<p>Rules: the role is decided by the data and the call, never by the style; the style only supplies the palette for each role. Fields of other roles are ignored (a categorical column ignores <code>color_scale</code> and <code>cmap_range</code>). An explicit <code>cmap</code> argument of the call overrides the palette of the detected role. The same detection is used by the animations (<code>color_values</code> or <code>column</code>). A binary variable (such as the election winner) is categorical; a share between 0 and 1 is sequential or diverging around 0.5. What this does not settle is ordinal data (ordered categories): proposed to treat it as categorical with a sequential palette sampled at the number of levels (<code>ordered=True</code> on the categorical dtype), to be confirmed.</p>
+<h3>Log color scale and <code>norm=</code></h3>
+<ul><li>The flow animations and plots accept <code>norm=</code> (a <code>Normalize</code>), with <code>vmin</code> / <code>vmax</code> taken from it. This removes the log10-values workaround.</li><li>With <code>color_scale=&quot;log&quot;</code> (or <code>&quot;auto&quot;</code> resolving to log) the style builds the <code>LogNorm</code> and its colorbar uses real-number tick labels (<code>tick_format=&quot;si&quot;</code>). Zeros or negatives under <code>&quot;log&quot;</code> raise a clear error; <code>&quot;auto&quot;</code> falls back to linear.</li></ul>
+<h3>Animation timing is not part of the style</h3>
+<p>Hold, morph and return durations, easing and the loop are about time, not appearance, and they are already expressed through <code>keyframe_times</code> and <code>linear_over(&quot;time&quot;)</code>. Proposal: a small helper <code>morph_timeline(snapshots, hold_start=1.5, morph=7.0, hold_end=2.5, back=5.0, easing=&quot;cosine&quot;)</code> returning <code>(keyframes, times)</code> to pass to <code>animate_geometry_keyframes</code>, replacing the talk&#x27;s <code>loop_timeline</code> and <code>ease_inv</code>. Optional <code>back=0</code> for a time series that plays forward only. <code>fps</code> and <code>dpi</code> stay explicit arguments; <code>figsize</code> and <code>dpi</code> defaults come from the style.</p>
+<h3>Other parts (issue point 4)</h3>
+<p>Preset bundles for <code>MorphOptions</code> and layout options already exist as classmethods and do not share fields with a plotting style. No shared mechanism is proposed; the convention (<code>copy_with</code>, classmethod presets) is already the same.</p>
+<h2>Scope and order</h2>
+<p>1. PR A: <code>style.py</code>, flow <code>Cartogram.plot</code>, <code>plot_cartogram</code>, <code>plot_comparison</code>, the six <code>animate_*</code> functions and <code>save_animation</code>; <code>norm=</code>; <code>morph_timeline</code>; tests with before/after figures of the default (unchanged) and <code>slides</code>; docs page on styling. 2. PR B: symbol, Voronoi and proportional plots (their existing <code>facecolor</code>, <code>edgecolor</code>, <code>cell_style</code> parameters stay and win over the style). 3. Issue 82: the talk visuals as gallery examples under <code>style_context(PlotStyle.slides())</code>.</p>
+<h2>Open decisions</h2>
+<p>1. Name: <code>PlotStyle</code> (proposed) or <code>Style</code>. 2. Should <code>figsize</code> and <code>dpi</code> be in the style (proposed, so a preset reproduces a frame size), or stay call arguments only. 3. Built-in presets: <code>default</code> and <code>slides</code> (proposed), or also a built-in <code>social</code>. 4. Docs gallery: keep the current docs look (proposed) and use <code>slides</code> only for the talk visuals of issue 82, or move the whole gallery to one style. 5. Data types: one palette per role (sequential, diverging, categorical) with the role detected from the data (proposed), or a single <code>cmap</code> field and the user switches per call. 6. <code>style=</code> as a string name: accept registered names (proposed) or only objects.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
