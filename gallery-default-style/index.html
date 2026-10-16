@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #156: Gallery examples use the default plot style</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #156: Gallery examples use the default plot style</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span><br><a href="../plot-style-core/index.html">PlotStyle sets the look of the flow plots and animations</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/156">https://github.com/bright-fakl/carto-flow/pull/156</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/99">#99</a></dd>
+<dt>Branch</dt><dd>docs/gallery-default-style</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-18 10:00</dd>
+<dt>Before</dt><dd>main @ 028f1e8</dd>
+<dt>After</dt><dd>docs/gallery-default-style @ d6738f7</dd>
+<dt>Inputs</dt><dd>the 28 gallery example scripts; each run with the Agg backend before and after.</dd>
+</dl>
+<p class="desc">The gallery examples looked like the classic style because they pinned a palette and limits (14 passed cmap=) and created their own figure (about 20 used plt.subplots with ax=), which leaves the figure white. The examples now let the style set the palette, scale and colorbar, and apply the style to their figures with get_style().apply(fig), so a copied snippet gives the same figure.</p>
+<h2>Why the gallery looked classic</h2>
+<p>Two causes, found by rendering <code>plot_flow_cartogram.py</code> on main (figure facecolor <code>#ffffff</code>, palette <code>RdYlGn_r</code>, linear scale):</p>
+<p>1. An explicit <code>cmap=</code>, <code>vmin</code> or <code>vmax</code> in the call wins over the style, so the palette and the log scale of the style never applied (14 examples passed <code>cmap=</code>, 6 passed <code>vmin</code>). 2. A plot function that is given <code>ax=</code> gives that axes the surface of the style but not the figure that the caller created; with the axes turned off the white figure showed (about 20 examples).</p>
+<p>After the change the figure of every example has the surface <code>#eef1f4</code> (checked by running all 28 examples).</p>
+<h2>Before and after</h2>
+<h2>What changes</h2>
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>palettes</td><td>the pins of the examples that draw a carto-flow result are removed (the explicit ones that carry a meaning stay)</td></tr>
+<tr><td>figures</td><td><code>get_style().apply(fig)</code> after every <code>plt.subplots</code>, with <code>from carto_flow import get_style</code></td></tr>
+<tr><td>not changed</td><td>the notebooks of the how-to and tutorials have the same two patterns (15 pass <code>cmap=</code> or <code>vmin</code>)</td></tr>
+</table>
+<h2>Checks</h2>
+<p>All 28 examples run; the figure facecolor of each is the surface of the default style; the docs build runs in CI.</p>
+<div class="figure">
+<img src="fig_election_shares.png" alt="The palette is kept on purpose (blue for Democratic, red for Republican); the figure has the surface.">
+<p class="caption">The palette is kept on purpose (blue for Democratic, red for Republican); the figure has the surface.</p>
+</div><div class="figure">
+<img src="fig_election_winners.png" alt="The same for the winner colors.">
+<p class="caption">The same for the winner colors.</p>
+</div><div class="figure">
+<img src="fig_flow_cartogram.png" alt="Flow cartogram: no pinned palette or limits, log scale and style colorbar.">
+<p class="caption">Flow cartogram: no pinned palette or limits, log scale and style colorbar.</p>
+</div><div class="figure">
+<img src="fig_flow_convergence.png" alt="Surface only.">
+<p class="caption">Surface only.</p>
+</div><div class="figure">
+<img src="fig_symbol_adjacency.png" alt="The links take the sequential palette.">
+<p class="caption">The links take the sequential palette.</p>
+</div><div class="figure">
+<img src="fig_symbol_displacement.png" alt="The arrows take the accent color.">
+<p class="caption">The arrows take the accent color.</p>
+</div><div class="figure">
+<img src="fig_symbol_flow_density.png" alt="Symbols colored with the sequential palette of the style.">
+<p class="caption">Symbols colored with the sequential palette of the style.</p>
+</div><div class="figure">
+<img src="fig_symbol_styling.png" alt="Surface only (the palette was not pinned).">
+<p class="caption">Surface only (the palette was not pinned).</p>
+</div><div class="figure">
+<img src="fig_symbol_tiling.png" alt="The tiling uses the reference layer and the stroke color of the style.">
+<p class="caption">The tiling uses the reference layer and the stroke color of the style.</p>
+</div><div class="figure">
+<img src="fig_voronoi_cartogram.png" alt="Voronoi cartogram.">
+<p class="caption">Voronoi cartogram.</p>
+</div><div class="figure">
+<img src="fig_voronoi_premorph.png" alt="The two cartograms are drawn with their own plot methods instead of geopandas.">
+<p class="caption">The two cartograms are drawn with their own plot methods instead of geopandas.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
