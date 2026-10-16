@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #157: README figure in the default plot style</title>
+<title>PR #157: README figure and text up to date</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,7 +72,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #157: README figure in the default plot style</h1>
+<h1>PR #157: README figure and text up to date</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>infra</dd>
@@ -83,20 +83,23 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-18 12:00</dd>
 <dt>Before</dt><dd>main @ 8cbe591</dd>
-<dt>After</dt><dd>docs/readme-figure @ 21a2cc0</dd>
+<dt>After</dt><dd>docs/readme-figure @ 7fa5abf</dd>
 <dt>Inputs</dt><dd>bundled US states with population, race and poverty counts (simplify 1000); the flow morph with the defaults; a hexagon grid symbol cartogram; the split partition of three groups; 1000 dots.</dd>
 </dl>
-<p class="desc">The figure of the README (cartogram-example.png) predates the style system (white background, RdYlGn_r and viridis palettes, grey separators). It is drawn again in the default plot style by scripts/make_readme_figure.py, with the same four panels of the US states.</p>
+<p class="desc">The README predated the style system and several cartogram types. Its figure is drawn again in the default plot style (scripts/make_readme_figure.py), its overview lists five cartogram types instead of three, its quick example is replaced by one that runs on the bundled data (the old one used arguments and attributes that do not exist), and the docs home page says Python 3.10+ instead of 3.9+.</p>
 <h2>Figures</h2>
 <h2>What changes</h2>
 <table>
 <tr><th></th><th></th></tr>
 <tr><td>figure</td><td><code>cartogram-example.png</code> redrawn; the README links it by its raw URL, so GitHub and PyPI show the new one after the merge</td></tr>
 <tr><td>script</td><td><code>scripts/make_readme_figure.py</code> draws it</td></tr>
-<tr><td>not changed</td><td>the README text still says that carto-flow supports three cartogram styles, without the Voronoi and the non-contiguous cartograms</td></tr>
+<tr><td>overview</td><td>five cartogram types (flow, symbol, Voronoi, non-contiguous, proportional with dot density) instead of three</td></tr>
+<tr><td>quick example</td><td>the old one (<code>create_flow_cartogram(gdf, values=...)</code>, <code>result.cartogram_gdf</code>, <code>create_symbol_cartogram(gdf, values=...)</code>) did not run; the new one runs on the bundled US states for the flow, symbol, Voronoi and non-contiguous cartograms and mentions <code>style=</code></td></tr>
+<tr><td>features and links</td><td>the Voronoi and non-contiguous cartograms, mosaic tile-count maps, plot styles, animations and bundled data are listed; the gallery is linked</td></tr>
+<tr><td>docs home</td><td><code>docs/index.md</code>: Python 3.10+ (it said 3.9+), the two cartogram types and the plot styles added</td></tr>
 </table>
 <h2>Checks</h2>
-<p>The script runs; the figure was checked by eye.</p>
+<p>The script runs; the figure was checked by eye; the quick example was run end to end (the four cartograms and <code>style=&quot;dark&quot;</code>); the docs build runs in CI.</p>
 <div class="figure">
 <img src="fig_after.png" alt="The new figure (1430 x 880, 386 KiB): the default plot style, the same four panels.">
 <p class="caption">The new figure (1430 x 880, 386 KiB): the default plot style, the same four panels.</p>
