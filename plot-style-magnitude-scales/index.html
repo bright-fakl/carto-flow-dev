@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #147: Scales for the velocity and displacement magnitudes, style palettes for the field plots</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #147: Scales for the velocity and displacement magnitudes, style palettes for the field plots</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow, voronoi, infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../plot-style-overlays/index.html">Overlay colors of the diagnostic plots in PlotStyle</a> <span class="meta">(pr)</span><br><a href="../plot-style-symbol/index.html">PlotStyle for the symbol plots</a> <span class="meta">(pr)</span><br><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/147">https://github.com/bright-fakl/carto-flow/pull/147</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/99">#99</a></dd>
+<dt>Branch</dt><dd>feat/plot-style-magnitude-scales</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-16 22:00</dd>
+<dt>Before</dt><dd>main @ aff2719 (equal to style=&quot;classic&quot;)</dd>
+<dt>After</dt><dd>feat/plot-style-magnitude-scales @ 4f3db68</dd>
+<dt>Inputs</dt><dd>bundled US states; a population flow cartogram (grid 64, 30 iterations); a population Voronoi cartogram (RasterBackend 256, 100 iterations).</dd>
+</dl>
+<p class="desc">VelocityPlotOptions(norm=) and the Voronoi plot_displacement(norm=) take a scale (linear, sqrt, log, auto or a Normalize) for the magnitude that sets arrow color, opacity and the colorbar; sqrt joins the color scales. The density and velocity plots and the Voronoi displacement arrows take the palettes of the style, and the flow convergence plots the series colors.</p>
+<p><code>make_figures.py</code> draws the plots on the PR branch. The colors of the velocity (color by magnitude, direction, opacity by magnitude, solid), density (none, ratio, difference), convergence and Voronoi displacement plots under <code>style=&quot;classic&quot;</code> are identical to <code>main</code>.</p>
+<h2>Scales</h2>
+<h2>Palettes of the style</h2>
+<h2>What changes</h2>
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>scales</td><td><code>VelocityPlotOptions.norm</code>, <code>plot_displacement(norm=)</code> of the Voronoi cartogram (function and method); <code>&quot;sqrt&quot;</code> is a color scale everywhere (<code>PowerNorm(0.5)</code>)</td></tr>
+<tr><td>palettes</td><td>density cmap (sequential, diverging for ratio and difference), velocity magnitude cmap, Voronoi displacement cmap: the style, then the former default</td></tr>
+<tr><td>series colors</td><td><code>plot_convergence</code> and the workflow convergence plot: <code>series_color</code>, <code>highlight_color</code></td></tr>
+<tr><td>not yet</td><td>the density colorbar still uses plain matplotlib (not the colorbar of the style); the direction colormap (<code>twilight</code>, cyclic) has no role in the style</td></tr>
+</table>
+<h2>Checks</h2>
+<p>Suite 1297 passed, ruff and mypy clean.</p>
+<div class="figure">
+<img src="fig_convergence.png" alt="Max and mean error lines take the series and highlight colors of the style (C0 and C1 in classic).">
+<p class="caption">Max and mean error lines take the series and highlight colors of the style (C0 and C1 in classic).</p>
+</div><div class="figure">
+<img src="fig_density_palettes.png" alt="Density field in classic (viridis), default and dark: the sequential palette of the style.">
+<p class="caption">Density field in classic (viridis), default and dark: the sequential palette of the style.</p>
+</div><div class="figure">
+<img src="fig_density_ratio_palettes.png" alt="Density relative to the mean: the diverging palette of the style (RdBu_r in classic).">
+<p class="caption">Density relative to the mean: the diverging palette of the style (RdBu_r in classic).</p>
+</div><div class="figure">
+<img src="fig_displacement_scales.png" alt="Voronoi displacement arrows with `norm` linear, sqrt and log; the scale is spread over the arrows that are drawn.">
+<p class="caption">Voronoi displacement arrows with <code>norm</code> linear, sqrt and log; the scale is spread over the arrows that are drawn.</p>
+</div><div class="figure">
+<img src="fig_velocity_alpha_scales.png" alt="Opacity by magnitude with the same three scales.">
+<p class="caption">Opacity by magnitude with the same three scales.</p>
+</div><div class="figure">
+<img src="fig_velocity_palettes.png" alt="Velocity arrows colored by magnitude: the sequential palette of the style.">
+<p class="caption">Velocity arrows colored by magnitude: the sequential palette of the style.</p>
+</div><div class="figure">
+<img src="fig_velocity_scales.png" alt="Velocity arrows colored by magnitude with `norm` linear, sqrt and log (default style); the colorbar follows the scale.">
+<p class="caption">Velocity arrows colored by magnitude with <code>norm</code> linear, sqrt and log (default style); the colorbar follows the scale.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
