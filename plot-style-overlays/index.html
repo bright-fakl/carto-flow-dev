@@ -84,7 +84,7 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-16 20:00</dd>
 <dt>Before</dt><dd>main @ 3055caa</dd>
-<dt>After</dt><dd>feat/plot-style-overlays @ 6b1c55b</dd>
+<dt>After</dt><dd>feat/plot-style-overlays @ ced8bab</dd>
 <dt>Inputs</dt><dd>bundled US states; a population-weighted Voronoi cartogram (RasterBackend 256, 100 iterations); a circle-packing symbol cartogram.</dd>
 </dl>
 <p class="desc">PlotStyle gets series_color, accent_color, positive_color and highlight_color for the fixed colors of the diagnostic overlays of the Voronoi and symbol plots. Default and dark set them; classic keeps the former colors.</p>
@@ -103,8 +103,8 @@
 <h2>Checks</h2>
 <p>Suite 1274 passed, ruff and mypy clean. The topology repair overlays were not exercised by the comparison (the test case has no violations); the replaced literals were checked by reading the diff.</p>
 <div class="figure">
-<img src="fig_adjacency_nodes.png" alt="Nodes use the text color of the style.">
-<p class="caption">Nodes use the text color of the style.</p>
+<img src="fig_adjacency_nodes.png" alt="Nodes use the stroke color of the style.">
+<p class="caption">Nodes use the stroke color of the style.</p>
 </div><div class="figure">
 <img src="fig_convergence.png" alt="Convergence curve (series color) and final value (accent color).">
 <p class="caption">Convergence curve (series color) and final value (accent color).</p>
