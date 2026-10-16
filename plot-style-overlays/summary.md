@@ -11,7 +11,7 @@ base: main
 date: 2026-10-16 20:00
 related: plot-style-symbol, plot-style-voronoi-proportional, style-system
 before: main @ 3055caa
-after: feat/plot-style-overlays @ b719626
+after: feat/plot-style-overlays @ fb4d694
 inputs: bundled US states; a population-weighted Voronoi cartogram (RasterBackend 256, 100 iterations); a circle-packing symbol cartogram.
 ---
 
@@ -29,7 +29,7 @@ figure: fig_symbol_displacement.png — Displacement arrows use the accent color
 figure: fig_adjacency_nodes.png — Nodes use the text color of the style.
 
 figure: fig_velocity.png — `plot_velocity_field`: the arrows take the accent color; classic draws them black (they were white on the white axes, invisible).
-figure: fig_linewidth_legend.png — Edge by region and line width by population: the keys of the line-width legend take the axes edge color.
+figure: fig_linewidth_legend.png — Line width by population without an edge color: the edge is the text color of the style, widths 1 to 4.5 points in default and dark.
 
 ## What changes
 
@@ -43,4 +43,4 @@ figure: fig_linewidth_legend.png — Edge by region and line width by population
 
 ## Checks
 
-Suite 1253 passed, ruff and mypy clean. The topology repair overlays were not exercised by the comparison (the test case has no violations); the replaced literals were checked by reading the diff.
+Suite 1257 passed, ruff and mypy clean. The topology repair overlays were not exercised by the comparison (the test case has no violations); the replaced literals were checked by reading the diff.
