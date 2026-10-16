@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #153: Gallery animation: dot density map into a flow cartogram</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #153: Gallery animation: dot density map into a flow cartogram</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow, proportional</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../pr133-landmark-uniform/index.html">Area scaling of the landmarks along the flow and uniform point landmarks</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/153">https://github.com/bright-fakl/carto-flow/pull/153</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/82">#82</a></dd>
+<dt>Branch</dt><dd>docs/gallery-dot-morph</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-17 17:30</dd>
+<dt>Before</dt><dd>main @ c70dca4</dd>
+<dt>After</dt><dd>docs/gallery-dot-morph @ 497a92c</dd>
+<dt>Inputs</dt><dd>bundled US states with poverty counts (simplify 1000); 1,480 dots (one dot is 25,011 people below the poverty line), seed 7; flow morph with the defaults and area_scale 1e-6, snapshot_every 4 (29 frames).</dd>
+</dl>
+<p class="desc">A gallery example carries dots generated on the true-area map as landmarks through a flow cartogram and draws them at every saved iteration with get_landmarks(iteration, uniform=True). With the defaults the carried dots have a border-band z-score of 3.8 and the uniform dots -0.5.</p>
+<p>The animation is built by the gallery at documentation build time (a GIF of about 1 MB, not committed); the figures here are its first and last frame.</p>
+<h2>Figures</h2>
+<h2>Border drift</h2>
+<p>Border-band z-score over all states (8 seeds in <a href="../pr133-landmark-uniform/index.html">pr133-landmark-uniform</a>; one seed here): carried dots 3.77, <code>uniform=True</code> dots -0.46; the share of dots inside their own state at the end is 1.000 and 0.998. The talk needed a grid of 512 and <code>recompute_every=1</code> to keep the drift down; the example uses the defaults.</p>
+<h2>What changes</h2>
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>example</td><td><code>docs/examples/flow_cartogram/plot_flow_dot_morph.py</code>, about 13 s with the GIF</td></tr>
+<tr><td>not taken from the talk</td><td>the Hispanic variant and the assertions of the talk script</td></tr>
+</table>
+<h2>Checks</h2>
+<p>The example runs; the docs build (including the GIF) runs in CI.</p>
+<div class="figure">
+<img src="fig_end.png" alt="The flow cartogram with the dots carried along: the dot density is the poverty rate.">
+<p class="caption">The flow cartogram with the dots carried along: the dot density is the poverty rate.</p>
+</div><div class="figure">
+<img src="fig_start.png" alt="The true-area map with the dots.">
+<p class="caption">The true-area map with the dots.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
