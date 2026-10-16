@@ -93,3 +93,9 @@ strip(
     [lambda s=s: plot_convergence(cartogram, style=s).ax.figure for s in styles],
     styles,
 )
+
+strip(
+    "fig_velocity_direction.png",
+    [lambda s=s: plot_velocity_field(cartogram, velocity=VelocityPlotOptions(color_by="direction"), style=s).ax.figure for s in styles],
+    styles,
+)
