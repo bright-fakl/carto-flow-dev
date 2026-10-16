@@ -84,7 +84,7 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-16 20:00</dd>
 <dt>Before</dt><dd>main @ 3055caa</dd>
-<dt>After</dt><dd>feat/plot-style-overlays @ c8fe15c</dd>
+<dt>After</dt><dd>feat/plot-style-overlays @ b719626</dd>
 <dt>Inputs</dt><dd>bundled US states; a population-weighted Voronoi cartogram (RasterBackend 256, 100 iterations); a circle-packing symbol cartogram.</dd>
 </dl>
 <p class="desc">PlotStyle gets series_color, accent_color, positive_color and highlight_color for the fixed colors of the diagnostic overlays of the Voronoi and symbol plots. Default and dark set them; classic keeps the former colors.</p>
@@ -97,7 +97,7 @@
 <tr><td>style fields</td><td><code>series_color</code>, <code>accent_color</code>, <code>positive_color</code>, <code>highlight_color</code>, <code>PlotStyle.pick(name, default)</code></td></tr>
 <tr><td>Voronoi</td><td>convergence, displacement, topology, repair plots and the history animation</td></tr>
 <tr><td>symbol</td><td>the key of the line-width legend, displacement arrows, adjacency nodes, pool tiles of <code>plot_tiling</code> (<code>core_edgecolor</code>, <code>ring_edgecolor</code> default to the style)</td></tr>
-<tr><td>flow</td><td><code>VelocityPlotOptions.color</code> defaults to None (the accent color of the style, white in classic); the reference lines of the workflow convergence plot use the axes edge color</td></tr>
+<tr><td>flow</td><td><code>VelocityPlotOptions.color</code> defaults to None (the accent color of the style; black on the bare axes and white over a density image in classic); the reference lines of the workflow convergence plot use the axes edge color</td></tr>
 <tr><td>not yet</td><td>the fixed colors of the density and field image overlays beyond these</td></tr>
 </table>
 <h2>Checks</h2>
@@ -109,8 +109,8 @@
 <img src="fig_convergence.png" alt="Convergence curve (series color) and final value (accent color).">
 <p class="caption">Convergence curve (series color) and final value (accent color).</p>
 </div><div class="figure">
-<img src="fig_linewidth_legend.png" alt="The key of the line-width legend takes the axes edge color.">
-<p class="caption">The key of the line-width legend takes the axes edge color.</p>
+<img src="fig_linewidth_legend.png" alt="Edge by region and line width by population: the keys of the line-width legend take the axes edge color.">
+<p class="caption">Edge by region and line width by population: the keys of the line-width legend take the axes edge color.</p>
 </div><div class="figure">
 <img src="fig_symbol_displacement.png" alt="Displacement arrows use the accent color (yellow in dark, for contrast with the blue circles).">
 <p class="caption">Displacement arrows use the accent color (yellow in dark, for contrast with the blue circles).</p>
@@ -118,8 +118,8 @@
 <img src="fig_topology.png" alt="Satellite cells use the highlight color; the base cells use the reference layer.">
 <p class="caption">Satellite cells use the highlight color; the base cells use the reference layer.</p>
 </div><div class="figure">
-<img src="fig_velocity.png" alt="`plot_velocity_field`: the arrows take the accent color (they were white, invisible on the plot surface).">
-<p class="caption"><code>plot_velocity_field</code>: the arrows take the accent color (they were white, invisible on the plot surface).</p>
+<img src="fig_velocity.png" alt="`plot_velocity_field`: the arrows take the accent color; classic draws them black (they were white on the white axes, invisible).">
+<p class="caption"><code>plot_velocity_field</code>: the arrows take the accent color; classic draws them black (they were white on the white axes, invisible).</p>
 </div><div class="figure">
 <img src="fig_voronoi_displacement.png" alt="Base cells use the reference fill and the axes edge color; targets use the accent color, centroids the series color.">
 <p class="caption">Base cells use the reference fill and the axes edge color; targets use the accent color, centroids the series color.</p>

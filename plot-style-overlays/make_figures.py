@@ -68,4 +68,4 @@ flow_result = flow.create_flow_cartogram(
     states, "Population", options=flow.MorphOptions(grid=64, n_iter=30, save_internals=True, show_progress=False)
 )
 row("fig_velocity.png", lambda s: plot_velocity_field(flow_result, style=s).ax.figure)
-row("fig_linewidth_legend.png", lambda s: circles.plot(linewidth="Population", edgecolor="black", style=s).ax.figure)
+row("fig_linewidth_legend.png", lambda s: circles.plot(edgecolor="Region", linewidth="Population", legend=False, style=s).ax.figure)
