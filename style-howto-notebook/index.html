@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #158: The style how-to is a notebook with plots and animations</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #158: The style how-to is a notebook with plots and animations</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>infra, flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span><br><a href="../gallery-default-style/index.html">Gallery examples and notebooks use the default plot style</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/158">https://github.com/bright-fakl/carto-flow/pull/158</a></dd>
+<dt>Branch</dt><dd>docs/style-howto-notebook</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-18 14:00</dd>
+<dt>Before</dt><dd>main @ 7fa5abf</dd>
+<dt>After</dt><dd>docs/style-howto-notebook @ 3b70eae</dd>
+<dt>Inputs</dt><dd>bundled US states with population; a flow cartogram with snapshots every 10 iterations.</dd>
+</dl>
+<p class="desc">The how-to &quot;Style Plots and Animations&quot; was a Markdown page with code blocks and no output, so it showed no plot and no animation. It is now a notebook that the documentation build executes, with the built-in styles on one cartogram, style_context and set_style, the palettes of the data types, your own and combined styles, and two animations.</p>
+<p>The page was written as Markdown, which the build does not execute, so it could not show output; this was not a decision. The other how-tos are notebooks.</p>
+<h2>Figures</h2>
+<p>The two animations (the morph with the error in the dark style, and <code>morph_timeline</code> with the large type) are shown inline on the built page and are not in this report.</p>
+<h2>What changes</h2>
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>how-to</td><td><code>docs/how-to/style-plots.ipynb</code> replaces <code>style-plots.md</code>; the navigation and the how-to index point to it</td></tr>
+<tr><td>text</td><td>the prose and the reference lists of the page are kept as text cells (what a style holds, keeping styles between sessions)</td></tr>
+</table>
+<h2>Checks</h2>
+<p>The notebook runs without error (about 10 s); the docs build, which executes it, runs in CI.</p>
+<div class="figure">
+<img src="fig_dark.png" alt="The same cartogram in the dark style (the default and classic figures are on the page).">
+<p class="caption">The same cartogram in the dark style (the default and classic figures are on the page).</p>
+</div><div class="figure">
+<img src="fig_dark_large_type.png" alt="The dark style combined with the large type of a slide.">
+<p class="caption">The dark style combined with the large type of a slide.</p>
+</div><div class="figure">
+<img src="fig_data_types.png" alt="Categories, a diverging scale around a center, a linear scale and a palette of the call.">
+<p class="caption">Categories, a diverging scale around a center, a linear scale and a palette of the call.</p>
+</div><div class="figure">
+<img src="fig_own_style.png" alt="A registered style with the Blues palette, a linear scale and thinner edges.">
+<p class="caption">A registered style with the Blues palette, a linear scale and thinner edges.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
