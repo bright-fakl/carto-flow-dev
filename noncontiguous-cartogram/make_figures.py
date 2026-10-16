@@ -42,6 +42,9 @@ def strip(name, draws, titles, size=(5.0, 4.0)):
 densest = create_noncontiguous_cartogram(states, "Population")
 largest_capped = create_noncontiguous_cartogram(states, "Population", reference="largest")
 largest_free = create_noncontiguous_cartogram(states, "Population", reference="largest", max_scale=None)
+nj_index = states.index[states["State Name"] == "New Jersey"][0]
+nj_capped = create_noncontiguous_cartogram(states, "Population", reference_region=nj_index)
+nj_free = create_noncontiguous_cartogram(states, "Population", reference_region=nj_index, max_scale=None)
 
 strip(
     "fig_references.png",
@@ -55,6 +58,15 @@ strip(
         f"largest, capped at 1 ({largest_capped.capped.sum()} states smaller than proportional)",
         "largest, no cap (11 states grow)",
     ),
+)
+strip(
+    "fig_reference_region.png",
+    [
+        lambda: densest.plot(facecolor="Population").ax.figure,
+        lambda: nj_capped.plot(facecolor="Population").ax.figure,
+        lambda: nj_free.plot(facecolor="Population").ax.figure,
+    ],
+    ("densest (DC): median scale 0.10", "reference_region=New Jersey, DC capped", "reference_region=New Jersey, DC grows"),
 )
 strip(
     "fig_styles.png",
