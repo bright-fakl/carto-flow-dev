@@ -4,8 +4,8 @@ title: Why the counties do not converge: targets below the grid resolution
 description: At grid 256, 67 % of the 3,108 counties have a target area below one grid cell (27 % at 512, 5 % at 1024). Finer grids and multiresolution lower the mean error to about 20 % but every run stalls or plateaus; the worst regions are all sub-cell and are held at 0.1 to 1 cell, while the regions with a target of at least one cell have a median error of 2.6 %. The ring orientation fix does not change this.
 kind: exploration
 topic: flow
-status: open
-related: exact-ring-orientation, flow-convergence-synthesis
+status: led-to
+related: exact-ring-orientation, flow-convergence-synthesis, exploration-hierarchical-morph
 date: 2026-10-11 23:36
 before: main @ 2a03f40
 after: the same checkout; grid, multiresolution and stall rule varied

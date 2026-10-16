@@ -4,8 +4,8 @@ title: Border pile-up of dots carried with a flow cartogram: re-evaluation, a di
 description: Dots carried along with the flow cartogram are over-represented near region borders also on the current code (border-band z-score +4.3 over 8 dot seeds against +0.6 on the original map; unchanged by the exact rasterizer, the adaptive step and recompute_on_rise; it falls with the grid size when the field is recomputed every iteration). The saved velocity fields show why: the divergence of the field (the area scaling rate) is constant inside a region, as for a uniform scaling, but falls to 0.7 to 0.8 of that value in a band along the border whose width follows the cell size. Integrating the divergence along each dot's own path predicts the observed dot density near the border of expanding regions (1.59 predicted, 1.54 observed in the first 1 % of the distance) and a remap built from it, without extra tracers and with the sum done in place during the morph (no snapshots, about 6 % extra morph time, 0.2 s for the remap), lowers the mean z-score from 4.3 to 0.67 with a median move of 0.7 % of the region width. Remaps built from tracer points (z 1.1) or from a thin-plate-spline warp through 16 boundary vertices (z 0.9) also work; pooling the regions and sectors around the centroid do not.
 kind: exploration
 topic: flow
-status: open
-related: exploration-hierarchical-morph, flow-convergence-synthesis
+status: led-to
+related: exploration-hierarchical-morph, flow-convergence-synthesis, pr133-landmark-uniform
 date: 2026-10-13 01:30
 before: main @ e78c5a9
 after: the same checkout; dots, tracers and the remap run after the morph

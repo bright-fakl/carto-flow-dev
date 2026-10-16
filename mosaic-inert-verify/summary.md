@@ -9,7 +9,6 @@ date: 2026-09-22
 before: origin/main @ a095187
 after: agent/mosaic-inert-knobs
 inputs: US states (uniform, and 154 tiles), congressional districts grouped by State Name, world countries (Natural Earth, Mollweide, 384 tiles)
-status: reviewed
 kind: pr
 topic: symbol
 ---

@@ -4,8 +4,8 @@ description: Proposal for issue 99. PlotStyle is a frozen dataclass that builds 
 issue: 99
 kind: proposal
 topic: flow, infra
-status: open
-related: exploration-border-drift
+status: led-to
+related: plot-vocabulary-flow, plot-vocabulary-symbol, plot-vocabulary-voronoi, plot-vocabulary-proportional, resolve-fill, flow-animation-names, plot-style-core, plot-style-voronoi-proportional, plot-style-symbol, plot-style-overlays, plot-style-magnitude-scales
 inputs: ANIMATION-STYLE.md, reference_implementation.py and style.py of the GeoDC talk bundle; the plot and animation signatures of the four cartogram types (survey below).
 ---
 
@@ -329,3 +329,13 @@ Precedence (call over style over library default) for every resolved setting; ro
 
 1. Items to verify: whether geopandas takes its default edge color from `patch.edgecolor` (then the `edge` channel value is partly an `rc` entry) and the ordered-categorical rule.
 2. Ambiguous strings: the rule under "Resolving a string parameter" (column, then built-in quantity, then color, with a warning on multiple matches) is a recommendation to be confirmed; the alternatives are literal first (silent wrong map) and an error on ambiguity (breaks working calls when the data gains a column).
+
+## As built
+
+The proposal was built in the pull requests listed under "Referenced by", in this order: the parameter vocabulary of the four cartogram types and the shared `resolve_fill` (#137 to #142), the style core with the flow plots and animations (#143), the Voronoi and proportional plots (#144), the symbol plots (#145), the overlay colors (#146) and the scales of the magnitudes with the field plots, previews and tiling plots (#147). Where the built version differs from the page above:
+
+- The plot-style fields are the ones listed on the how-to page "Style Plots and Animations": `rc`, `palettes` by data role (sequential, diverging, categorical, and a cyclic role added later), `channels` (fill, edge, stroke, hatch, alpha, linewidth, label, each with a value, palettes, a range and a scale), the color scale (linear, sqrt, log, auto), the colorbar, the reference layer, the annotation size, the hatch cycle and the overlay colors (series, accent, positive, highlight).
+- `"stroke"` was added as the color of an edge that carries data (a data-driven line width or a hatch), next to `"edge"`, the faint boundary that separates symbols.
+- Styles combine (`a | b`, `merge`), are registered and unregistered in the memory of the process (`register_style`, `unregister_style`), and are selected per call, per block (`style_context`) or per session (`set_style`).
+- `*_kwargs` is the name of the keyword dictionaries (not `*_kwds`), `cmap` accepts a `{category: color}` dictionary, and `facecolor` binds the fill of every plot.
+- Not built: persistence of styles between sessions (the how-to shows how to register them at startup), `to_dict` and `from_dict`, the `defaults` mapping, accessibility checks, and preset bundles for animation timing and for morph and layout options (`morph_timeline` covers the timing of an animation).
