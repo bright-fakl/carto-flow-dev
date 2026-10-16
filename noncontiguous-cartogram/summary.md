@@ -11,7 +11,7 @@ base: main
 date: 2026-10-17 10:00
 related: plot-style-magnitude-scales, style-system
 before: main @ aff2719
-after: feat/noncontiguous-cartogram @ 8f0a7e4
+after: feat/noncontiguous-cartogram @ 5d8e795
 inputs: bundled US states (simplify=1000), population; Michigan for the multipolygon modes.
 ---
 
@@ -40,9 +40,10 @@ figure: fig_styles.png — The default reference colored by region in classic, d
 | new module | `carto_flow.noncontiguous_cartogram`: `create_noncontiguous_cartogram(gdf, column, *, reference, max_scale, multipart)`, `NoncontiguousCartogram` (`geometries`, `source`, `scale`, `capped`, `reference_density`, `area_error_pct`, `to_geodataframe()`, `plot()`), `plot_cartogram` |
 | reference | `reference_region=<index label>` sets the density of that region as the reference (not combinable with `reference`) |
 | drawing order | regions are drawn in order of decreasing area, so a region that grew does not hide the smaller ones |
+| shared code | `fill_plan` in `carto_flow/_fill.py` resolves `facecolor` into a `Fill` for the flow and non-contiguous plots (built-in quantities, labels and diverging columns are arguments); the flow plots are unchanged (classic output identical to `main`). The Voronoi `_fill_of` is not folded in: it builds its cells from arrays and colors by index for `facecolor=None` |
 | docs | reference section, explanation page, gallery example, changelog |
 | not yet | `method="shrink"` (depends on #74); labels in the plot |
 
 ## Checks
 
-Suite 1361 passed, ruff and mypy clean; the gallery example runs.
+Suite 1373 passed, ruff and mypy clean; the gallery example runs.
