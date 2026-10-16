@@ -99,3 +99,27 @@ strip(
     [lambda s=s: plot_velocity_field(cartogram, velocity=VelocityPlotOptions(color_by="direction"), style=s).ax.figure for s in styles],
     styles,
 )
+
+from carto_flow.flow_cartogram import DensityBorderExtension, DirectionalTensor
+from carto_flow.flow_cartogram import anisotropy as aniso
+from carto_flow.flow_cartogram import density as dens
+import carto_flow.symbol_cartogram as sym
+
+mod = DensityBorderExtension(extension_width=300_000, transition_width=200_000)
+strip(
+    "fig_preview_density.png",
+    [lambda s=s: dens.preview_modulator(mod, states, column="Population", show="ratio", style=s).ax.figure for s in styles],
+    styles,
+)
+tensor = DirectionalTensor.radial(center=tuple(states.geometry.union_all().centroid.coords[0]), Dpar=3.0)
+strip(
+    "fig_preview_anisotropy.png",
+    [lambda s=s: aniso.preview_modulator(tensor, states, heatmap="output", heatmap_type="angle", style=s).ax.figure for s in styles],
+    styles,
+)
+tiling = sym.HexagonTiling().generate(n_tiles=60)
+strip(
+    "fig_tiling_modes.png",
+    [lambda s=s, m=m: tiling.plot(color_by=m, style=s).fig for s, m in (("classic", "aspect"), ("default", "aspect"), ("dark", "x"))],
+    ("classic (aspect)", "default (aspect)", "dark (x)"),
+)

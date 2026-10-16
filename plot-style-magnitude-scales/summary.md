@@ -11,7 +11,7 @@ base: main
 date: 2026-10-16 22:00
 related: plot-style-overlays, plot-style-symbol, style-system
 before: main @ aff2719 (equal to style="classic")
-after: feat/plot-style-magnitude-scales @ f5efe1c
+after: feat/plot-style-magnitude-scales @ 2b7cabd
 inputs: bundled US states; a population flow cartogram (grid 64, 30 iterations); a population Voronoi cartogram (RasterBackend 256, 100 iterations).
 ---
 
@@ -32,6 +32,10 @@ figure: fig_convergence.png — Max and mean error lines take the series and hig
 
 figure: fig_velocity_direction.png — Arrows colored by direction: twilight in classic (arrows pointing left are as light as the surface), the cyclic palette hsv in default and dark.
 
+figure: fig_preview_density.png — Density modulator preview (ratio) in the diverging palette of the style.
+figure: fig_preview_anisotropy.png — Anisotropy preview with the angle heatmap: sequential arrows, cyclic heatmap.
+figure: fig_tiling_modes.png — Tiling plot: the cyclic palette for aspect, the sequential palette for the position.
+
 ## What changes
 
 | | |
@@ -41,8 +45,10 @@ figure: fig_velocity_direction.png — Arrows colored by direction: twilight in 
 | series colors | `plot_convergence` and the workflow convergence plot: `series_color`, `highlight_color` |
 | colorbars | the density and velocity colorbars (static plots and animations) are drawn by the style; `legend_kwargs["label"]` replaces the label |
 | cyclic palette | `Palettes(cyclic=...)` is a fourth palette role, used for the direction of the velocity: `hsv` in default and dark (the ends of `twilight` are as light or as dark as the surface, so arrows in those directions vanish), `twilight` in classic |
-| not yet | `plot_density` of the density module and the anisotropy plots still use plain matplotlib colorbars |
+| previews | `preview_modulator` of the density and anisotropy modules take `style=`: diverging palette for the density, sequential for the arrows, cyclic for angles, diverging for speed changes, colorbars of the style |
+| tilings | `TilingResult.plot`, `plot_tile`, `plot_prototile` take `style=`: stroke color for outlines, cyclic palette for `color_by="aspect"`, sequential for the other modes, categorical palette for the edge shapes |
+| not yet | nothing known: a scan of the public plot and animate functions found none without `style=` (`save_animation` takes the style from the figure) |
 
 ## Checks
 
-Suite 1308 passed, ruff and mypy clean.
+Suite 1316 passed, ruff and mypy clean.

@@ -84,7 +84,7 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-16 22:00</dd>
 <dt>Before</dt><dd>main @ aff2719 (equal to style=&quot;classic&quot;)</dd>
-<dt>After</dt><dd>feat/plot-style-magnitude-scales @ f5efe1c</dd>
+<dt>After</dt><dd>feat/plot-style-magnitude-scales @ 2b7cabd</dd>
 <dt>Inputs</dt><dd>bundled US states; a population flow cartogram (grid 64, 30 iterations); a population Voronoi cartogram (RasterBackend 256, 100 iterations).</dd>
 </dl>
 <p class="desc">VelocityPlotOptions(norm=) and the Voronoi plot_displacement(norm=) take a scale (linear, sqrt, log, auto or a Normalize) for the magnitude that sets arrow color, opacity and the colorbar; sqrt joins the color scales. The density and velocity plots and the Voronoi displacement arrows take the palettes of the style, and the flow convergence plots the series colors.</p>
@@ -99,10 +99,12 @@
 <tr><td>series colors</td><td><code>plot_convergence</code> and the workflow convergence plot: <code>series_color</code>, <code>highlight_color</code></td></tr>
 <tr><td>colorbars</td><td>the density and velocity colorbars (static plots and animations) are drawn by the style; <code>legend_kwargs[&quot;label&quot;]</code> replaces the label</td></tr>
 <tr><td>cyclic palette</td><td><code>Palettes(cyclic=...)</code> is a fourth palette role, used for the direction of the velocity: <code>hsv</code> in default and dark (the ends of <code>twilight</code> are as light or as dark as the surface, so arrows in those directions vanish), <code>twilight</code> in classic</td></tr>
-<tr><td>not yet</td><td><code>plot_density</code> of the density module and the anisotropy plots still use plain matplotlib colorbars</td></tr>
+<tr><td>previews</td><td><code>preview_modulator</code> of the density and anisotropy modules take <code>style=</code>: diverging palette for the density, sequential for the arrows, cyclic for angles, diverging for speed changes, colorbars of the style</td></tr>
+<tr><td>tilings</td><td><code>TilingResult.plot</code>, <code>plot_tile</code>, <code>plot_prototile</code> take <code>style=</code>: stroke color for outlines, cyclic palette for <code>color_by=&quot;aspect&quot;</code>, sequential for the other modes, categorical palette for the edge shapes</td></tr>
+<tr><td>not yet</td><td>nothing known: a scan of the public plot and animate functions found none without <code>style=</code> (<code>save_animation</code> takes the style from the figure)</td></tr>
 </table>
 <h2>Checks</h2>
-<p>Suite 1308 passed, ruff and mypy clean.</p>
+<p>Suite 1316 passed, ruff and mypy clean.</p>
 <div class="figure">
 <img src="fig_convergence.png" alt="Max and mean error lines take the series and highlight colors of the style (C0 and C1 in classic).">
 <p class="caption">Max and mean error lines take the series and highlight colors of the style (C0 and C1 in classic).</p>
@@ -115,6 +117,15 @@
 </div><div class="figure">
 <img src="fig_displacement_scales.png" alt="Voronoi displacement arrows with `norm` linear, sqrt and log; the scale is spread over the arrows that are drawn.">
 <p class="caption">Voronoi displacement arrows with <code>norm</code> linear, sqrt and log; the scale is spread over the arrows that are drawn.</p>
+</div><div class="figure">
+<img src="fig_preview_anisotropy.png" alt="Anisotropy preview with the angle heatmap: sequential arrows, cyclic heatmap.">
+<p class="caption">Anisotropy preview with the angle heatmap: sequential arrows, cyclic heatmap.</p>
+</div><div class="figure">
+<img src="fig_preview_density.png" alt="Density modulator preview (ratio) in the diverging palette of the style.">
+<p class="caption">Density modulator preview (ratio) in the diverging palette of the style.</p>
+</div><div class="figure">
+<img src="fig_tiling_modes.png" alt="Tiling plot: the cyclic palette for aspect, the sequential palette for the position.">
+<p class="caption">Tiling plot: the cyclic palette for aspect, the sequential palette for the position.</p>
 </div><div class="figure">
 <img src="fig_velocity_alpha_scales.png" alt="Opacity by magnitude with the same three scales.">
 <p class="caption">Opacity by magnitude with the same three scales.</p>
