@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #157: README figure in the default plot style</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #157: README figure in the default plot style</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../gallery-default-style/index.html">Gallery examples and notebooks use the default plot style</a> <span class="meta">(pr)</span><br><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/157">https://github.com/bright-fakl/carto-flow/pull/157</a></dd>
+<dt>Branch</dt><dd>docs/readme-figure</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-18 12:00</dd>
+<dt>Before</dt><dd>main @ 8cbe591</dd>
+<dt>After</dt><dd>docs/readme-figure @ 21a2cc0</dd>
+<dt>Inputs</dt><dd>bundled US states with population, race and poverty counts (simplify 1000); the flow morph with the defaults; a hexagon grid symbol cartogram; the split partition of three groups; 1000 dots.</dd>
+</dl>
+<p class="desc">The figure of the README (cartogram-example.png) predates the style system (white background, RdYlGn_r and viridis palettes, grey separators). It is drawn again in the default plot style by scripts/make_readme_figure.py, with the same four panels of the US states.</p>
+<h2>Figures</h2>
+<h2>What changes</h2>
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>figure</td><td><code>cartogram-example.png</code> redrawn; the README links it by its raw URL, so GitHub and PyPI show the new one after the merge</td></tr>
+<tr><td>script</td><td><code>scripts/make_readme_figure.py</code> draws it</td></tr>
+<tr><td>not changed</td><td>the README text still says that carto-flow supports three cartogram styles, without the Voronoi and the non-contiguous cartograms</td></tr>
+</table>
+<h2>Checks</h2>
+<p>The script runs; the figure was checked by eye.</p>
+<div class="figure">
+<img src="fig_after.png" alt="The new figure (1430 x 880, 386 KiB): the default plot style, the same four panels.">
+<p class="caption">The new figure (1430 x 880, 386 KiB): the default plot style, the same four panels.</p>
+</div><div class="figure">
+<img src="fig_before.png" alt="The figure of main (1000 x 600, 225 KiB): classic style.">
+<p class="caption">The figure of main (1000 x 600, 225 KiB): classic style.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
