@@ -76,15 +76,16 @@
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>noncontiguous, infra</dd>
-<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
 <dt>Related</dt><dd><a href="../plot-style-magnitude-scales/index.html">Scales for the velocity and displacement magnitudes, style palettes for the field plots</a> <span class="meta">(pr)</span><br><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/148">https://github.com/bright-fakl/carto-flow/pull/148</a></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/76">#76</a></dd>
 <dt>Branch</dt><dd>feat/noncontiguous-cartogram</dd>
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-17 10:00</dd>
+<dt>Closed</dt><dd>2026-10-16 11:15</dd>
 <dt>Before</dt><dd>main @ aff2719</dd>
-<dt>After</dt><dd>feat/noncontiguous-cartogram @ 8f0a7e4</dd>
+<dt>After</dt><dd>feat/noncontiguous-cartogram @ 5d8e795</dd>
 <dt>Inputs</dt><dd>bundled US states (simplify=1000), population; Michigan for the multipolygon modes.</dd>
 </dl>
 <p class="desc">New noncontiguous_cartogram module with create_noncontiguous_cartogram(gdf, column): every region keeps its shape and is scaled about its centroid to an area proportional to its value. reference sets the density (densest, largest, or a number), max_scale limits growth, multipart scales a multipolygon as a group or by part. The result has plot(style=) over the original outlines.</p>
@@ -99,11 +100,12 @@
 <tr><td>new module</td><td><code>carto_flow.noncontiguous_cartogram</code>: <code>create_noncontiguous_cartogram(gdf, column, *, reference, max_scale, multipart)</code>, <code>NoncontiguousCartogram</code> (<code>geometries</code>, <code>source</code>, <code>scale</code>, <code>capped</code>, <code>reference_density</code>, <code>area_error_pct</code>, <code>to_geodataframe()</code>, <code>plot()</code>), <code>plot_cartogram</code></td></tr>
 <tr><td>reference</td><td><code>reference_region=&lt;index label&gt;</code> sets the density of that region as the reference (not combinable with <code>reference</code>)</td></tr>
 <tr><td>drawing order</td><td>regions are drawn in order of decreasing area, so a region that grew does not hide the smaller ones</td></tr>
+<tr><td>shared code</td><td><code>fill_plan</code> in <code>carto_flow/_fill.py</code> resolves <code>facecolor</code> into a <code>Fill</code> for the flow and non-contiguous plots (built-in quantities, labels and diverging columns are arguments); the flow plots are unchanged (classic output identical to <code>main</code>). The Voronoi <code>_fill_of</code> is not folded in: it builds its cells from arrays and colors by index for <code>facecolor=None</code></td></tr>
 <tr><td>docs</td><td>reference section, explanation page, gallery example, changelog</td></tr>
 <tr><td>not yet</td><td><code>method=&quot;shrink&quot;</code> (depends on #74); labels in the plot</td></tr>
 </table>
 <h2>Checks</h2>
-<p>Suite 1361 passed, ruff and mypy clean; the gallery example runs.</p>
+<p>Suite 1373 passed, ruff and mypy clean; the gallery example runs.</p>
 <div class="figure">
 <img src="fig_multipart.png" alt="Michigan (111 parts) at a scale of 0.5. `&quot;group&quot;` (default) is a smaller copy of the whole state, so the upper peninsula stays at its distance in proportion; `&quot;parts&quot;` keeps each part at its place and the gap between the peninsulas grows relative to them.">
 <p class="caption">Michigan (111 parts) at a scale of 0.5. <code>&quot;group&quot;</code> (default) is a smaller copy of the whole state, so the upper peninsula stays at its distance in proportion; <code>&quot;parts&quot;</code> keeps each part at its place and the gap between the peninsulas grows relative to them.</p>
