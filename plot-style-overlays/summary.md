@@ -11,7 +11,7 @@ base: main
 date: 2026-10-16 20:00
 related: plot-style-symbol, plot-style-voronoi-proportional, style-system
 before: main @ 3055caa
-after: feat/plot-style-overlays @ dece1bd
+after: feat/plot-style-overlays @ 2f6615d
 inputs: bundled US states; a population-weighted Voronoi cartogram (RasterBackend 256, 100 iterations); a circle-packing symbol cartogram.
 ---
 
@@ -25,7 +25,7 @@ figure: fig_topology.png — Satellite cells use the highlight color; the base c
 
 ## Symbol
 
-figure: fig_symbol_displacement.png — Displacement arrows use the accent color.
+figure: fig_symbol_displacement.png — Displacement arrows use the accent color (yellow in dark, for contrast with the blue circles).
 figure: fig_adjacency_nodes.png — Nodes use the text color of the style.
 
 ## What changes
