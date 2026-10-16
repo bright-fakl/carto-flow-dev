@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #152: How-to: pre-morph before symbol and Voronoi layouts</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #152: How-to: pre-morph before symbol and Voronoi layouts</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>symbol, voronoi, flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../style-system/index.html">Style system and presets for plots and animations</a> <span class="meta">(proposal)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/152">https://github.com/bright-fakl/carto-flow/pull/152</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/82">#82</a></dd>
+<dt>Branch</dt><dd>docs/howto-premorph</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-17 16:30</dd>
+<dt>Before</dt><dd>main @ c70dca4</dd>
+<dt>After</dt><dd>docs/howto-premorph @ 19a726b</dd>
+<dt>Inputs</dt><dd>bundled US states (contiguous, population); flow morph with the defaults and area_scale 1e-6; Voronoi RasterBackend 256, n_iter 300, area_cv_tol 0.1.</dd>
+</dl>
+<p class="desc">A new how-to compares the symbol layouts (centroid, packing, flow_density) and the Voronoi cartogram on raw and on flow-pre-morphed geometries. The pre-morph saves iterations for packing, flow_density and above all the Voronoi relaxation, and does nothing for centroid; the mosaic layout pre-morphs by itself.</p>
+<p>Measurements of the talk (<code>premorph_metrics.py</code>) re-run on the current API.</p>
+<h2>Measured</h2>
+<table>
+<tr><th>layout</th><th>input</th><th>iterations</th></tr>
+<tr><td>centroid</td><td>raw</td><td>9</td></tr>
+<tr><td>centroid</td><td>pre-morphed</td><td>10</td></tr>
+<tr><td>packing</td><td>raw</td><td>205</td></tr>
+<tr><td>packing</td><td>pre-morphed</td><td>164</td></tr>
+<tr><td>flow_density</td><td>raw</td><td>262</td></tr>
+<tr><td>flow_density</td><td>pre-morphed</td><td>197</td></tr>
+<tr><td>Voronoi</td><td>raw</td><td>141</td></tr>
+<tr><td>Voronoi</td><td>pre-morphed (premorph=True)</td><td>32</td></tr>
+</table>
+<p>The flow morph takes 0.6 s. One dataset on one machine: the saving for the symbol layouts is modest and was not tested on other data.</p>
+<h2>Figures</h2>
+<h2>What changes</h2>
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>how-to</td><td><code>docs/how-to/premorph-before-layouts.ipynb</code>, in the navigation (Symbol Cartogram) and the how-to index</td></tr>
+<tr><td>not taken from the talk</td><td>the tile-map comparison: the grid layout showed no benefit I could demonstrate, and the mosaic layout pre-morphs by itself (<code>morph=True</code>), which the how-to says; <code>premorph_figs.py</code> uses a cached flow snapshot and the talk&#x27;s helper code</td></tr>
+<tr><td>existing</td><td>the gallery example <code>plot_voronoi_premorph.py</code> shows only the result of <code>premorph=True</code></td></tr>
+</table>
+<h2>Checks</h2>
+<p>The notebook runs without error; the docs build runs in CI.</p>
+<div class="figure">
+<img src="fig_symbol_layouts.png" alt="The three symbol layouts on the raw (top) and the pre-morphed (bottom) geometries.">
+<p class="caption">The three symbol layouts on the raw (top) and the pre-morphed (bottom) geometries.</p>
+</div><div class="figure">
+<img src="fig_voronoi.png" alt="The Voronoi cartogram on the raw geometry and with premorph=True: the cells keep the outline of the flow cartogram, in 32 instead of 141 iterations.">
+<p class="caption">The Voronoi cartogram on the raw geometry and with premorph=True: the cells keep the outline of the flow cartogram, in 32 instead of 141 iterations.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
