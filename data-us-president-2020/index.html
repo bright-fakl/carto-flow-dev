@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #155: Bundled 2020 presidential results and the election area-bias gallery example</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #155: Bundled 2020 presidential results and the election area-bias gallery example</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>data, flow, noncontiguous</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../noncontiguous-cartogram/index.html">Non-contiguous (Olson) cartogram</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/155">https://github.com/bright-fakl/carto-flow/pull/155</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/82">#82</a></dd>
+<dt>Branch</dt><dd>feat/data-us-president-2020</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-17 21:00</dd>
+<dt>Before</dt><dd>main @ 8a67f6a</dd>
+<dt>After</dt><dd>feat/data-us-president-2020 @ c20cf10</dd>
+<dt>Inputs</dt><dd>FEC &quot;Federal Elections 2020&quot; workbook, sheet &quot;9. 2020 Pres General Results&quot;; bundled US states (contiguous, population).</dd>
+</dl>
+<p class="desc">load_us_president_2020 returns the official FEC results by state (51 rows, bundled), rebuilt by scripts/download_fec_2020.py with a check of the national totals. A gallery example draws them on a choropleth, a non-contiguous and a flow cartogram. Fixes cmap={category: color} in the flow, Voronoi and non-contiguous plots.</p>
+<h2>Data and license</h2>
+<p>The CSV has 51 rows (50 states and DC) and the columns <code>state_name</code>, <code>state_abbr</code>, <code>votes_dem</code>, <code>votes_gop</code>. The script downloads the workbook, sums the lines of the same state (fusion-party lines of New York and others) and checks the national totals, 81,283,501 for Biden and 74,223,975 for Trump; the file is identical to the one the talk used.</p>
+<p>The workbook is a publication of the Federal Election Commission. Its page says that the information is produced and disseminated at U.S. taxpayer expense and states no restriction on its reuse; works of the United States government are not subject to copyright (17 U.S.C. 105), and the underlying numbers are facts. The only restriction that the FEC states is on information about individual contributors (52 U.S.C. 30111(a)(4)), which the table does not contain. Attribution to the FEC is in the docstring, the script and the example. This is a reading of the public statements, not legal advice: the license is for the maintainer to confirm before the merge.</p>
+<h2>What the maps read</h2>
+<table>
+<tr><th>map</th><th>area-weighted Democratic share</th><th>area that is blue</th></tr>
+<tr><td>choropleth (land area)</td><td>47.1 %</td><td>43 %</td></tr>
+<tr><td>non-contiguous cartogram</td><td>52.1 %</td><td>57 %</td></tr>
+<tr><td>flow cartogram</td><td>52.2 %</td><td>57 %</td></tr>
+<tr><td>actual</td><td>52.2 %</td><td>57 % of the population</td></tr>
+</table>
+<h2>Figures</h2>
+<h2>What changes</h2>
+<table>
+<tr><th></th><th></th></tr>
+<tr><td>data</td><td><code>carto_flow.data.load_us_president_2020()</code>, <code>scripts/download_fec_2020.py</code>, <code>us_president_2020.csv</code> (1.4 KB), the data reference page</td></tr>
+<tr><td>example</td><td><code>docs/examples/plot_election_area_bias.py</code></td></tr>
+<tr><td>fix</td><td><code>cmap={category: color}</code> raised <code>TypeError: unhashable type: &#x27;dict&#x27;</code> in the flow, Voronoi and non-contiguous plots; the shared <code>plot_fill</code> now turns the dictionary into colors for the categories (the others take the tab10 colors)</td></tr>
+<tr><td>not taken from the talk</td><td>the single-panel slides and the county-level data</td></tr>
+</table>
+<h2>Checks</h2>
+<p>Suite, ruff and mypy; the example runs in about 5 s; the docs build runs in CI.</p>
+<div class="figure">
+<img src="fig_share_maps.png" alt="The Democratic share of the two-party vote on the three maps; the choropleth reads 5 points too low.">
+<p class="caption">The Democratic share of the two-party vote on the three maps; the choropleth reads 5 points too low.</p>
+</div><div class="figure">
+<img src="fig_winner_maps.png" alt="The winner of each state with `cmap` as a dictionary of colors.">
+<p class="caption">The winner of each state with <code>cmap</code> as a dictionary of colors.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
