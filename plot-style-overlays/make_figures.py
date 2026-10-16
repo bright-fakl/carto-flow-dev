@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import carto_flow.data as data
+import carto_flow.flow_cartogram as flow
+from carto_flow.flow_cartogram.visualization import plot_velocity_field
 import carto_flow.symbol_cartogram as sym
 import carto_flow.voronoi_cartogram as vor
 from carto_flow.voronoi_cartogram.animation import animate_voronoi_history
@@ -61,3 +63,9 @@ row(
 row("fig_topology.png", lambda s: vor.plot_topology(analysis, result, style=s).ax.figure)
 row("fig_symbol_displacement.png", lambda s: sym.plot_displacement(circles, style=s).ax.figure)
 row("fig_adjacency_nodes.png", lambda s: sym.plot_adjacency(circles, show_symbols=False, style=s).ax.figure)
+
+flow_result = flow.create_flow_cartogram(
+    states, "Population", options=flow.MorphOptions(grid=64, n_iter=30, save_internals=True, show_progress=False)
+)
+row("fig_velocity.png", lambda s: plot_velocity_field(flow_result, style=s).ax.figure)
+row("fig_linewidth_legend.png", lambda s: circles.plot(linewidth="Population", edgecolor="black", style=s).ax.figure)
