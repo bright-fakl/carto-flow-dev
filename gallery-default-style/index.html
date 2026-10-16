@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #156: Gallery examples use the default plot style</title>
+<title>PR #156: Gallery examples and notebooks use the default plot style</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,7 +72,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #156: Gallery examples use the default plot style</h1>
+<h1>PR #156: Gallery examples and notebooks use the default plot style</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>infra</dd>
@@ -84,24 +84,26 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-18 10:00</dd>
 <dt>Before</dt><dd>main @ 028f1e8</dd>
-<dt>After</dt><dd>docs/gallery-default-style @ d6738f7</dd>
-<dt>Inputs</dt><dd>the 28 gallery example scripts; each run with the Agg backend before and after.</dd>
+<dt>After</dt><dd>docs/gallery-default-style @ 8b3ee02</dd>
+<dt>Inputs</dt><dd>the 28 gallery example scripts and the 19 how-to and tutorial notebooks; each run with the Agg backend before and after.</dd>
 </dl>
-<p class="desc">The gallery examples looked like the classic style because they pinned a palette and limits (14 passed cmap=) and created their own figure (about 20 used plt.subplots with ax=), which leaves the figure white. The examples now let the style set the palette, scale and colorbar, and apply the style to their figures with get_style().apply(fig), so a copied snippet gives the same figure.</p>
-<h2>Why the gallery looked classic</h2>
+<p class="desc">The gallery examples and the how-to and tutorial notebooks looked like the classic style because they pinned a palette and limits (cmap=, vmin=, vmax=) and created their own figure with plt.subplots and ax=, which leaves the figure white. They now let the style set the palette, scale and colorbar, and apply the style to their figures with get_style().apply(fig), so a copied snippet gives the same figure. Every figure of the 28 examples and the 19 notebooks has the surface of the default style.</p>
+<h2>Why the gallery and the notebooks looked classic</h2>
 <p>Two causes, found by rendering <code>plot_flow_cartogram.py</code> on main (figure facecolor <code>#ffffff</code>, palette <code>RdYlGn_r</code>, linear scale):</p>
 <p>1. An explicit <code>cmap=</code>, <code>vmin</code> or <code>vmax</code> in the call wins over the style, so the palette and the log scale of the style never applied (14 examples passed <code>cmap=</code>, 6 passed <code>vmin</code>). 2. A plot function that is given <code>ax=</code> gives that axes the surface of the style but not the figure that the caller created; with the axes turned off the white figure showed (about 20 examples).</p>
-<p>After the change the figure of every example has the surface <code>#eef1f4</code> (checked by running all 28 examples).</p>
+<p>After the change the figure of every example and of every notebook cell has the surface <code>#eef1f4</code> (checked by running all 28 examples and all 19 notebooks; on main the figures of the notebooks were white).</p>
 <h2>Before and after</h2>
+<h2>Notebooks</h2>
 <h2>What changes</h2>
 <table>
 <tr><th></th><th></th></tr>
 <tr><td>palettes</td><td>the pins of the examples that draw a carto-flow result are removed (the explicit ones that carry a meaning stay)</td></tr>
 <tr><td>figures</td><td><code>get_style().apply(fig)</code> after every <code>plt.subplots</code>, with <code>from carto_flow import get_style</code></td></tr>
-<tr><td>not changed</td><td>the notebooks of the how-to and tutorials have the same two patterns (15 pass <code>cmap=</code> or <code>vmin</code>)</td></tr>
+<tr><td>notebooks</td><td><code>get_style().apply(fig)</code> after the 51 <code>plt.subplots</code> calls of 18 notebooks (with the import); the pins of the carto-flow plots removed; plain GeoDataFrame plots of the original geography use <code>cmap=get_style().colormap(&quot;sequential&quot;)</code>; the JSON of the notebooks is edited line by line, not re-serialized</td></tr>
+<tr><td>left explicit</td><td>meaningful palettes (election colors, category dictionaries, dot density), the covid and population-evolution encodings, the error colormap with caps of the multiresolution tutorial, the benchmark charts of the performance page, lightblue symbols of the adjacency example</td></tr>
 </table>
 <h2>Checks</h2>
-<p>All 28 examples run; the figure facecolor of each is the surface of the default style; the docs build runs in CI.</p>
+<p>All 28 examples and 19 notebooks run; the figure facecolor of each is the surface of the default style; the docs build (which executes the notebooks) runs in CI.</p>
 <div class="figure">
 <img src="fig_election_shares.png" alt="The palette is kept on purpose (blue for Democratic, red for Republican); the figure has the surface.">
 <p class="caption">The palette is kept on purpose (blue for Democratic, red for Republican); the figure has the surface.</p>
@@ -114,6 +116,24 @@
 </div><div class="figure">
 <img src="fig_flow_convergence.png" alt="Surface only.">
 <p class="caption">Surface only.</p>
+</div><div class="figure">
+<img src="fig_nb_basic_flow.png" alt="Tutorial: the original map and the cartogram with the sequential palette of the style.">
+<p class="caption">Tutorial: the original map and the cartogram with the sequential palette of the style.</p>
+</div><div class="figure">
+<img src="fig_nb_basic_voronoi.png" alt="Tutorial: the Voronoi cartogram without the pinned palette and colorbar.">
+<p class="caption">Tutorial: the Voronoi cartogram without the pinned palette and colorbar.</p>
+</div><div class="figure">
+<img src="fig_nb_choose_backend.png" alt="How-to: the area error of the two backends on the diverging palette of the style, without the fixed limits.">
+<p class="caption">How-to: the area error of the two backends on the diverging palette of the style, without the fixed limits.</p>
+</div><div class="figure">
+<img src="fig_nb_reduce_boundary.png" alt="How-to: the results of the prescaling comparison, plotted with `Cartogram.plot` instead of `to_geodataframe().plot`.">
+<p class="caption">How-to: the results of the prescaling comparison, plotted with <code>Cartogram.plot</code> instead of <code>to_geodataframe().plot</code>.</p>
+</div><div class="figure">
+<img src="fig_nb_save_export.png" alt="How-to: the original and the reloaded cartogram, plotted with `Cartogram.plot`.">
+<p class="caption">How-to: the original and the reloaded cartogram, plotted with <code>Cartogram.plot</code>.</p>
+</div><div class="figure">
+<img src="fig_nb_style_symbols.png" alt="How-to: the symbols without the pinned `YlOrRd`.">
+<p class="caption">How-to: the symbols without the pinned <code>YlOrRd</code>.</p>
 </div><div class="figure">
 <img src="fig_symbol_adjacency.png" alt="The links take the sequential palette.">
 <p class="caption">The links take the sequential palette.</p>
