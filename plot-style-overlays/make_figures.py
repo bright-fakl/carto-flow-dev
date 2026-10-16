@@ -69,3 +69,16 @@ flow_result = flow.create_flow_cartogram(
 )
 row("fig_velocity.png", lambda s: plot_velocity_field(flow_result, style=s).ax.figure)
 row("fig_linewidth_legend.png", lambda s: circles.plot(linewidth="Population", style=s).ax.figure)
+
+def scales(style):
+    fig, axes = plt.subplots(1, 4, figsize=(20, 4))
+    for ax, scale in zip(axes, ("linear", "sqrt", "log", "rank")):
+        circles.plot(ax=ax, linewidth="Population", linewidth_norm=scale, linewidth_legend=False, style=style)
+        ax.set_title(scale)
+    return fig
+
+
+for style in ("default", "dark"):
+    fig = scales(style)
+    fig.savefig(HERE / f"fig_width_scales_{style}.png", dpi=DPI, bbox_inches="tight")
+    plt.close(fig)

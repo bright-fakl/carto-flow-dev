@@ -84,7 +84,7 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-16 20:00</dd>
 <dt>Before</dt><dd>main @ 3055caa</dd>
-<dt>After</dt><dd>feat/plot-style-overlays @ fb4d694</dd>
+<dt>After</dt><dd>feat/plot-style-overlays @ 6b1c55b</dd>
 <dt>Inputs</dt><dd>bundled US states; a population-weighted Voronoi cartogram (RasterBackend 256, 100 iterations); a circle-packing symbol cartogram.</dd>
 </dl>
 <p class="desc">PlotStyle gets series_color, accent_color, positive_color and highlight_color for the fixed colors of the diagnostic overlays of the Voronoi and symbol plots. Default and dark set them; classic keeps the former colors.</p>
@@ -96,12 +96,12 @@
 <tr><th></th><th></th></tr>
 <tr><td>style fields</td><td><code>series_color</code>, <code>accent_color</code>, <code>positive_color</code>, <code>highlight_color</code>, <code>PlotStyle.pick(name, default)</code></td></tr>
 <tr><td>Voronoi</td><td>convergence, displacement, topology, repair plots and the history animation</td></tr>
-<tr><td>symbol</td><td>the key of the line-width legend, displacement arrows, adjacency nodes, pool tiles of <code>plot_tiling</code> (<code>core_edgecolor</code>, <code>ring_edgecolor</code> default to the style)</td></tr>
+<tr><td>symbol</td><td><code>&quot;stroke&quot;</code> channel for data-driven edges (width, hatch), <code>alpha_norm</code>/<code>linewidth_norm</code>/<code>label_fontsize_norm</code> and <code>Channel(scale=...)</code>, the key of the line-width legend, displacement arrows, adjacency nodes, pool tiles of <code>plot_tiling</code> (<code>core_edgecolor</code>, <code>ring_edgecolor</code> default to the style)</td></tr>
 <tr><td>flow</td><td><code>VelocityPlotOptions.color</code> defaults to None (the accent color of the style; black on the bare axes and white over a density image in classic); the reference lines of the workflow convergence plot use the axes edge color</td></tr>
 <tr><td>not yet</td><td>the fixed colors of the density and field image overlays beyond these</td></tr>
 </table>
 <h2>Checks</h2>
-<p>Suite 1257 passed, ruff and mypy clean. The topology repair overlays were not exercised by the comparison (the test case has no violations); the replaced literals were checked by reading the diff.</p>
+<p>Suite 1274 passed, ruff and mypy clean. The topology repair overlays were not exercised by the comparison (the test case has no violations); the replaced literals were checked by reading the diff.</p>
 <div class="figure">
 <img src="fig_adjacency_nodes.png" alt="Nodes use the text color of the style.">
 <p class="caption">Nodes use the text color of the style.</p>
@@ -109,8 +109,8 @@
 <img src="fig_convergence.png" alt="Convergence curve (series color) and final value (accent color).">
 <p class="caption">Convergence curve (series color) and final value (accent color).</p>
 </div><div class="figure">
-<img src="fig_linewidth_legend.png" alt="Line width by population without an edge color: the edge is the text color of the style, widths 1 to 4.5 points in default and dark.">
-<p class="caption">Line width by population without an edge color: the edge is the text color of the style, widths 1 to 4.5 points in default and dark.</p>
+<img src="fig_linewidth_legend.png" alt="Line width by population without an edge color: the edge is the stroke color of the style, the widths follow the `&quot;auto&quot;` scale of the style (log here), and the legend keys are spaced in the scaled units.">
+<p class="caption">Line width by population without an edge color: the edge is the stroke color of the style, the widths follow the <code>&quot;auto&quot;</code> scale of the style (log here), and the legend keys are spaced in the scaled units.</p>
 </div><div class="figure">
 <img src="fig_symbol_displacement.png" alt="Displacement arrows use the accent color (yellow in dark, for contrast with the blue circles).">
 <p class="caption">Displacement arrows use the accent color (yellow in dark, for contrast with the blue circles).</p>
@@ -123,6 +123,12 @@
 </div><div class="figure">
 <img src="fig_voronoi_displacement.png" alt="Base cells use the reference fill and the axes edge color; targets use the accent color, centroids the series color.">
 <p class="caption">Base cells use the reference fill and the axes edge color; targets use the accent color, centroids the series color.</p>
+</div><div class="figure">
+<img src="fig_width_scales_dark.png" alt="The same in the dark style.">
+<p class="caption">The same in the dark style.</p>
+</div><div class="figure">
+<img src="fig_width_scales_default.png" alt="`linewidth_norm` linear, sqrt, log and rank on the same data (default style).">
+<p class="caption"><code>linewidth_norm</code> linear, sqrt, log and rank on the same data (default style).</p>
 </div>
 <a class="back" href="../index.html">&larr; back to index</a>
 
