@@ -14,7 +14,7 @@ Every page has a `kind`:
 - `exploration`: an experiment or investigation. This is the default otherwise.
 - `proposal`: a change worked out in a page but not yet in a PR.
 
-`topic` is a comma-separated list from `flow`, `voronoi`, `symbol`, `proportional`,
+`topic` is a comma-separated list from `flow`, `voronoi`, `symbol`, `proportional`, `noncontiguous`,
 `data` and `infra`. The index filters and sorts on kind, topic and status.
 
 The status of a `pr` page comes from the PR on GitHub (see below). An exploration or
