@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -108,7 +106,9 @@
 <p>Nothing about the result looks worse. The change is modest, and the reason is now documented rather than left for the reader to guess: the neighbor force already holds contiguous groups together, and it is summed over each region&#x27;s neighbors while the group pull is applied once per symbol, so a <code>group_weight</code> numerically equal to <code>neighbor_weight</code> is the weaker of the two by roughly the mean neighbor count. On US states that mean is about 4.5 (range 1 to 8), so <code>group_weight=0.5</code> against the default <code>neighbor_weight=1.0</code> is close to a 1:9 contest. It is enough to make the narrative true; it is not enough to rearrange the map, which is the right trade for a how-to whose subject is styling rather than placement.</p>
 <p>The amplification depends on the adjacency values, not on the force: under <code>adjacency_mode=WEIGHTED</code> or <code>AREA_WEIGHTED</code> the pair weights sum to about 1 per region and the pair forces land back on the same scale as the per-circle ones.</p>
 <h2>Verification</h2>
-<ul><li>Notebook executed with nbclient (<code>kernel_name=&quot;python3&quot;</code>, <code>allow_errors=False</code>): no errors, and no <code>UserWarning</code> in any cell output.</li><li>Each changed code block executed against the bundled US census dataset.</li><li><code>uv run mkdocs build -s</code>, <code>docs/generated/</code> deleted first.</li><li><code>make check</code> clean, 712 tests pass.</li></ul>
+<ul><li>Notebook executed with nbclient (<code>kernel_name=&quot;python3&quot;</code>, <code>allow_errors=False</code>):</li></ul>
+<p>no errors, and no <code>UserWarning</code> in any cell output.</p>
+<ul><li>Each changed code block executed against the bundled US census dataset.</li><li><code>uv run mkdocs build -s</code>, <code>docs/generated/</code> deleted first.</li><li><code>make check</code> clean, 712 tests pass.</li></ul>
 <div class="figure">
 <img src="after.png" alt="After: `layout=sym.CirclePackingLayout(group_weight=0.5)`. No warning, and same-region states are actually drawn together.">
 <p class="caption">After: <code>layout=sym.CirclePackingLayout(group_weight=0.5)</code>. No warning, and same-region states are actually drawn together.</p>

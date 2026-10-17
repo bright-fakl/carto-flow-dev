@@ -126,7 +126,7 @@ investigation workspace is easy to miss.
    One line per PNG that needs a caption; PNGs without one use their
    filename.
 
-4. Write the rest of `summary.md` freely (headings, tables, bullet, numbered and nested lists, fenced code blocks, **bold**,
+4. Write the rest of `summary.md` freely (headings, tables, bullet lists,
    paragraphs, inline code, `[text](url)` links - relative links to other pages are `../<directory>/index.html`) - it is rendered below the description.
 
 ## Rebuilding

@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -91,11 +89,9 @@
 <p class="desc">Routes automatically-triggered pre-release publishes to TestPyPI instead of real PyPI and lets the CHANGELOG lookup fall back from an rc version to its base version; reviewer should check the routing trace table and the changelog-lookup unit test output below.</p>
 <h2>What would happen today if <code>2.0.0-rc1</code> were cut</h2>
 <p>Before this change, <code>.github/workflows/pypi-publish.yml</code> gated the publish step and the <code>UV_PUBLISH_URL</code> fallback only on <code>github.event_name</code>, not on whether the release was a pre-release:</p>
-<pre><code>- name: Publish to PyPI
-  if: inputs.environment == &#x27;pypi&#x27; || github.event_name == &#x27;release&#x27;
-  env:
-    UV_PUBLISH_URL: ${{ inputs.environment == &#x27;testpypi&#x27; &amp;&amp; &#x27;https://test.pypi.org/legacy/&#x27; || &#x27;https://upload.pypi.org/legacy/&#x27; }}
-  run: uv publish --trusted-publishing always</code></pre>
+<p>```yaml</p>
+<ul><li>name: Publish to PyPI</li></ul>
+<p>if: inputs.environment == &#x27;pypi&#x27; || github.event_name == &#x27;release&#x27; env: UV_PUBLISH_URL: ${{ inputs.environment == &#x27;testpypi&#x27; &amp;&amp; &#x27;https://test.pypi.org/legacy/&#x27; || &#x27;https://upload.pypi.org/legacy/&#x27; }} run: uv publish --trusted-publishing always ```</p>
 <p><code>release.yml</code> creating a GitHub Release fires <code>release: published</code> regardless of the <code>prerelease</code> flag on that release. For a <code>release</code>-triggered run, <code>inputs.environment</code> is unset (there is no <code>workflow_dispatch</code> input), so the <code>if:</code> was true via the second clause, and <code>UV_PUBLISH_URL</code> fell through the ternary&#x27;s <code>false</code> branch to <code>https://upload.pypi.org/legacy/</code> — real PyPI. The job&#x27;s <code>environment:</code> field had the same gap: <code>${{ inputs.environment == &#x27;testpypi&#x27; &amp;&amp; &#x27;testpypi&#x27; || &#x27;pypi&#x27; }}</code> also defaults to <code>pypi</code> when <code>inputs.environment</code> is unset. So cutting <code>2.0.0-rc1</code> today would publish it to real PyPI, an irreversible action: a version number on PyPI cannot be reused or deleted.</p>
 <p><code>release.yml</code>&#x27;s CHANGELOG lookup separately hard-fails for <code>2.0.0-rc1</code> because <code>CHANGELOG.md</code> has a <code>## [2.0.0]</code> section but no <code>## [2.0.0-rc1]</code> section, and the old lookup only tried the exact version string.</p>
 <h2>Fix</h2>
@@ -118,41 +114,29 @@
 <p>Verified by simulating the step&#x27;s shell logic across all six rows of the table above, including the two anomaly inputs (empty string, and <code>True</code> with different capitalization). Both now resolve to <code>testpypi</code>; under the previous condition both resolved to <code>pypi</code>.</p>
 <p>The dispatch assignment is also quoted now (<code>environment=&quot;${{ inputs.environment }}&quot;</code>). The input is a <code>choice</code>, so its value is constrained to two options and the missing quotes were not exploitable, but an unquoted assignment is not worth keeping in the script that picks a publish target.</p>
 <p>Trace detail for the <code>determine-target</code> job&#x27;s <code>Determine publish target</code> step:</p>
-<ul><li>The step&#x27;s shell script first branches on <code>github.event_name</code>. For <code>workflow_dispatch</code> runs, <code>${{ github.event_name }}</code> substitutes to the literal text <code>workflow_dispatch</code> at compile time, so the outer <code>if</code> condition (<code>= &quot;release&quot;</code>) is false and the script takes the <code>else</code> branch: <code>environment=${{ inputs.environment }}</code>, which substitutes to the literal <code>testpypi</code> or <code>pypi</code> chosen at dispatch time.</li><li>For <code>release</code> runs, the outer <code>if</code> is true, and the inner check <code>${{ github.event.release.prerelease }} = &quot;true&quot;</code> compares against the literal <code>true</code> or <code>false</code> GitHub substitutes from the release payload&#x27;s boolean <code>prerelease</code> field.</li><li>Either way, <code>environment</code> is then used in a second <code>if</code> to pick <code>publish_url</code>: <code>testpypi</code> maps to <code>https://test.pypi.org/legacy/</code>, anything else to <code>https://upload.pypi.org/legacy/</code>.</li><li>Both values are written to <code>$GITHUB_OUTPUT</code> and read by <code>build-and-publish</code> via <code>needs.determine-target.outputs.environment</code> (used directly as the job&#x27;s <code>environment:</code> key, so the environment&#x27;s protection rules apply) and <code>needs.determine-target.outputs.publish_url</code> (used as <code>UV_PUBLISH_URL</code> in the single <code>Publish package</code> step).</li><li>The <code>${{ inputs.environment }}</code> reference inside the <code>release</code>-branch&#x27;s dead <code>else</code> clause is inert: for a <code>release</code>-triggered run there is no <code>workflow_dispatch</code> input, so the expression substitutes to an empty string, but that line is never reached because the outer <code>if</code> already took the <code>release</code> branch.</li></ul>
+<ul><li>The step&#x27;s shell script first branches on <code>github.event_name</code>. For</li></ul>
+<p><code>workflow_dispatch</code> runs, <code>${{ github.event_name }}</code> substitutes to the literal text <code>workflow_dispatch</code> at compile time, so the outer <code>if</code> condition (<code>= &quot;release&quot;</code>) is false and the script takes the <code>else</code> branch: <code>environment=${{ inputs.environment }}</code>, which substitutes to the literal <code>testpypi</code> or <code>pypi</code> chosen at dispatch time.</p>
+<ul><li>For <code>release</code> runs, the outer <code>if</code> is true, and the inner check</li></ul>
+<p><code>${{ github.event.release.prerelease }} = &quot;true&quot;</code> compares against the literal <code>true</code> or <code>false</code> GitHub substitutes from the release payload&#x27;s boolean <code>prerelease</code> field.</p>
+<ul><li>Either way, <code>environment</code> is then used in a second <code>if</code> to pick</li></ul>
+<p><code>publish_url</code>: <code>testpypi</code> maps to <code>https://test.pypi.org/legacy/</code>, anything else to <code>https://upload.pypi.org/legacy/</code>.</p>
+<ul><li>Both values are written to <code>$GITHUB_OUTPUT</code> and read by</li></ul>
+<p><code>build-and-publish</code> via <code>needs.determine-target.outputs.environment</code> (used directly as the job&#x27;s <code>environment:</code> key, so the environment&#x27;s protection rules apply) and <code>needs.determine-target.outputs.publish_url</code> (used as <code>UV_PUBLISH_URL</code> in the single <code>Publish package</code> step).</p>
+<ul><li>The <code>${{ inputs.environment }}</code> reference inside the <code>release</code>-branch&#x27;s</li></ul>
+<p>dead <code>else</code> clause is inert: for a <code>release</code>-triggered run there is no <code>workflow_dispatch</code> input, so the expression substitutes to an empty string, but that line is never reached because the outer <code>if</code> already took the <code>release</code> branch.</p>
 <p>All four cases resolve to the environment/URL pairs required by the task: pre-releases and the <code>testpypi</code> dispatch go to TestPyPI; final releases and the <code>pypi</code> dispatch go to real PyPI.</p>
 <h2>Verification output</h2>
 <p>YAML parses for both modified workflow files:</p>
-<pre><code>$ uv run python -c &quot;import yaml,sys; [yaml.safe_load(open(f)) for f in [&#x27;.github/workflows/pypi-publish.yml&#x27;,&#x27;.github/workflows/release.yml&#x27;]]; print(&#x27;yaml ok&#x27;)&quot;
-yaml ok</code></pre>
+<p>``<code> $ uv run python -c &quot;import yaml,sys; [yaml.safe_load(open(f)) for f in [&#x27;.github/workflows/pypi-publish.yml&#x27;,&#x27;.github/workflows/release.yml&#x27;]]; print(&#x27;yaml ok&#x27;)&quot; yaml ok </code>``</p>
 <p>Extracted the modified CHANGELOG-lookup Python verbatim into a standalone script and ran it against the real <code>CHANGELOG.md</code>:</p>
-<pre><code>=== 2.0.0 ===
-used_version: 2.0.0
-error: None
-body starts: &#x27;Step-by-step edits for every break below are in the\n[migration guide](https://br&#x27;
-body len: 12186
-
-=== 2.0.0-rc1 ===
-used_version: 2.0.0
-error: None
-body starts: &#x27;Step-by-step edits for every break below are in the\n[migration guide](https://br&#x27;
-body len: 12186
-
-=== 9.9.9 ===
-used_version: None
-error: CHANGELOG.md has neither &#x27;## [9.9.9]&#x27; section. Add one of them before releasing; the release notes are read from it.
-
-ALL CHECKS PASSED</code></pre>
+<p>``` === 2.0.0 === used_version: 2.0.0 error: None body starts: &#x27;Step-by-step edits for every break below are in the\n[migration guide](https://br&#x27; body len: 12186</p>
+<p>=== 2.0.0-rc1 === used_version: 2.0.0 error: None body starts: &#x27;Step-by-step edits for every break below are in the\n[migration guide](https://br&#x27; body len: 12186</p>
+<p>=== 9.9.9 === used_version: None error: CHANGELOG.md has neither &#x27;## [9.9.9]&#x27; section. Add one of them before releasing; the release notes are read from it.</p>
+<p>ALL CHECKS PASSED ```</p>
 <p><code>2.0.0</code> and <code>2.0.0-rc1</code> both resolve to the <code>## [2.0.0]</code> section body, and the two bodies are byte-identical (12186 characters, non-empty). <code>9.9.9</code> fails with a message naming the form it looked for.</p>
 <p>Static checks on the three changed files:</p>
-<pre><code>$ uv run mypy src/carto_flow --exclude &#x27;mosaic_cartogram&#x27;
-Success: no issues found in 80 source files
-
-$ uv run pre-commit run --files .github/workflows/pypi-publish.yml .github/workflows/release.yml RELEASING.md
-check for case conflicts.................................................Passed
-check for merge conflicts................................................Passed
-check yaml...............................................................Passed
-fix end of files.........................................................Passed
-trim trailing whitespace.................................................Passed</code></pre>
+<p>``` $ uv run mypy src/carto_flow --exclude &#x27;mosaic_cartogram&#x27; Success: no issues found in 80 source files</p>
+<p>$ uv run pre-commit run --files .github/workflows/pypi-publish.yml .github/workflows/release.yml RELEASING.md check for case conflicts.................................................Passed check for merge conflicts................................................Passed check yaml...............................................................Passed fix end of files.........................................................Passed trim trailing whitespace.................................................Passed ```</p>
 <p>No figures accompany this report: the change is CI workflow YAML and a documentation rewrite, with no rendered output to compare before/after.</p>
 
 <a class="back" href="../index.html">&larr; back to index</a>

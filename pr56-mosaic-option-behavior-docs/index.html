@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -91,12 +89,12 @@
 </dl>
 <p class="desc">Rewrites the MosaicLayoutOptions / HungarianOptions documentation on the mosaic explanation page so every option is described by what it does to a result, not by what it was intended to do. This page records the measurements each claim rests on, since the explanation page itself carries no numbers.</p>
 <h2>What changed</h2>
-<p><code>docs/explanations/symbol-cartogram-mosaic-layout.md</code> described <code>MosaicLayoutOptions</code> and <code>HungarianOptions</code> by intent. Two measurement workspaces now show that several options do not behave as described. The page&#x27;s parameter tables gain a <code>Type</code> column and a new section, <strong>How Each Option Behaves</strong>, describes each option by its effect.</p>
+<p><code>docs/explanations/symbol-cartogram-mosaic-layout.md</code> described <code>MosaicLayoutOptions</code> and <code>HungarianOptions</code> by intent. Two measurement workspaces now show that several options do not behave as described. The page&#x27;s parameter tables gain a <code>Type</code> column and a new section, **How Each Option Behaves**, describes each option by its effect.</p>
 <p><code>docs/explanations/</code> explains algorithms only: no result tables, no measurements, no PR references, no decision history. Every claim on the page is therefore stated as behavior. The table below is the audit trail: claim on the left, measured basis on the right.</p>
 <p>Three docstrings in <code>src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py</code> (<code>distance_weight</code>, <code>outside_penalty</code>, <code>spacing</code>, <code>extra_tile_rings</code>, <code>min_overlap_frac</code>) were corrected in the same way. <code>distance_weight</code>&#x27;s was actively wrong, not merely incomplete.</p>
 <p>No behavior changed. No source logic was touched.</p>
 <h2>Claim-to-evidence map</h2>
-<p>Sources: <strong>S</strong> = <code>visual_checks/mosaic-options-sweep/summary.md</code> (with <code>tables.md</code>, <code>results.jsonl</code>); <strong>G</strong> = <code>visual_checks/grid-vs-mosaic-similarity/summary.md</code>.</p>
+<p>Sources: **S** = <code>visual_checks/mosaic-options-sweep/summary.md</code> (with <code>tables.md</code>, <code>results.jsonl</code>); **G** = <code>visual_checks/grid-vs-mosaic-similarity/summary.md</code>.</p>
 <table>
 <tr><th>Claim on the explanation page</th><th>Measured basis</th></tr>
 <tr><td><code>spacing</code> draws a gap by shrinking each symbol inside its tile: the lattice is calibrated first, then <code>Transform.scale</code> is divided by <code>1 + spacing</code>. The grid layout does the same, so leaving the assignment unchanged is correct, not anomalous</td><td>S, &quot;spacing&quot;: fingerprint, tile size and all ~40 metrics identical for 0.0 / 0.05 / 0.2 / 0.5 on all five inputs at both morph settings. <code>spacing_check.json</code>: symbol-area ratio matches <code>1/(1+s)²</code> to machine precision; <code>tiles_gdf</code> total area unchanged</td></tr>
@@ -130,7 +128,9 @@
 <h2>Parameter table audit</h2>
 <p>Every row of both tables was checked field by field against the dataclass definitions in <code>src/carto_flow/symbol_cartogram/layouts/mosaic/__init__.py</code>. All nine <code>MosaicLayoutOptions</code> fields and all nine <code>HungarianOptions</code> fields are present, with matching names and defaults, and no row names a field that no longer exists. No mismatch was found — the earlier PRs that removed, renamed and re-defaulted fields had already updated both tables. The <code>Type</code> column is new.</p>
 <h2>Checks</h2>
-<ul><li><code>uv run mkdocs build -s</code> — passes (437 s, 26 of 26 gallery files, clean <code>docs/generated/</code> and <code>site/</code>)</li><li><code>make check</code> — ruff, ruff format, mypy (80 files), deptry all pass</li><li><code>uv run pytest</code> — 710 passed</li></ul>
+<ul><li><code>uv run mkdocs build -s</code> — passes (437 s, 26 of 26 gallery files, clean</li></ul>
+<p><code>docs/generated/</code> and <code>site/</code>)</p>
+<ul><li><code>make check</code> — ruff, ruff format, mypy (80 files), deptry all pass</li><li><code>uv run pytest</code> — 710 passed</li></ul>
 <h2>Correction and default change (2026-09-24)</h2>
 <p>The first draft of this page described <code>spacing</code> as an option that &quot;never reaches the layout&quot; and suggested removing it. That was wrong. <code>GridBasedLayout</code> implements <code>spacing</code> the same way — <code>grid/__init__.py:210-214</code> calibrates <code>tile_size</code> with <code>spacing=0</code> and then divides symbol sizes by <code>1 + spacing</code>, exactly as <code>mosaic/__init__.py:1051</code> does. Leaving the assignment unchanged is the correct semantics for a lattice layout: the gap drawn between symbols must not decide which tile a region gets. <code>CirclePackingLayout</code> differs only because it has no lattice.</p>
 <p>The real inconsistency was the default. <code>GridBasedLayoutOptions.spacing</code> defaulted to 0.05 and <code>MosaicLayoutOptions.spacing</code> to 0.0, so switching layouts changed the drawn gap with no stated reason. <code>MosaicLayoutOptions.spacing</code> now defaults to 0.05.</p>

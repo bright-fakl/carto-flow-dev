@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -94,19 +92,24 @@
 <p><code>HungarianOptions.interior_bonus</code>: 0.5 -&gt; 2.0. The connectivity bonus is subtracted from a tile&#x27;s cost in proportion to how many of its lattice neighbours are also in the pool, so raising it makes each region claim a tighter, rounder block and pushes the leftover surplus to the periphery.</p>
 <p>Both sides of every figure come from the same source tree with <code>interior_bonus</code> passed explicitly, so the only difference between any two panels is the value.</p>
 <h2>What to look for</h2>
-<ul><li><strong>Figures 02 and 03 are the cost of this change</strong>, not an aside. On one symbol per region with <code>morph=False</code> the new default places symbols worse: fewer geographic neighbours end up adjacent, and more pairs end up on opposite sides of each other than before. It shows on both tilings, so it is a property of the change rather than of the hexagon lattice.</li><li><strong>Figures 01, 04 and 05 are the benefit.</strong> The gain is largest where a region owns several tiles (04) or where a group must stay whole (05) — exactly what the bonus acts on.</li><li>No panel in this set gains or loses a split group or a non-contiguous region; all five are 0/0 on both sides. The differences here are all fidelity, not integrity.</li></ul>
+<ul><li>**Figures 02 and 03 are the cost of this change**, not an aside. On one</li></ul>
+<p>symbol per region with <code>morph=False</code> the new default places symbols worse: fewer geographic neighbours end up adjacent, and more pairs end up on opposite sides of each other than before. It shows on both tilings, so it is a property of the change rather than of the hexagon lattice.</p>
+<ul><li>**Figures 01, 04 and 05 are the benefit.** The gain is largest where a</li></ul>
+<p>region owns several tiles (04) or where a group must stay whole (05) — exactly what the bonus acts on.</p>
+<ul><li>No panel in this set gains or loses a split group or a non-contiguous</li></ul>
+<p>region; all five are 0/0 on both sides. The differences here are all fidelity, not integrity.</p>
 <h2>Measured numbers</h2>
 <p>Eight panels: four input/tiling combinations x <code>morph</code> in {True, False}. Positive = the new default is better on that axis.</p>
 <table>
 <tr><th>input</th><th>morph</th><th>adjacency</th><th>displacement</th><th>direction</th><th>reversed &gt;90</th><th>better</th></tr>
-<tr><td>1 tile/region, hexagon</td><td>True</td><td>+0.028</td><td>+0.04</td><td>−2.3</td><td>+0.028</td><td><strong>2.0</strong></td></tr>
-<tr><td>1 tile/region, hexagon</td><td><strong>False</strong></td><td><strong>−0.073</strong></td><td>+0.01</td><td><strong>−5.2</strong></td><td><strong>−0.055</strong></td><td><strong>0.5</strong></td></tr>
-<tr><td>1 tile/region, square</td><td>True</td><td>+0.009</td><td>+0.13</td><td>+7.5</td><td>+0.018</td><td><strong>2.0</strong></td></tr>
-<tr><td>1 tile/region, square</td><td><strong>False</strong></td><td><strong>−0.018</strong></td><td>−0.06</td><td><strong>−7.6</strong></td><td><strong>−0.028</strong></td><td><strong>0.5</strong></td></tr>
-<tr><td>154 tiles</td><td>True</td><td>+0.092</td><td>+0.48</td><td>0.0</td><td>+0.028</td><td><strong>2.0</strong></td></tr>
-<tr><td>154 tiles</td><td>False</td><td>+0.028</td><td>+0.35</td><td>−0.6</td><td>+0.028</td><td><strong>2.0</strong></td></tr>
-<tr><td>districts, group_by</td><td>True</td><td>+0.050</td><td>+0.07</td><td>+3.3</td><td>+0.043</td><td><strong>2.0</strong></td></tr>
-<tr><td>districts, group_by</td><td>False</td><td>+0.016</td><td>+0.11</td><td>+3.4</td><td>0.000</td><td><strong>2.0</strong></td></tr>
+<tr><td>1 tile/region, hexagon</td><td>True</td><td>+0.028</td><td>+0.04</td><td>−2.3</td><td>+0.028</td><td>**2.0**</td></tr>
+<tr><td>1 tile/region, hexagon</td><td>**False**</td><td>**−0.073**</td><td>+0.01</td><td>**−5.2**</td><td>**−0.055**</td><td>**0.5**</td></tr>
+<tr><td>1 tile/region, square</td><td>True</td><td>+0.009</td><td>+0.13</td><td>+7.5</td><td>+0.018</td><td>**2.0**</td></tr>
+<tr><td>1 tile/region, square</td><td>**False**</td><td>**−0.018**</td><td>−0.06</td><td>**−7.6**</td><td>**−0.028**</td><td>**0.5**</td></tr>
+<tr><td>154 tiles</td><td>True</td><td>+0.092</td><td>+0.48</td><td>0.0</td><td>+0.028</td><td>**2.0**</td></tr>
+<tr><td>154 tiles</td><td>False</td><td>+0.028</td><td>+0.35</td><td>−0.6</td><td>+0.028</td><td>**2.0**</td></tr>
+<tr><td>districts, group_by</td><td>True</td><td>+0.050</td><td>+0.07</td><td>+3.3</td><td>+0.043</td><td>**2.0**</td></tr>
+<tr><td>districts, group_by</td><td>False</td><td>+0.016</td><td>+0.11</td><td>+3.4</td><td>0.000</td><td>**2.0**</td></tr>
 </table>
 <p>The two losses are both the one-tile-per-region <code>morph=False</code> panels. A user on that combination should pass <code>interior_bonus=0.5</code> explicitly to keep the previous behaviour.</p>
 <h2>Why not some other value</h2>
@@ -114,7 +117,10 @@
 <p>The knob is strongly non-monotonic: on one tile per region with hexagons and <code>morph=True</code> its adjacency curve runs 0.651, 0.761, 0.697, 0.569, 0.725, 0.716, 0.771 across those seven values, with a deep trough at 1.0 between two peaks. Values between the tested ones are not bounded by them.</p>
 <h2>Two effects outside this figure set</h2>
 <p>Found through an existing test fixture at a tile count the sweep did not cover — US states at ~300 tiles, shipped 16-hop swap-back reach:</p>
-<ul><li><code>morph=True</code>: 1 enclosed unassigned tile where 0.5 left none, while stranded core tiles drop from 4 to 3.</li><li><code>morph=False</code>: stranded core tiles rise from 9 to 11, no enclosed holes either way.</li></ul>
+<ul><li><code>morph=True</code>: 1 enclosed unassigned tile where 0.5 left none, while</li></ul>
+<p>stranded core tiles drop from 4 to 3.</p>
+<ul><li><code>morph=False</code>: stranded core tiles rise from 9 to 11, no enclosed holes</li></ul>
+<p>either way.</p>
 <p>Neither is a split group or a non-contiguous region, so neither breaks the topology guarantee, but both are regressions on a related axis.</p>
 <h2>Not covered here</h2>
 <p>Only US inputs, only hexagon and square tilings, only these tile counts. <code>interior_bonus</code> was varied alone with the other three <code>HungarianOptions</code> cost weights at their defaults; a different <code>neighbor_weight</code> or <code>distance_weight</code> could move which value is best. Inputs with islands, a zero-value sizing column, or non-US geography were not tested.</p>

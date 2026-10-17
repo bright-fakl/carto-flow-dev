@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -101,7 +99,7 @@
 <tr><td>512</td><td>4.848 s</td><td>0.487 s</td><td>10.0x</td><td>200</td></tr>
 <tr><td>1024</td><td>16.618 s</td><td>1.434 s</td><td>11.6x</td><td>200</td></tr>
 </table>
-<p><strong>Iteration counts are identical at every grid size.</strong> <code>morph_geometries</code> stops early once its error tolerances are met, so this had to be checked: without it a wall-clock comparison could be measuring convergence behavior rather than speed. 63, 113, 200, 200 in both versions means the two follow the same convergence path and stop at the same point. The numerics did not change; the work per iteration got cheaper.</p>
+<p>**Iteration counts are identical at every grid size.** <code>morph_geometries</code> stops early once its error tolerances are met, so this had to be checked: without it a wall-clock comparison could be measuring convergence behavior rather than speed. 63, 113, 200, 200 in both versions means the two follow the same convergence path and stop at the same point. The numerics did not change; the work per iteration got cheaper.</p>
 <h2>Vertex-count check</h2>
 <table>
 <tr><th>geometry</th><th>vertices</th><th>1.1.2</th><th>2.0.0</th><th>speedup</th></tr>
