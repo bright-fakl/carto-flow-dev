@@ -55,7 +55,7 @@ Default options, ladder from the given grid for the given number of levels (each
 
 ## Reading
 
-- The invalid polygons fall in 9 of the 11 single-grid rows (two rise by two: districts 1024 from 12 to 14); states have none after the change, counties at 128 and 512 fall by half or more.
+- In the 11 single-grid rows the invalid polygons fall in 8, stay at zero in 2 (states 256 and 512) and rise by two in 1 (districts 1024, 12 to 14). States have none after the change; districts 128 falls from 113 to 25 and counties 512 from 374 to 191.
 - Convergence is unchanged on the single grids: every converged run still converges at about the same iteration count. Errors move within noise (districts 256: mean 0.47 to 1.44 %, still converged).
 - The ladder rows are mixed because a ladder that is not near convergence is sensitive to small changes: the counties ladders have fewer invalid polygons (611 to 321, 1,311 to 378, 369 to 301), the mean error of the 256 start rises from 2.19 to 4.19 % while the 512 and 128 starts fall, and districts 64x4 changes from converged to stalled. The sub-cell problem of the coarse levels remains and is the subject of issue 167.
 - The grid of a square run is up to one cell larger than before, because the domain now grows in both directions to a whole number of cells.
