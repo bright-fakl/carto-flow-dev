@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #160: Input validation with clear errors</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #160: Input validation with clear errors</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow, voronoi, noncontiguous, infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/160">https://github.com/bright-fakl/carto-flow/pull/160</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/78">#78</a></dd>
+<dt>Branch</dt><dd>feat/validate-geometries</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-17 12:00</dd>
+<dt>Before</dt><dd>main @ b57f75b</dd>
+<dt>After</dt><dd>feat/validate-geometries @ 0fb020e</dd>
+<dt>Inputs</dt><dd>bundled US states (EPSG:5070) with one polygon replaced by a bowtie or one value set to NaN; bundled world (EPSG:8857) for the coverage check.</dd>
+</dl>
+<p class="desc">validate_geometries reports null, empty and invalid geometries, bad values, overlapping polygons and repeated vertices by row label; the flow, Voronoi and non-contiguous cartograms run it first and raise a ValueError for errors before the run.</p>
+<h2>What the check reports</h2>
+<table>
+<tr><th>issue</th><th>severity</th><th>rows named</th><th>how it is found</th></tr>
+<tr><td>null or empty geometry</td><td>error</td><td>yes</td><td><code>shapely.is_missing</code>, <code>shapely.is_empty</code></td></tr>
+<tr><td>invalid geometry</td><td>error</td><td>yes, with the reason</td><td><code>shapely.is_valid_reason</code></td></tr>
+<tr><td>value missing, infinite or negative (zero where it is not allowed)</td><td>error</td><td>yes</td><td>NumPy on the data column</td></tr>
+<tr><td>column not found</td><td>error</td><td></td><td></td></tr>
+<tr><td>polygon overlaps a neighbor or shares an edge that does not match</td><td>warning, with <code>coverage=True</code></td><td>yes</td><td><code>shapely.coverage_invalid_edges</code></td></tr>
+<tr><td>repeated consecutive vertices</td><td>information only</td><td>yes</td><td><code>shapely.remove_repeated_points</code></td></tr>
+</table>
+<p>The report is a <code>GeometryReport</code>; <code>raise_for_errors()</code> raises one <code>ValueError</code> that lists all errors, <code>warn()</code> issues a <code>UserWarning</code> for each warning.</p>
+<h2>Messages on real data</h2>
+<table>
+<tr><th>input</th><th>before</th><th>after</th></tr>
+<tr><td>US states, one polygon replaced by a bowtie</td><td><code>GEOSException: IllegalArgumentException: Points of LinearRing do not form a closed linestring</code>, from inside the morph</td><td><code>ValueError: invalid input: Invalid geometry (first: Self-intersection[0.5 0.5]) in 1 row: 0. Repair with shapely.make_valid or carto_flow.geo_utils.repair_polygons.</code></td></tr>
+<tr><td>US states, one value NaN</td><td>the same <code>GEOSException</code>, after the morph produced NaN coordinates</td><td><code>ValueError: invalid input: Value is missing, infinite or negative in 1 row: 3. Fix or drop these rows.</code></td></tr>
+<tr><td>world, flow cartogram</td><td>no message</td><td><code>UserWarning: Polygon overlaps a neighbor or shares an edge that does not match in 3 rows: 14, 165, 176. Neighbors may be missed and the result may overlap; see shapely.coverage_invalid_edges.</code></td></tr>
+<tr><td>bundled US states, census, flow cartogram</td><td>no message</td><td>no message (6 states have repeated vertices; reported as information only)</td></tr>
+</table>
+<h2>Where it runs</h2>
+<p><code>create_flow_cartogram</code>, <code>CartogramWorkflow</code>, <code>create_voronoi_cartogram</code> and <code>create_noncontiguous_cartogram</code>, with <code>validate=False</code> to skip. Zero values are accepted, as before (flow shrinks the region; Voronoi has its own message).</p>
+<p>Left out: the symbol cartogram works on centroids and areas, and its tests cover degenerate polygons and null sizes, so an invalidity error would be wrong there; the partition functions already repair invalid polygons with a warning; the geographic CRS warning and the extreme value ratio from the issue were to be confirmed and are not included. The mosaic layout&#x27;s internal morph passes <code>validate=False</code>, and so does the Voronoi pre-morph, which has been checked already.</p>
+<h2>Checks</h2>
+<p>Suite 1399 passed, ruff clean, mypy shows only the errors of the untracked old <code>mosaic_cartogram</code> module. Cost: 0.01 s for the 177 countries, 0.02 s for the 49 census states.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
