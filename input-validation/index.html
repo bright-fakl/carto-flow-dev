@@ -83,7 +83,7 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-17 12:00</dd>
 <dt>Before</dt><dd>main @ b57f75b</dd>
-<dt>After</dt><dd>feat/validate-geometries @ 0fb020e</dd>
+<dt>After</dt><dd>feat/validate-geometries @ c996c60</dd>
 <dt>Inputs</dt><dd>bundled US states (EPSG:5070) with one polygon replaced by a bowtie or one value set to NaN; bundled world (EPSG:8857) for the coverage check.</dd>
 </dl>
 <p class="desc">validate_geometries reports null, empty and invalid geometries, bad values, overlapping polygons and repeated vertices by row label; the flow, Voronoi and non-contiguous cartograms run it first and raise a ValueError for errors before the run.</p>
@@ -95,6 +95,7 @@
 <tr><td>value missing, infinite or negative (zero where it is not allowed)</td><td>error</td><td>yes</td><td>NumPy on the data column</td></tr>
 <tr><td>column not found</td><td>error</td><td></td><td></td></tr>
 <tr><td>polygon overlaps a neighbor or shares an edge that does not match</td><td>warning, with <code>coverage=True</code></td><td>yes</td><td><code>shapely.coverage_invalid_edges</code></td></tr>
+<tr><td>coordinates in longitude and latitude (geographic CRS)</td><td>warning</td><td>no (whole input)</td><td><code>crs.is_geographic</code></td></tr>
 <tr><td>repeated consecutive vertices</td><td>information only</td><td>yes</td><td><code>shapely.remove_repeated_points</code></td></tr>
 </table>
 <p>The report is a <code>GeometryReport</code>; <code>raise_for_errors()</code> raises one <code>ValueError</code> that lists all errors, <code>warn()</code> issues a <code>UserWarning</code> for each warning.</p>
@@ -104,13 +105,14 @@
 <tr><td>US states, one polygon replaced by a bowtie</td><td><code>GEOSException: IllegalArgumentException: Points of LinearRing do not form a closed linestring</code>, from inside the morph</td><td><code>ValueError: invalid input: Invalid geometry (first: Self-intersection[0.5 0.5]) in 1 row: 0. Repair with shapely.make_valid or carto_flow.geo_utils.repair_polygons.</code></td></tr>
 <tr><td>US states, one value NaN</td><td>the same <code>GEOSException</code>, after the morph produced NaN coordinates</td><td><code>ValueError: invalid input: Value is missing, infinite or negative in 1 row: 3. Fix or drop these rows.</code></td></tr>
 <tr><td>world, flow cartogram</td><td>no message</td><td><code>UserWarning: Polygon overlaps a neighbor or shares an edge that does not match in 3 rows: 14, 165, 176. Neighbors may be missed and the result may overlap; see shapely.coverage_invalid_edges.</code></td></tr>
+<tr><td>bundled world in EPSG:4326</td><td>no message</td><td><code>UserWarning: The coordinates are longitude and latitude (EPSG:4326), so areas are in square degrees and distorted. Project the data first, ...</code></td></tr>
 <tr><td>bundled US states, census, flow cartogram</td><td>no message</td><td>no message (6 states have repeated vertices; reported as information only)</td></tr>
 </table>
 <h2>Where it runs</h2>
 <p><code>create_flow_cartogram</code>, <code>CartogramWorkflow</code>, <code>create_voronoi_cartogram</code> and <code>create_noncontiguous_cartogram</code>, with <code>validate=False</code> to skip. Zero values are accepted, as before (flow shrinks the region; Voronoi has its own message).</p>
-<p>Left out: the symbol cartogram works on centroids and areas, and its tests cover degenerate polygons and null sizes, so an invalidity error would be wrong there; the partition functions already repair invalid polygons with a warning; the geographic CRS warning and the extreme value ratio from the issue were to be confirmed and are not included. The mosaic layout&#x27;s internal morph passes <code>validate=False</code>, and so does the Voronoi pre-morph, which has been checked already.</p>
+<p>Left out: the symbol cartogram works on centroids and areas, and its tests cover degenerate polygons and null sizes, so an invalidity error would be wrong there; the partition functions already repair invalid polygons with a warning; the extreme value ratio from the issue is not included (any cutoff is arbitrary, and the convergence status already reports a region that cannot reach its target). The mosaic layout&#x27;s internal morph passes <code>validate=False</code>, and so does the Voronoi pre-morph, which has been checked already.</p>
 <h2>Checks</h2>
-<p>Suite 1399 passed, ruff clean, mypy shows only the errors of the untracked old <code>mosaic_cartogram</code> module. Cost: 0.01 s for the 177 countries, 0.02 s for the 49 census states.</p>
+<p>Suite 1400 passed, ruff clean, mypy shows only the errors of the untracked old <code>mosaic_cartogram</code> module. Cost: 0.01 s for the 177 countries, 0.02 s for the 49 census states.</p>
 
 <a class="back" href="../index.html">&larr; back to index</a>
 
