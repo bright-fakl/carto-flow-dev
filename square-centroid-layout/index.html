@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #161: Square collision for the centroid layout</title>
+<title>PR #161: Square collision and settled spacing for the centroid layout</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,7 +72,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #161: Square collision for the centroid layout</h1>
+<h1>PR #161: Square collision and settled spacing for the centroid layout</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>symbol</dd>
@@ -83,21 +83,33 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-18 12:00</dd>
 <dt>Before</dt><dd>main @ b7df147</dd>
-<dt>After</dt><dd>feat/square-centroid-layout @ 0a91dc2</dd>
+<dt>After</dt><dd>feat/square-centroid-layout @ 38e6b40</dd>
 <dt>Inputs</dt><dd>bundled US census snapshot (49 regions, EPSG:5070), size Population, spacing 0.</dd>
 </dl>
-<p class="desc">CentroidLayout(shape=&quot;square&quot;) separates axis-aligned squares of the circles&#x27; area, so squares sit flush with no gaps and no overlaps; the default stays circles.</p>
+<p class="desc">CentroidLayout(shape=&quot;square&quot;) separates axis-aligned squares of the circles&#x27; area, so squares sit flush with no gaps and no overlaps; the default stays circles. A final pass after the attraction cycles now also makes the circle layout keep its spacing.</p>
 <h2>Figures</h2>
+<h2>Circle layout: the spacing is kept now</h2>
+<p>Smallest gap between two circles as a fraction of the requested gap (spacing times the mean radius); at spacing 0 as a fraction of the mean radius (negative is overlap).</p>
+<table>
+<tr><th>data</th><th>spacing</th><th>before</th><th>after</th><th>mean displacement before / after</th></tr>
+<tr><td>census snapshot</td><td>0</td><td>-0.062</td><td>0.000</td><td>156.0 / 160.6 km</td></tr>
+<tr><td>census snapshot</td><td>0.05</td><td>-0.48</td><td>0.998</td><td>166.7 / 173.3 km</td></tr>
+<tr><td>census snapshot</td><td>0.2</td><td>0.49</td><td>1.000</td><td>210.7 / 220.9 km</td></tr>
+<tr><td>world (177 countries)</td><td>0</td><td>-0.119</td><td>0.000</td><td>320.0 / 335.1 km</td></tr>
+<tr><td>world</td><td>0.05</td><td>-1.98</td><td>0.998</td><td>339.4 / 358.7 km</td></tr>
+<tr><td>world</td><td>0.2</td><td>-0.50</td><td>1.000</td><td>408.3 / 450.2 km</td></tr>
+</table>
+<p>The cleanup passes inside the attraction cycles are capped at 20, so the overlaps from the last attraction step could remain. The final pass (full local step, up to 500 passes, stops at the tolerance) removes them; the run time is unchanged (0.5 s for the census snapshot, 3 s for the world). The symbols move 3 to 10 % farther from their centroids, more at larger spacing.</p>
 <h2>Measured (US census snapshot, spacing 0)</h2>
 <table>
 <tr><th>layout and symbols</th><th>overlapping pairs</th><th>total symbol area / circle area</th><th>mean displacement</th></tr>
-<tr><td>circle layout, circles</td><td>7</td><td>1.00</td><td>156 km</td></tr>
+<tr><td>circle layout, circles (before the final pass for circles)</td><td>7</td><td>1.00</td><td>156 km</td></tr>
 <tr><td>circle layout, squares, fit <code>inside</code></td><td>0</td><td>0.64</td><td>156 km</td></tr>
 <tr><td>circle layout, squares, fit <code>area</code></td><td>28</td><td>1.00</td><td>156 km</td></tr>
 <tr><td>square layout, squares</td><td>0</td><td>1.01</td><td>230 km</td></tr>
 <tr><td>square layout, squares, spacing 0.05</td><td>0</td><td>1.01</td><td>246 km</td></tr>
 </table>
-<p>Overlapping pairs have an overlap area above 0.1 % of the mean symbol area. The area ratio of 1.01 is the polygon approximation of the circle (a 64-gon has 0.5 % less area than the circle). The 7 overlapping pairs of the circle layout at <code>spacing=0</code> are the existing behavior of its cleanup pass and are not changed here.</p>
+<p>Overlapping pairs have an overlap area above 0.1 % of the mean symbol area. The area ratio of 1.01 is the polygon approximation of the circle (a 64-gon has 0.5 % less area than the circle). The 7 overlapping pairs of the circle layout at <code>spacing=0</code> are the state before the final pass for circles; after it none remain.</p>
 <h2>What changes</h2>
 <table>
 <tr><th></th><th></th></tr>
@@ -105,15 +117,19 @@
 <tr><td>collision</td><td>the pair distance is the larger axis offset (Chebyshev) and pairs separate along that axis, the direction of the smaller penetration; the global expansion factor uses the same distance</td></tr>
 <tr><td>size</td><td>the square half-side is sqrt(pi)/2 times the circle radius, so the area stays proportional to the value; <code>LayoutResult.sizes</code> holds the half-sides</td></tr>
 <tr><td>final pass</td><td>after the attraction cycles, up to 500 local passes with a full step (stops at the tolerance): 0.28 of the mean size overlap remained after 20 passes, none after this pass; 0.6 s for 49 regions</td></tr>
+<tr><td>circles</td><td>the final pass runs for both shapes, so the circle layout keeps its spacing too (result-changing, figures above)</td></tr>
 <tr><td>docs</td><td>gallery example <code>plot_symbol_square_layout.py</code>, a line in the layout table of the pipeline explanation</td></tr>
 </table>
 <h2>Not in this PR</h2>
 <p>The packing and flow-density layouts (their force simulators assume circles), rectangles with an aspect ratio, and a preset function. The symbols sit farther from the geometry centroids than circles (230 km against 156 km): equal-area squares need more room in the dense east, and the final pass allows no overlap.</p>
 <h2>Checks</h2>
-<p>Symbol and layout tests pass locally (395), mypy and ruff clean; the new tests cover flush squares, coincident squares, the canonical symbol, no overlap with and without groups, area proportional to the value, and the unchanged circle path. The full suite and the docs build run in CI.</p>
+<p>Suite 1415 passed locally, mypy and ruff clean; the new tests cover flush squares, coincident squares, the canonical symbol, no overlap with and without groups, area proportional to the value, the unchanged circle path, and the requested spacing for circles and squares. The full suite and the docs build run in CI.</p>
 <div class="figure">
 <img src="fig_before_after.png" alt="Left and middle: squares drawn on the circle layout (the fit modes `inside` and `area`); right: the square layout.">
 <p class="caption">Left and middle: squares drawn on the circle layout (the fit modes <code>inside</code> and <code>area</code>); right: the square layout.</p>
+</div><div class="figure">
+<img src="fig_circle_spacing.png" alt="Circle layout, spacing 0.05, before and after the final pass; circles closer than 90 % of the spacing to a neighbor are red.">
+<p class="caption">Circle layout, spacing 0.05, before and after the final pass; circles closer than 90 % of the spacing to a neighbor are red.</p>
 </div>
 <a class="back" href="../index.html">&larr; back to index</a>
 
