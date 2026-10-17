@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -103,24 +105,22 @@
 </table>
 <p><code>topology</code> is a registered alias of <code>packing</code>.</p>
 <h2>Mechanism</h2>
-<ul><li><code>Layout</code> gains <code>supports_group_by: ClassVar[bool] = False</code>.</li><li><code>Layout.compute</code> becomes a template method: it checks the flag (from</li></ul>
-<p><code>data.group_ids_G is not None</code>), then delegates to a new abstract <code>_compute</code> that subclasses implement. A layout instance called directly therefore cannot bypass the check - there is no unvalidated entry point left.</p>
-<ul><li><code>create_layout</code> runs the same <code>check_group_by_support</code> as soon as the layout</li></ul>
-<p>string is resolved, so the error is raised before any preprocessing work.</p>
-<ul><li>The list of supporting layouts in the message is derived from the registry</li></ul>
-<p>(<code>group_by_layouts()</code>, aliases dropped), so it cannot drift from the flags.</p>
-<p>``<code> ValueError: Layout GridBasedLayout does not support group_by: it would ignore the grouping and place symbols as if it were absent. Layouts that honour group_by: centroid, flow_density, mosaic, packing. Drop group_by or use one of those layouts. </code>``</p>
+<ul><li><code>Layout</code> gains <code>supports_group_by: ClassVar[bool] = False</code>.</li><li><code>Layout.compute</code> becomes a template method: it checks the flag (from <code>data.group_ids_G is not None</code>), then delegates to a new abstract <code>_compute</code> that subclasses implement. A layout instance called directly therefore cannot bypass the check - there is no unvalidated entry point left.</li><li><code>create_layout</code> runs the same <code>check_group_by_support</code> as soon as the layout string is resolved, so the error is raised before any preprocessing work.</li><li>The list of supporting layouts in the message is derived from the registry (<code>group_by_layouts()</code>, aliases dropped), so it cannot drift from the flags.</li></ul>
+<pre><code>ValueError: Layout GridBasedLayout does not support group_by: it would ignore
+the grouping and place symbols as if it were absent. Layouts that honour
+group_by: centroid, flow_density, mosaic, packing. Drop group_by or use one of
+those layouts.</code></pre>
 <h2>Inert-default warning</h2>
 <p><code>packing</code> and <code>flow_density</code> read the grouping only through an option that defaults to a no-op. At those defaults <code>group_by</code> is accepted and changes nothing - the same defect as grid, just quieter. Both now emit a <code>UserWarning</code> through a <code>_inert_group_by_warning</code> hook on <code>Layout</code>, called from the same template method, naming the option to set:</p>
 <ul><li>packing: <code>group_weight is 0.0</code> - set e.g. <code>CirclePackingLayout(group_weight=0.5)</code></li><li>flow_density: <code>cross_group_pull_scale is 1.0</code> - set it below 1.0</li></ul>
 <p>Centroid and mosaic inherit the default no-op hook and never warn. The shipped grouped presets set the options, so they stay silent too.</p>
 <h2>The documentation example that did nothing</h2>
 <p><code>docs/reference/symbol_cartogram/index.md</code> carried</p>
-<p>``<code>python result = create_symbol_cartogram(gdf, size=&quot;population&quot;, group_by=&quot;region&quot;) </code>``</p>
+<pre><code>result = create_symbol_cartogram(gdf, size=&quot;population&quot;, group_by=&quot;region&quot;)</code></pre>
 <p>with no <code>layout=</code>, and the default is <code>layout=&quot;physics&quot;</code>. So the documented way to use <code>group_by</code> was one of the two layouts that ignored it entirely. The example now passes <code>layout=&quot;packing&quot;</code> and names the layouts that honour the grouping. Under the new check the old line would raise.</p>
 <h2>Breaking change for 2.0</h2>
 <p>Any caller passing <code>group_by</code> with <code>grid</code> or <code>physics</code> now raises where it previously ran. That is the intent - the previous result was wrong in a way the user could not see - but it is a hard break, not a deprecation.</p>
-<p>**Accepted consequence.** <code>collapse_group</code> acts on starting positions inside <code>prepare_layout_data</code> (<code>if collapse_group &gt; 0 and group_ids is not None</code>), so it used to reach every layout, grid and physics included. Since <code>check_group_by_support</code> now fires in <code>create_layout</code> *before* preprocessing, <code>group_by</code> + <code>collapse_group</code> + grid/physics is closed off. Collapsing the starting positions of a grouping the layout then ignores was a thin use case, and the alternative - allowing <code>group_by</code> through when <code>collapse_group &gt; 0</code> - would reintroduce exactly the silent-no-effect surface the PR removes.</p>
+<p><strong>Accepted consequence.</strong> <code>collapse_group</code> acts on starting positions inside <code>prepare_layout_data</code> (<code>if collapse_group &gt; 0 and group_ids is not None</code>), so it used to reach every layout, grid and physics included. Since <code>check_group_by_support</code> now fires in <code>create_layout</code> *before* preprocessing, <code>group_by</code> + <code>collapse_group</code> + grid/physics is closed off. Collapsing the starting positions of a grouping the layout then ignores was a thin use case, and the alternative - allowing <code>group_by</code> through when <code>collapse_group &gt; 0</code> - would reintroduce exactly the silent-no-effect surface the PR removes.</p>
 <p><code>tile_count</code> is unaffected: it leaves <code>group_ids_G</code> as <code>None</code>, so the check stays silent.</p>
 <h2>Tests</h2>
 <p><code>tests/test_symbol_cartogram_group_by_support.py</code> (new, 193 lines): each non-supporting layout raises via both <code>create_layout</code> and <code>compute</code>, the message names the supporting layouts, supporting layouts never raise, and the check stays silent with no <code>group_by</code> and with <code>tile_count</code>. The inert-grouping warning fires for packing and flow_density at their defaults, and is silent once the option is set, without <code>group_by</code>, and for both grouped presets.</p>

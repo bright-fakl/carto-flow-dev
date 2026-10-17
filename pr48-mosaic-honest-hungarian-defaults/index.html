@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -88,7 +90,7 @@
 <dt>Inputs</dt><dd>US states (uniform hexagon, uniform square, 154 tiles), congressional districts grouped by State Name, world countries (Natural Earth, Mollweide ESRI:54009, 384 nominal / 460 actual tiles) — each at both morph settings</dd>
 </dl>
 <p class="desc">max_connectivity_iters drops 15 to 5 because the cap never binds, and disconnected_penalty_mult becomes a boolean because every non-zero value is indistinguishable; both verified bit-identical over 40 Hungarian solves.</p>
-<p>**No figures, deliberately.** The change is bit-identical by construction and verified so over 40 Hungarian solves, which means a before/after pair would be two identical images. The evidence below is the point of this page.</p>
+<p><strong>No figures, deliberately.</strong> The change is bit-identical by construction and verified so over 40 Hungarian solves, which means a before/after pair would be two identical images. The evidence below is the point of this page.</p>
 <p>Two <code>HungarianOptions</code> fields advertise behaviour they do not have. Neither change alters any result.</p>
 <h2><code>max_connectivity_iters</code>: 15 → 5</h2>
 <p>The cap never binds. The repair loop also stops as soon as a pass fails to improve on the incumbent, and that always happens first. Passes actually run, over all five sweep inputs at both morph settings:</p>
@@ -96,21 +98,31 @@
 <tr><th>input</th><th>morph=False</th><th>morph=True</th></tr>
 <tr><td>states (uniform, hexagon)</td><td>2</td><td>2</td></tr>
 <tr><td>states (uniform, square)</td><td>3</td><td>2</td></tr>
-<tr><td>states (154 tiles)</td><td>**4**</td><td>2</td></tr>
-<tr><td>congressional districts</td><td>**4**</td><td>2</td></tr>
+<tr><td>states (154 tiles)</td><td><strong>4</strong></td><td>2</td></tr>
+<tr><td>congressional districts</td><td><strong>4</strong></td><td>2</td></tr>
 <tr><td>world countries (384 nominal / 460 actual tiles)</td><td>2</td><td>2</td></tr>
 </table>
 <p>The worst case over everything measured is four passes. A cap of 5 allows six, so it still cannot bind, while no longer implying a range of behaviour that cannot occur. If an input ever does need more, the field is still there to raise.</p>
 <h2><code>disconnected_penalty_mult</code>: float → <code>penalize_disconnected: bool</code></h2>
 <p>The value scales a raise applied to a disconnected tile&#x27;s cost, as a multiple of the *static cost maximum*:</p>
-<p>``<code>python disc_penalty = cost_static_max * options.disconnected_penalty_mult </code>``</p>
+<pre><code>disc_penalty = cost_static_max * options.disconnected_penalty_mult</code></pre>
 <p>Any multiple above one already puts that tile out of contention outright, so every value from 1.0 to 50.0 produces the identical assignment and only 0.0 differs. It is a switch wearing a float&#x27;s clothing, and a caller reading <code>10.0</code> reasonably assumes 5.0 or 20.0 would mean something.</p>
 <p>Renamed to <code>penalize_disconnected: bool = True</code>. The former default moves to <code>_DISCONNECTED_PENALTY_MULT = 10.0</code> in <code>_assignment.py</code>, following the pattern #43 established for <code>_GAP_BRIDGE_MULT</code> and <code>_DISCONNECTED_SCORE_WEIGHT</code>. The branch itself is untouched, so no behaviour is removed: <code>penalize_disconnected=False</code> reproduces <code>disconnected_penalty_mult=0.0</code> exactly.</p>
-<p>**Breaking change.** <code>HungarianOptions(disconnected_penalty_mult=...)</code> now raises <code>TypeError</code>. <code>disconnected_penalty_mult=0.0</code> becomes <code>penalize_disconnected=False</code>; every other value was the default and needs nothing.</p>
+<p><strong>Breaking change.</strong> <code>HungarianOptions(disconnected_penalty_mult=...)</code> now raises <code>TypeError</code>. <code>disconnected_penalty_mult=0.0</code> becomes <code>penalize_disconnected=False</code>; every other value was the default and needs nothing.</p>
 <h2>Bit-identity evidence: 40 solves, all identical</h2>
-<p>Verified with the same-process technique from <code>visual_checks/mosaic-inert-verify/</code> (PR #43). A naive end-to-end before/after comparison would look like a regression at morph=True and would not be one — <code>morph_geometries</code> produces a different result on every run. So the morph runs **once** and feeds both implementations inside one process: for every Hungarian solve the layout performs, the new <code>hungarian_morphed_assignment</code> and the one from <code>origin/main</code> are called on identical captured arguments, the old one given a shim options object carrying <code>max_connectivity_iters=15</code> and <code>disconnected_penalty_mult=10.0</code>, and the two assignments compared elementwise.</p>
-<p>``` states_uniform     morph=0:   1 solve(s)  max passes run=2  IDENTICAL states_uniform     morph=1:   1 solve(s)  max passes run=2  IDENTICAL states_uniform_sq  morph=0:   1 solve(s)  max passes run=3  IDENTICAL states_uniform_sq  morph=1:   1 solve(s)  max passes run=2  IDENTICAL states             morph=0:   1 solve(s)  max passes run=4  IDENTICAL states             morph=1:   1 solve(s)  max passes run=2  IDENTICAL districts          morph=0:   1 solve(s)  max passes run=4  IDENTICAL districts          morph=1:   1 solve(s)  max passes run=2  IDENTICAL world              morph=0:  12 solve(s)  max passes run=2  IDENTICAL world              morph=1:  21 solve(s)  max passes run=2  IDENTICAL</p>
-<p>worst passes run over all inputs = 4 (cap allows 6) ```</p>
+<p>Verified with the same-process technique from <code>visual_checks/mosaic-inert-verify/</code> (PR #43). A naive end-to-end before/after comparison would look like a regression at morph=True and would not be one — <code>morph_geometries</code> produces a different result on every run. So the morph runs <strong>once</strong> and feeds both implementations inside one process: for every Hungarian solve the layout performs, the new <code>hungarian_morphed_assignment</code> and the one from <code>origin/main</code> are called on identical captured arguments, the old one given a shim options object carrying <code>max_connectivity_iters=15</code> and <code>disconnected_penalty_mult=10.0</code>, and the two assignments compared elementwise.</p>
+<pre><code>states_uniform     morph=0:   1 solve(s)  max passes run=2  IDENTICAL
+states_uniform     morph=1:   1 solve(s)  max passes run=2  IDENTICAL
+states_uniform_sq  morph=0:   1 solve(s)  max passes run=3  IDENTICAL
+states_uniform_sq  morph=1:   1 solve(s)  max passes run=2  IDENTICAL
+states             morph=0:   1 solve(s)  max passes run=4  IDENTICAL
+states             morph=1:   1 solve(s)  max passes run=2  IDENTICAL
+districts          morph=0:   1 solve(s)  max passes run=4  IDENTICAL
+districts          morph=1:   1 solve(s)  max passes run=2  IDENTICAL
+world              morph=0:  12 solve(s)  max passes run=2  IDENTICAL
+world              morph=1:  21 solve(s)  max passes run=2  IDENTICAL
+
+worst passes run over all inputs = 4 (cap allows 6)</code></pre>
 <p>Script: <code>visual_checks/mosaic-world-islands/pr4_same_proc.py</code>. <code>make check</code> clean, full suite 632 passed. The reference table in <code>docs/explanations/symbol-cartogram-mosaic-layout.md</code> is corrected for both fields.</p>
 <h2>Deliberately not changed</h2>
 <p><code>swap_repair_passes</code> and <code>ring_swapback_max_hops</code> are both live: every value gives a distinct result, the saturation point of <code>swap_repair_passes</code> moves with the input and it never saturates on world at morph=True, and <code>ring_swapback_max_hops</code> buys a monotonic reduction in empty core tiles while 32 re-introduces a defect on districts. Neither is a misleading default. Per-value tables for both are in <code>visual_checks/mosaic-world-islands/tables.md</code>.</p>

@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -93,8 +95,8 @@
 <p><code>tests/test_geo_utils_contiguity_precheck.py</code>, 17 tests, 295 lines. No change to <code>src/</code>.</p>
 <h2>The invariant, and why it needed pinning</h2>
 <p>PR #44 put a 25-line node-level BFS in front of the path enumeration inside <code>repair_contiguity</code>. It returns early when no node of <code>dst_slots</code> is reachable from <code>src_slots</code> within <code>max_len</code> nodes while avoiding <code>forbidden_nodes</code>. The correctness argument is that a shortest walk is a simple path, so &quot;unreachable within <code>max_len</code> nodes&quot; is exactly the condition under which the enumeration would have yielded nothing.</p>
-<p>The argument is sound, but the pre-check **duplicates** four things the enumeration also does:</p>
-<p>1. the source filter (<code>s not in forbidden_nodes</code>), 2. the <code>forbidden_nodes</code> handling during expansion, 3. the depth bound (<code>&gt;= max_len</code> stops expanding), 4. the convention that <code>max_len</code> counts **nodes**, starting at 1, not edges.</p>
+<p>The argument is sound, but the pre-check <strong>duplicates</strong> four things the enumeration also does:</p>
+<ol><li>the source filter (<code>s not in forbidden_nodes</code>),</li><li>the <code>forbidden_nodes</code> handling during expansion,</li><li>the depth bound (<code>&gt;= max_len</code> stops expanding),</li><li>the convention that <code>max_len</code> counts <strong>nodes</strong>, starting at 1, not edges.</li></ol>
 <p>Change any one of them on one side only and the pre-check starts returning early on calls that do have a path. <code>repair_contiguity</code> then quietly stops repairing satellites, still returns a valid permutation, and no test fails. That is the failure mode these tests exist to make loud.</p>
 <p>PR #44&#x27;s own page, <code>visual_checks/pr44-contiguity-reachability-precheck/</code>, states plainly that the merged diff adds no test of its own and that the identity evidence was the argument plus end-to-end fingerprint runs. This PR closes that gap.</p>
 <h2>How the two are compared directly</h2>
@@ -108,16 +110,7 @@
 <p>So the comparison is direct: <code>verdict(...) is bool(list(bare(...)))</code>, plus <code>list(guarded(...)) == list(bare(...))</code> element-wise. All three are derived from the real source at test time - no copy of the algorithm lives in the test file, so the tests cannot drift into agreeing with a stale duplicate.</p>
 <p>The lift is marker-guarded. If the pre-check block stops matching the markers the tests strip it by, they fail with a message saying exactly that, rather than silently testing nothing.</p>
 <h2>What is asserted</h2>
-<ul><li>**The boundary, in both directions.** On a chain, a route of exactly</li></ul>
-<p><code>max_len</code> nodes is yielded and the verdict is reachable; one node further, the verdict is unreachable and the bare enumeration also yields nothing. The node-not-edge convention is asserted explicitly at the default bound of 10.</p>
-<ul><li>**Agreement.** Verdict against bare enumeration on 11 hand-built graphs with</li></ul>
-<p>hand-computed expectations - including <code>forbidden_nodes</code> cutting the only route, <code>forbidden_nodes</code> forcing a longer route that is still within the bound, a forbidden source, a source that is also a destination, an isolated node, a cycle with two routes of different length - and on 300 seeded random small graphs (2-9 nodes, random <code>max_len</code> from 1 to 6).</p>
-<ul><li>**The skip is real, not just harmless.** On a 4x4 grid with a destination</li></ul>
-<p>beyond the bound, the guarded call costs at most one neighbour lookup per node (16) while the bare one costs 471. This pins the performance claim of PR #44 as well as the correctness one.</p>
-<ul><li>**The repair still repairs.** Three cases through <code>repair_contiguity</code></li></ul>
-<p>itself: a reachable satellite is walked back next to the main body; a 10-node route repairs while an 11-node one leaves the satellite in <code>discontiguous</code> with the permutation untouched; a group in three components</p>
-<ul><li>so one satellite sits in <code>forbidden_nodes</code> while the other searches -</li></ul>
-<p>still converges to contiguous. A pre-check that wrongly skipped everything would fail all three.</p>
+<ul><li><strong>The boundary, in both directions.</strong> On a chain, a route of exactly <code>max_len</code> nodes is yielded and the verdict is reachable; one node further, the verdict is unreachable and the bare enumeration also yields nothing. The node-not-edge convention is asserted explicitly at the default bound of 10.</li><li><strong>Agreement.</strong> Verdict against bare enumeration on 11 hand-built graphs with hand-computed expectations - including <code>forbidden_nodes</code> cutting the only route, <code>forbidden_nodes</code> forcing a longer route that is still within the bound, a forbidden source, a source that is also a destination, an isolated node, a cycle with two routes of different length - and on 300 seeded random small graphs (2-9 nodes, random <code>max_len</code> from 1 to 6).</li><li><strong>The skip is real, not just harmless.</strong> On a 4x4 grid with a destination beyond the bound, the guarded call costs at most one neighbour lookup per node (16) while the bare one costs 471. This pins the performance claim of PR #44 as well as the correctness one.</li><li><strong>The repair still repairs.</strong> Three cases through <code>repair_contiguity</code> itself: a reachable satellite is walked back next to the main body; a 10-node route repairs while an 11-node one leaves the satellite in <code>discontiguous</code> with the permutation untouched; a group in three components<ul><li>so one satellite sits in <code>forbidden_nodes</code> while the other searches - still converges to contiguous. A pre-check that wrongly skipped everything would fail all three.</li></ul></li></ul>
 <p>Expected values are hand-derived from the graph, never read off a run.</p>
 <h2>Mutation check</h2>
 <p>Four one-line mutations of the pre-check were applied by hand to <code>contiguity.py</code> and the suite re-run. Each is caught:</p>
@@ -128,7 +121,7 @@
 <tr><td>source filter dropped (<code>seen = set(src_slots)</code>)</td><td>2</td></tr>
 <tr><td>destination test shifted (<code>and depth &gt; 1</code>)</td><td>2</td></tr>
 </table>
-<p>The first three are exactly the three duplications listed above; the fourth is the depth convention. The source was restored after each. Note that the earlier draft of these tests, which compared only guarded-against-bare output, caught the depth mutation but **not** the two <code>forbidden_nodes</code> /source-filter ones - those make the pre-check too permissive, which is invisible in the output and only costs performance. Lifting the verdict out separately is what made them visible; that is the reason the third form exists.</p>
+<p>The first three are exactly the three duplications listed above; the fourth is the depth convention. The source was restored after each. Note that the earlier draft of these tests, which compared only guarded-against-bare output, caught the depth mutation but <strong>not</strong> the two <code>forbidden_nodes</code> /source-filter ones - those make the pre-check too permissive, which is invisible in the output and only costs performance. Lifting the verdict out separately is what made them visible; that is the reason the third form exists.</p>
 <h2>Disagreements found</h2>
 <p>None. The merged pre-check agreed with the enumeration on every input tried, including the 300 random graphs. No bug to report against PR #44.</p>
 <h2>Checks</h2>

@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -86,13 +88,13 @@
 <p class="desc">The index sorted by PR number and had no notion of whether a report had been reviewed. It now lists newest first and marks each page outstanding, deferred or done.</p>
 <p>No figures: this changes the index that lists the other pages, so the evidence is the generated page itself. Open <code>../index.html</code>.</p>
 <h2>What was wrong</h2>
-<p>**Sorted by PR number.** Several directories are investigation workspaces that belong to no single PR, so they were pushed to the bottom whatever their date — and one had been given <code>pr: 0</code> to escape that, claiming a PR number that does not exist.</p>
-<p>**The mtime fallback could never work.** This script writes <code>index.html</code> into every subdirectory, and <code>_dir_mtime</code> took the newest mtime among *all* files there, so every rebuild reset every directory&#x27;s mtime to the moment of the rebuild. Ordering unnumbered directories by mtime was ordering them by nothing.</p>
-<p>**<code>_sort_key</code> was dead code.** <code>main()</code> partitioned the directories into numbered and unnumbered and sorted each separately, so the sort key was never called. The first attempt at this fix changed it and had no effect on the output; that was only caught by reading the rendered table.</p>
-<p>**Eight warnings on every build.** <code>pr</code> and <code>url</code> were required metadata, so each of the four investigation workspaces emitted two warnings every time. A build that always warns trains the reader to ignore warnings, so a real one would have gone unnoticed.</p>
+<p><strong>Sorted by PR number.</strong> Several directories are investigation workspaces that belong to no single PR, so they were pushed to the bottom whatever their date — and one had been given <code>pr: 0</code> to escape that, claiming a PR number that does not exist.</p>
+<p><strong>The mtime fallback could never work.</strong> This script writes <code>index.html</code> into every subdirectory, and <code>_dir_mtime</code> took the newest mtime among *all* files there, so every rebuild reset every directory&#x27;s mtime to the moment of the rebuild. Ordering unnumbered directories by mtime was ordering them by nothing.</p>
+<p><strong><code>_sort_key</code> was dead code.</strong> <code>main()</code> partitioned the directories into numbered and unnumbered and sorted each separately, so the sort key was never called. The first attempt at this fix changed it and had no effect on the output; that was only caught by reading the rendered table.</p>
+<p><strong>Eight warnings on every build.</strong> <code>pr</code> and <code>url</code> were required metadata, so each of the four investigation workspaces emitted two warnings every time. A build that always warns trains the reader to ignore warnings, so a real one would have gone unnoticed.</p>
 <h2>What it does now</h2>
-<p>Pages list **newest first**, by the <code>date</code> metadata field where present and by a now-meaningful directory mtime otherwise. PR number only breaks ties within a date.</p>
-<p>Each page carries a **review status**, taken from the PR&#x27;s GitHub state via one batched <code>gh</code> call — merged or closed is done, open needs review. An explicit <code>status:</code> in <code>summary.md</code> always wins, so a merged PR can still be flagged for follow-up, and a directory with no PR can say where it stands. Those default to needs review: an investigation is outstanding until someone says it is not. The lookup degrades to the declared status when <code>gh</code> is unavailable, and <code>--offline</code> skips it.</p>
+<p>Pages list <strong>newest first</strong>, by the <code>date</code> metadata field where present and by a now-meaningful directory mtime otherwise. PR number only breaks ties within a date.</p>
+<p>Each page carries a <strong>review status</strong>, taken from the PR&#x27;s GitHub state via one batched <code>gh</code> call — merged or closed is done, open needs review. An explicit <code>status:</code> in <code>summary.md</code> always wins, so a merged PR can still be flagged for follow-up, and a directory with no PR can say where it stands. Those default to needs review: an investigation is outstanding until someone says it is not. The lookup degrades to the declared status when <code>gh</code> is unavailable, and <code>--offline</code> skips it.</p>
 <p>Three states, because a parked item is neither finished nor awaiting attention:</p>
 <table>
 <tr><th>Status</th><th>State</th></tr>
