@@ -1,7 +1,7 @@
 ---
 issue: 129
-title: County flow cartograms: hierarchical prototype, and the stall rule as the main obstacle
-description: A single global morph of the 3,108 counties reaches a mean error of 1.0 % and a median of 0.01 % at grid 2048 (126 s) and 2.2 % / 0.13 % at grid 1024 (23 s) once the stall rule is off; with only stall_min_improvement lowered to 0.002 the default stack reaches 5.4 % mean at 1024 in 8 s. The earlier county failures were the stall rule ending slow progress after 50 iterations, not sub-cell regions alone. The hierarchical prototype (states first, then counties per state) fixes the county areas but leaves the state outlines free, so the states overlap by 11.6 %; it is not needed to get a county cartogram. A plain Arizona (15 counties) converges at every grid once the stall rule is off.
+title: County flow cartograms: global morph, ladder, and hierarchical prototype
+description: A resolution ladder from grid 256 to 2048 with the default options reaches a county mean error of 2.1 % (median 0.11 %) in 12 s; starts at 128 or 64 tangle the counties, and the dt schedule and the stall threshold change little. A single global morph of the 3,108 counties reaches a mean error of 1.0 % and a median of 0.01 % at grid 2048 (126 s) and 2.2 % / 0.13 % at grid 1024 (23 s) once the stall rule is off; with only stall_min_improvement lowered to 0.002 the default stack reaches 5.4 % mean at 1024 in 8 s. The earlier county failures were the stall rule ending slow progress after 50 iterations, not sub-cell regions alone. The hierarchical prototype (states first, then counties per state) fixes the county areas but leaves the state outlines free, so the states overlap by 11.6 %; it is not needed to get a county cartogram. A plain Arizona (15 counties) converges at every grid once the stall rule is off.
 kind: exploration
 topic: flow
 status: open
@@ -27,6 +27,30 @@ A single morph of all counties (`hier_global.py`; `MorphOptions(grid=N, grid_mar
 At grid 1024 the default stall rule ends at 50 iterations with a mean error of 929 %. Lowering only `stall_min_improvement` (patience 4) to 0.002 gives a run of 650 iterations in 8 s with mean 5.41 %, median 0.18 %, max 627 % (status stalled); 0.0005 with patience 6 gives the same. The invalid polygons are self-intersections (226 of 228 at 1024); 98 of the 127 at 2048 belong to counties within 5 % of their target. Starting the global morph from the state stage output is not better (1024: mean 5.49 %, 171 invalid).
 
 figure: fig_global.png — County area error log2(area/target) of the single-grid result at grid 1024 and 2048, stall rule off. The remaining large errors are a few sub-cell counties around Washington (grid 1024: a patch in Virginia and Maryland).
+
+## Resolution ladder
+
+`ladder2.py` runs `CartogramWorkflow.morph_multiresolution` with one `MorphOptions` per level (n_iter 1000 per level, margin 0.5, square) and reports every level. A ladder that starts at 256 and ends at 2048 (4 levels) converges to a usable result with the **default** stall rule in 12 s. The earlier county failures started at 128, where 89 % of the counties are below one cell.
+
+| ladder | stall rule | dt per level | time | level 256 | 512 | 1024 | 2048 (mean / median % , invalid) |
+|---|---|---|---|---|---|---|---|
+| 256 to 2048 | default | 0.2 | 12 s | mean 69.8 | 37.1 | 4.09 | 2.10 / 0.11, 689 |
+| 256 to 2048 | min improvement 0.002 | 0.2 | 18 s | 69.8 | 37.1 | 4.09 | 2.37 / 0.32, 721 |
+| 256 to 2048 | min improvement 0.0003, patience 6 | 0.2 | 22 s | 69.8 | 37.1 | 4.09 | 2.37 / 0.32, 721 |
+| 256 to 2048 | off, 600 iterations per level | 0.2 | 48 s | 69.8 | 37.1 | 3.39 | 2.73 / 0.60, 734 |
+| 256 to 2048 | min improvement 0.002 | 0.2 0.4 0.8 1.0 | 13 s | 69.8 | 34.6 | 4.84 | 4.67 / 0.12, 935 |
+| 256 to 2048 | min improvement 0.002 | 0.1 0.2 0.4 0.8 | 14 s | 61.5 | 46.8 | 4.64 | 3.43 / 0.09, 745 |
+| 256 to 2048 | min improvement 0.002 | 0.05 0.1 0.2 0.4 | 19 s | 62.0 | 13.3 | 8.38 | 8.29 / 0.20, 785 |
+| 512 to 2048 | min improvement 0.002 | 0.2 | 15 s | | 15.1 (512) | 6.63 | 6.39 / 0.12, 324 |
+| 128 to 2048 (5 levels) | min improvement 0.002 | 0.2 | 20 s | | | | 13.98 / 1.39, 1662 |
+| 64 to 2048 (6 levels) | min improvement 0.002 | 0.2 | 21 s | | | | 56.1 / 21.7, 2363 |
+
+The columns give the mean error after each level (the level-1024 and level-2048 values of the rows with a different grid ladder are the levels of that ladder, not of the 256 start; the 512-start row lists its levels 512, 1024, 2048 in the 512, 1024, 2048 columns).
+
+- **Levels 256 and 512 never converge** (sub-cell regions: mean 70 % and 37 %); the work is done at 1024 and 2048, where the shares under one cell are 5 % and 0.3 %.
+- **The dt schedule changes little.** Constant physical step (dt doubling per level, capped at 1.0) and a half-size schedule end within 2 to 8 % mean error, with the default `0.2` best or equal. The stall rule threshold does not matter either once the ladder starts at 256.
+- **The starting grid matters most.** Starting at 128 or 64 leaves the coarse level with tangled counties (1,660 and 2,360 invalid polygons) that finer levels do not repair; starting at 512 is worse than starting at 256 (6.4 % against 2.1 %), the fine-start effect again.
+- **Against the single grid.** Single grid 2048 with the stall rule off reaches 1.0 % mean and 127 invalid polygons in 126 s; the ladder reaches 2.1 % and 689 invalid in 12 s. The ladder's output has about five times as many invalid polygons.
 
 ## Hierarchical prototype
 

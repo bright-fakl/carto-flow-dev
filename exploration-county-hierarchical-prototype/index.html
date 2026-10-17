@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>County flow cartograms: hierarchical prototype, and the stall rule as the main obstacle</title>
+<title>County flow cartograms: global morph, ladder, and hierarchical prototype</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,7 +72,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>County flow cartograms: hierarchical prototype, and the stall rule as the main obstacle</h1>
+<h1>County flow cartograms: global morph, ladder, and hierarchical prototype</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>exploration</dd>
 <dt>Topic</dt><dd>flow</dd>
@@ -84,7 +84,7 @@
 <dt>After</dt><dd>the same checkout; prototype scripts only, no library change</dd>
 <dt>Inputs</dt><dd>3,108 contiguous counties from cb_2020_us_county_500k with the 2020 Census population estimate (co-est2020-alldata.csv), ESRI:102008, coverage-simplified at 1000 m with 5 km segments. The vote set of the earlier explorations is not available, so the numbers are not comparable one to one. MorphOptions grid_margin 0.5, square, area_scale 1e-6, n_iter 500; NUMBA_NUM_THREADS=8. Error is the output area against the population share of the total output area.</dd>
 </dl>
-<p class="desc">A single global morph of the 3,108 counties reaches a mean error of 1.0 % and a median of 0.01 % at grid 2048 (126 s) and 2.2 % / 0.13 % at grid 1024 (23 s) once the stall rule is off; with only stall_min_improvement lowered to 0.002 the default stack reaches 5.4 % mean at 1024 in 8 s. The earlier county failures were the stall rule ending slow progress after 50 iterations, not sub-cell regions alone. The hierarchical prototype (states first, then counties per state) fixes the county areas but leaves the state outlines free, so the states overlap by 11.6 %; it is not needed to get a county cartogram. A plain Arizona (15 counties) converges at every grid once the stall rule is off.</p>
+<p class="desc">A resolution ladder from grid 256 to 2048 with the default options reaches a county mean error of 2.1 % (median 0.11 %) in 12 s; starts at 128 or 64 tangle the counties, and the dt schedule and the stall threshold change little. A single global morph of the 3,108 counties reaches a mean error of 1.0 % and a median of 0.01 % at grid 2048 (126 s) and 2.2 % / 0.13 % at grid 1024 (23 s) once the stall rule is off; with only stall_min_improvement lowered to 0.002 the default stack reaches 5.4 % mean at 1024 in 8 s. The earlier county failures were the stall rule ending slow progress after 50 iterations, not sub-cell regions alone. The hierarchical prototype (states first, then counties per state) fixes the county areas but leaves the state outlines free, so the states overlap by 11.6 %; it is not needed to get a county cartogram. A plain Arizona (15 counties) converges at every grid once the stall rule is off.</p>
 <p><code>prep_counties.py</code> builds the set, <code>hier129.py</code> runs the three stages (member grid, state grid and polish grid as arguments), <code>hier_ladder.py</code> runs stage 2 as a ladder, <code>probe_az*.py</code> are the Arizona probes. Logs are in <code>data/</code>.</p>
 <h2>Global morph without the stall rule</h2>
 <p>A single morph of all counties (<code>hier_global.py</code>; <code>MorphOptions(grid=N, grid_margin=0.5, grid_square=True, area_scale=1e-6, stall_patience=None)</code>), from the original geometries. State error is computed from the summed county areas.</p>
@@ -95,6 +95,23 @@
 <tr><td>2048</td><td>4000</td><td>126 s</td><td>1.02 / 0.01 / 1.2 / 356</td><td>0.04 / 1.2</td><td>57 (15 of them)</td><td>127</td></tr>
 </table>
 <p>At grid 1024 the default stall rule ends at 50 iterations with a mean error of 929 %. Lowering only <code>stall_min_improvement</code> (patience 4) to 0.002 gives a run of 650 iterations in 8 s with mean 5.41 %, median 0.18 %, max 627 % (status stalled); 0.0005 with patience 6 gives the same. The invalid polygons are self-intersections (226 of 228 at 1024); 98 of the 127 at 2048 belong to counties within 5 % of their target. Starting the global morph from the state stage output is not better (1024: mean 5.49 %, 171 invalid).</p>
+<h2>Resolution ladder</h2>
+<p><code>ladder2.py</code> runs <code>CartogramWorkflow.morph_multiresolution</code> with one <code>MorphOptions</code> per level (n_iter 1000 per level, margin 0.5, square) and reports every level. A ladder that starts at 256 and ends at 2048 (4 levels) converges to a usable result with the **default** stall rule in 12 s. The earlier county failures started at 128, where 89 % of the counties are below one cell.</p>
+<table>
+<tr><th>ladder</th><th>stall rule</th><th>dt per level</th><th>time</th><th>level 256</th><th>512</th><th>1024</th><th>2048 (mean / median % , invalid)</th></tr>
+<tr><td>256 to 2048</td><td>default</td><td>0.2</td><td>12 s</td><td>mean 69.8</td><td>37.1</td><td>4.09</td><td>2.10 / 0.11, 689</td></tr>
+<tr><td>256 to 2048</td><td>min improvement 0.002</td><td>0.2</td><td>18 s</td><td>69.8</td><td>37.1</td><td>4.09</td><td>2.37 / 0.32, 721</td></tr>
+<tr><td>256 to 2048</td><td>min improvement 0.0003, patience 6</td><td>0.2</td><td>22 s</td><td>69.8</td><td>37.1</td><td>4.09</td><td>2.37 / 0.32, 721</td></tr>
+<tr><td>256 to 2048</td><td>off, 600 iterations per level</td><td>0.2</td><td>48 s</td><td>69.8</td><td>37.1</td><td>3.39</td><td>2.73 / 0.60, 734</td></tr>
+<tr><td>256 to 2048</td><td>min improvement 0.002</td><td>0.2 0.4 0.8 1.0</td><td>13 s</td><td>69.8</td><td>34.6</td><td>4.84</td><td>4.67 / 0.12, 935</td></tr>
+<tr><td>256 to 2048</td><td>min improvement 0.002</td><td>0.1 0.2 0.4 0.8</td><td>14 s</td><td>61.5</td><td>46.8</td><td>4.64</td><td>3.43 / 0.09, 745</td></tr>
+<tr><td>256 to 2048</td><td>min improvement 0.002</td><td>0.05 0.1 0.2 0.4</td><td>19 s</td><td>62.0</td><td>13.3</td><td>8.38</td><td>8.29 / 0.20, 785</td></tr>
+<tr><td>512 to 2048</td><td>min improvement 0.002</td><td>0.2</td><td>15 s</td><td></td><td>15.1 (512)</td><td>6.63</td><td>6.39 / 0.12, 324</td></tr>
+<tr><td>128 to 2048 (5 levels)</td><td>min improvement 0.002</td><td>0.2</td><td>20 s</td><td></td><td></td><td></td><td>13.98 / 1.39, 1662</td></tr>
+<tr><td>64 to 2048 (6 levels)</td><td>min improvement 0.002</td><td>0.2</td><td>21 s</td><td></td><td></td><td></td><td>56.1 / 21.7, 2363</td></tr>
+</table>
+<p>The columns give the mean error after each level (the level-1024 and level-2048 values of the rows with a different grid ladder are the levels of that ladder, not of the 256 start; the 512-start row lists its levels 512, 1024, 2048 in the 512, 1024, 2048 columns).</p>
+<ul><li>**Levels 256 and 512 never converge** (sub-cell regions: mean 70 % and 37 %); the work is done at 1024 and 2048, where the shares under one cell are 5 % and 0.3 %.</li><li>**The dt schedule changes little.** Constant physical step (dt doubling per level, capped at 1.0) and a half-size schedule end within 2 to 8 % mean error, with the default <code>0.2</code> best or equal. The stall rule threshold does not matter either once the ladder starts at 256.</li><li>**The starting grid matters most.** Starting at 128 or 64 leaves the coarse level with tangled counties (1,660 and 2,360 invalid polygons) that finer levels do not repair; starting at 512 is worse than starting at 256 (6.4 % against 2.1 %), the fine-start effect again.</li><li>**Against the single grid.** Single grid 2048 with the stall rule off reaches 1.0 % mean and 127 invalid polygons in 126 s; the ladder reaches 2.1 % and 689 invalid in 12 s. The ladder&#x27;s output has about five times as many invalid polygons.</li></ul>
 <h2>Hierarchical prototype</h2>
 <p>1. **States.** The counties of each state are dissolved and the 49 states are morphed to their population (grid 512), with every county vertex passed as <code>coords</code>, so the counties follow the state flow. 3 s, converged in 212 iterations, state area error mean 0.45 %, max 6.2 %. 2. **Members.** Each state&#x27;s counties are morphed on a grid fitted to the state, independently, with the outline free. 3. **Polish.** One global morph on the result.</p>
 <h2>Findings</h2>
