@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #171: Stall rule requires a smaller improvement per cycle on fine grids</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #171: Stall rule requires a smaller improvement per cycle on fine grids</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-county-hierarchical-prototype/index.html">County flow cartograms: global morph, ladder, and hierarchical prototype</a> <span class="meta">(exploration)</span><br><a href="../square-grid-spacing/index.html">Square flow grids have a cell size that matches their coordinate spacing</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/171">https://github.com/bright-fakl/carto-flow/pull/171</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/166">#166</a></dd>
+<dt>Branch</dt><dd>feat/stall-grid-scaling</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-19 03:00</dd>
+<dt>Before</dt><dd>main @ cf7d1bb</dd>
+<dt>After</dt><dd>feat/stall-grid-scaling @ c2fe797</dd>
+<dt>Inputs</dt><dd>bundled states and congressional districts (population), 3,108 counties and the 15 Arizona and 254 Texas counties from the bundled ACS 2020 snapshot of the county-level PR (population), MorphOptions area_scale 1e-6, square grid with margin 0.5 (the grid code of main, before the square-grid fix of PR 170), n_iter 3000. NUMBA_NUM_THREADS=8.</dd>
+</dl>
+<p class="desc">A step moves the fastest point dt cells, so progress per iteration falls with the cell size and the fixed 2 % required improvement ended runs on fine grids that were converging. Above 256 cells the required improvement is scaled by 256 over the number of cells. Counties at grid 1024 go from stalled at the start (929 % mean error) to 4.2 %; Arizona&#x27;s counties converge at 512 and 1024; runs at 256 cells and below are identical.</p>
+<h2>Figures</h2>
+<h2>Rule</h2>
+<p><code>stall_min_improvement</code> (2 %) is the improvement of the window minimum of the error ratio that counts as progress. The windows are 10 iterations. The required improvement is now <code>stall_min_improvement * min(1, 256 / cells)</code>, with <code>cells</code> the number of cells along the longer side of the grid, so it is 2 % at 256 cells and below, 1 % at 512, 0.5 % at 1024 and 0.25 % at 2048.</p>
+<h2>Single grids: default rule, scaled rule, no rule</h2>
+<p><code>stall166.py</code> runs every case (the data are in <code>data_stall166.log</code>).</p>
+<table>
+<tr><th>input</th><th>grid</th><th>default rule</th><th>scaled rule (this change)</th><th>no stall rule (3,000 iterations at most)</th></tr>
+<tr><td>AZ counties</td><td>256</td><td>converged, 206 it, mean 2.2 %, max 6 %</td><td>converged, 206 it, mean 2.2 %, max 6 %</td><td>converged, 206 it, mean 2.2 %, max 6 %</td></tr>
+<tr><td>AZ counties</td><td>512</td><td>stalled, 50 it, mean 393.73 %, max 1137.2 %</td><td>converged, 383 it, mean 1.27 %, max 5 %</td><td>converged, 383 it, mean 1.27 %, max 5 %</td></tr>
+<tr><td>AZ counties</td><td>1024</td><td>stalled, 50 it, mean 414.13 %, max 1194.8 %</td><td>converged, 755 it, mean 1.92 %, max 9.9 %</td><td>converged, 755 it, mean 1.92 %, max 9.9 %</td></tr>
+<tr><td>TX counties</td><td>512</td><td>stalled, 50 it, mean 1939.49 %, max 56196.4 %</td><td>stalled, 480 it, mean 11.64 %, max 410.6 %</td><td>completed, 3000 it, mean 6 %, max 355.6 %</td></tr>
+<tr><td>TX counties</td><td>1024</td><td>stalled, 50 it, mean 2054.93 %, max 59399.6 %</td><td>stalled, 960 it, mean 1.72 %, max 47.8 %</td><td>completed, 3000 it, mean 1.72 %, max 47.8 %</td></tr>
+<tr><td>states pop</td><td>256</td><td>converged, 111 it, mean 0.5 %, max 5.9 %</td><td>converged, 111 it, mean 0.5 %, max 5.9 %</td><td>converged, 111 it, mean 0.5 %, max 5.9 %</td></tr>
+<tr><td>states pop</td><td>512</td><td>converged, 213 it, mean 0.59 %, max 7.8 %</td><td>converged, 213 it, mean 0.59 %, max 7.8 %</td><td>converged, 213 it, mean 0.59 %, max 7.8 %</td></tr>
+<tr><td>states pop</td><td>1024</td><td>converged, 420 it, mean 0.74 %, max 9.3 %</td><td>converged, 420 it, mean 0.74 %, max 9.3 %</td><td>converged, 420 it, mean 0.74 %, max 9.3 %</td></tr>
+<tr><td>states pop</td><td>2048</td><td>stalled, 80 it, mean 168.19 %, max 1540.2 %</td><td>converged, 832 it, mean 0.96 %, max 9.7 %</td><td>converged, 832 it, mean 0.96 %, max 9.7 %</td></tr>
+<tr><td>districts pop</td><td>256</td><td>converged, 149 it, mean 0.47 %, max 7.2 %</td><td>converged, 149 it, mean 0.47 %, max 7.2 %</td><td>converged, 149 it, mean 0.47 %, max 7.2 %</td></tr>
+<tr><td>districts pop</td><td>512</td><td>converged, 261 it, mean 0.41 %, max 6.2 %</td><td>converged, 261 it, mean 0.41 %, max 6.2 %</td><td>converged, 261 it, mean 0.41 %, max 6.2 %</td></tr>
+<tr><td>districts pop</td><td>1024</td><td>converged, 510 it, mean 0.54 %, max 8.5 %</td><td>converged, 510 it, mean 0.54 %, max 8.5 %</td><td>converged, 510 it, mean 0.54 %, max 8.5 %</td></tr>
+<tr><td>districts pop</td><td>2048</td><td>converged, 1006 it, mean 0.64 %, max 9.8 %</td><td>converged, 1006 it, mean 0.64 %, max 9.8 %</td><td>converged, 1006 it, mean 0.64 %, max 9.8 %</td></tr>
+<tr><td>counties pop</td><td>1024</td><td>stalled, 50 it, mean 929.39 %, max 57754.3 %</td><td>stalled, 700 it, mean 4.17 %, max 622.9 %</td><td>completed, 3000 it, mean 2.27 %, max 610.4 %</td></tr>
+<tr><td>counties pop</td><td>2048</td><td>stalled, 50 it, mean 968.37 %, max 60180 %</td><td>stalled, 1100 it, mean 3.09 %, max 477 %</td><td>completed, 3000 it, mean 0.94 %, max 385.5 %</td></tr>
+</table>
+<h2>Reading</h2>
+<ul><li>At 256 cells and below the three rules agree (same iteration count and error), so default runs on the default grid are unchanged.</li><li>The default rule ends the runs that start far from the target at 512 cells and above after 50 iterations (Arizona and Texas at 512 and 1024, counties at 1024 and 2048, states at 2048), with the error close to the start error. The scaled rule reaches the no-rule result on Arizona (convergence), on the states at 2048 (convergence in 832 iterations) and gets within a factor of 2 to 3 of it on the counties, in a fifth to a third of the iterations.</li><li>Counties and Texas still end as stalled, at 4.2 % and 1.7 % mean error at 1024: the remaining large errors are sub-cell counties, which no longer improve. The no-rule run uses all 3,000 iterations for the same or a slightly lower error.</li><li>Districts and the states up to 1024 are unchanged.</li></ul>
+<div class="figure">
+<img src="fig_counties.png" alt="Counties by population on a single grid of 1024 with default options, before (stalled after 50 iterations at 929 % mean error) and after (stalled after 700 iterations at 4.2 %). Color is log2(area/target); red is too large.">
+<p class="caption">Counties by population on a single grid of 1024 with default options, before (stalled after 50 iterations at 929 % mean error) and after (stalled after 700 iterations at 4.2 %). Color is log2(area/target); red is too large.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
