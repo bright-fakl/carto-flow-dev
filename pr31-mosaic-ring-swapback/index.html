@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -90,11 +88,9 @@
 </dl>
 <p class="desc">The extra-ring swap-back only looked at tiles directly adjacent to a stranded ring tile, so a hole two rows away — Michigan&#x27;s, on US states — was unreachable. Generalising it to a guarded BFS relocation that shifts ownership along a path takes US states from 5 protruding ring tiles and 5 empty core tiles to 2 and 2, and congressional districts from 17 to 6, with no split-region or split-group regression anywhere.</p>
 <h2>The defect</h2>
-<p>Calibration matches the core tile count to the tile budget exactly — on US states, 154 and</p>
-<ol><li>So every tile the solver places outside the core leaves a core tile empty <strong>one for one</strong>.</li></ol>
-<p>The protruding tails the user saw near Florida, Texas and the north-west tip, and the four unassigned tiles near Michigan, are not two problems. They are the same problem, and <code>swapback_before_after.png</code> shows the pairing directly: five orange tiles, five red ones.</p>
+<p>Calibration matches the core tile count to the tile budget exactly — on US states, 154 and 154. So every tile the solver places outside the core leaves a core tile empty **one for one**. The protruding tails the user saw near Florida, Texas and the north-west tip, and the four unassigned tiles near Michigan, are not two problems. They are the same problem, and <code>swapback_before_after.png</code> shows the pairing directly: five orange tiles, five red ones.</p>
 <p>(What read as &quot;Texas&quot; is Louisiana&#x27;s ring tile on the bottom edge.)</p>
-<p>The cause is in <code>MosaicLayout</code>&#x27;s extra-ring swap-back, which only ever considered tiles <strong>immediately adjacent</strong> to the stranded ring tile. Michigan&#x27;s ring tile sits at y ~ 1,208,955 and its nearest empty core tile at y ~ 751,735, with a row spacing of ~ 228,610 — two rows away, so the loop never saw it. The greedy <code>while changed</code> loop chains distance-1 moves but could never make the first hop.</p>
+<p>The cause is in <code>MosaicLayout</code>&#x27;s extra-ring swap-back, which only ever considered tiles **immediately adjacent** to the stranded ring tile. Michigan&#x27;s ring tile sits at y ~ 1,208,955 and its nearest empty core tile at y ~ 751,735, with a row spacing of ~ 228,610 — two rows away, so the loop never saw it. The greedy <code>while changed</code> loop chains distance-1 moves but could never make the first hop.</p>
 <p>This is not a regression from PR #30; it is visible in that PR&#x27;s before panel too, and #30&#x27;s chain-swap repair cannot address it by design — it permutes *which region owns* an occupied tile and never changes the occupied set. That invariant is untouched here.</p>
 <h2>How many are genuinely fixable</h2>
 <p>Measured before changing anything, by enumerating BFS paths from each of the five ring tiles to each reachable empty core tile and scoring the resulting relocation:</p>
@@ -103,16 +99,16 @@
 <tr><td>Michigan</td><td>2 hops</td><td>fixable</td></tr>
 <tr><td>Louisiana</td><td>4 hops</td><td>fixable</td></tr>
 <tr><td>Maine</td><td>8 hops</td><td>fixable</td></tr>
-<tr><td>Florida</td><td>none</td><td><strong>not fixable</strong> — nearest empties are 11 hops away; relocating splits Indiana + North Carolina, or Ohio</td></tr>
-<tr><td>Washington</td><td>none</td><td><strong>not fixable</strong> — nearest empties are 10-11 hops away; relocating splits California + Oregon, or Michigan + Wisconsin</td></tr>
+<tr><td>Florida</td><td>none</td><td>**not fixable** — nearest empties are 11 hops away; relocating splits Indiana + North Carolina, or Ohio</td></tr>
+<tr><td>Washington</td><td>none</td><td>**not fixable** — nearest empties are 10-11 hops away; relocating splits California + Oregon, or Michigan + Wisconsin</td></tr>
 </table>
-<p><strong>3 of 5, not 5 of 5.</strong> Florida and Washington sit at map extremities whose only reachable empty core tiles are clear across the country; shifting ownership along those chains breaks the contiguity of states in between, so the accept-guard correctly declines. Raising the hop bound to 24 does not change this.</p>
+<p>**3 of 5, not 5 of 5.** Florida and Washington sit at map extremities whose only reachable empty core tiles are clear across the country; shifting ownership along those chains breaks the contiguity of states in between, so the accept-guard correctly declines. Raising the hop bound to 24 does not change this.</p>
 <p>In the shipped pipeline the swap-back runs *before* the chain-swap repair, so the greedy order differs slightly from the offline replay above and the pair left standing is Washington and Maine rather than Washington and Florida. The count — three recovered, two not — is the same.</p>
 <h2>Hop bound</h2>
 <p>The bound was measured, not picked. Ring tiles left on US states as a function of <code>ring_swapback_max_hops</code>:</p>
 <table>
 <tr><th>max_hops</th><th>1</th><th>2</th><th>4</th><th>6</th><th>8</th><th>10</th><th>12</th><th>16</th><th>24</th></tr>
-<tr><td>ring tiles left</td><td>5</td><td>4</td><td>3</td><td>3</td><td><strong>2</strong></td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+<tr><td>ring tiles left</td><td>5</td><td>4</td><td>3</td><td>3</td><td>**2**</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
 </table>
 <p>It saturates at 8 and nothing above 8 buys anything, so 8 is the default. Wall time is unchanged within noise at that bound (see the table below) because BFS stops at the first empty tile it reaches and the first path is almost always accepted.</p>
 <h2>Numbers</h2>
@@ -120,15 +116,15 @@
 <table>
 <tr><th>Case</th><th>Ring tiles used</th><th>Empty core tiles</th><th>Split regions</th><th>Split groups</th><th>Regions correct</th><th>Wall time</th></tr>
 <tr><td>3x3 synthetic fixture</td><td>0 - 0</td><td>1 - 1</td><td>0 - 0</td><td>-</td><td>9/9 - 9/9</td><td>0.06 s - 0.06 s</td></tr>
-<tr><td>US states (154 tiles)</td><td>5 - <strong>2</strong></td><td>5 - <strong>2</strong></td><td>0 - 0</td><td>-</td><td>49/49 - 49/49</td><td>1.53 s - 1.53 s</td></tr>
-<tr><td>Districts (1 tile each)</td><td>17 - <strong>6</strong></td><td>21 - <strong>10</strong></td><td>0 - 0</td><td>0 - 0</td><td>432/432 - 432/432</td><td>5.30 s - 5.20 s</td></tr>
-<tr><td>Districts + <code>group_by</code></td><td>18 - <strong>8</strong></td><td>22 - <strong>12</strong></td><td>0 - 0</td><td>0 - 0</td><td>432/432 - 432/432</td><td>5.41 s - 5.13 s</td></tr>
+<tr><td>US states (154 tiles)</td><td>5 - **2**</td><td>5 - **2**</td><td>0 - 0</td><td>-</td><td>49/49 - 49/49</td><td>1.53 s - 1.53 s</td></tr>
+<tr><td>Districts (1 tile each)</td><td>17 - **6**</td><td>21 - **10**</td><td>0 - 0</td><td>0 - 0</td><td>432/432 - 432/432</td><td>5.30 s - 5.20 s</td></tr>
+<tr><td>Districts + <code>group_by</code></td><td>18 - **8**</td><td>22 - **12**</td><td>0 - 0</td><td>0 - 0</td><td>432/432 - 432/432</td><td>5.41 s - 5.13 s</td></tr>
 </table>
 <p>No metric regresses on any case. The districts cases were not the reported defect but improve the most in absolute terms. The 3x3 fixture is unchanged: its single empty core tile is a calibration rounding artefact with no ring tile to trade against, so there is nothing to reclaim — which is also why &quot;empty core tiles&quot; and &quot;ring tiles used&quot; are not equal on every row. The one-for-one identity holds when calibration lands exactly on the budget, as it does on US states.</p>
 <h2>The mechanism</h2>
-<p>BFS runs from each assigned ring tile over *occupied* tiles until it reaches an unassigned core tile, then ownership shifts one step along the path <code>t -&gt; n1 -&gt; ... -&gt; nk -&gt; empty</code>: the empty tile takes <code>n_k</code>&#x27;s geometry, each <code>n_i</code> takes <code>n_{i-1}</code>&#x27;s, <code>n_1</code> takes the ring tile&#x27;s, and the ring tile is freed. Every geometry on the path loses one tile and gains one, so <strong>per-region tile counts are preserved exactly</strong> — structurally, not by correction. Asserted in the tests.</p>
+<p>BFS runs from each assigned ring tile over *occupied* tiles until it reaches an unassigned core tile, then ownership shifts one step along the path <code>t -&gt; n1 -&gt; ... -&gt; nk -&gt; empty</code>: the empty tile takes <code>n_k</code>&#x27;s geometry, each <code>n_i</code> takes <code>n_{i-1}</code>&#x27;s, <code>n_1</code> takes the ring tile&#x27;s, and the ring tile is freed. Every geometry on the path loses one tile and gains one, so **per-region tile counts are preserved exactly** — structurally, not by correction. Asserted in the tests.</p>
 <p>Unassigned core tiles strictly decrease by construction, because the path always ends on an empty core tile and the tile freed is outside the core. The only thing needing an explicit guard is topology: a relocation is applied only when it increases neither the split-region nor the split-group count, mirroring PR #30&#x27;s accept-if-better test. &quot;Never regress&quot; is therefore structural rather than tuned.</p>
-<p>This <strong>replaces</strong> the old adjacent-only loop rather than stacking on top of it: the new search at <code>max_hops=1</code> is exactly the old behaviour. One mechanism, one knob (<code>HungarianOptions.ring_swapback_max_hops</code>, default 8; <code>0</code> disables the step entirely), and removing the feature means deleting one function and one call.</p>
+<p>This **replaces** the old adjacent-only loop rather than stacking on top of it: the new search at <code>max_hops=1</code> is exactly the old behaviour. One mechanism, one knob (<code>HungarianOptions.ring_swapback_max_hops</code>, default 8; <code>0</code> disables the step entirely), and removing the feature means deleting one function and one call.</p>
 <h2>New metric</h2>
 <p><code>MosaicMetrics.n_unassigned_core_tiles</code> counts every core tile left empty. PR #30&#x27;s hole check counted only *enclosed* unassigned tiles and reported 0 on US states — all five sit in concave boundary pockets, so they passed the check while being plainly visible on the map. The wider count is the honest one; the enclosed count is kept in the figure as the hatched overlay and is 0 in both panels.</p>
 <h2>Open question, deliberately not decided</h2>

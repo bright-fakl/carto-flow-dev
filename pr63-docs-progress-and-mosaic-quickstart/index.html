@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -91,14 +89,20 @@
 <p class="desc">Fourteen morph and layout calls across nine notebooks now pass show_progress=False, so no tqdm fragments survive into the rendered docs. The symbol cartogram quick start gains a fifth section teaching MosaicLayout, which it did not cover at all.</p>
 <h2>What changed</h2>
 <p>Two independent things, kept in separate commits.</p>
-<p><strong>Progress bars.</strong> Fourteen call sites across nine notebooks now pass <code>show_progress=False</code>. Most are <code>flow.MorphOptions(...)</code>; one goes through <code>flow.MorphOptions.preset_balanced().copy_with(show_progress=False)</code> and one is <code>sym.create_layout(..., show_progress=False)</code>, which takes the flag directly. The notebooks affected are the seven how-to pages, <code>basic-flow-cartogram</code> and <code>basic-symbol-cartogram</code>.</p>
-<p><strong>Mosaic section.</strong> <code>basic-symbol-cartogram.ipynb</code> taught the centroid, grid, circle packing and flow density layouts and stopped. It now closes with &quot;Tiles on a Mosaic&quot;, which introduces <code>tile_count</code> as a second way to carry the data - by number of tiles rather than by symbol size - and <code>MosaicLayout</code> as the layout that keeps each region&#x27;s tiles in one connected block.</p>
+<p>**Progress bars.** Fourteen call sites across nine notebooks now pass <code>show_progress=False</code>. Most are <code>flow.MorphOptions(...)</code>; one goes through <code>flow.MorphOptions.preset_balanced().copy_with(show_progress=False)</code> and one is <code>sym.create_layout(..., show_progress=False)</code>, which takes the flag directly. The notebooks affected are the seven how-to pages, <code>basic-flow-cartogram</code> and <code>basic-symbol-cartogram</code>.</p>
+<p>**Mosaic section.** <code>basic-symbol-cartogram.ipynb</code> taught the centroid, grid, circle packing and flow density layouts and stopped. It now closes with &quot;Tiles on a Mosaic&quot;, which introduces <code>tile_count</code> as a second way to carry the data - by number of tiles rather than by symbol size - and <code>MosaicLayout</code> as the layout that keeps each region&#x27;s tiles in one connected block.</p>
 <p>A third commit fixes a factual error found while reviewing: three gallery examples commented that the state abbreviation lookup comes from the <code>censusdis</code> package. It comes from the bundled census snapshot, and none of them import <code>censusdis</code>.</p>
 <h2>Does the quick start still need updating after the 2.0 work?</h2>
 <p>Yes, and this covers it. Two specific staleness items were checked:</p>
-<ul><li>The install cell listed <code>pip install censusdis</code> as a prerequisite. The bundled snapshot removed that dependency, so the cell now installs <code>carto-flow</code> alone.</li><li>The physics layout was removed in 2.0 and the default changed to packing. The quick start never taught the physics layout, so nothing there had to change.</li></ul>
+<ul><li>The install cell listed <code>pip install censusdis</code> as a prerequisite. The bundled</li></ul>
+<p>snapshot removed that dependency, so the cell now installs <code>carto-flow</code> alone.</p>
+<ul><li>The physics layout was removed in 2.0 and the default changed to packing. The</li></ul>
+<p>quick start never taught the physics layout, so nothing there had to change.</p>
 <h2>Verification</h2>
-<ul><li>All nine touched notebooks executed with <code>nbclient</code>, <code>allow_errors=False</code>: no errors, no stderr stream on any cell, and zero tqdm fragments (<code>it/s]</code> or <code>%|</code>) in any output. Runtimes 7.8 s to 37.0 s, 148 s in total.</li><li><code>make check</code>: pre-commit, ruff, mypy (80 files), deptry all clean.</li><li><code>grep</code> over <code>docs/</code> confirms no <code>censusdis</code> reference remains in a tracked source. The matches left are in <code>docs/generated/</code> (gitignored build output, regenerated on the next build) and two prose mentions in <code>migrating-to-2.0.md</code> and <code>reference/data/index.md</code> that correctly describe regenerating the snapshot.</li></ul>
+<ul><li>All nine touched notebooks executed with <code>nbclient</code>, <code>allow_errors=False</code>:</li></ul>
+<p>no errors, no stderr stream on any cell, and zero tqdm fragments (<code>it/s]</code> or <code>%|</code>) in any output. Runtimes 7.8 s to 37.0 s, 148 s in total.</p>
+<ul><li><code>make check</code>: pre-commit, ruff, mypy (80 files), deptry all clean.</li><li><code>grep</code> over <code>docs/</code> confirms no <code>censusdis</code> reference remains in a tracked</li></ul>
+<p>source. The matches left are in <code>docs/generated/</code> (gitignored build output, regenerated on the next build) and two prose mentions in <code>migrating-to-2.0.md</code> and <code>reference/data/index.md</code> that correctly describe regenerating the snapshot.</p>
 <div class="figure">
 <img src="after-mosaic-section.png" alt="The new closing section. One tile per two million people on a shared hexagon lattice, labeled by state abbreviation and colored by population. Every state&#x27;s tiles form one connected block and the national outline survives, which is the property the section is there to teach.">
 <p class="caption">The new closing section. One tile per two million people on a shared hexagon lattice, labeled by state abbreviation and colored by population. Every state&#x27;s tiles form one connected block and the national outline survives, which is the property the section is there to teach.</p>

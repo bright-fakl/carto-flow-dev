@@ -1,0 +1,58 @@
+diff --git a/src/carto_flow/flow_cartogram/algorithm.py b/src/carto_flow/flow_cartogram/algorithm.py
+index 9a4bbe2..d5c9360 100644
+--- a/src/carto_flow/flow_cartogram/algorithm.py
++++ b/src/carto_flow/flow_cartogram/algorithm.py
+@@ -525,6 +525,10 @@ def morph_geometries(
+         scaled_min_improvement(options.stall_min_improvement, max(grid.sx, grid.sy)),
+         cycle_length(options.recompute_every),
+     )
++    import os as _os
++    stall_monitor.eta = float(_os.environ.get('ETA', '0'))
++    _Lbar = float(np.sqrt(np.sum(target_areas**2) / np.sum(target_areas)))
++    _strain = 0.0
+     n_done = 0
+     step_controller = StepController(
+         cycle_length(options.recompute_every),
+@@ -647,6 +651,7 @@ def morph_geometries(
+             _t0 = _time.perf_counter()
+         max_v = max(max_abs_velocity(vx, vy), 1e-8)
+         dt_prime = options.dt * step_controller.current(step) * min(grid.dx, grid.dy) / max_v
++        _strain = options.dt * step_controller.current(step) * min(grid.dx, grid.dy) / _Lbar
+         since_recompute += 1
+ 
+         # 2a. Displace geometry coordinates using the velocity field
+@@ -775,7 +780,7 @@ def morph_geometries(
+                 probe_xy.copy() if probe_xy is not None else None,
+                 probe_log_scaling.copy() if probe_log_scaling is not None else None,
+             )
+-        stalled = stall_monitor.update(step, mean_error / log2_mean_tol, max_error / log2_max_tol)
++        stalled = stall_monitor.update(step, mean_error / log2_mean_tol, max_error / log2_max_tol, _strain)
+         n_done = step + 1
+ 
+         status = (
+diff --git a/src/carto_flow/flow_cartogram/stall.py b/src/carto_flow/flow_cartogram/stall.py
+index 1e285ee..ac7d09c 100644
+--- a/src/carto_flow/flow_cartogram/stall.py
++++ b/src/carto_flow/flow_cartogram/stall.py
+@@ -66,15 +66,19 @@ class StallMonitor:
+         self.cycles_without_progress = 0
+         self._cur_mean = float("inf")
+         self._cur_max = float("inf")
++        self._cur_strain = 0.0
++        self.eta = 0.0
+ 
+-    def update(self, step: int, mean_ratio: float, max_ratio: float) -> bool:
++    def update(self, step: int, mean_ratio: float, max_ratio: float, strain: float = 0.0) -> bool:
+         """Record iteration ``step`` (0-based); return True if the run is stalled."""
+         self._cur_mean = min(self._cur_mean, mean_ratio)
+         self._cur_max = min(self._cur_max, max_ratio)
++        self._cur_strain += strain
+         if (step + 1) % self.cycle != 0:
+             return False
+ 
+-        keep = 1.0 - self.min_improvement
++        keep = 1.0 - (min(0.5, self.eta * self._cur_strain) if self.eta > 0 else self.min_improvement)
++        self._cur_strain = 0.0
+         progress = (self._cur_mean > 1.0 and self._cur_mean < self.best_mean * keep) or (
+             self._cur_max > 1.0 and self._cur_max < self.best_max * keep
+         )

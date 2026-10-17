@@ -68,3 +68,40 @@ figure: fig_counties.png — Counties by population on a single grid of 1024 wit
 | counties ladder 128 x 5 | 15.2 % | same | 28.4 % |
 
 The symmetric rule makes coarse levels of a ladder give up sooner, which helps the districts ladder from a start that is too coarse. It also ends single runs on coarse grids that were converging (states at 32 cells, Arizona at 32), and it is worse on the counties ladder from 128. Stopping an unresolvable coarse level early is a question about ladders, not about the grid size, so it is left to issue 167 as a per-level rule.
+
+## Expected against observed change
+
+The scaling by `256 / cells` is a proxy. The expected progress of a window can be stated directly. In a window the fastest point moves `dt * fraction * cell` per iteration, so the boundaries move a distance `d` in total, and a region of linear size `L` changes its area, and with it its error, by a fraction of order `d / L` (perimeter times displacement over area). The efficiency of a window is
+
+`eta = (relative decrease of the error ratio over the window) / (d / L)`,
+
+with `d` the sum over the window of `dt * step fraction * cell size` and `L = sqrt(sum(T^2) / sum(T))`, the area-weighted size of the target regions (`expect.py`, `expect2.py`, `expect3.py`).
+
+Observed `eta` of the first windows of runs with the stall rule off:
+
+| input | grid 256 | grid 1024 |
+|---|---|---|
+| Arizona counties (L = 62 and 121 cells) | 0.76 to 1.4 | 0.38 to 0.42 |
+| states (17 and 60 cells) | 1.0 to 2.9 | 0.9 to 1.4 |
+| districts (4 and 26 cells) | 0.28 to 0.37 | 0.58 to 0.83 |
+| all counties (11 cells at 1024) | | 0.06 to 0.07 |
+| districts, lognormal values, sigma 1 | 0.31 to 0.42 | 0.48 to 0.62 |
+| districts, lognormal values, sigma 2 | 0.33 to 0.40 | 0.22 to 0.32 |
+
+For one input `eta` is the same on every grid (Arizona with the mean region size: 0.22, 0.22, 0.22, 0.28 at grids 128, 256, 512, 1024; the first-window decrease itself falls exactly as 1 / grid: 4.8 %, 2.5 %, 1.25 %, 0.63 %), so the `1 / grid` scaling is the grid part of this expression. The expression adds the dependence on `dt`, the adaptive step fraction and the region size, and `eta` of healthy runs lies between 0.2 and 3, a factor of ten above the sub-cell dominated counties (0.06).
+
+A rule that requires an improvement of `eta_min * d / L` per window, with `eta_min` a constant, was run on the same cases (`eta_try.py`, `eta_lad.py`; patch in `eta_rule_experiment.patch`). Outcomes (status, iterations, mean error) for `eta_min` from 0.03 to 0.1:
+
+| case | one-way scaling (this PR) | eta rule, eta_min 0.03 to 0.1 |
+|---|---|---|
+| Arizona 256, 512, 1024; states 64 to 2048; districts 256, 1024 | converged | identical |
+| Texas counties 512, 1024; all counties 1024, 2048 | stalled after 480 to 1100 iterations, 1.7 to 11.6 % | identical (all counties 1024 at 0.1: 660 iterations, 4.6 %) |
+| districts, lognormal sigma 1 and 2, grids 256 and 512 | stalled | identical within 10 iterations |
+| districts 64 | stalled, 110 iterations | stalled, 100 to 80 iterations |
+| ladders: states 64x3 and 32x5, districts 128x3 and 64x4, counties 512x3 and 256x4 | converged or stalled as before | identical (districts 64x4 in 188 instead of 208 iterations) |
+| ladder districts 32x5 | stalled, 4.88 % | converged in 222 iterations, 1.51 %, 249 invalid |
+| ladder counties 128x5 and 64x6 | 17.4 and 31.3 % | 16.9 and 30.8 % |
+
+At `eta_min` 0.2 the all-counties runs stall at the start (929 %), so the usable range is about 0.03 to 0.1 and 0.05 is its middle. With the mean region size instead of the area-weighted one the counties stall at 0.04 already, because the many sub-cell counties make the mean size small; the area-weighted size is the one that matches.
+
+So the rule needs no reference grid and no one-way scaling: the required improvement follows from what the step can do. It also reproduces the fixed 2 % rule on the default grid for typical inputs (`d / L` of about 0.3 gives 1.5 %).

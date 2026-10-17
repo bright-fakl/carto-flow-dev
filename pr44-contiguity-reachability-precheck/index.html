@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -94,14 +92,14 @@
 <h2>What landed</h2>
 <p>25 added lines in one file, <code>src/carto_flow/geo_utils/contiguity.py</code>, at the top of the inner <code>_enumerate_paths</code> generator. Nothing else in the merged diff.</p>
 <h2>The cost being removed</h2>
-<p><code>_enumerate_paths</code> is a heap over <strong>paths</strong>, not nodes. It keeps no visited set, so a node is re-expanded once per distinct prefix that reaches it, and the loop terminates only when <code>max_k</code> candidates have been yielded <strong>or the heap empties</strong>. When nothing reaches <code>dst_slots</code>, &quot;the heap empties&quot; means every simple path of up to <code>max_len</code> (10) nodes has been enumerated - on a hex tile lattice roughly 1.3e5 heap operations to establish that one satellite cannot be repaired at all. That happens once per unrepairable satellite, once per pass.</p>
+<p><code>_enumerate_paths</code> is a heap over **paths**, not nodes. It keeps no visited set, so a node is re-expanded once per distinct prefix that reaches it, and the loop terminates only when <code>max_k</code> candidates have been yielded **or the heap empties**. When nothing reaches <code>dst_slots</code>, &quot;the heap empties&quot; means every simple path of up to <code>max_len</code> (10) nodes has been enumerated - on a hex tile lattice roughly 1.3e5 heap operations to establish that one satellite cannot be repaired at all. That happens once per unrepairable satellite, once per pass.</p>
 <p>Instrumented on a captured <code>repair_contiguity</code> call from the mosaic layout on world countries at 800 nominal / 848 actual tiles (842 slots, 173 units, mean degree 5.13):</p>
 <table>
 <tr><th><code>max_passes</code></th><th>heap pops</th><th>pops in calls that yielded nothing</th><th>calls</th><th>calls yielding nothing</th><th>provably unreachable</th></tr>
 <tr><td>1</td><td>1,482,211</td><td>1,468,147</td><td>22</td><td>11</td><td>11</td></tr>
 <tr><td>2</td><td>2,959,350</td><td>2,936,294</td><td>36</td><td>21</td><td>21</td></tr>
 <tr><td>5</td><td>7,384,414</td><td>7,340,735</td><td>72</td><td>51</td><td>51</td></tr>
-<tr><td>10 (default)</td><td>11,807,758</td><td><strong>11,745,176 (99.5%)</strong></td><td>107</td><td>80</td><td>80</td></tr>
+<tr><td>10 (default)</td><td>11,807,758</td><td>**11,745,176 (99.5%)**</td><td>107</td><td>80</td><td>80</td></tr>
 </table>
 <p>Cost is exactly linear in <code>max_passes</code> (~1.48M pops per pass) because each pass redoes the identical hopeless enumeration. The existing <code>if not any_swap: break</code> does not help while some *other* satellite is still repairable.</p>
 <h2>Why the result cannot change</h2>
@@ -111,16 +109,16 @@
 <p>Bit-identity was also confirmed end to end on six configurations - world (800 nominal / 848 actual), congressional districts and US states, each at <code>morph=True</code> and <code>morph=False</code> - by a fingerprint of the complete per-region set of assigned tile centroids plus the calibrated tile size. All six hashes match before and after, re-run after rebasing onto current <code>main</code> rather than carried over from the pre-rebase branch.</p>
 <p>Note that the merged diff adds no test of its own; the identity evidence is the argument above plus those fingerprint runs, and the existing suite (632 passed, <code>make check</code> clean).</p>
 <h2>Measurements, and what they actually support</h2>
-<p><strong>Isolated - the clean measurement.</strong> The captured <code>repair_contiguity</code> call above, run directly, <code>slot_of</code> compared with <code>np.array_equal</code>:</p>
+<p>**Isolated - the clean measurement.** The captured <code>repair_contiguity</code> call above, run directly, <code>slot_of</code> compared with <code>np.array_equal</code>:</p>
 <table>
 <tr><th><code>max_passes</code></th><th>before</th><th>after</th><th>speedup</th><th><code>slot_of</code> identical</th></tr>
 <tr><td>1</td><td>5.0 s</td><td>0.06 s</td><td>81x</td><td>yes</td></tr>
 <tr><td>2</td><td>10.6 s</td><td>0.10 s</td><td>110x</td><td>yes</td></tr>
 <tr><td>3</td><td>11.0 s</td><td>0.08 s</td><td>143x</td><td>yes</td></tr>
 <tr><td>5</td><td>19.8 s</td><td>0.11 s</td><td>176x</td><td>yes</td></tr>
-<tr><td>10</td><td><strong>30.5 s</strong></td><td><strong>0.23 s</strong></td><td><strong>132x</strong></td><td>yes</td></tr>
+<tr><td>10</td><td>**30.5 s**</td><td>**0.23 s**</td><td>**132x**</td><td>yes</td></tr>
 </table>
-<p><strong>End to end: 1.0x to 2.7x</strong>, best of two reps per configuration:</p>
+<p>**End to end: 1.0x to 2.7x**, best of two reps per configuration:</p>
 <table>
 <tr><th>configuration</th><th>before</th><th>after</th></tr>
 <tr><td>world, 800 nominal / 848 tiles, morph=True</td><td>52.4 s</td><td>26.5 s</td></tr>
@@ -131,7 +129,7 @@
 <tr><td>congressional districts, morph=False</td><td>9.4 s</td><td>3.7 s</td></tr>
 </table>
 <h3>The noise, stated explicitly</h3>
-<p>Wall clock on this machine varies a great deal. The <strong>same</strong> world / 800 / <code>morph=True</code> configuration measured <strong>37.3 s, 52.4 s and 81.0 s on unpatched <code>main</code> across three separate runs</strong> - a 2.2x spread from run-to-run noise alone, which is larger than most of the &quot;speedups&quot; in the table above. No single end-to-end pair in that table supports a 2x claim, and the 52.4 -&gt; 26.5 row in particular must not be read as &quot;2x end to end&quot;: its <code>before</code> sits in the middle of a range whose low end is below the <code>after</code> figure&#x27;s plausible neighbourhood.</p>
+<p>Wall clock on this machine varies a great deal. The **same** world / 800 / <code>morph=True</code> configuration measured **37.3 s, 52.4 s and 81.0 s on unpatched <code>main</code> across three separate runs** - a 2.2x spread from run-to-run noise alone, which is larger than most of the &quot;speedups&quot; in the table above. No single end-to-end pair in that table supports a 2x claim, and the 52.4 -&gt; 26.5 row in particular must not be read as &quot;2x end to end&quot;: its <code>before</code> sits in the middle of a range whose low end is below the <code>after</code> figure&#x27;s plausible neighbourhood.</p>
 <h3>The honest summary</h3>
 <p>The repair step itself becomes essentially free (30.5 s -&gt; 0.23 s in isolation, with <code>slot_of</code> array-identical). How much total runtime that removes depends entirely on how much of the run the repair was consuming - from almost none (world / <code>morph=False</code> at 800 tiles, where the extra-ring swap-back dominates instead) to most of it (districts). Quote the isolated number; treat the end-to-end column as a range, not a measurement.</p>
 

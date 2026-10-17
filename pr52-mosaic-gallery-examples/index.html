@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -98,13 +96,25 @@
 </table>
 <p>No gallery registration was needed: the <code>gallery</code> plugin picks up everything under <code>docs/examples/</code> and orders it by filename, so the two land next to the other symbol-cartogram examples.</p>
 <h2>What the figures show</h2>
-<p><strong><code>mosaic_layout.png</code></strong> — the outline of the country is clearly readable: the West is a wide orange block dominated by California, the Northeast is a dense red cluster, Texas and Florida keep their shapes. Population, not area, drives the block sizes, so Montana, Wyoming and the Dakotas shrink to one hexagon each while California takes about twenty.</p>
-<p><strong><code>mosaic_groups.png</code></strong> — 432 districts, one hexagon each, grouped by state. The run reports every region at its exact tile count, no non-contiguous region and no split group. Two things in the picture are worth naming rather than glossing over, and the example&#x27;s prose names both:</p>
-<ul><li>Several lattice cells inside the outline are left empty and read as small holes (the run leaves ten), with the same number of tiles pulled from just outside the outline instead.</li><li>A few tiles look detached — Michigan&#x27;s northern one is the clearest — but are lattice neighbors; the apparent gap is only the drawn <code>spacing</code>. This was checked against the metrics rather than assumed.</li></ul>
+<p>**<code>mosaic_layout.png</code>** — the outline of the country is clearly readable: the West is a wide orange block dominated by California, the Northeast is a dense red cluster, Texas and Florida keep their shapes. Population, not area, drives the block sizes, so Montana, Wyoming and the Dakotas shrink to one hexagon each while California takes about twenty.</p>
+<p>**<code>mosaic_groups.png</code>** — 432 districts, one hexagon each, grouped by state. The run reports every region at its exact tile count, no non-contiguous region and no split group. Two things in the picture are worth naming rather than glossing over, and the example&#x27;s prose names both:</p>
+<ul><li>Several lattice cells inside the outline are left empty and read as small</li></ul>
+<p>holes (the run leaves ten), with the same number of tiles pulled from just outside the outline instead.</p>
+<ul><li>A few tiles look detached — Michigan&#x27;s northern one is the clearest — but are</li></ul>
+<p>lattice neighbors; the apparent gap is only the drawn <code>spacing</code>. This was checked against the metrics rather than assumed.</p>
 <h2>Considered and not added</h2>
-<ul><li><strong>A <code>morph=False</code> vs <code>morph=True</code> contrast.</strong> Written, rendered and then dropped: the user judged it not helpful enough to carry. The two panels differ in ways that are hard to attribute without already knowing the algorithm, and the <code>morph=False</code> panel raises questions the gallery is the wrong place to answer — Maryland lands among New York and Pennsylvania, losing contact with the four states it borders, which is an open question about the cost function rather than a lesson about the option.</li><li><strong><code>min_one_tile_per_region</code> on world countries.</strong> A genuine capability, but the input it needs is the one where the layout is roughest, and a world run is much slower than a US one. Poor fit for a first impression of the layout in a CI-built gallery.</li><li><strong>A square-tiling variant.</strong> It is a one-word change to an example already present and teaches nothing the hexagon version does not.</li><li><strong>Mosaic versus grid side by side.</strong> The grid layout rejects <code>group_by</code> outright, so the two cannot be shown on the same input in one figure.</li></ul>
+<ul><li>**A <code>morph=False</code> vs <code>morph=True</code> contrast.** Written, rendered and then</li></ul>
+<p>dropped: the user judged it not helpful enough to carry. The two panels differ in ways that are hard to attribute without already knowing the algorithm, and the <code>morph=False</code> panel raises questions the gallery is the wrong place to answer — Maryland lands among New York and Pennsylvania, losing contact with the four states it borders, which is an open question about the cost function rather than a lesson about the option.</p>
+<ul><li>**<code>min_one_tile_per_region</code> on world countries.** A genuine capability, but the</li></ul>
+<p>input it needs is the one where the layout is roughest, and a world run is much slower than a US one. Poor fit for a first impression of the layout in a CI-built gallery.</p>
+<ul><li>**A square-tiling variant.** It is a one-word change to an example already</li></ul>
+<p>present and teaches nothing the hexagon version does not.</p>
+<ul><li>**Mosaic versus grid side by side.** The grid layout rejects <code>group_by</code></li></ul>
+<p>outright, so the two cannot be shown on the same input in one figure.</p>
 <h2>Checks</h2>
-<ul><li><code>uv run mkdocs build -s</code> completes after removing <code>docs/generated/</code>: 611 s, exit 0, both examples executed (verified in <code>mg_execution_times.md</code>).</li><li><code>make check</code> clean; 712 tests pass.</li><li>Every figure above was rendered by the gallery build itself and inspected.</li></ul>
+<ul><li><code>uv run mkdocs build -s</code> completes after removing <code>docs/generated/</code>: 611 s,</li></ul>
+<p>exit 0, both examples executed (verified in <code>mg_execution_times.md</code>).</p>
+<ul><li><code>make check</code> clean; 712 tests pass.</li><li>Every figure above was rendered by the gallery build itself and inspected.</li></ul>
 <div class="figure">
 <img src="mosaic_groups.png" alt="group_by: one hexagon per congressional district, each state&#x27;s districts kept as one connected block">
 <p class="caption">group_by: one hexagon per congressional district, each state&#x27;s districts kept as one connected block</p>

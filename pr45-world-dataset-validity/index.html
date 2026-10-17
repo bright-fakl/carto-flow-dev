@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -92,7 +90,11 @@
 <h2>What to look for</h2>
 <p>Outlines must be unchanged apart from added vertices. The repair inserts collinear vertices (exact in EPSG:4326) and drops two degenerate features: the zero-area spike in Sudan and a 0.5 m sliver in Mozambique. Nothing else about the boundaries should move.</p>
 <h2>Measured cost</h2>
-<ul><li>Vertices 10,654 -&gt; 14,541 (+36%); file 138 KiB -&gt; 187 KiB.</li><li>Mozambique Polygon -&gt; MultiPolygon (the sliver separates).</li><li>Reprojected areas (EPSG:6933) change by at most 7.1e-04 relative, total 3.2e-07. Largest relative: Israel -16.4 km2, Netherlands +24.6 km2, Norway +209.4 km2. Largest absolute: Russia -524.0 km2, Algeria -496.7 km2, Mauritania +267.3 km2. These come from densification: the densified outline follows the projected curve instead of cutting the chord, so the areas are more faithful, not less.</li><li>Precision snapping and make_valid on their own change no country by more than 0.097 km2 (Sudan).</li><li>Attributes (name, continent, pop_est, gdp_md_est) are byte-identical.</li></ul>
+<ul><li>Vertices 10,654 -&gt; 14,541 (+36%); file 138 KiB -&gt; 187 KiB.</li><li>Mozambique Polygon -&gt; MultiPolygon (the sliver separates).</li><li>Reprojected areas (EPSG:6933) change by at most 7.1e-04 relative, total</li></ul>
+<p>3.2e-07. Largest relative: Israel -16.4 km2, Netherlands +24.6 km2, Norway +209.4 km2. Largest absolute: Russia -524.0 km2, Algeria -496.7 km2, Mauritania +267.3 km2. These come from densification: the densified outline follows the projected curve instead of cutting the chord, so the areas are more faithful, not less.</p>
+<ul><li>Precision snapping and make_valid on their own change no country by more</li></ul>
+<p>than 0.097 km2 (Sudan).</p>
+<ul><li>Attributes (name, continent, pop_est, gdp_md_est) are byte-identical.</li></ul>
 <h2>Not fixed, by design</h2>
 <p>Fiji under an LAEA centred near its antipode, and Russia and Antarctica under a US-centred Albers applied worldwide, remain invalid. Those are projection domain limits, not data defects.</p>
 <div class="figure">

@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -94,7 +92,9 @@
 <h1>Shrink area tolerance</h1>
 <p><code>proportional_cartogram.shrink</code> used <code>tol</code> as the root-finder tolerance on the buffer distance. For small target fractions the area is very sensitive to that distance, so the core could miss its area target without a warning. The solve now runs on the relative area residual and stops as soon as <code>abs(area / target - 1) &lt; tol</code>, so <code>tol</code> sets both the achieved area error and the speed. The default is <code>0.01</code>.</p>
 <p>Each state is shrunk to its density ratio relative to the densest state (the non-contiguous cartogram construction in issue #74). DC is excluded from the measurements. <code>make_figures.py</code> regenerates every figure from a carto-flow checkout.</p>
-<ul><li><code>area_error_per_state.png</code>: area error of every shrunken core, main (left) and fix at the default tol (right), states sorted by target fraction. Same x range on both.</li><li><code>map.png</code>: the shrunken cores over the original states, main and fix.</li><li><code>tol_sweep.png</code>: maximum area error and runtime for main and for several <code>tol</code>.</li><li><code>isotropic.png</code>: the <code>isotropic</code> option, described below.</li></ul>
+<ul><li><code>area_error_per_state.png</code>: area error of every shrunken core, main (left)</li></ul>
+<p>and fix at the default tol (right), states sorted by target fraction. Same x range on both.</p>
+<ul><li><code>map.png</code>: the shrunken cores over the original states, main and fix.</li><li><code>tol_sweep.png</code>: maximum area error and runtime for main and for several <code>tol</code>.</li><li><code>isotropic.png</code>: the <code>isotropic</code> option, described below.</li></ul>
 <table>
 <tr><th>State (target)</th><th>main</th><th>fix (tol=0.01)</th></tr>
 <tr><td>SD (1.0%)</td><td>-23.9%</td><td>-0.222%</td></tr>
