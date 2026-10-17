@@ -84,7 +84,7 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-18 18:00</dd>
 <dt>Before</dt><dd>main @ f4952ed</dd>
-<dt>After</dt><dd>feat/square-packing-layout @ 323fd37</dd>
+<dt>After</dt><dd>feat/square-packing-layout @ 6fd7bbd</dd>
 <dt>Inputs</dt><dd>bundled US census snapshot (49 regions, EPSG:5070) and bundled world (177 countries, EPSG:8857), spacing 0.</dd>
 </dl>
 <p class="desc">CirclePackingLayout(shape=&quot;square&quot;) packs axis-aligned squares of the circles&#x27; area with the circle layout&#x27;s forces; squares touch along flat edges and keep their neighbors as well as circles do. A greedy stacking prototype was rejected.</p>
@@ -109,16 +109,27 @@
 <tr><th>layout</th><th>overlap</th><th>hull density</th><th>mean displacement</th><th>adjacent pairs kept</th><th>rank order</th><th>iterations</th><th>time</th></tr>
 <tr><td>packing, circles</td><td>0.0001</td><td>0.50</td><td>1146 km</td><td>0.63</td><td>0.97</td><td>343</td><td>2.5 s</td></tr>
 <tr><td>packing, circles, compactness 0.8</td><td>0.0001</td><td>0.78</td><td>3723 km</td><td>0.52</td><td>0.84</td><td>463</td><td>3.6 s</td></tr>
-<tr><td>packing, squares</td><td>0.0016</td><td>0.47</td><td>1236 km</td><td>0.58</td><td>0.97</td><td>442</td><td>4.4 s</td></tr>
-<tr><td>packing, squares, compactness 0.8</td><td>0.0006</td><td>0.75</td><td>2777 km</td><td>0.55</td><td>0.94</td><td>339</td><td>5.3 s</td></tr>
+<tr><td>packing, squares</td><td>0.0001</td><td>0.47</td><td>1236 km</td><td>0.58</td><td>0.97</td><td>442</td><td>6.7 s</td></tr>
+<tr><td>packing, squares, compactness 0.8</td><td>0.0001</td><td>0.75</td><td>2777 km</td><td>0.55</td><td>0.94</td><td>339</td><td>5.4 s</td></tr>
 <tr><td>centroid, squares</td><td>0.0006</td><td>0.41</td><td>581 km</td><td>0.49</td><td>0.99</td><td>9</td><td>4.7 s</td></tr>
 </table>
-<p>The squares converge, keep about as many neighbors as the circles, and keep the rank order better at high compaction. The residual overlap of the squares on the world data (0.06 to 0.16 % of the mean symbol size) is above the 1e-4 tolerance: the final Gauss-Seidel passes, capped at 500, do not reach the tolerance for squares in the dense clusters.</p>
+<p>The squares converge and keep about as many neighbors as the circles, and keep the rank order better at high compaction.</p>
+<h2>Spacing</h2>
+<p>Smallest edge-to-edge gap as a fraction of the requested gap (spacing times the mean half-side, or radius):</p>
+<table>
+<tr><th>data</th><th>shape</th><th>spacing 0.05</th><th>spacing 0.2</th></tr>
+<tr><td>census</td><td>circles</td><td>1.006</td><td>1.000</td></tr>
+<tr><td>census</td><td>squares</td><td>0.998</td><td>1.000</td></tr>
+<tr><td>world</td><td>circles</td><td>0.999</td><td>1.000</td></tr>
+<tr><td>world</td><td>squares</td><td>0.998</td><td>1.000</td></tr>
+</table>
+<p>The first version of the PR left the squares of the world data at 0.82 of the requested gap at spacing 0.05: the final Gauss-Seidel passes (500) did not settle the dense clusters, because a square separates along one axis per pair. Giving squares four times the passes in the final cleanup fixes it (the loop stops at the tolerance, so the cost is paid only when needed). A full overlap step in the cleanup also reached the spacing but moved the median symbol by 1.4 mean sizes on the world data (compactness 0.8, neighbors kept 0.55 down to 0.15), so it was rejected.</p>
 <h2>What changes</h2>
 <table>
 <tr><th></th><th></th></tr>
 <tr><td>option</td><td><code>CirclePackingLayoutOptions.shape</code>, <code>&quot;circle&quot;</code> (default) or <code>&quot;square&quot;</code>; the simulator takes <code>shape</code></td></tr>
 <tr><td>pair geometry</td><td>three helpers in the simulator: the pair distance (Euclidean, or the larger axis offset), the separation and contact direction (line between centers, or the dominant axis) and random directions for coincident pairs; used by the overlap count, the global expansion, the three overlap projections, the topology and tangency gaps and the contact reaction</td></tr>
+<tr><td>cleanup</td><td>squares get four times the Gauss-Seidel passes in the final cleanup (they stop at the tolerance)</td></tr>
 <tr><td>unchanged</td><td>the attraction forces (compaction, origin, group), step control, convergence; the tangency and topology force directions stay center to center</td></tr>
 <tr><td>size</td><td>the half-side is sqrt(pi)/2 times the circle radius; <code>LayoutResult.sizes</code> holds the half-sides; the canonical symbol is a square</td></tr>
 <tr><td>circles</td><td>positions of six configurations on the census snapshot (default, Dorling, stage 1 only, spacing 0, Gauss-Seidel only, grouped) are bit-identical before and after</td></tr>
@@ -127,7 +138,7 @@
 <h2>Not in this PR</h2>
 <p>The flow-density layout, rectangles with an aspect ratio, and the named presets (<code>dorling</code>, <code>geographic</code> and others) do not take <code>shape</code>; use <code>CirclePackingLayout(shape=&quot;square&quot;, ...)</code>. #77 stays closed by this PR for the force-based layouts it named.</p>
 <h2>Checks</h2>
-<p>Suite 1426 passed, mypy and ruff clean. The new tests cover the canonical symbol, the spacing, no overlap as polygons, area proportional to the value, groups with attraction, the default being the circle, an invalid shape, and the pair geometry helpers.</p>
+<p>Suite 1427 passed, mypy and ruff clean. The new tests cover the canonical symbol, the spacing, no overlap as polygons, area proportional to the value, groups with attraction, the default being the circle, an invalid shape, the pair geometry helpers, and the spacing on the world data.</p>
 <div class="figure">
 <img src="fig_square_packing.png" alt="Census snapshot, squares drawn: centroid layout with squares (top left), square packing (top right), square packing with compactness 0.8 (bottom left), and the circle layout with squares fit inside (before, bottom right).">
 <p class="caption">Census snapshot, squares drawn: centroid layout with squares (top left), square packing (top right), square packing with compactness 0.8 (bottom left), and the circle layout with squares fit inside (before, bottom right).</p>

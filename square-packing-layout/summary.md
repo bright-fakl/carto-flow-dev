@@ -10,7 +10,7 @@ base: main
 branch: feat/square-packing-layout
 date: 2026-10-18 18:00
 before: main @ f4952ed
-after: feat/square-packing-layout @ 323fd37
+after: feat/square-packing-layout @ 6fd7bbd
 related: square-centroid-layout
 inputs: bundled US census snapshot (49 regions, EPSG:5070) and bundled world (177 countries, EPSG:8857), spacing 0.
 ---
@@ -43,11 +43,24 @@ Hull density is symbol area divided by the convex hull of the symbols; "adjacent
 |---|---|---|---|---|---|---|---|
 | packing, circles | 0.0001 | 0.50 | 1146 km | 0.63 | 0.97 | 343 | 2.5 s |
 | packing, circles, compactness 0.8 | 0.0001 | 0.78 | 3723 km | 0.52 | 0.84 | 463 | 3.6 s |
-| packing, squares | 0.0016 | 0.47 | 1236 km | 0.58 | 0.97 | 442 | 4.4 s |
-| packing, squares, compactness 0.8 | 0.0006 | 0.75 | 2777 km | 0.55 | 0.94 | 339 | 5.3 s |
+| packing, squares | 0.0001 | 0.47 | 1236 km | 0.58 | 0.97 | 442 | 6.7 s |
+| packing, squares, compactness 0.8 | 0.0001 | 0.75 | 2777 km | 0.55 | 0.94 | 339 | 5.4 s |
 | centroid, squares | 0.0006 | 0.41 | 581 km | 0.49 | 0.99 | 9 | 4.7 s |
 
-The squares converge, keep about as many neighbors as the circles, and keep the rank order better at high compaction. The residual overlap of the squares on the world data (0.06 to 0.16 % of the mean symbol size) is above the 1e-4 tolerance: the final Gauss-Seidel passes, capped at 500, do not reach the tolerance for squares in the dense clusters.
+The squares converge and keep about as many neighbors as the circles, and keep the rank order better at high compaction.
+
+## Spacing
+
+Smallest edge-to-edge gap as a fraction of the requested gap (spacing times the mean half-side, or radius):
+
+| data | shape | spacing 0.05 | spacing 0.2 |
+|---|---|---|---|
+| census | circles | 1.006 | 1.000 |
+| census | squares | 0.998 | 1.000 |
+| world | circles | 0.999 | 1.000 |
+| world | squares | 0.998 | 1.000 |
+
+The first version of the PR left the squares of the world data at 0.82 of the requested gap at spacing 0.05: the final Gauss-Seidel passes (500) did not settle the dense clusters, because a square separates along one axis per pair. Giving squares four times the passes in the final cleanup fixes it (the loop stops at the tolerance, so the cost is paid only when needed). A full overlap step in the cleanup also reached the spacing but moved the median symbol by 1.4 mean sizes on the world data (compactness 0.8, neighbors kept 0.55 down to 0.15), so it was rejected.
 
 ## What changes
 
@@ -55,6 +68,7 @@ The squares converge, keep about as many neighbors as the circles, and keep the 
 |---|---|
 | option | `CirclePackingLayoutOptions.shape`, `"circle"` (default) or `"square"`; the simulator takes `shape` |
 | pair geometry | three helpers in the simulator: the pair distance (Euclidean, or the larger axis offset), the separation and contact direction (line between centers, or the dominant axis) and random directions for coincident pairs; used by the overlap count, the global expansion, the three overlap projections, the topology and tangency gaps and the contact reaction |
+| cleanup | squares get four times the Gauss-Seidel passes in the final cleanup (they stop at the tolerance) |
 | unchanged | the attraction forces (compaction, origin, group), step control, convergence; the tangency and topology force directions stay center to center |
 | size | the half-side is sqrt(pi)/2 times the circle radius; `LayoutResult.sizes` holds the half-sides; the canonical symbol is a square |
 | circles | positions of six configurations on the census snapshot (default, Dorling, stage 1 only, spacing 0, Gauss-Seidel only, grouped) are bit-identical before and after |
@@ -66,4 +80,4 @@ The flow-density layout, rectangles with an aspect ratio, and the named presets 
 
 ## Checks
 
-Suite 1426 passed, mypy and ruff clean. The new tests cover the canonical symbol, the spacing, no overlap as polygons, area proportional to the value, groups with attraction, the default being the circle, an invalid shape, and the pair geometry helpers.
+Suite 1427 passed, mypy and ruff clean. The new tests cover the canonical symbol, the spacing, no overlap as polygons, area proportional to the value, groups with attraction, the default being the circle, an invalid shape, the pair geometry helpers, and the spacing on the world data.
