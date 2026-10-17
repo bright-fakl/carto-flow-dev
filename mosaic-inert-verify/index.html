@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -101,20 +99,21 @@
 <p>The <code>states</code> case at <code>morph=False</code> was targeted deliberately: it is the only input where the repair loop runs four passes AND two passes tie on split-region count, so it is where a tie-break weight would bite if it ever did. Still identical.</p>
 <h2>Insensitive, not dead</h2>
 <p>Neither code path is unreachable. The repair loop runs 2-4 passes on every input and the gap count at pass 0 is non-zero everywhere (26-189), so the bridge bonus really executes and really does change later passes&#x27; candidate assignments (pass-1 score moves 28 -&gt; 32 on US states).</p>
-<ul><li><code>gap_bridge_mult</code>: altered candidates are rejected for not improving on the incumbent; where a later pass does win, the same pass wins at every multiplier.</li><li><code>disconnected_score_weight</code>: only separates passes with equal split-region count, and the disconnected-tile and gap counts rank those passes the same way at any weight in [0, 1000]. At weight 0 the score does not collapse, because the gap term survives.</li></ul>
+<ul><li><code>gap_bridge_mult</code>: altered candidates are rejected for not improving on the incumbent;</li></ul>
+<p>where a later pass does win, the same pass wins at every multiplier.</p>
+<ul><li><code>disconnected_score_weight</code>: only separates passes with equal split-region count, and the</li></ul>
+<p>disconnected-tile and gap counts rank those passes the same way at any weight in [0, 1000]. At weight 0 the score does not collapse, because the gap term survives.</p>
 <p>Both were therefore removed by hard-coding their former defaults as module constants in <code>_assignment.py</code> (<code>_GAP_BRIDGE_MULT = 5.0</code>, <code>_DISCONNECTED_SCORE_WEIGHT = 100</code>). The branches are untouched, so no behaviour was removed.</p>
 <h2>The nondeterminism trap</h2>
 <p>A naive end-to-end before/after comparison LOOKS like a regression and is not one. At <code>morph=False</code> all five inputs are bit-identical to the a095187 baseline. At <code>morph=True</code> all five differ -- but a baseline-against-ITSELF comparison also differs on all five at <code>morph=True</code> while agreeing everywhere at <code>morph=False</code>, and <code>morph_geometries</code> alone produces a different centroid hash on every run in a single unmodified worktree. One baseline-vs-baseline pair happened to agree; a third run broke it.</p>
 <p>The change was isolated from that noise by loading the old and new <code>hungarian_morphed_assignment</code> into ONE process and calling both on identical captured inputs, so the morph runs once and feeds both, with the old one given a shim options object carrying the two removed fields at their old defaults.</p>
-<pre><code>states_uniform     morph=0/1:  1 solve   IDENTICAL
-states_uniform_sq  morph=0/1:  1 solve   IDENTICAL
-states             morph=0/1:  1 solve   IDENTICAL
-districts          morph=0/1:  1 solve   IDENTICAL
-world              morph=0:   12 solves  IDENTICAL
-world              morph=1:   21 solves  IDENTICAL</code></pre>
+<p>``<code> states_uniform     morph=0/1:  1 solve   IDENTICAL states_uniform_sq  morph=0/1:  1 solve   IDENTICAL states             morph=0/1:  1 solve   IDENTICAL districts          morph=0/1:  1 solve   IDENTICAL world              morph=0:   12 solves  IDENTICAL world              morph=1:   21 solves  IDENTICAL </code>``</p>
 <p>39 assignment solves across 10 input x morph combinations, every returned array equal.</p>
 <h2>Reported in passing, not acted on</h2>
-<ul><li><code>max_connectivity_iters</code> (default 15): the cap never binds. Most passes observed is 4 (<code>states</code> and <code>districts</code> at <code>morph=False</code>); at <code>morph=True</code> it is always 2. Any cap &gt;= 3 is equivalent to 15. It does real work at <code>morph=False</code>, where 0, 1 and &gt;=2 give three distinct results, so it is not a deletion candidate -- but 15 is dead headroom.</li><li><code>disconnected_penalty_mult</code> (default 10.0): effectively boolean. Only 0 vs non-zero separates, and only on <code>states</code> and <code>districts</code> at <code>morph=False</code>; 1.0 through 50.0 are indistinguishable. The penalty is a multiple of the static cost maximum, so once it exceeds that maximum the tile is out of contention regardless of magnitude.</li></ul>
+<ul><li><code>max_connectivity_iters</code> (default 15): the cap never binds. Most passes observed is 4</li></ul>
+<p>(<code>states</code> and <code>districts</code> at <code>morph=False</code>); at <code>morph=True</code> it is always 2. Any cap &gt;= 3 is equivalent to 15. It does real work at <code>morph=False</code>, where 0, 1 and &gt;=2 give three distinct results, so it is not a deletion candidate -- but 15 is dead headroom.</p>
+<ul><li><code>disconnected_penalty_mult</code> (default 10.0): effectively boolean. Only 0 vs non-zero</li></ul>
+<p>separates, and only on <code>states</code> and <code>districts</code> at <code>morph=False</code>; 1.0 through 50.0 are indistinguishable. The penalty is a multiple of the static cost maximum, so once it exceeds that maximum the tile is out of contention regardless of magnitude.</p>
 <h2>Scripts</h2>
 <p><code>verify.py</code> (sweep + fingerprint), <code>probe.py</code> (repair-loop trace), <code>same_proc.py</code> (old-vs-new in one process), <code>cmpall.py</code> (end-to-end comparison), <code>morphhash.py</code> (nondeterminism demonstration), <code>pin.py</code> (pinned-test values). Raw dumps in <code>base*.txt</code> and <code>mod*.txt</code>.</p>
 

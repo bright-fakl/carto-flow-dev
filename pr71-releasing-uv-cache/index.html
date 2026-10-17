@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -92,11 +90,9 @@
 <p>No figures. The change is documentation, found by running the procedure rather than by reading it.</p>
 <h2>What happened</h2>
 <p><code>2.0.0rc2</code> was published to TestPyPI successfully. The documented verification command, run minutes later, failed:</p>
-<pre><code>Because there is no version of carto-flow==2.0.0rc2 and you require
-carto-flow==2.0.0rc2, we can conclude that your requirements are unsatisfiable.</code></pre>
+<p>``<code> Because there is no version of carto-flow==2.0.0rc2 and you require carto-flow==2.0.0rc2, we can conclude that your requirements are unsatisfiable. </code>``</p>
 <p>The upload was not at fault. <code>https://test.pypi.org/simple/carto-flow/</code> already listed both artifacts:</p>
-<pre><code>carto_flow-2.0.0rc2-py3-none-any.whl#sha256=67ad11c4...
-carto_flow-2.0.0rc2.tar.gz#sha256=cd5ecf4f...</code></pre>
+<p>``<code> carto_flow-2.0.0rc2-py3-none-any.whl#sha256=67ad11c4... carto_flow-2.0.0rc2.tar.gz#sha256=cd5ecf4f... </code>``</p>
 <p>uv&#x27;s cached index listing was stale. <code>--refresh-package carto-flow</code> resolved it on the next attempt.</p>
 <h2>Why it is worth documenting</h2>
 <p>The error names the version, not the cache. The natural reading is that the publish failed, and the natural response is to publish again - which cannot work, because the version already exists on the index and a version number cannot be reused. Someone following that reading during a real release could conclude the release itself is broken.</p>

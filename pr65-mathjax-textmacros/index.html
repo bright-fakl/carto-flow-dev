@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -98,8 +96,8 @@
 <table>
 <tr><th>candidate</th><th>result</th></tr>
 <tr><td><code>\text{tile\_size}</code> (current source), default packages</td><td><code>tile\_size</code> - the bug</td></tr>
-<tr><td><code>\text{tile\_size}</code> <strong>+ textmacros</strong></td><td><code>tile_size</code> - correct</td></tr>
-<tr><td><code>\text{tile_size}</code> (drop the backslash)</td><td><strong>TeX error</strong>, renders nothing</td></tr>
+<tr><td><code>\text{tile\_size}</code> **+ textmacros**</td><td><code>tile_size</code> - correct</td></tr>
+<tr><td><code>\text{tile_size}</code> (drop the backslash)</td><td>**TeX error**, renders nothing</td></tr>
 <tr><td><code>\texttt{tile\_size}</code></td><td><code>tile\_size</code> - still wrong, <code>\texttt</code> is also text mode</td></tr>
 <tr><td><code>\mathrm{tile\_size}</code></td><td><code>tile_size</code> - correct, but needs 12 source edits</td></tr>
 </table>
@@ -117,15 +115,20 @@
 <p>Before the extension these two looked correct and the other twelve looked broken, because verbatim mode prints whatever it is given. Escaping both to <code>\_</code> makes all fourteen consistent, and the escaped form renders correctly with or without <code>textmacros</code>, so the source is right independently of the config.</p>
 <p>Both were found by scanning for the pattern rather than by waiting for reports: one had been reported, the scan found the second before it was.</p>
 <h2>Verification</h2>
-<ul><li>Every equation in <code>docs/</code> - 336 of them across 16 files - rendered through <code>mathjax-full</code> 3 at the site&#x27;s package set. Results:</li></ul>
+<ul><li>Every equation in <code>docs/</code> - 336 of them across 16 files - rendered through</li></ul>
+<p><code>mathjax-full</code> 3 at the site&#x27;s package set. Results:</p>
 <table>
 <tr><th>config</th><th>source</th><th>outcome</th></tr>
 <tr><td>no textmacros</td><td>original</td><td>0 errors, but 12 equations display <code>\_</code></td></tr>
-<tr><td>textmacros</td><td>original</td><td><strong>2 errors</strong> - the regression above</td></tr>
-<tr><td>textmacros</td><td>fixed</td><td><strong>0 errors, 0 mis-rendered</strong></td></tr>
+<tr><td>textmacros</td><td>original</td><td>**2 errors** - the regression above</td></tr>
+<tr><td>textmacros</td><td>fixed</td><td>**0 errors, 0 mis-rendered**</td></tr>
 <tr><td>no textmacros</td><td>fixed</td><td>0 errors - the source fix is backward compatible</td></tr>
 </table>
-<ul><li>Rendered every affected equation through <code>mathjax-full</code> 3 with the exact package set <code>tex-svg.js</code> ships, before and after. The figures above are those renders, not mockups.</li><li><code>https://cdn.jsdelivr.net/npm/mathjax@3/es5/input/tex/extensions/textmacros.js</code> returns 200 (16 KB), so the loader path resolves against the same CDN that already serves <code>tex-svg.js</code>.</li><li><code>make check</code> clean.</li></ul>
+<ul><li>Rendered every affected equation through <code>mathjax-full</code> 3 with the exact</li></ul>
+<p>package set <code>tex-svg.js</code> ships, before and after. The figures above are those renders, not mockups.</p>
+<ul><li><code>https://cdn.jsdelivr.net/npm/mathjax@3/es5/input/tex/extensions/textmacros.js</code></li></ul>
+<p>returns 200 (16 KB), so the loader path resolves against the same CDN that already serves <code>tex-svg.js</code>.</p>
+<ul><li><code>make check</code> clean.</li></ul>
 <h2>Note on a separate config smell, not changed here</h2>
 <p><code>inlineMath</code> still lists <code>[&#x27;$&#x27;,&#x27;$&#x27;]</code> and <code>displayMath</code> <code>[&#x27;$$&#x27;,&#x27;$$&#x27;]</code>, but <code>pymdownx.arithmatex</code> runs in <code>generic: true</code> mode and has already rewritten every <code>$...$</code> into <code>\(...\)</code> before MathJax sees the page. Leaving the dollar delimiters active means a literal <code>$</code> in prose can open a spurious math region. Nothing in the current documentation triggers it, and it is unrelated to this bug, so it is left alone rather than folded into a rendering fix.</p>
 <div class="figure">

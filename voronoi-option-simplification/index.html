@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -144,7 +142,7 @@
 <tr><td>20000.0</td><td>3589</td></tr>
 <tr><td>100000.0</td><td>3419</td></tr>
 </table>
-<ul><li><strong>adjacency_spring</strong> raises the share of input-adjacent pairs that stay adjacent from 0.66 to 0.83 (the test asserts a gain above 0.05 at 0.6).</li><li><strong>intra_group_spring</strong> with \<code>group_by\</code> removes the discontiguous groups (3 to 0 for the census divisions).</li><li><strong>ElasticBoundary</strong> deforms the outline (the union area changes by 2.5 % at strength 0.05; 0 keeps the area exactly).</li><li><strong>boundary</strong> sets the outline: the bbox, the convex hull and the circle all cover the input and are much rounder than the union (roundness 0.76, 0.83, 1.00 against 0.07).</li><li><strong>simplify_tol</strong> cuts the outline vertices (14,572 to 3,419 at 100 km).</li></ul>
+<ul><li>**adjacency_spring** raises the share of input-adjacent pairs that stay adjacent from 0.66 to 0.83 (the test asserts a gain above 0.05 at 0.6).</li><li>**intra_group_spring** with \<code>group_by\</code> removes the discontiguous groups (3 to 0 for the census divisions).</li><li>**ElasticBoundary** deforms the outline (the union area changes by 2.5 % at strength 0.05; 0 keeps the area exactly).</li><li>**boundary** sets the outline: the bbox, the convex hull and the circle all cover the input and are much rounder than the union (roundness 0.76, 0.83, 1.00 against 0.07).</li><li>**simplify_tol** cuts the outline vertices (14,572 to 3,419 at 100 km).</li></ul>
 <h2>Evidence that nothing else changed</h2>
 <ul><li>All 99 existing and new Voronoi tests pass with \<code>DeprecationWarning\</code> from \<code>carto_flow\</code> turned into an error, so no internal path passes a deprecated value; the full suite passes (926 tests).</li><li>The three how-to notebooks that were edited execute without errors and without deprecation warnings.</li><li>The code paths are untouched: only warnings, documentation and tests were added, so results are identical.</li></ul>
 <h2>Not included</h2>

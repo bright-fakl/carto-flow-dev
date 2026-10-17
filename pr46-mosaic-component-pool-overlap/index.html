@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -92,11 +90,8 @@
 <p class="desc">An island component&#x27;s extra tile rings reached across water into a mainland component&#x27;s core tiles, and the last component solved silently overwrote the other&#x27;s symbols; six regions at world 384/460 lose tiles to this.</p>
 <p>Tile budgets are written <code>nominal / actual</code>. The fixture builds counts with <code>max(1, round(pop / pop.sum() * budget))</code>, and because 140 of 176 countries hold less than half a tile&#x27;s worth of population the floor raises the requested total well above the nominal figure: nominal 384 requests 460 tiles, nominal 800 requests 848.</p>
 <h2>The bug</h2>
-<p>Every core tile is assigned to exactly one geographic component. The <code>extra_tile_rings</code> expansion then grew each component&#x27;s pool <strong>independently</strong>, from its own core set, so a component separated from another by less than <code>extra_tile_rings</code> tile widths — an island off a coast — reached across the water and took the mainland&#x27;s <strong>core</strong> tiles into its own pool. Both components solved over those tiles and both placed a symbol on them, and the per-component write-back assigns unconditionally:</p>
-<pre><code>for t in pool_c:
-    local_g = int(assignment_c[t])
-    if local_g &gt;= 0:
-        assignment[t] = int(geom_indices_arr[local_g])</code></pre>
+<p>Every core tile is assigned to exactly one geographic component. The <code>extra_tile_rings</code> expansion then grew each component&#x27;s pool **independently**, from its own core set, so a component separated from another by less than <code>extra_tile_rings</code> tile widths — an island off a coast — reached across the water and took the mainland&#x27;s **core** tiles into its own pool. Both components solved over those tiles and both placed a symbol on them, and the per-component write-back assigns unconditionally:</p>
+<p>``<code>python for t in pool_c: local_g = int(assignment_c[t]) if local_g &gt;= 0: assignment[t] = int(geom_indices_arr[local_g]) </code>``</p>
 <p>so whichever component happened to be enumerated last silently overwrote the other&#x27;s tile. Each tile lost that way is a region left short of its requested count, with no error and no warning, and which region loses depends on component enumeration order.</p>
 <p>All eight overwrites at world 384 / 460, morph=True:</p>
 <table>
@@ -116,23 +111,23 @@
 <p>Pools are then disjoint by construction, the write-back cannot conflict, and the result no longer depends on component order. A first-come-first-served guard at the write would have stopped the corruption too, but it would have left the pools overlapping, left one component&#x27;s solver optimising over tiles it is not allowed to have, and left the outcome dependent on enumeration order — which is what made this latent in the first place.</p>
 <h2>Six regions recovered</h2>
 <p>At world 384 / 460, morph=True the six regions that regain their tiles are exactly the six victims in the table above:</p>
-<p><strong>Timor-Leste, North Korea, South Korea, Bhutan, Germany, Belgium.</strong></p>
+<p>**Timor-Leste, North Korea, South Korea, Bhutan, Germany, Belgium.**</p>
 <p>Short falls 8 → 2. The two that remain, Bahamas and Trinidad and Tobago, fail for an unrelated reason: their component wins no core tile at all because their area never reaches <code>min_overlap_frac</code> of any tile (best overlap 0.034 and 0.009), so the pool is empty and the component is skipped. That is handled separately in #47.</p>
-<p>At world 800 / 848, morph=False the regions recovered are <strong>India, China, Vietnam, Bangladesh, Ukraine and Hungary</strong> — mainland countries, not islands.</p>
+<p>At world 800 / 848, morph=False the regions recovered are **India, China, Vietnam, Bangladesh, Ukraine and Hungary** — mainland countries, not islands.</p>
 <h2>Before and after, all inputs</h2>
 <table>
 <tr><th>input</th><th>regions short</th><th>zero tiles</th><th>non-contiguous</th><th>split groups</th><th>unassigned core</th><th>enclosed holes</th><th>seconds</th><th>result changed</th></tr>
-<tr><td>world 384 / 460, morph=True</td><td><strong>8 → 2</strong></td><td>6 → 2</td><td>1 → 2</td><td>0 → 0</td><td>25 → 28</td><td>4 → 1</td><td>3.7 → 4.7</td><td>yes</td></tr>
-<tr><td>world 384 / 460, morph=False</td><td><strong>18 → 13</strong></td><td>14 → 13</td><td>3 → 3</td><td>0 → 0</td><td>55 → 41</td><td>1 → 0</td><td>14.2 → 6.8</td><td>yes</td></tr>
-<tr><td>world 800 / 848, morph=True</td><td><strong>6 → 3</strong></td><td>3 → 3</td><td>6 → 3</td><td>0 → 0</td><td>32 → 41</td><td>6 → 7</td><td><strong>46.7 → 11.6</strong></td><td>yes</td></tr>
-<tr><td>world 800 / 848, morph=False</td><td><strong>17 → 11</strong></td><td>12 → 11</td><td>4 → 3</td><td>0 → 0</td><td>81 → 68</td><td>0 → 0</td><td>19.7 → 13.1</td><td>yes</td></tr>
+<tr><td>world 384 / 460, morph=True</td><td>**8 → 2**</td><td>6 → 2</td><td>1 → 2</td><td>0 → 0</td><td>25 → 28</td><td>4 → 1</td><td>3.7 → 4.7</td><td>yes</td></tr>
+<tr><td>world 384 / 460, morph=False</td><td>**18 → 13**</td><td>14 → 13</td><td>3 → 3</td><td>0 → 0</td><td>55 → 41</td><td>1 → 0</td><td>14.2 → 6.8</td><td>yes</td></tr>
+<tr><td>world 800 / 848, morph=True</td><td>**6 → 3**</td><td>3 → 3</td><td>6 → 3</td><td>0 → 0</td><td>32 → 41</td><td>6 → 7</td><td>**46.7 → 11.6**</td><td>yes</td></tr>
+<tr><td>world 800 / 848, morph=False</td><td>**17 → 11**</td><td>12 → 11</td><td>4 → 3</td><td>0 → 0</td><td>81 → 68</td><td>0 → 0</td><td>19.7 → 13.1</td><td>yes</td></tr>
 <tr><td>africa 150 / 159 and 300 / 306, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>5-8 → 5-9</td><td>0 → 0</td><td>unchanged</td><td>yes</td></tr>
-<tr><td>world mainland only, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>unchanged</td><td>0 → 0</td><td>unchanged</td><td>unchanged</td><td>unchanged</td><td><strong>no</strong></td></tr>
-<tr><td>US states, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>unchanged</td><td>0 → 0</td><td>unchanged</td><td><strong>no</strong></td></tr>
-<tr><td>congressional districts, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>unchanged</td><td>0 → 0</td><td>unchanged</td><td><strong>no</strong></td></tr>
+<tr><td>world mainland only, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>unchanged</td><td>0 → 0</td><td>unchanged</td><td>unchanged</td><td>unchanged</td><td>**no**</td></tr>
+<tr><td>US states, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>unchanged</td><td>0 → 0</td><td>unchanged</td><td>**no**</td></tr>
+<tr><td>congressional districts, both morph settings</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>0 → 0</td><td>unchanged</td><td>0 → 0</td><td>unchanged</td><td>**no**</td></tr>
 </table>
 <h3>Bit-identical inputs</h3>
-<p><strong>US states, congressional districts and world-mainland-only are byte-identical before and after</strong>, at both morph settings — same per-region tile centroids, same tile size. They have a single geographic component, or none close enough to contend, so there is nothing to make disjoint. Africa&#x27;s fingerprint moves because Madagascar is a second component; its integrity metrics are unchanged and only the count of empty core tiles shifts by one or two either way.</p>
+<p>**US states, congressional districts and world-mainland-only are byte-identical before and after**, at both morph settings — same per-region tile centroids, same tile size. They have a single geographic component, or none close enough to contend, so there is nothing to make disjoint. Africa&#x27;s fingerprint moves because Madagascar is a second component; its integrity metrics are unchanged and only the count of empty core tiles shifts by one or two either way.</p>
 <h3>Integrity</h3>
 <p>No split groups anywhere, before or after. Non-contiguous regions improve on three of the four world configurations and regress by one on world 384 / 460 morph=True. Empty core tiles move in both directions: they rise where the fix returns a tile to a mainland region that then sits closer to its own land, and fall where an island stops borrowing mainland tiles.</p>
 <h3>Runtime</h3>

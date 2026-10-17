@@ -34,9 +34,7 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul, ol { padding-left: 1.4rem; }
-  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
-  pre code { background: none; padding: 0; }
+  ul { padding-left: 1.4rem; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -92,13 +90,13 @@
 <p>No figures. The change is a CI workflow fix with no rendered output.</p>
 <h2>The failure</h2>
 <p><code>gh workflow run release.yml -f version=2.0.0-rc1</code> failed at step 10 of 14:</p>
-<pre><code>jupyter_client.kernelspec.NoSuchKernel: No such kernel named carto-flow</code></pre>
+<p>``<code> jupyter_client.kernelspec.NoSuchKernel: No such kernel named carto-flow </code>``</p>
 <p>The documentation executes notebooks through mkdocs-jupyter, which needs the project kernel registered first. Two workflows already do it:</p>
 <table>
 <tr><th>workflow</th><th>registers the kernel</th></tr>
 <tr><td><code>main.yml</code> (<code>check-docs</code>)</td><td>yes</td></tr>
 <tr><td><code>deploy-docs.yml</code></td><td>yes</td></tr>
-<tr><td><code>release.yml</code></td><td><strong>no</strong></td></tr>
+<tr><td><code>release.yml</code></td><td>**no**</td></tr>
 </table>
 <p>So every release would have failed at the same step. The bug is pre-existing and unrelated to anything merged on 2026-09-27; <code>2.0.0</code> would have hit it identically.</p>
 <h2>Why no earlier signal</h2>
@@ -126,7 +124,9 @@
 </table>
 <p>Nothing was published. The irreversible surface was never touched, which is the protection the release-candidate flow exists to provide.</p>
 <h2>Verification</h2>
-<ul><li><code>mkdocs build -s</code> on <code>main</code> at <code>2.0.0-rc1</code>: succeeds, 269.85 s. The strict flag does not break the release.</li><li>All three workflows register the kernel, confirmed by grep.</li><li>Both modified workflow files parse as YAML.</li></ul>
+<ul><li><code>mkdocs build -s</code> on <code>main</code> at <code>2.0.0-rc1</code>: succeeds, 269.85 s. The strict</li></ul>
+<p>flag does not break the release.</p>
+<ul><li>All three workflows register the kernel, confirmed by grep.</li><li>Both modified workflow files parse as YAML.</li></ul>
 
 <a class="back" href="../index.html">&larr; back to index</a>
 
