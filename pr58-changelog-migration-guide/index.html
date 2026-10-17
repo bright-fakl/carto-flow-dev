@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -91,7 +93,7 @@
 <p>No figures. This PR adds <code>CHANGELOG.md</code>, <code>docs/migrating-to-2.0.md</code>, <code>docs/changelog.md</code> (a one-line snippet include), two nav entries, a README section and the version bump. No code path changes, so no before/after result differs.</p>
 <h2>What to review</h2>
 <p>Serve the docs and read the two new pages:</p>
-<p>``<code> cd /home/fakl/carto-flow &amp;&amp; uv run mkdocs serve </code>``</p>
+<pre><code>cd /home/fakl/carto-flow &amp;&amp; uv run mkdocs serve</code></pre>
 <p>Then open &lt;http://127.0.0.1:8000/carto-flow/changelog/&gt; and &lt;http://127.0.0.1:8000/carto-flow/migrating-to-2.0/&gt;.</p>
 <h2>Files</h2>
 <table>
@@ -104,20 +106,9 @@
 <tr><td><code>pyproject.toml</code>, <code>src/carto_flow/__init__.py</code>, <code>uv.lock</code></td><td>1.1.2 -&gt; 2.0.0.</td></tr>
 </table>
 <h2>Verification</h2>
-<ul><li><code>uv run mkdocs build -s</code> passes from a cleared <code>docs/generated/</code> and <code>site/</code></li></ul>
-<p>(392 s, 26/26 gallery files).</p>
-<ul><li><code>site/changelog/index.html</code> contains the 2.0.0 body text, the grouped</li></ul>
-<p>sections and working PR links; the snippet include is not producing an empty page.</p>
-<ul><li>Both pages appear in the built nav, and the cross-links resolve to</li></ul>
-<p><code>../migrating-to-2.0/</code> and <code>../changelog/</code>.</p>
-<ul><li><code>make check</code> passes (pre-commit, mypy on 80 source files, deptry).</li><li><code>uv run python -m pytest</code>: 711 passed.</li></ul>
+<ul><li><code>uv run mkdocs build -s</code> passes from a cleared <code>docs/generated/</code> and <code>site/</code> (392 s, 26/26 gallery files).</li><li><code>site/changelog/index.html</code> contains the 2.0.0 body text, the grouped sections and working PR links; the snippet include is not producing an empty page.</li><li>Both pages appear in the built nav, and the cross-links resolve to <code>../migrating-to-2.0/</code> and <code>../changelog/</code>.</li><li><code>make check</code> passes (pre-commit, mypy on 80 source files, deptry).</li><li><code>uv run python -m pytest</code>: 711 passed.</li></ul>
 <h2>Notes on the content</h2>
-<ul><li>Every breaking change was checked against the code on <code>main</code> rather than taken</li></ul>
-<p>from the PR titles. Four breaks not on the original list were found: the <code>value_column</code> -&gt; <code>size</code> rename, the <code>preset_*</code> -&gt; named-function replacement, <code>SymbolCartogram.metrics</code> -&gt; <code>placement_metrics</code> with <code>simulation_history</code> removed, and the bundled datasets moving from GeoJSON to GeoParquet.</p>
-<ul><li><code>MosaicLayout</code> does not exist in 1.1.2, so the mosaic option changes (#40,</li></ul>
-<p>#43, #46, #47, #48, #56) break only code written against an unreleased <code>main</code>. Both pages say so instead of presenting them as 1.x -&gt; 2.0 breaks.</p>
-<ul><li>The version string lives in three files, not two: <code>pyproject.toml</code>,</li></ul>
-<p><code>src/carto_flow/__init__.py</code> and <code>mkdocs.yml</code> (<code>extra.version</code>). <code>scripts/bump_version.py</code> already updates all three.</p>
+<ul><li>Every breaking change was checked against the code on <code>main</code> rather than taken from the PR titles. Four breaks not on the original list were found: the <code>value_column</code> -&gt; <code>size</code> rename, the <code>preset_*</code> -&gt; named-function replacement, <code>SymbolCartogram.metrics</code> -&gt; <code>placement_metrics</code> with <code>simulation_history</code> removed, and the bundled datasets moving from GeoJSON to GeoParquet.</li><li><code>MosaicLayout</code> does not exist in 1.1.2, so the mosaic option changes (#40, #43, #46, #47, #48, #56) break only code written against an unreleased <code>main</code>. Both pages say so instead of presenting them as 1.x -&gt; 2.0 breaks.</li><li>The version string lives in three files, not two: <code>pyproject.toml</code>, <code>src/carto_flow/__init__.py</code> and <code>mkdocs.yml</code> (<code>extra.version</code>). <code>scripts/bump_version.py</code> already updates all three.</li></ul>
 
 <a class="back" href="../index.html">&larr; back to index</a>
 

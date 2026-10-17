@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -76,12 +78,13 @@
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>data</dd>
-<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/169">https://github.com/bright-fakl/carto-flow/pull/169</a></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/129">#129</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/166">#166</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/167">#167</a></dd>
 <dt>Branch</dt><dd>feat/county-census-level</dd>
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-19 00:30</dd>
+<dt>Closed</dt><dd>2026-10-17 16:43</dd>
 <dt>Before</dt><dd>main @ cf7d1bb</dd>
 <dt>After</dt><dd>feat/county-census-level @ 55cf978</dd>
 <dt>Inputs</dt><dd>ACS 5-year 2020 via censusdis (scripts/build_census_snapshot.py, new county level); ESRI:102008, coverage-simplified at 1000 m, densified to 5 km segments.</dd>
