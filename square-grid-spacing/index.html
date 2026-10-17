@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #170: Square flow grids have a cell size that matches their coordinate spacing</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul { padding-left: 1.4rem; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #170: Square flow grids have a cell size that matches their coordinate spacing</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/170">https://github.com/bright-fakl/carto-flow/pull/170</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/167">#167</a></dd>
+<dt>Branch</dt><dd>fix/square-grid-spacing</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-19 02:00</dd>
+<dt>Before</dt><dd>main @ cf7d1bb</dd>
+<dt>After</dt><dd>fix/square-grid-spacing @ 31c6a23</dd>
+<dt>Inputs</dt><dd>bundled states and congressional districts (population), 3,108 counties (bundled ACS 2020 snapshot of the county-level PR, population). MorphOptions area_scale 1e-6, margin 0.5, square grid, stall rule off for the single-grid table (1,500 iterations); ladder runs with default options. NUMBA_NUM_THREADS=8.</dd>
+</dl>
+<p class="desc">With square=True the cell size no longer equaled the spacing of the grid coordinates, so vertices were interpolated in the wrong cell and the displacement jumped at cell boundaries. On 3,108 counties at a square grid of 128 the invalid output polygons after 200 iterations fall from 1,350 to 70; other inputs have fewer invalid polygons in most cases and converge as before.</p>
+<h2>Figures</h2>
+<h2>Cause</h2>
+<p><code>inv167d.py</code> follows one invalid county (Suffolk, New York) through the first iteration. Two vertices 1.4 km apart on its boundary are displaced by 8.7 and 12.0 km in x, with a strain of 2.3, although the bilinear velocity field cannot change that fast over 1.4 km of a 68 km cell. The vertices sit on both sides of a cell boundary, and the location step puts one in the wrong cell: the grid has <code>dx</code> = 68,420 m but its coordinates are 68,159 m apart (<code>Grid</code> replaced <code>dx</code> by the average of the two directions and adjusted only the shorter side of the domain), so the interpolation weight of the second vertex is 1.33 instead of a value in [0, 1) and the extrapolated displacement differs by 3 km.</p>
+<h2>Single square grid before and after</h2>
+<p>Stall rule off, 1,500 iterations. Values are before / after.</p>
+<table>
+<tr><th>input</th><th>grid</th><th>status (before / after)</th><th>iterations</th><th>mean error %</th><th>median error %</th><th>invalid polygons</th></tr>
+<tr><td>states</td><td>64</td><td>converged / converged</td><td>74 / 82</td><td>2.86 / 3.37</td><td>2.81 / 3.11</td><td>5 / 0</td></tr>
+<tr><td>states</td><td>128</td><td>converged / converged</td><td>60 / 62</td><td>1.33 / 1.37</td><td>0.76 / 0.68</td><td>6 / 0</td></tr>
+<tr><td>states</td><td>256</td><td>converged / converged</td><td>111 / 111</td><td>0.5 / 0.71</td><td>0.12 / 0.18</td><td>0 / 0</td></tr>
+<tr><td>states</td><td>512</td><td>converged / converged</td><td>213 / 214</td><td>0.59 / 0.5</td><td>0.13 / 0.09</td><td>0 / 0</td></tr>
+<tr><td>districts</td><td>128</td><td>converged / converged</td><td>119 / 130</td><td>0.83 / 0.61</td><td>0.52 / 0.36</td><td>113 / 25</td></tr>
+<tr><td>districts</td><td>256</td><td>converged / converged</td><td>149 / 145</td><td>0.47 / 1.44</td><td>0.23 / 0.95</td><td>20 / 14</td></tr>
+<tr><td>districts</td><td>512</td><td>converged / converged</td><td>261 / 263</td><td>0.41 / 0.43</td><td>0.15 / 0.19</td><td>22 / 16</td></tr>
+<tr><td>districts</td><td>1024</td><td>converged / converged</td><td>510 / 511</td><td>0.54 / 0.63</td><td>0.29 / 0.35</td><td>12 / 14</td></tr>
+<tr><td>counties</td><td>256</td><td>completed / completed</td><td>1500 / 1500</td><td>57.31 / 56.45</td><td>25.11 / 22.92</td><td>62 / 38</td></tr>
+<tr><td>counties</td><td>512</td><td>completed / completed</td><td>1500 / 1500</td><td>12.78 / 12.56</td><td>0.72 / 1.39</td><td>374 / 191</td></tr>
+<tr><td>counties</td><td>1024</td><td>completed / completed</td><td>1500 / 1500</td><td>2.27 / 3.16</td><td>0.02 / 0.03</td><td>159 / 154</td></tr>
+</table>
+<h2>Ladders before and after</h2>
+<p>Default options, ladder from the given grid for the given number of levels (each doubles the grid).</p>
+<table>
+<tr><th>ladder</th><th>status (before / after)</th><th>final-level iterations</th><th>mean error %</th><th>median error %</th><th>max error %</th><th>invalid polygons</th></tr>
+<tr><td>states ladder 64x3</td><td>converged / converged</td><td>74 / 82</td><td>2.86 / 3.37</td><td>2.81 / 3.11</td><td>7.3 / 7.5</td><td>5 / 0</td></tr>
+<tr><td>districts ladder 128x3</td><td>converged / converged</td><td>123 / 134</td><td>0.76 / 0.88</td><td>0.51 / 0.75</td><td>8.3 / 8.4</td><td>48 / 15</td></tr>
+<tr><td>districts ladder 64x4</td><td>converged / stalled</td><td>98 / 50</td><td>1.12 / 1.83</td><td>0.67 / 0.53</td><td>9.6 / 30.4</td><td>109 / 196</td></tr>
+<tr><td>counties ladder 512x3</td><td>stalled / stalled</td><td>50 / 50</td><td>6.95 / 3.4</td><td>0.1 / 0.15</td><td>762.5 / 658.4</td><td>369 / 301</td></tr>
+<tr><td>counties ladder 256x4</td><td>stalled / stalled</td><td>60 / 80</td><td>2.19 / 4.19</td><td>0.12 / 0.09</td><td>295.9 / 645.7</td><td>611 / 321</td></tr>
+<tr><td>counties ladder 128x5</td><td>stalled / stalled</td><td>120 / 60</td><td>17.43 / 15.18</td><td>1.64 / 1.82</td><td>1894.7 / 4333.4</td><td>1311 / 378</td></tr>
+</table>
+<h2>Reading</h2>
+<ul><li>The invalid polygons fall in 9 of the 11 single-grid rows (two rise by two: districts 1024 from 12 to 14); states have none after the change, counties at 128 and 512 fall by half or more.</li><li>Convergence is unchanged on the single grids: every converged run still converges at about the same iteration count. Errors move within noise (districts 256: mean 0.47 to 1.44 %, still converged).</li><li>The ladder rows are mixed because a ladder that is not near convergence is sensitive to small changes: the counties ladders have fewer invalid polygons (611 to 321, 1,311 to 378, 369 to 301), the mean error of the 256 start rises from 2.19 to 4.19 % while the 512 and 128 starts fall, and districts 64x4 changes from converged to stalled. The sub-cell problem of the coarse levels remains and is the subject of issue 167.</li><li>The grid of a square run is up to one cell larger than before, because the domain now grows in both directions to a whole number of cells.</li></ul>
+<div class="figure">
+<img src="fig_invalid.png" alt="Counties on a square grid of 128 (stall rule off): the number of invalid polygons per iteration before and after the change, and the invalid counties (red) at iteration 11.">
+<p class="caption">Counties on a square grid of 128 (stall rule off): the number of invalid polygons per iteration before and after the change, and the invalid counties (red) at iteration 11.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
