@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -94,7 +96,7 @@
 <table>
 <tr><th>Case</th><th>Regions correct</th><th>Non-contiguous regions</th><th>Split groups</th><th>Repair passes</th><th>Wall time</th></tr>
 <tr><td>3x3 synthetic fixture</td><td>9/9 - 9/9</td><td>2 - 2</td><td>-</td><td>15 - 2</td><td>0.07 s - 0.06 s</td></tr>
-<tr><td>US states (154 tiles)</td><td>49/49 - 49/49</td><td>9 - **2**</td><td>-</td><td>15 - 2</td><td>3.07 s - 1.98 s</td></tr>
+<tr><td>US states (154 tiles)</td><td>49/49 - 49/49</td><td>9 - <strong>2</strong></td><td>-</td><td>15 - 2</td><td>3.07 s - 1.98 s</td></tr>
 <tr><td>Districts (1 tile each)</td><td>432/432 - 432/432</td><td>0 - 0</td><td>-</td><td>15 - 3</td><td>5.36 s - 5.14 s</td></tr>
 <tr><td>Districts + <code>group_by</code></td><td>432/432 - 432/432</td><td>0 - 0</td><td>14 - 14</td><td>15 - 2</td><td>5.35 s - 4.99 s</td></tr>
 </table>
