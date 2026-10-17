@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -89,14 +91,12 @@
 <p class="desc">summary.md pages now support numbered lists, nested lists, fenced code blocks and bold. This page is its own example, so it shows the result.</p>
 <h2>What renders now</h2>
 <p>Before, a numbered list became one paragraph and <code>**bold**</code> showed as literal asterisks. The cases below are the ones that now render.</p>
-<p>1. A numbered list with **bold** items. 2. A second item that continues on an indented line, with nested bullets:</p>
-<ul><li>first nested item</li><li>second nested item</li></ul>
-<p>3. A third item.</p>
-<ul><li>A bullet list.</li><li>A nested bullet.</li><li>A second bullet.</li></ul>
+<ol><li>A numbered list with <strong>bold</strong> items.</li><li>A second item that continues on an indented line, with nested bullets:<ul><li>first nested item</li><li>second nested item</li></ul></li><li>A third item.</li></ol>
+<ul><li>A bullet list.<ul><li>A nested bullet.</li></ul></li><li>A second bullet.</li></ul>
 <p>A fenced block is shown as written and is not parsed for lists or bold:</p>
-<p>```python x = 1 &lt; 2</p>
-<ul><li>not a list</li></ul>
-<p>**not bold** ```</p>
+<pre><code>x = 1 &lt; 2
+- not a list
+**not bold**</code></pre>
 <h2>Checks</h2>
 <ul><li>Five new tests cover bold outside code spans, numbered lists, nested lists with continuation lines, a numbered list with nested bullets, and an escaped, unparsed fenced block. The file passes (74 tests).</li><li>The dev index rebuilds all 121 pages without errors.</li></ul>
 

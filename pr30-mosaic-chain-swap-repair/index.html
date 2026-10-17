@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -94,10 +96,10 @@
 <h2>Numbers</h2>
 <table>
 <tr><th>Case</th><th>Regions correct</th><th>Non-contiguous regions</th><th>Split groups</th><th>Wall time</th></tr>
-<tr><td>3x3 synthetic fixture</td><td>9/9 - 9/9</td><td>2 - **0**</td><td>-</td><td>0.06 s - 0.06 s</td></tr>
-<tr><td>US states (154 tiles)</td><td>49/49 - 49/49</td><td>2 - **0**</td><td>-</td><td>2.02 s - 1.61 s</td></tr>
+<tr><td>3x3 synthetic fixture</td><td>9/9 - 9/9</td><td>2 - <strong>0</strong></td><td>-</td><td>0.06 s - 0.06 s</td></tr>
+<tr><td>US states (154 tiles)</td><td>49/49 - 49/49</td><td>2 - <strong>0</strong></td><td>-</td><td>2.02 s - 1.61 s</td></tr>
 <tr><td>Districts (1 tile each)</td><td>432/432 - 432/432</td><td>0 - 0</td><td>-</td><td>5.23 s - 5.34 s</td></tr>
-<tr><td>Districts + <code>group_by</code></td><td>432/432 - 432/432</td><td>0 - 0</td><td>14 - **0**</td><td>5.27 s - 5.42 s</td></tr>
+<tr><td>Districts + <code>group_by</code></td><td>432/432 - 432/432</td><td>0 - 0</td><td>14 - <strong>0</strong></td><td>5.27 s - 5.42 s</td></tr>
 </table>
 <p>(Each cell reads &quot;before - after&quot;.) No metric regresses on any case. Wall time is unchanged within noise; on plain districts the repair finds nothing to do and moves zero tiles.</p>
 <p>Geographic disturbance, measured as the shift of each region&#x27;s tile-centroid in tile widths:</p>
@@ -129,13 +131,10 @@
 <p>Stage 2 is the churn: it moved a fifth of all districts up to seven tile widths for no topology gain at all, and it is also the only stage that runs in the single-tile non-grouped mode where there was nothing to gain. Stage 3 added further movement with no gain. Only stage 1 is kept.</p>
 <h2>Michigan — a possible over-correction, not a win</h2>
 <p>Of the two US states split on the base branch, the two are not equivalent:</p>
-<ul><li>**Washington** is a single-part geometry. Its split was a genuine artifact and closing it is</li></ul>
-<p>a real repair.</p>
-<ul><li>**Michigan** is genuinely two-part: 111 polygons, of which two exceed 5% of area at 70.9%</li></ul>
-<p>and 28.3%. Its tiles being in two blocks either side of the strait is arguably the *correct* outcome, and this branch closes it anyway.</p>
+<ul><li><strong>Washington</strong> is a single-part geometry. Its split was a genuine artifact and closing it is a real repair.</li><li><strong>Michigan</strong> is genuinely two-part: 111 polygons, of which two exceed 5% of area at 70.9% and 28.3%. Its tiles being in two blocks either side of the strait is arguably the *correct* outcome, and this branch closes it anyway.</li></ul>
 <p><code>michigan_before_after.png</code> shows the change: one tile moves one position west so the lower tile joins the upper chain. It is a mild over-correction, and it is caused by the *metric*, not by the repair being reckless — multi-part geometries are not modelled anywhere in the pipeline. <code>components_from_adjacency</code> works on a graph whose nodes are whole geometries, so a MultiPolygon is one node and its internal disconnection is invisible; in <code>tile_count</code> mode each geometry is its own group and is therefore required to form one connected block regardless of its real geography. A consequence that predates this branch: <code>converged</code> can never be True on any input containing a genuinely multi-part region.</p>
-<p>By contrast, none of the 14 grouped-district failures are geographically legitimate: checking state-by-state component counts over the district polygons finds **zero** states whose districts span disconnected geography, and the pipeline already splits groups at component boundaries. All 14 were real failures and closing all 14 is a clean win.</p>
-<p>Deciding how multi-part geometries should be modelled (explode into effective sub-regions? how are tile counts apportioned across parts? what area threshold, given 24 of 49 states have only negligible extra islands?) is a design change and is deliberately **not** made here.</p>
+<p>By contrast, none of the 14 grouped-district failures are geographically legitimate: checking state-by-state component counts over the district polygons finds <strong>zero</strong> states whose districts span disconnected geography, and the pipeline already splits groups at component boundaries. All 14 were real failures and closing all 14 is a clean win.</p>
+<p>Deciding how multi-part geometries should be modelled (explode into effective sub-regions? how are tile counts apportioned across parts? what area threshold, given 24 of 49 states have only negligible extra islands?) is a design change and is deliberately <strong>not</strong> made here.</p>
 <div class="figure">
 <img src="districts_group_by_after.png" alt="Districts + group_by, this branch.">
 <p class="caption">Districts + group_by, this branch.</p>

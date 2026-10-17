@@ -1,0 +1,9 @@
+ETA=old   states     64x3 CONVERGED levels 1 total it    82   0.6s mean    3.37 med   3.11 inv 0
+ETA=old   states     32x5 CONVERGED levels 2 total it   256   0.7s mean    1.96 med   1.72 inv 0
+ETA=old   districts 128x3 CONVERGED levels 1 total it   134   0.9s mean    0.88 med   0.75 inv 15
+ETA=old   districts  64x4 STALLED   levels 4 total it   420   1.5s mean    1.83 med   0.53 inv 196
+ETA=old   districts  32x5 STALLED   levels 5 total it   380   2.8s mean    3.53 med   1.30 inv 177
+ETA=old   counties  512x3 STALLED   levels 3 total it   530  10.5s mean    3.40 med   0.15 inv 301
+ETA=old   counties  256x4 STALLED   levels 4 total it   630  16.8s mean    4.19 med   0.09 inv 321
+ETA=old   counties  128x5 STALLED   levels 5 total it   690  11.6s mean   15.18 med   1.82 inv 378
+ETA=old   counties   64x6 STALLED   levels 6 total it   610  12.8s mean    7.78 med   0.44 inv 419

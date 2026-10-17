@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #171: Stall rule requires a smaller improvement per cycle on fine grids</title>
+<title>PR #171: Stall rule requires an improvement proportional to the distance moved</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -72,7 +74,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #171: Stall rule requires a smaller improvement per cycle on fine grids</h1>
+<h1>PR #171: Stall rule requires an improvement proportional to the distance moved</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
@@ -82,51 +84,55 @@
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/166">#166</a></dd>
 <dt>Branch</dt><dd>feat/stall-grid-scaling</dd>
 <dt>Base</dt><dd>main</dd>
-<dt>Created</dt><dd>2026-10-19 03:00</dd>
-<dt>Before</dt><dd>main @ cf7d1bb</dd>
-<dt>After</dt><dd>feat/stall-grid-scaling @ c2fe797</dd>
-<dt>Inputs</dt><dd>bundled states and congressional districts (population), 3,108 counties and the 15 Arizona and 254 Texas counties from the bundled ACS 2020 snapshot of the county-level PR (population), MorphOptions area_scale 1e-6, square grid with margin 0.5 (the grid code of main, before the square-grid fix of PR 170), n_iter 3000. NUMBA_NUM_THREADS=8.</dd>
+<dt>Created</dt><dd>2026-10-19 12:00</dd>
+<dt>Before</dt><dd>main @ 0491b5b</dd>
+<dt>After</dt><dd>feat/stall-grid-scaling @ 239299d</dd>
+<dt>Inputs</dt><dd>bundled states and congressional districts (population), 3,108 counties and the 15 Arizona and 254 Texas counties from the bundled ACS 2020 snapshot (population), districts and states with lognormal values (seed 0). MorphOptions area_scale 1e-6, square grid with margin 0.5, n_iter 3000 (single grids) or 1000 per level (ladders). NUMBA_NUM_THREADS=8.</dd>
 </dl>
-<p class="desc">A step moves the fastest point dt cells, so progress per iteration falls with the cell size and the fixed 2 % required improvement ended runs on fine grids that were converging. Above 256 cells the required improvement is scaled by 256 over the number of cells. Counties at grid 1024 go from stalled at the start (929 % mean error) to 4.2 %; Arizona&#x27;s counties converge at 512 and 1024; runs at 256 cells and below are identical.</p>
+<p class="desc">The stall rule required a fixed 2 % improvement per window, which ended runs on fine grids that were converging, because a step moves the fastest point dt cells and progress per iteration falls with the cell size. A window now has to improve by stall_min_efficiency (0.05) times the distance the boundaries moved divided by the area-weighted region size. Arizona&#x27;s counties converge at grids 512 and 1024, the states at 2048, all counties at 1024 go from stalled at the start (930 % mean error) to 7.6 %; runs on the default grid are unchanged.</p>
 <h2>Figures</h2>
 <h2>Rule</h2>
-<p><code>stall_min_improvement</code> (2 %) is the improvement of the window minimum of the error ratio that counts as progress. The windows are 10 iterations. The required improvement is now <code>stall_min_improvement * min(1, 256 / cells)</code>, with <code>cells</code> the number of cells along the longer side of the grid, so it is 2 % at 256 cells and below, 1 % at 512, 0.5 % at 1024 and 0.25 % at 2048.</p>
-<h2>Single grids: default rule, scaled rule, no rule</h2>
-<p><code>stall166.py</code> runs every case (the data are in <code>data_stall166.log</code>).</p>
+<p>A step moves the fastest point <code>dt</code> times the adaptive step fraction times the cell size. A region of linear size <code>L</code> changes its area, and with it its error, by a fraction of order <code>distance / L</code>. A window of 10 iterations therefore has to lower a violated component&#x27;s minimum below its best earlier minimum by at least <code>stall_min_efficiency * (sum of the distances of the window) / L</code>, with <code>L = sqrt(sum(T^2) / sum(T))</code> over the target areas <code>T</code>. The option replaces <code>stall_min_improvement</code>, which was never released (it appeared after 2.0.0 in the stall rule of PR 110). At the default grid and <code>dt</code> the requirement is about 1 to 2 % for typical inputs, as before.</p>
+<h2>Single grids: main and this PR</h2>
+<p>Stall detection on in both (the previous column is main, which already has the square-grid fix).</p>
 <table>
-<tr><th>input</th><th>grid</th><th>default rule</th><th>scaled rule (this change)</th><th>no stall rule (3,000 iterations at most)</th></tr>
-<tr><td>AZ counties</td><td>256</td><td>converged, 206 it, mean 2.2 %, max 6 %</td><td>converged, 206 it, mean 2.2 %, max 6 %</td><td>converged, 206 it, mean 2.2 %, max 6 %</td></tr>
-<tr><td>AZ counties</td><td>512</td><td>stalled, 50 it, mean 393.73 %, max 1137.2 %</td><td>converged, 383 it, mean 1.27 %, max 5 %</td><td>converged, 383 it, mean 1.27 %, max 5 %</td></tr>
-<tr><td>AZ counties</td><td>1024</td><td>stalled, 50 it, mean 414.13 %, max 1194.8 %</td><td>converged, 755 it, mean 1.92 %, max 9.9 %</td><td>converged, 755 it, mean 1.92 %, max 9.9 %</td></tr>
-<tr><td>TX counties</td><td>512</td><td>stalled, 50 it, mean 1939.49 %, max 56196.4 %</td><td>stalled, 480 it, mean 11.64 %, max 410.6 %</td><td>completed, 3000 it, mean 6 %, max 355.6 %</td></tr>
-<tr><td>TX counties</td><td>1024</td><td>stalled, 50 it, mean 2054.93 %, max 59399.6 %</td><td>stalled, 960 it, mean 1.72 %, max 47.8 %</td><td>completed, 3000 it, mean 1.72 %, max 47.8 %</td></tr>
-<tr><td>states pop</td><td>256</td><td>converged, 111 it, mean 0.5 %, max 5.9 %</td><td>converged, 111 it, mean 0.5 %, max 5.9 %</td><td>converged, 111 it, mean 0.5 %, max 5.9 %</td></tr>
-<tr><td>states pop</td><td>512</td><td>converged, 213 it, mean 0.59 %, max 7.8 %</td><td>converged, 213 it, mean 0.59 %, max 7.8 %</td><td>converged, 213 it, mean 0.59 %, max 7.8 %</td></tr>
-<tr><td>states pop</td><td>1024</td><td>converged, 420 it, mean 0.74 %, max 9.3 %</td><td>converged, 420 it, mean 0.74 %, max 9.3 %</td><td>converged, 420 it, mean 0.74 %, max 9.3 %</td></tr>
-<tr><td>states pop</td><td>2048</td><td>stalled, 80 it, mean 168.19 %, max 1540.2 %</td><td>converged, 832 it, mean 0.96 %, max 9.7 %</td><td>converged, 832 it, mean 0.96 %, max 9.7 %</td></tr>
-<tr><td>districts pop</td><td>256</td><td>converged, 149 it, mean 0.47 %, max 7.2 %</td><td>converged, 149 it, mean 0.47 %, max 7.2 %</td><td>converged, 149 it, mean 0.47 %, max 7.2 %</td></tr>
-<tr><td>districts pop</td><td>512</td><td>converged, 261 it, mean 0.41 %, max 6.2 %</td><td>converged, 261 it, mean 0.41 %, max 6.2 %</td><td>converged, 261 it, mean 0.41 %, max 6.2 %</td></tr>
-<tr><td>districts pop</td><td>1024</td><td>converged, 510 it, mean 0.54 %, max 8.5 %</td><td>converged, 510 it, mean 0.54 %, max 8.5 %</td><td>converged, 510 it, mean 0.54 %, max 8.5 %</td></tr>
-<tr><td>districts pop</td><td>2048</td><td>converged, 1006 it, mean 0.64 %, max 9.8 %</td><td>converged, 1006 it, mean 0.64 %, max 9.8 %</td><td>converged, 1006 it, mean 0.64 %, max 9.8 %</td></tr>
-<tr><td>counties pop</td><td>1024</td><td>stalled, 50 it, mean 929.39 %, max 57754.3 %</td><td>stalled, 700 it, mean 4.17 %, max 622.9 %</td><td>completed, 3000 it, mean 2.27 %, max 610.4 %</td></tr>
-<tr><td>counties pop</td><td>2048</td><td>stalled, 50 it, mean 968.37 %, max 60180 %</td><td>stalled, 1100 it, mean 3.09 %, max 477 %</td><td>completed, 3000 it, mean 0.94 %, max 385.5 %</td></tr>
+<tr><th>input</th><th>grid</th><th>main</th><th>this PR</th></tr>
+<tr><td>AZ</td><td>256</td><td>converged, 202 it, mean 1.08 %</td><td>converged, 202 it, mean 1.08 %</td></tr>
+<tr><td>AZ</td><td>512</td><td>stalled, 50 it, mean 393.7 %</td><td>converged, 382 it, mean 1.13 %</td></tr>
+<tr><td>AZ</td><td>1024</td><td>stalled, 50 it, mean 414.13 %</td><td>converged, 755 it, mean 1.61 %</td></tr>
+<tr><td>TX</td><td>512</td><td>stalled, 50 it, mean 1939.46 %</td><td>stalled, 590 it, mean 5.45 %</td></tr>
+<tr><td>TX</td><td>1024</td><td>stalled, 50 it, mean 2054.91 %</td><td>stalled, 1050 it, mean 0.48 %</td></tr>
+<tr><td>states</td><td>64</td><td>converged, 82 it, mean 3.37 %</td><td>converged, 82 it, mean 3.37 %</td></tr>
+<tr><td>states</td><td>256</td><td>converged, 111 it, mean 0.71 %</td><td>converged, 111 it, mean 0.71 %</td></tr>
+<tr><td>states</td><td>1024</td><td>converged, 421 it, mean 0.56 %</td><td>converged, 421 it, mean 0.56 %</td></tr>
+<tr><td>states</td><td>2048</td><td>stalled, 90 it, mean 165.85 %</td><td>converged, 833 it, mean 0.93 %</td></tr>
+<tr><td>districts</td><td>64</td><td>stalled, 190 it, mean 32.04 %</td><td>stalled, 100 it, mean 92.9 %</td></tr>
+<tr><td>districts</td><td>256</td><td>converged, 145 it, mean 1.44 %</td><td>converged, 145 it, mean 1.44 %</td></tr>
+<tr><td>districts</td><td>1024</td><td>converged, 511 it, mean 0.63 %</td><td>converged, 511 it, mean 0.63 %</td></tr>
+<tr><td>counties</td><td>1024</td><td>stalled, 50 it, mean 929.62 %</td><td>stalled, 600 it, mean 7.65 %</td></tr>
+<tr><td>counties</td><td>2048</td><td>stalled, 50 it, mean 968.12 %</td><td>stalled, 1100 it, mean 3.15 %</td></tr>
+<tr><td>districts lognormal1</td><td>256</td><td>stalled, 490 it, mean 2.1 %</td><td>stalled, 490 it, mean 2.1 %</td></tr>
+<tr><td>districts lognormal1</td><td>512</td><td>converged, 625 it, mean 0.37 %</td><td>converged, 625 it, mean 0.37 %</td></tr>
+<tr><td>districts lognormal2</td><td>256</td><td>stalled, 350 it, mean 242.67 %</td><td>stalled, 390 it, mean 242.67 %</td></tr>
+<tr><td>districts lognormal2</td><td>512</td><td>stalled, 450 it, mean 148.46 %</td><td>stalled, 510 it, mean 149.68 %</td></tr>
+<tr><td>states lognormal2</td><td>256</td><td>converged, 478 it, mean 0.66 %</td><td>converged, 478 it, mean 0.66 %</td></tr>
+</table>
+<h2>Ladders: main and this PR</h2>
+<p>Default options, ladder from the first grid for the given number of levels.</p>
+<table>
+<tr><th>ladder</th><th>main</th><th>this PR</th></tr>
+<tr><td>states 64x3</td><td>converged, 82 it, mean 3.37 %, 0 invalid</td><td>converged, 82 it, mean 3.37 %, 0 invalid</td></tr>
+<tr><td>states 32x5</td><td>converged, 256 it, mean 1.96 %, 0 invalid</td><td>converged, 256 it, mean 1.96 %, 0 invalid</td></tr>
+<tr><td>districts 128x3</td><td>converged, 134 it, mean 0.88 %, 15 invalid</td><td>converged, 134 it, mean 0.88 %, 15 invalid</td></tr>
+<tr><td>districts 64x4</td><td>stalled, 420 it, mean 1.83 %, 196 invalid</td><td>converged, 200 it, mean 1.07 %, 24 invalid</td></tr>
+<tr><td>districts 32x5</td><td>stalled, 380 it, mean 3.53 %, 177 invalid</td><td>stalled, 360 it, mean 3.53 %, 177 invalid</td></tr>
+<tr><td>counties 512x3</td><td>stalled, 530 it, mean 3.4 %, 301 invalid</td><td>stalled, 550 it, mean 3.4 %, 301 invalid</td></tr>
+<tr><td>counties 256x4</td><td>stalled, 630 it, mean 4.19 %, 321 invalid</td><td>stalled, 700 it, mean 4.19 %, 321 invalid</td></tr>
+<tr><td>counties 128x5</td><td>stalled, 690 it, mean 15.18 %, 378 invalid</td><td>stalled, 690 it, mean 28.37 %, 406 invalid</td></tr>
+<tr><td>counties 64x6</td><td>stalled, 610 it, mean 7.78 %, 419 invalid</td><td>stalled, 850 it, mean 17.13 %, 641 invalid</td></tr>
 </table>
 <h2>Reading</h2>
-<ul><li>At 256 cells and below the three rules agree (same iteration count and error), so default runs on the default grid are unchanged.</li><li>The default rule ends the runs that start far from the target at 512 cells and above after 50 iterations (Arizona and Texas at 512 and 1024, counties at 1024 and 2048, states at 2048), with the error close to the start error. The scaled rule reaches the no-rule result on Arizona (convergence), on the states at 2048 (convergence in 832 iterations) and gets within a factor of 2 to 3 of it on the counties, in a fifth to a third of the iterations.</li><li>Counties and Texas still end as stalled, at 4.2 % and 1.7 % mean error at 1024: the remaining large errors are sub-cell counties, which no longer improve. The no-rule run uses all 3,000 iterations for the same or a slightly lower error.</li><li>Districts and the states up to 1024 are unchanged.</li></ul>
-<h2>Why only above 256 cells</h2>
-<p>256 cells is the default grid and the grid at which <code>stall_min_improvement</code> was set; all tests and earlier explorations of the rule are at 256 or below, and the rule is unchanged there. The evidence supports relaxing the requirement on fine grids, where runs that make steady progress are ended; it does not support tightening it on coarse grids. <code>sym256.py</code> and <code>sym256b.py</code> compare three rules, with the required improvement multiplied by 1 (none), by <code>min(1, 256 / cells)</code> (this change) and by <code>256 / cells</code> at every grid (symmetric):</p>
-<table>
-<tr><th>case</th><th>none</th><th>this change</th><th>symmetric</th></tr>
-<tr><td>states, single grid 32</td><td>stalled, 590 it, 4.0 % mean</td><td>same</td><td>stalled, 80 it, 29.9 % mean</td></tr>
-<tr><td>AZ counties, single grid 32</td><td>converged, 177 it</td><td>same</td><td>stalled, 130 it, 6.9 % mean</td></tr>
-<tr><td>districts, single grid 64</td><td>stalled, 240 it, 34 % mean</td><td>same</td><td>stalled, 90 it, 92 % mean</td></tr>
-<tr><td>states ladder 32 x 5</td><td>converged, 256 it, 1.96 %</td><td>same</td><td>converged, 117 it, 0.93 %</td></tr>
-<tr><td>districts ladder 64 x 4</td><td>stalled, 196 invalid, 1.83 %</td><td>same</td><td>converged, 200 it, 1.07 %, 24 invalid</td></tr>
-<tr><td>districts ladder 32 x 5</td><td>stalled, 3.53 %</td><td>same</td><td>same</td></tr>
-<tr><td>counties ladder 256 x 4 or 512 x 3</td><td>4.19 % or 3.40 %</td><td>same</td><td>same</td></tr>
-<tr><td>counties ladder 128 x 5</td><td>15.2 %</td><td>same</td><td>28.4 %</td></tr>
-</table>
-<p>The symmetric rule makes coarse levels of a ladder give up sooner, which helps the districts ladder from a start that is too coarse. It also ends single runs on coarse grids that were converging (states at 32 cells, Arizona at 32), and it is worse on the counties ladder from 128. Stopping an unresolvable coarse level early is a question about ladders, not about the grid size, so it is left to issue 167 as a per-level rule.</p>
+<ul><li>On the default grid and coarser, results are identical where runs converge (Arizona 256, states 64 to 1024, districts 256 and 1024). Runs with the stall rule at work on genuinely hard values (lognormal, sigma 1 and 2) are unchanged within 60 iterations.</li><li>The runs that the old rule ended after 50 iterations at 512 cells and above (Arizona 512 and 1024, Texas, states at 2048, all counties at 1024 and 2048) now run until they converge or make no more progress.</li><li>Districts on a grid of 64 cells (76 % of the districts below one cell) stall after 100 instead of 190 iterations with a worse best iterate (92.9 % against 32.0 % mean error); that start is not usable in either case.</li><li>In ladders only the starts that are too coarse change: districts 64x4 converges (in 200 iterations, 24 invalid polygons) instead of stalling after 420 (196 invalid); counties from 64 and 128 cells end at 17.1 and 28.4 % mean error against 7.8 and 15.2 % on main. The sub-cell damage of coarse levels remains the subject of issue 167.</li><li>The ladder from 256 or 512 cells on counties is identical to main (4.2 and 3.4 % mean error).</li></ul>
 <h2>Expected against observed change</h2>
 <p>The scaling by <code>256 / cells</code> is a proxy. The expected progress of a window can be stated directly. In a window the fastest point moves <code>dt * fraction * cell</code> per iteration, so the boundaries move a distance <code>d</code> in total, and a region of linear size <code>L</code> changes its area, and with it its error, by a fraction of order <code>d / L</code> (perimeter times displacement over area). The efficiency of a window is</p>
 <p><code>eta = (relative decrease of the error ratio over the window) / (d / L)</code>,</p>
@@ -142,7 +148,7 @@
 <tr><td>districts, lognormal values, sigma 2</td><td>0.33 to 0.40</td><td>0.22 to 0.32</td></tr>
 </table>
 <p>For one input <code>eta</code> is the same on every grid (Arizona with the mean region size: 0.22, 0.22, 0.22, 0.28 at grids 128, 256, 512, 1024; the first-window decrease itself falls exactly as 1 / grid: 4.8 %, 2.5 %, 1.25 %, 0.63 %), so the <code>1 / grid</code> scaling is the grid part of this expression. The expression adds the dependence on <code>dt</code>, the adaptive step fraction and the region size, and <code>eta</code> of healthy runs lies between 0.2 and 3, a factor of ten above the sub-cell dominated counties (0.06).</p>
-<p>A rule that requires an improvement of <code>eta_min * d / L</code> per window, with <code>eta_min</code> a constant, was run on the same cases (<code>eta_try.py</code>, <code>eta_lad.py</code>; patch in <code>eta_rule_experiment.patch</code>). Outcomes (status, iterations, mean error) for <code>eta_min</code> from 0.03 to 0.1:</p>
+<p>The experiment that led to the rule of this PR compared it with the earlier one-way scaling by <code>256 / cells</code> (<code>eta_try.py</code>, <code>eta_lad.py</code>; patch in <code>eta_rule_experiment.patch</code>), on the grid code before the square-grid fix. Outcomes (status, iterations, mean error) for <code>eta_min</code> from 0.03 to 0.1:</p>
 <table>
 <tr><th>case</th><th>one-way scaling (this PR)</th><th>eta rule, eta_min 0.03 to 0.1</th></tr>
 <tr><td>Arizona 256, 512, 1024; states 64 to 2048; districts 256, 1024</td><td>converged</td><td>identical</td></tr>
@@ -154,10 +160,9 @@
 <tr><td>ladder counties 128x5 and 64x6</td><td>17.4 and 31.3 %</td><td>16.9 and 30.8 %</td></tr>
 </table>
 <p>At <code>eta_min</code> 0.2 the all-counties runs stall at the start (929 %), so the usable range is about 0.03 to 0.1 and 0.05 is its middle. With the mean region size instead of the area-weighted one the counties stall at 0.04 already, because the many sub-cell counties make the mean size small; the area-weighted size is the one that matches.</p>
-<p>So the rule needs no reference grid and no one-way scaling: the required improvement follows from what the step can do. It also reproduces the fixed 2 % rule on the default grid for typical inputs (<code>d / L</code> of about 0.3 gives 1.5 %).</p>
 <div class="figure">
-<img src="fig_counties.png" alt="Counties by population on a single grid of 1024 with default options, before (stalled after 50 iterations at 929 % mean error) and after (stalled after 700 iterations at 4.2 %). Color is log2(area/target); red is too large.">
-<p class="caption">Counties by population on a single grid of 1024 with default options, before (stalled after 50 iterations at 929 % mean error) and after (stalled after 700 iterations at 4.2 %). Color is log2(area/target); red is too large.</p>
+<img src="fig_counties.png" alt="Counties by population on a single grid of 1024 with default options, main (stalled after 50 iterations, 929.6 % mean error) and this PR (stalled after 600 iterations, 7.6 %). Color is log2(area/target); red is too large.">
+<p class="caption">Counties by population on a single grid of 1024 with default options, main (stalled after 50 iterations, 929.6 % mean error) and this PR (stalled after 600 iterations, 7.6 %). Color is log2(area/target); red is too large.</p>
 </div>
 <a class="back" href="../index.html">&larr; back to index</a>
 

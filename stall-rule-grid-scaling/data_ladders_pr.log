@@ -1,0 +1,9 @@
+ETA=new   states     64x3 CONVERGED levels 1 total it    82   0.4s mean    3.37 med   3.11 inv 0
+ETA=new   states     32x5 CONVERGED levels 2 total it   256   0.5s mean    1.96 med   1.72 inv 0
+ETA=new   districts 128x3 CONVERGED levels 1 total it   134   1.0s mean    0.88 med   0.75 inv 15
+ETA=new   districts  64x4 CONVERGED levels 2 total it   200   0.8s mean    1.07 med   0.62 inv 24
+ETA=new   districts  32x5 STALLED   levels 5 total it   360   3.4s mean    3.53 med   1.30 inv 177
+ETA=new   counties  512x3 STALLED   levels 3 total it   550  10.8s mean    3.40 med   0.15 inv 301
+ETA=new   counties  256x4 STALLED   levels 4 total it   700  16.6s mean    4.19 med   0.09 inv 321
+ETA=new   counties  128x5 STALLED   levels 5 total it   690  13.2s mean   28.37 med   4.16 inv 406
+ETA=new   counties   64x6 STALLED   levels 6 total it   850  15.0s mean   17.13 med   1.25 inv 641

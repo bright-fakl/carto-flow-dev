@@ -34,7 +34,9 @@
   .status.done { color: #4a7a4a; }
   th { background: rgba(0,0,0,0.05); }
   code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
-  ul { padding-left: 1.4rem; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
   dl.meta-list { margin: 1rem 0; }
   dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
   dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
@@ -89,13 +91,13 @@
 <p class="desc">The example simplified to 5 km and never densified, leaving 519 km straight segments that cannot bend during the morph. 45 warnings across 22 keyframes, and invalid output geometry in every one of them. Densifying to 2 km cuts warnings to 1 and invalid polygons from 92 to 15, at no runtime cost.</p>
 <h2>The cause</h2>
 <p>The example simplified and never densified:</p>
-<p>``<code>python us_states = carto_flow.simplify_coverage(us_states, tolerance=5000) </code>``</p>
-<p><code>simplify_coverage</code> drops vertices along gentle boundaries. On this input it takes the longest straight segment from 5 km to **519 km** while cutting vertices from 34,510 to 6,752. A segment with no interior vertices cannot bend during the morph, which is exactly what the solver warns about - 45 times across the 22 keyframes.</p>
+<pre><code>us_states = carto_flow.simplify_coverage(us_states, tolerance=5000)</code></pre>
+<p><code>simplify_coverage</code> drops vertices along gentle boundaries. On this input it takes the longest straight segment from 5 km to <strong>519 km</strong> while cutting vertices from 34,510 to 6,752. A segment with no interior vertices cannot bend during the morph, which is exactly what the solver warns about - 45 times across the 22 keyframes.</p>
 <h2>The warnings were pointing at real damage</h2>
 <p>The warnings are advisory, so the obvious reading is that they are noise. They are not. Checking the output geometry:</p>
 <table>
 <tr><th></th><th>invalid keyframes</th><th>invalid polygons</th></tr>
-<tr><td>before (simplify only)</td><td>**22 / 22**</td><td>**92**</td></tr>
+<tr><td>before (simplify only)</td><td><strong>22 / 22</strong></td><td><strong>92</strong></td></tr>
 <tr><td>after (simplify + densify 2 km)</td><td>9 / 22</td><td>15</td></tr>
 </table>
 <p>Every keyframe the example produced contained self-intersecting polygons. A segment that cannot bend folds over itself instead. This was severe enough that <code>union_all()</code> over a before-frame raises a GEOS <code>TopologyException</code> outright, which is how it surfaced while measuring.</p>
@@ -104,7 +106,7 @@
 <table>
 <tr><th>densify</th><th>vertices</th><th>warnings</th><th>invalid keyframes</th><th>invalid polygons</th><th>runtime</th></tr>
 <tr><td>none (current)</td><td>6,752</td><td>45</td><td>22 / 22</td><td>92</td><td>5.9 s</td></tr>
-<tr><td>**2,000 m**</td><td>**54,650**</td><td>**1**</td><td>**9 / 22**</td><td>**15**</td><td>**5.9 s**</td></tr>
+<tr><td><strong>2,000 m</strong></td><td><strong>54,650</strong></td><td><strong>1</strong></td><td><strong>9 / 22</strong></td><td><strong>15</strong></td><td><strong>5.9 s</strong></td></tr>
 <tr><td>1,000 m</td><td>105,129</td><td>0</td><td>17 / 22</td><td>45</td><td>7.3 s</td></tr>
 <tr><td>500 m</td><td>206,475</td><td>0</td><td>22 / 22</td><td>146</td><td>10.3 s</td></tr>
 </table>
@@ -114,9 +116,7 @@
 <h2>Residual, not fixed here</h2>
 <p>15 self-intersecting polygons remain across 9 keyframes, all of kind <code>Self-intersection</code>, concentrated in Michigan (4), Maryland (3) and Nevada (2), with Oregon, New Mexico, Idaho, Wyoming, New Jersey and Maine contributing one each. Michigan and Maryland are the two shapes most prone to this in every mosaic and flow test so far, so the residual looks like the known behavior of the morph under strong distortion rather than anything specific to this example. Reducing 92 to 15 is the scope of this change; driving it to zero is not, and would need work in the morph rather than in an example.</p>
 <h2>Verification</h2>
-<ul><li>22 keyframes rendered for every densification setting in the table, counting</li></ul>
-<p>warnings, invalid keyframes and invalid polygons per setting.</p>
-<ul><li>Runtime measured twice per setting.</li><li><code>ruff check</code> and <code>ruff format</code> clean on the example.</li></ul>
+<ul><li>22 keyframes rendered for every densification setting in the table, counting warnings, invalid keyframes and invalid polygons per setting.</li><li>Runtime measured twice per setting.</li><li><code>ruff check</code> and <code>ruff format</code> clean on the example.</li></ul>
 <div class="figure">
 <img src="before-after-keyframes.png" alt="Three of the 22 keyframes, before and after. The cartograms are substantively identical: the fix removes warnings and repairs geometry without changing what the example shows.">
 <p class="caption">Three of the 22 keyframes, before and after. The cartograms are substantively identical: the fix removes warnings and repairs geometry without changing what the example shows.</p>
