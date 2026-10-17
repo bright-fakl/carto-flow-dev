@@ -1,0 +1,9 @@
+start: county mean 1000.16% median 144.79% max 44126.4% invalid 0
+stage1 converged 212 3.1s
+state error mean 0.45% max 6.20%
+after stage1: county mean 506.29% median 143.96% max 45536.9% invalid 0
+stage2 17.0s; states not converged: [('06', 58, 'stalled', 240), ('13', 159, 'stalled', 270), ('48', 254, 'stalled', 430), ('51', 133, 'stalled', 190)]
+seam (symmetric difference of state outline, % of state area): median 34.8 max 106.4
+after stage2: county mean 3.48% median 1.07% max 589.6% invalid 168
+polish stalled 50 0.8s
+after polish: county mean 3.61% median 1.25% max 587.1% invalid 168
