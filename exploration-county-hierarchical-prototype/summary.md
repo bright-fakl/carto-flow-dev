@@ -1,7 +1,7 @@
 ---
 issue: 129
-title: Hierarchical flow morph on counties: first prototype
-description: Morphing the states first (county vertices carried along) and then each state's counties on a grid fitted to the state brings the county median error from 144 % to 1.1 % and the mean from 1000 % to 3.5 % in about 25 s, against 22 % mean for the global multiresolution run. Without a fixed outline the states overlap by 11.6 % of the map and a global polish does not repair it. Separately, a plain state at grid 512 or finer stalls at its start error because the step is dt grid cells and the stall rule fires before enough iterations have run.
+title: County flow cartograms: hierarchical prototype, and the stall rule as the main obstacle
+description: A single global morph of the 3,108 counties reaches a mean error of 1.0 % and a median of 0.01 % at grid 2048 (126 s) and 2.2 % / 0.13 % at grid 1024 (23 s) once the stall rule is off; with only stall_min_improvement lowered to 0.002 the default stack reaches 5.4 % mean at 1024 in 8 s. The earlier county failures were the stall rule ending slow progress after 50 iterations, not sub-cell regions alone. The hierarchical prototype (states first, then counties per state) fixes the county areas but leaves the state outlines free, so the states overlap by 11.6 %; it is not needed to get a county cartogram. A plain Arizona (15 counties) converges at every grid once the stall rule is off.
 kind: exploration
 topic: flow
 status: open
@@ -14,7 +14,21 @@ inputs: 3,108 contiguous counties from cb_2020_us_county_500k with the 2020 Cens
 
 `prep_counties.py` builds the set, `hier129.py` runs the three stages (member grid, state grid and polish grid as arguments), `hier_ladder.py` runs stage 2 as a ladder, `probe_az*.py` are the Arizona probes. Logs are in `data/`.
 
-## Prototype
+## Global morph without the stall rule
+
+A single morph of all counties (`hier_global.py`; `MorphOptions(grid=N, grid_margin=0.5, grid_square=True, area_scale=1e-6, stall_patience=None)`), from the original geometries. State error is computed from the summed county areas.
+
+| grid | iterations | time | county mean / median / p95 / max % | state mean / max % | counties off by > 10 % (target < 1 cell) | invalid |
+|---|---|---|---|---|---|---|
+| 512 | 2000 | 17 s | 12.2 / 1.24 / 54 / 651 | 1.65 / 16.5 | | 408 |
+| 1024 | 1500 and 4000 (same result) | 23 s / 50 s | 2.25 / 0.13 / 8.7 / 458 | 0.22 / 3.6 | 142 (90 of them) | 228 |
+| 2048 | 4000 | 126 s | 1.02 / 0.01 / 1.2 / 356 | 0.04 / 1.2 | 57 (15 of them) | 127 |
+
+At grid 1024 the default stall rule ends at 50 iterations with a mean error of 929 %. Lowering only `stall_min_improvement` (patience 4) to 0.002 gives a run of 650 iterations in 8 s with mean 5.41 %, median 0.18 %, max 627 % (status stalled); 0.0005 with patience 6 gives the same. The invalid polygons are self-intersections (226 of 228 at 1024); 98 of the 127 at 2048 belong to counties within 5 % of their target. Starting the global morph from the state stage output is not better (1024: mean 5.49 %, 171 invalid).
+
+figure: fig_global.png — County area error log2(area/target) of the single-grid result at grid 1024 and 2048, stall rule off. The remaining large errors are a few sub-cell counties around Washington (grid 1024: a patch in Virginia and Maryland).
+
+## Hierarchical prototype
 
 1. **States.** The counties of each state are dissolved and the 49 states are morphed to their population (grid 512), with every county vertex passed as `coords`, so the counties follow the state flow. 3 s, converged in 212 iterations, state area error mean 0.45 %, max 6.2 %.
 2. **Members.** Each state's counties are morphed on a grid fitted to the state, independently, with the outline free.
@@ -33,7 +47,8 @@ figure: fig_stages.png — County area error log2(area/target) at the start, aft
 
 ## Open
 
-- Pin or decompose the outline (issue options 1 to 3). Option 2 (global flow from the state level plus a local part from each member's deviation from the state mean density) fits the prototype best: stage 1 already provides the global part.
+- The hierarchical approach is not needed to get a county cartogram: the global morph is far better once it runs long enough. It remains an option for speed and for the sub-cell counties.
+- Pin or decompose the outline (issue options 1 to 3), if the hierarchical approach is pursued. Option 2 (global flow from the state level plus a local part from each member's deviation from the state mean density) fits the prototype best: stage 1 already provides the global part.
 - Step size in physical units, or a stall rule that counts progress per distance moved, so a far start on a fine grid is not cut off (separate issue candidate).
 - Invalid output polygons (168 at member grid 256) need the repair the flow output already has an issue for (#85).
 - Counties with the vote values of the earlier explorations, to compare directly.

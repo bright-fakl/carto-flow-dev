@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hierarchical flow morph on counties: first prototype</title>
+<title>County flow cartograms: hierarchical prototype, and the stall rule as the main obstacle</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,7 +72,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>Hierarchical flow morph on counties: first prototype</h1>
+<h1>County flow cartograms: hierarchical prototype, and the stall rule as the main obstacle</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>exploration</dd>
 <dt>Topic</dt><dd>flow</dd>
@@ -84,16 +84,28 @@
 <dt>After</dt><dd>the same checkout; prototype scripts only, no library change</dd>
 <dt>Inputs</dt><dd>3,108 contiguous counties from cb_2020_us_county_500k with the 2020 Census population estimate (co-est2020-alldata.csv), ESRI:102008, coverage-simplified at 1000 m with 5 km segments. The vote set of the earlier explorations is not available, so the numbers are not comparable one to one. MorphOptions grid_margin 0.5, square, area_scale 1e-6, n_iter 500; NUMBA_NUM_THREADS=8. Error is the output area against the population share of the total output area.</dd>
 </dl>
-<p class="desc">Morphing the states first (county vertices carried along) and then each state&#x27;s counties on a grid fitted to the state brings the county median error from 144 % to 1.1 % and the mean from 1000 % to 3.5 % in about 25 s, against 22 % mean for the global multiresolution run. Without a fixed outline the states overlap by 11.6 % of the map and a global polish does not repair it. Separately, a plain state at grid 512 or finer stalls at its start error because the step is dt grid cells and the stall rule fires before enough iterations have run.</p>
+<p class="desc">A single global morph of the 3,108 counties reaches a mean error of 1.0 % and a median of 0.01 % at grid 2048 (126 s) and 2.2 % / 0.13 % at grid 1024 (23 s) once the stall rule is off; with only stall_min_improvement lowered to 0.002 the default stack reaches 5.4 % mean at 1024 in 8 s. The earlier county failures were the stall rule ending slow progress after 50 iterations, not sub-cell regions alone. The hierarchical prototype (states first, then counties per state) fixes the county areas but leaves the state outlines free, so the states overlap by 11.6 %; it is not needed to get a county cartogram. A plain Arizona (15 counties) converges at every grid once the stall rule is off.</p>
 <p><code>prep_counties.py</code> builds the set, <code>hier129.py</code> runs the three stages (member grid, state grid and polish grid as arguments), <code>hier_ladder.py</code> runs stage 2 as a ladder, <code>probe_az*.py</code> are the Arizona probes. Logs are in <code>data/</code>.</p>
-<h2>Prototype</h2>
+<h2>Global morph without the stall rule</h2>
+<p>A single morph of all counties (<code>hier_global.py</code>; <code>MorphOptions(grid=N, grid_margin=0.5, grid_square=True, area_scale=1e-6, stall_patience=None)</code>), from the original geometries. State error is computed from the summed county areas.</p>
+<table>
+<tr><th>grid</th><th>iterations</th><th>time</th><th>county mean / median / p95 / max %</th><th>state mean / max %</th><th>counties off by &gt; 10 % (target &lt; 1 cell)</th><th>invalid</th></tr>
+<tr><td>512</td><td>2000</td><td>17 s</td><td>12.2 / 1.24 / 54 / 651</td><td>1.65 / 16.5</td><td></td><td>408</td></tr>
+<tr><td>1024</td><td>1500 and 4000 (same result)</td><td>23 s / 50 s</td><td>2.25 / 0.13 / 8.7 / 458</td><td>0.22 / 3.6</td><td>142 (90 of them)</td><td>228</td></tr>
+<tr><td>2048</td><td>4000</td><td>126 s</td><td>1.02 / 0.01 / 1.2 / 356</td><td>0.04 / 1.2</td><td>57 (15 of them)</td><td>127</td></tr>
+</table>
+<p>At grid 1024 the default stall rule ends at 50 iterations with a mean error of 929 %. Lowering only <code>stall_min_improvement</code> (patience 4) to 0.002 gives a run of 650 iterations in 8 s with mean 5.41 %, median 0.18 %, max 627 % (status stalled); 0.0005 with patience 6 gives the same. The invalid polygons are self-intersections (226 of 228 at 1024); 98 of the 127 at 2048 belong to counties within 5 % of their target. Starting the global morph from the state stage output is not better (1024: mean 5.49 %, 171 invalid).</p>
+<h2>Hierarchical prototype</h2>
 <p>1. **States.** The counties of each state are dissolved and the 49 states are morphed to their population (grid 512), with every county vertex passed as <code>coords</code>, so the counties follow the state flow. 3 s, converged in 212 iterations, state area error mean 0.45 %, max 6.2 %. 2. **Members.** Each state&#x27;s counties are morphed on a grid fitted to the state, independently, with the outline free. 3. **Polish.** One global morph on the result.</p>
 <h2>Findings</h2>
 <ul><li>**Stage 2 fixes the county areas.** Member grid 256, single level: 17 to 20 s for 49 states, median county error 1.07 %, mean 3.48 %, 168 invalid output polygons; four states (CA, GA, TX, VA) stall. Start 1000 % mean, 145 % median; after stage 1, 506 % and 144 %. The global multiresolution run on the earlier county set had 22 % mean and no converged level.</li><li>**The outline is not fixed, so the states overlap.** The symmetric difference of a state&#x27;s outline before and after stage 2 is a median 35 % of the state area. The sum of the state areas exceeds the area of their union by 11.6 % (figure). The polish at grid 512 stalls after 50 iterations and changes neither (11.8 %). Pinning the outline (options 1 to 3 of the issue) is required, not optional.</li><li>**Finer member grids fail for a different reason than sub-cell regions.** At member grid 512, nine states stall after 50 iterations and the county mean is 232 %. Arizona alone (15 counties, none below one cell) shows why: start mean error 446 %; after 120 iterations the mean error is 155 % at grid 256 and 252 % at grid 512. The step moves the fastest point <code>dt</code> grid cells, so the distance per iteration is proportional to the cell size and the iterations needed grow with the grid. The stall rule (2 % improvement over a cycle) then ends the run at 50 iterations, near the start error (grid 512: 405 %, grid 1024: 426 %); without the rule, 300 iterations reach 117 %. <code>adaptive_dt</code> off and <code>dt</code> 0.05 give the same result. This is probably the unexplained &quot;fine start fails&quot; of the multires-start exploration: a region far from its target on a fine grid needs more iterations than the stall rule allows.</li><li>**A ladder per state is not better.** Stage 2 as a ladder 64 to 512: 24 s, mean 10.6 %, median 1.74 %, 497 invalid, 13 states not converged. The coarse levels meet the sub-cell problem again at the scale of the state.</li></ul>
 <h2>Stages</h2>
 <h2>Open</h2>
-<ul><li>Pin or decompose the outline (issue options 1 to 3). Option 2 (global flow from the state level plus a local part from each member&#x27;s deviation from the state mean density) fits the prototype best: stage 1 already provides the global part.</li><li>Step size in physical units, or a stall rule that counts progress per distance moved, so a far start on a fine grid is not cut off (separate issue candidate).</li><li>Invalid output polygons (168 at member grid 256) need the repair the flow output already has an issue for (#85).</li><li>Counties with the vote values of the earlier explorations, to compare directly.</li></ul>
+<ul><li>The hierarchical approach is not needed to get a county cartogram: the global morph is far better once it runs long enough. It remains an option for speed and for the sub-cell counties.</li><li>Pin or decompose the outline (issue options 1 to 3), if the hierarchical approach is pursued. Option 2 (global flow from the state level plus a local part from each member&#x27;s deviation from the state mean density) fits the prototype best: stage 1 already provides the global part.</li><li>Step size in physical units, or a stall rule that counts progress per distance moved, so a far start on a fine grid is not cut off (separate issue candidate).</li><li>Invalid output polygons (168 at member grid 256) need the repair the flow output already has an issue for (#85).</li><li>Counties with the vote values of the earlier explorations, to compare directly.</li></ul>
 <div class="figure">
+<img src="fig_global.png" alt="County area error log2(area/target) of the single-grid result at grid 1024 and 2048, stall rule off. The remaining large errors are a few sub-cell counties around Washington (grid 1024: a patch in Virginia and Maryland).">
+<p class="caption">County area error log2(area/target) of the single-grid result at grid 1024 and 2048, stall rule off. The remaining large errors are a few sub-cell counties around Washington (grid 1024: a patch in Virginia and Maryland).</p>
+</div><div class="figure">
 <img src="fig_stages.png" alt="County area error log2(area/target) at the start, after the state stage, after the member stage (grid 256) and after the polish; thin lines are the state outlines of the dissolved counties. After stage 2 the counties are at their target (grey), but the states overlap.">
 <p class="caption">County area error log2(area/target) at the start, after the state stage, after the member stage (grid 256) and after the polish; thin lines are the state outlines of the dissolved counties. After stage 2 the counties are at their target (grey), but the states overlap.</p>
 </div>
