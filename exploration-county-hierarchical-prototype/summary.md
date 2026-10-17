@@ -24,12 +24,12 @@ inputs: 3,108 contiguous counties from cb_2020_us_county_500k with the 2020 Cens
 
 ## Recommended next steps
 
-- **Ladder robustness, not a retuned start rule.** Changing the `"auto"` start rule to give 256 here would fit it to the cases tested. Instead find out what goes wrong at a coarse level with many sub-cell regions (tangled counties that finer levels do not repair) and whether the ladder can be made robust to it, then judge the result on a wider set of inputs: states, districts, counties, other value distributions and a second county dataset.
-- **Stall rule independent of the grid.** Test a required improvement that scales with the cell size, or a progress measure per distance moved, on Arizona, districts at 1024 and counties at 1024 and 2048. Issue candidate; ladders are affected little.
-- **Other county data.** Rerun with a second value set (votes or another census variable) so the numbers compare with the earlier reports and with other value distributions, and add counties to the benchmarks (#113).
-- **Invalid output polygons.** A repair is ruled out because it changes the vertices and breaks animation. Measure only whether the number falls with the finest grid or a longer final level (single grid 2048: 127 invalid; ladder: 689).
-- **#129.** Retitle it to the county question and move the hierarchical idea to a later speed and sub-cell follow-up. If pursued, start from option 2 (global flow from the state level plus a local part from each member's deviation from the state mean density).
-- **Docs (optional).** Add a county example once the ladder behavior is settled.
+- Ladder robustness, not a retuned start rule. Changing the `"auto"` start rule to give 256 here would fit it to the cases tested. Instead find out what goes wrong at a coarse level with many sub-cell regions (tangled counties that finer levels do not repair) and whether the ladder can be made robust to it, then judge the result on a wider set of inputs: states, districts, counties, other value distributions and a second county dataset.
+- Stall rule independent of the grid. Test a required improvement that scales with the cell size, or a progress measure per distance moved, on Arizona, districts at 1024 and counties at 1024 and 2048. Issue candidate; ladders are affected little.
+- Other county data. Rerun with a second value set (votes or another census variable) so the numbers compare with the earlier reports and with other value distributions, and add counties to the benchmarks (#113).
+- Invalid output polygons. A repair is ruled out because it changes the vertices and breaks animation. Measure only whether the number falls with the finest grid or a longer final level (single grid 2048: 127 invalid; ladder: 689).
+- #129. Retitle it to the county question and move the hierarchical idea to a later speed and sub-cell follow-up. If pursued, start from option 2 (global flow from the state level plus a local part from each member's deviation from the state mean density).
+- Docs (optional). Add a county example once the ladder behavior is settled.
 
 ## Global morph without the stall rule
 
@@ -47,7 +47,7 @@ figure: fig_global.png — County area error log2(area/target) of the single-gri
 
 ## Resolution ladder
 
-`ladder2.py` runs `CartogramWorkflow.morph_multiresolution` with one `MorphOptions` per level (n_iter 1000 per level, margin 0.5, square) and reports every level. A ladder that starts at 256 and ends at 2048 (4 levels) converges to a usable result with the **default** stall rule in 12 s. The earlier county failures started at 128, where 89 % of the counties are below one cell.
+`ladder2.py` runs `CartogramWorkflow.morph_multiresolution` with one `MorphOptions` per level (n_iter 1000 per level, margin 0.5, square) and reports every level. A ladder that starts at 256 and ends at 2048 (4 levels) converges to a usable result with the default stall rule in 12 s. The earlier county failures started at 128, where 89 % of the counties are below one cell.
 
 | ladder | stall rule | dt per level | time | level 256 | 512 | 1024 | 2048 (mean / median % , invalid) |
 |---|---|---|---|---|---|---|---|
@@ -64,23 +64,23 @@ figure: fig_global.png — County area error log2(area/target) of the single-gri
 
 The level columns give the mean error after the levels at grids 256, 512, 1024 and 2048 for the 256 start. The 512-start row lists its levels 512, 1024 and 2048 under the 512, 1024 and 2048 columns; the 128 and 64 rows list only the final level.
 
-- **Levels 256 and 512 never converge** (sub-cell regions: mean 70 % and 37 %); the work is done at 1024 and 2048, where the shares under one cell are 5 % and 0.3 %.
-- **The dt schedule changes little.** Constant physical step (dt doubling per level, capped at 1.0) and a half-size schedule end within 2 to 8 % mean error, with the default `0.2` best or equal. The stall rule threshold does not matter either once the ladder starts at 256.
-- **The starting grid matters most.** Starting at 128 or 64 leaves the coarse level with tangled counties (1,660 and 2,360 invalid polygons) that finer levels do not repair; starting at 512 is worse than starting at 256 (6.4 % against 2.1 %), the fine-start effect again.
-- **Against the single grid.** Single grid 2048 with the stall rule off reaches 1.0 % mean and 127 invalid polygons in 126 s; the ladder reaches 2.1 % and 689 invalid in 12 s. The ladder's output has about five times as many invalid polygons.
+- Levels 256 and 512 never converge (sub-cell regions: mean 70 % and 37 %); the work is done at 1024 and 2048, where the shares under one cell are 5 % and 0.3 %.
+- The dt schedule changes little. Constant physical step (dt doubling per level, capped at 1.0) and a half-size schedule end within 2 to 8 % mean error, with the default `0.2` best or equal. The stall rule threshold does not matter either once the ladder starts at 256.
+- The starting grid matters most. Starting at 128 or 64 leaves the coarse level with tangled counties (1,660 and 2,360 invalid polygons) that finer levels do not repair; starting at 512 is worse than starting at 256 (6.4 % against 2.1 %), the fine-start effect again.
+- Against the single grid. Single grid 2048 with the stall rule off reaches 1.0 % mean and 127 invalid polygons in 126 s; the ladder reaches 2.1 % and 689 invalid in 12 s. The ladder's output has about five times as many invalid polygons.
 
 ## Hierarchical prototype
 
-1. **States.** The counties of each state are dissolved and the 49 states are morphed to their population (grid 512), with every county vertex passed as `coords`, so the counties follow the state flow. 3 s, converged in 212 iterations, state area error mean 0.45 %, max 6.2 %.
-2. **Members.** Each state's counties are morphed on a grid fitted to the state, independently, with the outline free.
-3. **Polish.** One global morph on the result.
+1. States. The counties of each state are dissolved and the 49 states are morphed to their population (grid 512), with every county vertex passed as `coords`, so the counties follow the state flow. 3 s, converged in 212 iterations, state area error mean 0.45 %, max 6.2 %.
+2. Members. Each state's counties are morphed on a grid fitted to the state, independently, with the outline free.
+3. Polish. One global morph on the result.
 
 ## Findings
 
-- **Stage 2 fixes the county areas.** Member grid 256, single level: 17 to 20 s for 49 states, median county error 1.07 %, mean 3.48 %, 168 invalid output polygons; four states (CA, GA, TX, VA) stall. Start 1000 % mean, 145 % median; after stage 1, 506 % and 144 %. The global multiresolution run on the earlier county set had 22 % mean and no converged level.
-- **The outline is not fixed, so the states overlap.** The symmetric difference of a state's outline before and after stage 2 is a median 35 % of the state area. The sum of the state areas exceeds the area of their union by 11.6 % (figure). The polish at grid 512 stalls after 50 iterations and changes neither (11.8 %). Pinning the outline (options 1 to 3 of the issue) is required, not optional.
-- **Finer member grids fail for a different reason than sub-cell regions.** At member grid 512, nine states stall after 50 iterations and the county mean is 232 %. Arizona alone (15 counties, none below one cell) shows why: start mean error 446 %; after 120 iterations the mean error is 155 % at grid 256 and 252 % at grid 512. The step moves the fastest point `dt` grid cells, so the distance per iteration is proportional to the cell size and the iterations needed grow with the grid. The stall rule (2 % improvement over a cycle) then ends the run at 50 iterations, near the start error (grid 512: 405 %, grid 1024: 426 %); without the rule, 300 iterations reach 117 %. `adaptive_dt` off and `dt` 0.05 give the same result. This is probably the unexplained "fine start fails" of the multires-start exploration: a region far from its target on a fine grid needs more iterations than the stall rule allows.
-- **A ladder per state is not better.** Stage 2 as a ladder 64 to 512: 24 s, mean 10.6 %, median 1.74 %, 497 invalid, 13 states not converged. The coarse levels meet the sub-cell problem again at the scale of the state.
+- Stage 2 fixes the county areas. Member grid 256, single level: 17 to 20 s for 49 states, median county error 1.07 %, mean 3.48 %, 168 invalid output polygons; four states (CA, GA, TX, VA) stall. Start 1000 % mean, 145 % median; after stage 1, 506 % and 144 %. The global multiresolution run on the earlier county set had 22 % mean and no converged level.
+- The outline is not fixed, so the states overlap. The symmetric difference of a state's outline before and after stage 2 is a median 35 % of the state area. The sum of the state areas exceeds the area of their union by 11.6 % (figure). The polish at grid 512 stalls after 50 iterations and changes neither (11.8 %). Pinning the outline (options 1 to 3 of the issue) is required, not optional.
+- Finer member grids fail for a different reason than sub-cell regions. At member grid 512, nine states stall after 50 iterations and the county mean is 232 %. Arizona alone (15 counties, none below one cell) shows why: start mean error 446 %; after 120 iterations the mean error is 155 % at grid 256 and 252 % at grid 512. The step moves the fastest point `dt` grid cells, so the distance per iteration is proportional to the cell size and the iterations needed grow with the grid. The stall rule (2 % improvement over a cycle) then ends the run at 50 iterations, near the start error (grid 512: 405 %, grid 1024: 426 %); without the rule, 300 iterations reach 117 %. `adaptive_dt` off and `dt` 0.05 give the same result. This is probably the unexplained "fine start fails" of the multires-start exploration: a region far from its target on a fine grid needs more iterations than the stall rule allows.
+- A ladder per state is not better. Stage 2 as a ladder 64 to 512: 24 s, mean 10.6 %, median 1.74 %, 497 invalid, 13 states not converged. The coarse levels meet the sub-cell problem again at the scale of the state.
 
 ## Stages
 
