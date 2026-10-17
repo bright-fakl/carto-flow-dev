@@ -19,17 +19,17 @@ inputs: 3,108 contiguous counties from cb_2020_us_county_500k with the 2020 Cens
 - A county flow cartogram works with the existing code and no new algorithm: a resolution ladder from grid 256 to 2048 with default options gives a mean county error of 2.1 % (median 0.11 %) in 12 s. A single grid 2048 with the stall rule off gives 1.0 % (median 0.01 %) in 126 s.
 - The earlier county failures came from the ladder starting at 128 or 64, where 89 % and 97 % of the counties are below one cell and the coarse level tangles them. The start at 512 (the "2.5 cells" auto rule) is also worse than 256.
 - On a single grid at 512 or finer, the stall rule ends the run early: the step is `dt` grid cells, so progress per iteration shrinks with the grid (Arizona alone: 119, 208, 384 and 758 iterations to converge at grids 128 to 1024, but stalled at 50 above 256). In the ladder the stall threshold and the dt schedule change little.
-- About 130 to 700 output polygons are invalid (self-intersections), mostly counties that are within 5 % of their target.
+- About 130 to 700 output polygons are invalid (self-intersections), mostly counties that are within 5 % of their target. A repair would change the vertices and break animation.
 - The hierarchical idea (states first, then counties on state-fitted grids) fixes the county areas but leaves the state outlines free, so states overlap by 11.6 %. It is not needed for a county cartogram.
 
 ## Recommended next steps
 
-1. **Choose the ladder start from the data.** Replace the `"auto"` rule (smallest region at least 2.5 cells, which picks 512 here) with one that predicts 256 for counties and 128 for districts, for example the share of regions below one cell at the start grid. Check it on states, districts, counties with votes and the random-value cases of the multires-start report. Issue candidate.
-2. **Make the single-grid stall rule independent of the grid.** Test a required improvement that scales with the cell size (or a progress measure per distance moved) on Arizona, districts at 1024 and counties at 1024 and 2048. Issue candidate; ladders do not need it.
-3. **Repair the invalid output polygons** (self-intersections after the finest level). Follow the existing issue #85 and check whether a short refinement at the finest grid removes them.
-4. **Redo the county runs with a vote or other bundled-style value set** so the numbers compare with the earlier reports, and add counties to the performance benchmarks (#113).
-5. **Retitle #129** to the county question (ladder start and finest grid) and move the hierarchical idea to a speed and sub-cell follow-up. If pursued later, start from option 2 (global flow from the state level plus a local part from each member's deviation from the state mean density).
-6. **Optional.** Add a county example to the docs once the start rule is settled: the ladder with the 256 start already produces one.
+- **Ladder robustness, not a retuned start rule.** Changing the `"auto"` start rule to give 256 here would fit it to the cases tested. Instead find out what goes wrong at a coarse level with many sub-cell regions (tangled counties that finer levels do not repair) and whether the ladder can be made robust to it, then judge the result on a wider set of inputs: states, districts, counties, other value distributions and a second county dataset.
+- **Stall rule independent of the grid.** Test a required improvement that scales with the cell size, or a progress measure per distance moved, on Arizona, districts at 1024 and counties at 1024 and 2048. Issue candidate; ladders are affected little.
+- **Other county data.** Rerun with a second value set (votes or another census variable) so the numbers compare with the earlier reports and with other value distributions, and add counties to the benchmarks (#113).
+- **Invalid output polygons.** A repair is ruled out because it changes the vertices and breaks animation. Measure only whether the number falls with the finest grid or a longer final level (single grid 2048: 127 invalid; ladder: 689).
+- **#129.** Retitle it to the county question and move the hierarchical idea to a later speed and sub-cell follow-up. If pursued, start from option 2 (global flow from the state level plus a local part from each member's deviation from the state mean density).
+- **Docs (optional).** Add a county example once the ladder behavior is settled.
 
 ## Global morph without the stall rule
 
