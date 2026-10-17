@@ -53,6 +53,22 @@ Default options, ladder from the given grid for the given number of levels (each
 | counties ladder 256x4 | stalled / stalled | 60 / 80 | 2.19 / 4.19 | 0.12 / 0.09 | 295.9 / 645.7 | 611 / 321 |
 | counties ladder 128x5 | stalled / stalled | 120 / 60 | 17.43 / 15.18 | 1.64 / 1.82 | 1894.7 / 4333.4 | 1311 / 378 |
 
+## Why the larger spacing
+
+The grid has `sx` by `sy` cells with `sy` truncated from `h * size / w`, so the cell size of the longer side, `w / sx`, is never larger than the one of the shorter side, `h / sy`. A square grid needs one cell size `s` with `sx * s >= w` and `sy * s >= h`; the smallest such `s` is `max(w / sx, h / sy)`. The domain grows, centered, by less than one cell in each direction, and nothing of the margined bounds is cut off. The smaller value would cut the margin, and the average (the former choice) cannot be matched by a domain that keeps its extent in one direction.
+
+## Districts ladder 64x4
+
+Per level, before and after (grid fix and stall change combined; `dist64.py`):
+
+| level | before | after |
+|---|---|---|
+| 64 | stalled, 110 it, mean 91.6 %, 23 invalid | stalled, 190 it, mean 32.0 %, 116 invalid |
+| 128 | converged, 98 it, mean 1.12 %, 109 invalid | stalled, 130 it, mean 2.07 %, 195 invalid |
+| 256 and 512 | not run (converged at 128) | stalled, 50 it each, 196 invalid |
+
+At 64 cells 76 % of the districts are below one cell. Before the change the coarse level made little progress (91.6 % mean error after 110 iterations, the field jumping at cell boundaries), so level 128 started from nearly the original shapes and converged. After the change level 64 makes real progress (32.0 %) but into the sub-cell regime, with 116 invalid polygons, and the finer levels cannot repair them. So the change did not make the finer levels worse: it removed an accidental protection of a start that is too coarse. The same ladder from 128 (the start the resolution warning recommends) converges before and after (mean 0.76 % to 0.88 %, 48 to 15 invalid). The sub-cell damage of coarse levels is the subject of issue 167.
+
 ## Reading
 
 - In the 11 single-grid rows the invalid polygons fall in 8, stay at zero in 2 (states 256 and 512) and rise by two in 1 (districts 1024, 12 to 14). States have none after the change; districts 128 falls from 113 to 25 and counties 512 from 374 to 191.

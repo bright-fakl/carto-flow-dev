@@ -115,6 +115,20 @@
 </table>
 <h2>Reading</h2>
 <ul><li>At 256 cells and below the three rules agree (same iteration count and error), so default runs on the default grid are unchanged.</li><li>The default rule ends the runs that start far from the target at 512 cells and above after 50 iterations (Arizona and Texas at 512 and 1024, counties at 1024 and 2048, states at 2048), with the error close to the start error. The scaled rule reaches the no-rule result on Arizona (convergence), on the states at 2048 (convergence in 832 iterations) and gets within a factor of 2 to 3 of it on the counties, in a fifth to a third of the iterations.</li><li>Counties and Texas still end as stalled, at 4.2 % and 1.7 % mean error at 1024: the remaining large errors are sub-cell counties, which no longer improve. The no-rule run uses all 3,000 iterations for the same or a slightly lower error.</li><li>Districts and the states up to 1024 are unchanged.</li></ul>
+<h2>Why only above 256 cells</h2>
+<p>256 cells is the default grid and the grid at which <code>stall_min_improvement</code> was set; all tests and earlier explorations of the rule are at 256 or below, and the rule is unchanged there. The evidence supports relaxing the requirement on fine grids, where runs that make steady progress are ended; it does not support tightening it on coarse grids. <code>sym256.py</code> and <code>sym256b.py</code> compare three rules, with the required improvement multiplied by 1 (none), by <code>min(1, 256 / cells)</code> (this change) and by <code>256 / cells</code> at every grid (symmetric):</p>
+<table>
+<tr><th>case</th><th>none</th><th>this change</th><th>symmetric</th></tr>
+<tr><td>states, single grid 32</td><td>stalled, 590 it, 4.0 % mean</td><td>same</td><td>stalled, 80 it, 29.9 % mean</td></tr>
+<tr><td>AZ counties, single grid 32</td><td>converged, 177 it</td><td>same</td><td>stalled, 130 it, 6.9 % mean</td></tr>
+<tr><td>districts, single grid 64</td><td>stalled, 240 it, 34 % mean</td><td>same</td><td>stalled, 90 it, 92 % mean</td></tr>
+<tr><td>states ladder 32 x 5</td><td>converged, 256 it, 1.96 %</td><td>same</td><td>converged, 117 it, 0.93 %</td></tr>
+<tr><td>districts ladder 64 x 4</td><td>stalled, 196 invalid, 1.83 %</td><td>same</td><td>converged, 200 it, 1.07 %, 24 invalid</td></tr>
+<tr><td>districts ladder 32 x 5</td><td>stalled, 3.53 %</td><td>same</td><td>same</td></tr>
+<tr><td>counties ladder 256 x 4 or 512 x 3</td><td>4.19 % or 3.40 %</td><td>same</td><td>same</td></tr>
+<tr><td>counties ladder 128 x 5</td><td>15.2 %</td><td>same</td><td>28.4 %</td></tr>
+</table>
+<p>The symmetric rule makes coarse levels of a ladder give up sooner, which helps the districts ladder from a start that is too coarse. It also ends single runs on coarse grids that were converging (states at 32 cells, Arizona at 32), and it is worse on the counties ladder from 128. Stopping an unresolvable coarse level early is a question about ladders, not about the grid size, so it is left to issue 167 as a per-level rule.</p>
 <div class="figure">
 <img src="fig_counties.png" alt="Counties by population on a single grid of 1024 with default options, before (stalled after 50 iterations at 929 % mean error) and after (stalled after 700 iterations at 4.2 %). Color is log2(area/target); red is too large.">
 <p class="caption">Counties by population on a single grid of 1024 with default options, before (stalled after 50 iterations at 929 % mean error) and after (stalled after 700 iterations at 4.2 %). Color is log2(area/target); red is too large.</p>
