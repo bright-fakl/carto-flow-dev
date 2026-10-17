@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #162: Square packing for the circle packing layout</title>
+<title>PR #162: Square packing layout and the Demers preset</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -72,7 +72,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #162: Square packing for the circle packing layout</h1>
+<h1>PR #162: Square packing layout and the Demers preset</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>symbol</dd>
@@ -84,11 +84,23 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-18 18:00</dd>
 <dt>Before</dt><dd>main @ f4952ed</dd>
-<dt>After</dt><dd>feat/square-packing-layout @ 6fd7bbd</dd>
+<dt>After</dt><dd>feat/square-packing-layout @ aa809ac</dd>
 <dt>Inputs</dt><dd>bundled US census snapshot (49 regions, EPSG:5070) and bundled world (177 countries, EPSG:8857), spacing 0.</dd>
 </dl>
-<p class="desc">CirclePackingLayout(shape=&quot;square&quot;) packs axis-aligned squares of the circles&#x27; area with the circle layout&#x27;s forces; squares touch along flat edges and keep their neighbors as well as circles do. A greedy stacking prototype was rejected.</p>
+<p class="desc">CirclePackingLayout(shape=&quot;square&quot;) packs axis-aligned squares of the circles&#x27; area with the circle layout&#x27;s forces; squares touch along flat edges and keep their neighbors as well as circles do. The demers_cartogram preset now uses it. A greedy stacking prototype was rejected.</p>
 <h2>Figures</h2>
+<h2>Demers preset</h2>
+<p><code>demers_cartogram</code> used the grid layout with a square tiling: each square sits in a lattice cell, and with the default <code>size_normalization=&quot;max&quot;</code> the squares cover 15 % of the geometry area. It now uses <code>CirclePackingLayout(shape=&quot;square&quot;)</code> with the default forces and <code>size_normalization=&quot;total&quot;</code> (a new parameter, as in the other presets). The grid version stays available through <code>layout=&quot;grid&quot;</code>.</p>
+<table>
+<tr><th>census snapshot</th><th>squares in grid cells (before)</th><th>square packing (after)</th></tr>
+<tr><td>total square area / geometry area</td><td>0.15</td><td>1.00</td></tr>
+<tr><td>overlapping pairs</td><td>0</td><td>0</td></tr>
+<tr><td>symbol area / convex hull</td><td>0.14</td><td>0.55</td></tr>
+<tr><td>mean displacement</td><td>395 km</td><td>449 km</td></tr>
+<tr><td>neighboring pairs within half a mean half-side</td><td>0.00</td><td>0.76</td></tr>
+<tr><td>rank order x,y</td><td>0.96</td><td>0.96</td></tr>
+</table>
+<p>Other settings tried for the preset (same measure, neighboring pairs within half a mean half-side): the geographic-style forces (origin 0.5, topology 0.5, neighbor 0.5, no compaction) displace the squares less (277 km) but keep fewer neighbors in contact (0.62); origin weight 0.5 alone gives 337 km and 0.72. The default forces keep the neighbors best (0.76), which is what a Demers cartogram shows; the layout is available for other settings.</p>
 <h2>Decision: generalize the simulator, not stack</h2>
 <p>A greedy stacking prototype (not in the PR) placed the squares one by one, flush against the placed squares, at the feasible spot nearest the original centroid. On the census snapshot it kept fewer neighbors than the centroid layout. The packing layout keeps neighbors through its forces (neighbor tangency, angular topology, compaction, contact sliding), and only the pair geometry of the simulator depends on the shape.</p>
 <table>
@@ -133,13 +145,17 @@
 <tr><td>unchanged</td><td>the attraction forces (compaction, origin, group), step control, convergence; the tangency and topology force directions stay center to center</td></tr>
 <tr><td>size</td><td>the half-side is sqrt(pi)/2 times the circle radius; <code>LayoutResult.sizes</code> holds the half-sides; the canonical symbol is a square</td></tr>
 <tr><td>circles</td><td>positions of six configurations on the census snapshot (default, Dorling, stage 1 only, spacing 0, Gauss-Seidel only, grouped) are bit-identical before and after</td></tr>
+<tr><td>preset</td><td><code>demers_cartogram</code> uses the square packing layout, with a <code>size_normalization</code> parameter; docs that listed it as a grid preset are updated</td></tr>
 <tr><td>docs</td><td>gallery example <code>plot_symbol_square_packing.py</code>, a phrase in the layout table of the pipeline explanation</td></tr>
 </table>
 <h2>Not in this PR</h2>
-<p>The flow-density layout, rectangles with an aspect ratio, and the named presets (<code>dorling</code>, <code>geographic</code> and others) do not take <code>shape</code>; use <code>CirclePackingLayout(shape=&quot;square&quot;, ...)</code>. #77 stays closed by this PR for the force-based layouts it named.</p>
+<p>The flow-density layout, rectangles with an aspect ratio (separate issues), and the other named presets (<code>dorling</code>, <code>geographic</code> and others) do not take <code>shape</code>; use <code>CirclePackingLayout(shape=&quot;square&quot;, ...)</code>. The rename of <code>CirclePackingLayout</code> to <code>PackingLayout</code> is a separate PR. #77 stays closed by this PR for the force-based layouts it named.</p>
 <h2>Checks</h2>
-<p>Suite 1427 passed, mypy and ruff clean. The new tests cover the canonical symbol, the spacing, no overlap as polygons, area proportional to the value, groups with attraction, the default being the circle, an invalid shape, the pair geometry helpers, and the spacing on the world data.</p>
+<p>Suite 1428 passed, mypy and ruff clean. The new tests cover the canonical symbol, the spacing, no overlap as polygons, area proportional to the value, groups with attraction, the default being the circle, an invalid shape, the pair geometry helpers, and the spacing on the world data.</p>
 <div class="figure">
+<img src="fig_demers.png" alt="`demers_cartogram` on the census snapshot: before (squares in grid cells) and after (square packing).">
+<p class="caption"><code>demers_cartogram</code> on the census snapshot: before (squares in grid cells) and after (square packing).</p>
+</div><div class="figure">
 <img src="fig_square_packing.png" alt="Census snapshot, squares drawn: centroid layout with squares (top left), square packing (top right), square packing with compactness 0.8 (bottom left), and the circle layout with squares fit inside (before, bottom right).">
 <p class="caption">Census snapshot, squares drawn: centroid layout with squares (top left), square packing (top right), square packing with compactness 0.8 (bottom left), and the circle layout with squares fit inside (before, bottom right).</p>
 </div>

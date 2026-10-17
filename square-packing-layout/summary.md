@@ -2,15 +2,15 @@
 pr: 162
 url: https://github.com/bright-fakl/carto-flow/pull/162
 issue: 77
-title: Square packing for the circle packing layout
-description: CirclePackingLayout(shape="square") packs axis-aligned squares of the circles' area with the circle layout's forces; squares touch along flat edges and keep their neighbors as well as circles do. A greedy stacking prototype was rejected.
+title: Square packing layout and the Demers preset
+description: CirclePackingLayout(shape="square") packs axis-aligned squares of the circles' area with the circle layout's forces; squares touch along flat edges and keep their neighbors as well as circles do. The demers_cartogram preset now uses it. A greedy stacking prototype was rejected.
 kind: pr
 topic: symbol
 base: main
 branch: feat/square-packing-layout
 date: 2026-10-18 18:00
 before: main @ f4952ed
-after: feat/square-packing-layout @ 6fd7bbd
+after: feat/square-packing-layout @ aa809ac
 related: square-centroid-layout
 inputs: bundled US census snapshot (49 regions, EPSG:5070) and bundled world (177 countries, EPSG:8857), spacing 0.
 ---
@@ -18,6 +18,23 @@ inputs: bundled US census snapshot (49 regions, EPSG:5070) and bundled world (17
 ## Figures
 
 figure: fig_square_packing.png — Census snapshot, squares drawn: centroid layout with squares (top left), square packing (top right), square packing with compactness 0.8 (bottom left), and the circle layout with squares fit inside (before, bottom right).
+
+figure: fig_demers.png — `demers_cartogram` on the census snapshot: before (squares in grid cells) and after (square packing).
+
+## Demers preset
+
+`demers_cartogram` used the grid layout with a square tiling: each square sits in a lattice cell, and with the default `size_normalization="max"` the squares cover 15 % of the geometry area. It now uses `CirclePackingLayout(shape="square")` with the default forces and `size_normalization="total"` (a new parameter, as in the other presets). The grid version stays available through `layout="grid"`.
+
+| census snapshot | squares in grid cells (before) | square packing (after) |
+|---|---|---|
+| total square area / geometry area | 0.15 | 1.00 |
+| overlapping pairs | 0 | 0 |
+| symbol area / convex hull | 0.14 | 0.55 |
+| mean displacement | 395 km | 449 km |
+| neighboring pairs within half a mean half-side | 0.00 | 0.76 |
+| rank order x,y | 0.96 | 0.96 |
+
+Other settings tried for the preset (same measure, neighboring pairs within half a mean half-side): the geographic-style forces (origin 0.5, topology 0.5, neighbor 0.5, no compaction) displace the squares less (277 km) but keep fewer neighbors in contact (0.62); origin weight 0.5 alone gives 337 km and 0.72. The default forces keep the neighbors best (0.76), which is what a Demers cartogram shows; the layout is available for other settings.
 
 ## Decision: generalize the simulator, not stack
 
@@ -72,12 +89,13 @@ The first version of the PR left the squares of the world data at 0.82 of the re
 | unchanged | the attraction forces (compaction, origin, group), step control, convergence; the tangency and topology force directions stay center to center |
 | size | the half-side is sqrt(pi)/2 times the circle radius; `LayoutResult.sizes` holds the half-sides; the canonical symbol is a square |
 | circles | positions of six configurations on the census snapshot (default, Dorling, stage 1 only, spacing 0, Gauss-Seidel only, grouped) are bit-identical before and after |
+| preset | `demers_cartogram` uses the square packing layout, with a `size_normalization` parameter; docs that listed it as a grid preset are updated |
 | docs | gallery example `plot_symbol_square_packing.py`, a phrase in the layout table of the pipeline explanation |
 
 ## Not in this PR
 
-The flow-density layout, rectangles with an aspect ratio, and the named presets (`dorling`, `geographic` and others) do not take `shape`; use `CirclePackingLayout(shape="square", ...)`. #77 stays closed by this PR for the force-based layouts it named.
+The flow-density layout, rectangles with an aspect ratio (separate issues), and the other named presets (`dorling`, `geographic` and others) do not take `shape`; use `CirclePackingLayout(shape="square", ...)`. The rename of `CirclePackingLayout` to `PackingLayout` is a separate PR. #77 stays closed by this PR for the force-based layouts it named.
 
 ## Checks
 
-Suite 1427 passed, mypy and ruff clean. The new tests cover the canonical symbol, the spacing, no overlap as polygons, area proportional to the value, groups with attraction, the default being the circle, an invalid shape, the pair geometry helpers, and the spacing on the world data.
+Suite 1428 passed, mypy and ruff clean. The new tests cover the canonical symbol, the spacing, no overlap as polygons, area proportional to the value, groups with attraction, the default being the circle, an invalid shape, the pair geometry helpers, and the spacing on the world data.
