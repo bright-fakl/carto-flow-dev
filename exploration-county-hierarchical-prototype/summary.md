@@ -14,6 +14,23 @@ inputs: 3,108 contiguous counties from cb_2020_us_county_500k with the 2020 Cens
 
 `prep_counties.py` builds the set, `hier129.py` runs the three stages (member grid, state grid and polish grid as arguments), `hier_ladder.py` runs stage 2 as a ladder, `probe_az*.py` are the Arizona probes. Logs are in `data/`.
 
+## Summary
+
+- A county flow cartogram works with the existing code and no new algorithm: a resolution ladder from grid 256 to 2048 with default options gives a mean county error of 2.1 % (median 0.11 %) in 12 s. A single grid 2048 with the stall rule off gives 1.0 % (median 0.01 %) in 126 s.
+- The earlier county failures came from the ladder starting at 128 or 64, where 89 % and 97 % of the counties are below one cell and the coarse level tangles them. The start at 512 (the "2.5 cells" auto rule) is also worse than 256.
+- On a single grid at 512 or finer, the stall rule ends the run early: the step is `dt` grid cells, so progress per iteration shrinks with the grid (Arizona alone: 119, 208, 384 and 758 iterations to converge at grids 128 to 1024, but stalled at 50 above 256). In the ladder the stall threshold and the dt schedule change little.
+- About 130 to 700 output polygons are invalid (self-intersections), mostly counties that are within 5 % of their target.
+- The hierarchical idea (states first, then counties on state-fitted grids) fixes the county areas but leaves the state outlines free, so states overlap by 11.6 %. It is not needed for a county cartogram.
+
+## Recommended next steps
+
+1. **Choose the ladder start from the data.** Replace the `"auto"` rule (smallest region at least 2.5 cells, which picks 512 here) with one that predicts 256 for counties and 128 for districts, for example the share of regions below one cell at the start grid. Check it on states, districts, counties with votes and the random-value cases of the multires-start report. Issue candidate.
+2. **Make the single-grid stall rule independent of the grid.** Test a required improvement that scales with the cell size (or a progress measure per distance moved) on Arizona, districts at 1024 and counties at 1024 and 2048. Issue candidate; ladders do not need it.
+3. **Repair the invalid output polygons** (self-intersections after the finest level). Follow the existing issue #85 and check whether a short refinement at the finest grid removes them.
+4. **Redo the county runs with a vote or other bundled-style value set** so the numbers compare with the earlier reports, and add counties to the performance benchmarks (#113).
+5. **Retitle #129** to the county question (ladder start and finest grid) and move the hierarchical idea to a speed and sub-cell follow-up. If pursued later, start from option 2 (global flow from the state level plus a local part from each member's deviation from the state mean density).
+6. **Optional.** Add a county example to the docs once the start rule is settled: the ladder with the 256 start already produces one.
+
 ## Global morph without the stall rule
 
 A single morph of all counties (`hier_global.py`; `MorphOptions(grid=N, grid_margin=0.5, grid_square=True, area_scale=1e-6, stall_patience=None)`), from the original geometries. State error is computed from the summed county areas.
@@ -45,7 +62,7 @@ figure: fig_global.png — County area error log2(area/target) of the single-gri
 | 128 to 2048 (5 levels) | min improvement 0.002 | 0.2 | 20 s | | | | 13.98 / 1.39, 1662 |
 | 64 to 2048 (6 levels) | min improvement 0.002 | 0.2 | 21 s | | | | 56.1 / 21.7, 2363 |
 
-The columns give the mean error after each level (the level-1024 and level-2048 values of the rows with a different grid ladder are the levels of that ladder, not of the 256 start; the 512-start row lists its levels 512, 1024, 2048 in the 512, 1024, 2048 columns).
+The level columns give the mean error after the levels at grids 256, 512, 1024 and 2048 for the 256 start. The 512-start row lists its levels 512, 1024 and 2048 under the 512, 1024 and 2048 columns; the 128 and 64 rows list only the final level.
 
 - **Levels 256 and 512 never converge** (sub-cell regions: mean 70 % and 37 %); the work is done at 1024 and 2048, where the shares under one cell are 5 % and 0.3 %.
 - **The dt schedule changes little.** Constant physical step (dt doubling per level, capped at 1.0) and a half-size schedule end within 2 to 8 % mean error, with the default `0.2` best or equal. The stall rule threshold does not matter either once the ladder starts at 256.
@@ -68,11 +85,3 @@ The columns give the mean error after each level (the level-1024 and level-2048 
 ## Stages
 
 figure: fig_stages.png — County area error log2(area/target) at the start, after the state stage, after the member stage (grid 256) and after the polish; thin lines are the state outlines of the dissolved counties. After stage 2 the counties are at their target (grey), but the states overlap.
-
-## Open
-
-- The hierarchical approach is not needed to get a county cartogram: the global morph is far better once it runs long enough. It remains an option for speed and for the sub-cell counties.
-- Pin or decompose the outline (issue options 1 to 3), if the hierarchical approach is pursued. Option 2 (global flow from the state level plus a local part from each member's deviation from the state mean density) fits the prototype best: stage 1 already provides the global part.
-- Step size in physical units, or a stall rule that counts progress per distance moved, so a far start on a fine grid is not cut off (separate issue candidate).
-- Invalid output polygons (168 at member grid 256) need the repair the flow output already has an issue for (#85).
-- Counties with the vote values of the earlier explorations, to compare directly.
