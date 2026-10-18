@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #173: Warn when input segments are too long for the expected stretch</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #173: Warn when input segments are too long for the expected stretch</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-county-hierarchical-prototype/index.html">County flow cartograms: global morph, ladder, and hierarchical prototype</a> <span class="meta">(exploration)</span><br><a href="../stall-rule-grid-scaling/index.html">Stall rule requires an improvement proportional to the distance moved</a> <span class="meta">(pr)</span><br><a href="../county-gallery-example/index.html">Gallery example of a county population flow cartogram</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/173">https://github.com/bright-fakl/carto-flow/pull/173</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/167">#167</a></dd>
+<dt>Branch</dt><dd>feat/segment-stretch-warning</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-19 18:00</dd>
+<dt>Before</dt><dd>main @ 2f41daa</dd>
+<dt>After</dt><dd>feat/segment-stretch-warning @ d57e18f</dd>
+<dt>Inputs</dt><dd>bundled states and districts, 3,108 counties (bundled ACS 2020 snapshot, population), densified with densify_coverage to the given maximum segment length; ladders with default options and n_iter 1000, square grid margin 0.5. NUMBA_NUM_THREADS=8.</dd>
+</dl>
+<p class="desc">Sparse vertices are a main cause of the tangled polygons and the high error of the coarse levels of a ladder. Densifying the bundled counties from 5 km to 1 km lowers the mean error of a ladder from 128 cells from 28.4 % to 7.3 % (from 256 cells 4.2 % to 1.5 %) and the invalid polygons of districts from 24 to 0. create_flow_cartogram and CartogramWorkflow now warn, with a recommended segment length, when more than 0.5 % of the segments are expected to outgrow 4 cells of the finest grid; the states do not warn.</p>
+<h2>Figures</h2>
+<h2>Finding</h2>
+<p>After the square-grid fix, the first invalid polygons of counties on a grid of 128 appear at iteration 27 (Arapahoe and Denver, Colorado: <code>fold167.py</code>). A bilinear velocity field cannot fold a polygon in one step (a step moves the fastest point 0.2 cells, so the relative displacement across a distance <code>w</code> is at most 0.4 <code>w</code>), so the crossing comes from the straight edges between vertices that are sparse relative to the width of a narrow part. Densifying the input confirms it: one run of 300 iterations on a grid of 128 has 16, 2, 1 and 0 invalid polygons with maximum segments of 5, 2, 1 and 0.5 km (<code>dens167.py</code>), with the same error (114.6 %).</p>
+<h2>Ladders with denser segments</h2>
+<p>Default options, mean / median error and invalid polygons after the ladder (<code>dens167b.py</code>, <code>dens167c.py</code>). Left column is the bundled 5 km.</p>
+<table>
+<tr><th>input</th><th>ladder</th><th>5 km</th><th>2 km</th><th>1 km</th><th>0.5 km</th></tr>
+<tr><td>counties</td><td>64x6</td><td>17.13 % / 1.25 %, 641</td><td></td><td>5.24 % / 0.03 %, 316</td><td></td></tr>
+<tr><td>counties</td><td>128x5</td><td>28.37 % / 4.16 %, 406</td><td>11.11 % / 0.35 %, 326</td><td>7.32 % / 0.08 %, 244</td><td>6.38 % / 0.41 %, 160</td></tr>
+<tr><td>counties</td><td>256x4</td><td>4.19 % / 0.09 %, 321</td><td>1.75 % / 0.06 %, 252</td><td>1.54 % / 0.09 %, 144</td><td>1.76 % / 0.14 %, 96</td></tr>
+<tr><td>counties</td><td>512x3</td><td>3.40 % / 0.15 %, 301</td><td>3.40 % / 0.24 %, 73</td><td>1.52 % / 0.25 %, 57</td><td>1.54 % / 0.11 %, 38</td></tr>
+<tr><td>districts</td><td>128x3</td><td>0.88 % / 0.75 %, 15</td><td>0.89 % / 0.58 %, 7</td><td>0.48 % / 0.26 %, 2</td><td>0.55 % / 0.29 %, 2</td></tr>
+<tr><td>districts</td><td>64x4</td><td>1.07 % / 0.62 %, 24</td><td>1.58 % / 1.24 %, 9</td><td>0.57 % / 0.21 %, 0</td><td>0.84 % / 0.54 %, 0</td></tr>
+<tr><td>districts</td><td>32x5</td><td>3.53 % / 1.30 %, 177 (stalled)</td><td>3.23 % / 0.74 %, 160 (stalled)</td><td>0.55 % / 0.19 %, 90 (stalled)</td><td>0.47 % / 0.20 %, 57</td></tr>
+<tr><td>states</td><td>64x3, 32x5</td><td>no invalid polygons, same error</td><td>same</td><td>same</td><td>same</td></tr>
+</table>
+<p>The error falls and the invalid polygons fall with the vertex density down to about 1 km; the states, whose regions change little, do not change. A too coarse start (counties from 64 and 128 cells) becomes usable at 1 km (5.2 and 7.3 %). The cost is the number of vertices (193,856 at 5 km, 768,580 at 1 km for the counties) and a run time of 10 to 25 s instead of 10 to 17 s.</p>
+<h2>Predicting where it matters</h2>
+<p>A segment of a region whose target is larger than its area grows with the linear factor <code>sqrt(target / area)</code> (<code>stretch167.py</code>). Share of the segments whose expected length exceeds 4 cells of the finest grid (2048 cells, 4.3 km):</p>
+<table>
+<tr><th>input</th><th>largest enlargement</th><th>segments over 4 cells</th><th>boundary length over 4 cells</th><th>suggested length</th></tr>
+<tr><td>states</td><td>9.8</td><td>0.05 %</td><td>0.05 %</td><td>1.7 km</td></tr>
+<tr><td>districts</td><td>23.5</td><td>3.18 %</td><td>3.48 %</td><td>0.73 km</td></tr>
+<tr><td>counties, population</td><td>21.8</td><td>0.88 %</td><td>1.02 %</td><td>0.78 km</td></tr>
+<tr><td>counties, white</td><td>19.2</td><td>0.68 %</td><td>0.79 %</td><td>0.89 km</td></tr>
+<tr><td>counties, Hispanic</td><td>29.7</td><td>1.01 %</td><td>1.13 %</td><td>0.57 km</td></tr>
+</table>
+<p>The states, which gain nothing from denser vertices, are one to two orders of magnitude below the counties and districts, which do; the threshold of 0.5 % of the segments sits between them. The suggested length is <code>4 cells / largest enlargement</code>, which is 0.7 to 0.9 km for the inputs that benefit and the value at which the table above saturates (1 km and 0.5 km agree). The check uses the finest grid of the ladder (or the grid of a single run) because the cell size sets how narrow a feature the flow can still resolve.</p>
+<p><code>warn167.py</code> runs <code>create_flow_cartogram(grid=&quot;auto&quot;)</code> on the bundled data: the states give no warning, the districts and counties at 5 km warn once (before the first level) and give none after <code>densify_coverage(max_segment_length=1000)</code>.</p>
+<h2>Limits</h2>
+<ul><li>The library adds no vertices: densification stays an explicit step, so animations keep their vertex correspondence.</li><li>The bundled districts and counties are densified to 5 km; the tutorial that already densifies to 2 km is unaffected, and the gallery county example now densifies to 1 km (median error 0.26 %, 95th percentile 2.9 %, mean 1.7 %, 170 iterations in the last level).</li><li>The threshold (0.5 % of the segments, 4 cells) rests on these inputs; the states and the counties are separated by a factor of 10 on either side.</li></ul>
+<div class="figure">
+<img src="fig_ladder.png" alt="Counties by population, ladder from 128 to 2048 cells with default options, bundled 5 km segments (left) and the same counties densified to 1 km (right). Color is log2(area/target); counties with an invalid output polygon are outlined in green.">
+<p class="caption">Counties by population, ladder from 128 to 2048 cells with default options, bundled 5 km segments (left) and the same counties densified to 1 km (right). Color is log2(area/target); counties with an invalid output polygon are outlined in green.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
