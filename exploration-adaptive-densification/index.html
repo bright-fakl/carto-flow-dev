@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What the remaining invalid output polygons are, and adaptive densification</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>What the remaining invalid output polygons are, and adaptive densification</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../segment-density-warning/index.html">Warn when input segments are too long for the expected stretch</a> <span class="meta">(pr)</span><br><a href="../exploration-county-hierarchical-prototype/index.html">County flow cartograms: global morph, ladder, and hierarchical prototype</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/167">#167</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/174">#174</a></dd>
+<dt>Created</dt><dd>2026-10-19 21:00</dd>
+<dt>Before</dt><dd>main @ 08f3edf</dd>
+<dt>After</dt><dd>the same checkout; scripts only, no library change</dd>
+<dt>Inputs</dt><dd>3,108 bundled counties (population), ladder with grid auto, n_iter 1000, square grid margin 0.5, NUMBA_NUM_THREADS=8. Pilot: the same ladder on the 5 km bundled geometry, per-segment length at the end of every level.</dd>
+</dl>
+<p class="desc">After the grid and stall fixes and input densified to 1 km, 57 of the 3,108 county polygons are still invalid. The first invalid polygons were Virginia counties next to enlarging independent cities (stretched segments); at 0.25 km the remaining ones are Great Plains counties that shrink 10 to 100 times into needles narrower than a cell, where chords between vertices 3 to 4 km apart cross across the width. Densifying by a pilot run (stretch and local width) reaches the quality of uniform 1 km densification with 40 to 90 % of its vertices but does not reach zero invalid polygons.</p>
+<h2>What the invalid polygons are</h2>
+<p><code>inv_final.py</code> takes the 57 invalid polygons of the ladder on the counties densified to 1 km and, for each, the longest segment and the segment at the crossing, in cells of the finest grid (4.26 km).</p>
+<ul><li>They are not sub-cell regions (median target 13 cells; 2 % below one cell) and not enlarging regions: the median area against the original is 0.08, so most regions shrink strongly.</li><li>The first ones in the list are Virginia counties around independent cities that enlarge 10 to 30 times (Rockbridge, Rockingham, Harrisonburg, Staunton): segments up to 5 cells long at the crossing. That is the stretch of the previous page.</li><li>With adaptive densification of the stretched segments (below) these disappear, and what remains at 0.25 km (39 invalid polygons, <code>inv2.py</code>) are counties of NE, SD, CO, ND, MT and KS that shrink 10 to 100 times (median area against the original 0.04, 1 to 10 cells in the target). The crossing segments are neighbors or second neighbors in the ring (22 of 39 within two positions, all within five), not degenerate in the input (separation of the two segments 198 m to 37 km, median 1.35 km), and the steps are small (0.01 to 0.03 cells per iteration).</li><li><code>when.py</code> and <code>when2.py</code> follow the polygons over the iterations: invalid polygons appear at 1024 and 2048 cells and some appear, heal and reappear (Rock County, Minnesota at iterations 41, 61, 76 and 96). <code>when2.py</code> shows Washington County, Colorado at its first invalid iteration (iteration 32 of the 1024 level): a needle about 15 km long and 0.5 to 2 km wide, in cells of 8.5 km, with vertices 3 to 4 km apart on each side.</li></ul>
+<h2>Reading</h2>
+<p>The crossings are the same kind as before, chords between vertices that are too sparse, but the relevant length is the local width of the squeezed polygon rather than the stretch. A step cannot fold a polygon (a bilinear field with a step of 0.2 cells moves two points at distance <code>w</code> by at most <code>0.4 w</code> relative to each other), but the straight chord between two vertices is not the image of the straight segment: its distance to the opposite side differs from the true one by the sagitta of the flow, of the order of the vertex spacing squared times the curvature of the displacement. When a region is squeezed into a strip narrower than that, chords of the two sides cross. Densifying uniformly lowers the sagitta (301, 73, 57 and 38 invalid polygons at 5, 2, 1 and 0.5 km on a ladder from 512) but cannot reach zero because a squeezed strip can become arbitrarily narrow.</p>
+<h2>Adaptive densification from a pilot run</h2>
+<p><code>adapt.py</code>, <code>adapt2.py</code> and <code>adapt3.py</code> run the ladder once on the bundled geometry, record the length of every segment at the end of every level (and for the width criterion the distance of every vertex to the nearest vertex more than three positions away in its ring), subdivide each input segment so that its longest recorded length is at most <code>c</code> cells (stretch) and at most <code>alpha</code> times the local width (width), identically for the two polygons that share it, and run the ladder again. Vertices are added in the input, so the animation correspondence is kept.</p>
+<table>
+<tr><th>input geometry</th><th>vertices</th><th>mean / median / 95th percentile error</th><th>invalid polygons</th><th>time</th></tr>
+<tr><td>bundled, 5 km</td><td>193,856</td><td>3.40 / 0.15 / 14.0 %</td><td>301</td><td>11.5 s</td></tr>
+<tr><td>uniform 2 km</td><td>451,364</td><td>3.40 / 0.24 / 12.9 %</td><td>73</td><td>12.4 s</td></tr>
+<tr><td>uniform 1 km</td><td>768,580</td><td>1.52 / 0.25 / 2.7 %</td><td>57</td><td>19.4 s</td></tr>
+<tr><td>uniform 0.5 km</td><td>1,453,552</td><td>1.54 / 0.11 / 6.2 %</td><td>38</td><td>28.6 s</td></tr>
+<tr><td>pilot, stretch c = 1 (final lengths only)</td><td>306,086</td><td>3.31 / 0.15 / 14.7 %</td><td>67</td><td>11.2 s</td></tr>
+<tr><td>pilot, stretch c = 1 (longest over the levels)</td><td>309,549</td><td>1.40 / 0.31 / 2.9 %</td><td>130</td><td>10.1 s</td></tr>
+<tr><td>pilot, stretch c = 0.5</td><td>499,415</td><td>1.31 / 0.21 / 4.0 %</td><td>64</td><td>19.2 s</td></tr>
+<tr><td>pilot, stretch c = 0.25</td><td>892,497</td><td>1.47 / 0.09 / 6.2 %</td><td>39</td><td>24.6 s</td></tr>
+<tr><td>pilot, stretch c = 0.5, second round</td><td>571,312</td><td>1.01 / 0.18 / 3.2 %</td><td>80</td><td>20.8 s</td></tr>
+<tr><td>pilot, stretch c = 1 and width alpha = 1</td><td>457,233</td><td>3.34 / 0.18 / 14.9 %</td><td>34</td><td>11.7 s</td></tr>
+<tr><td>pilot, stretch c = 1 and width alpha = 0.5</td><td>712,072</td><td>3.33 / 0.17 / 14.9 %</td><td>14</td><td>12.5 s</td></tr>
+<tr><td>pilot, stretch c = 0.5 and width alpha = 0.5</td><td>806,668</td><td>1.81 / 0.03 / 7.0 %</td><td>62</td><td>20.1 s</td></tr>
+</table>
+<ul><li>The stretch criterion from the longest length over the levels reaches the error of uniform 1 km densification (1.3 to 1.4 % mean) with 310,000 to 500,000 vertices instead of 770,000, but the invalid polygons (64 to 130) stay at the level of uniform 1 km.</li><li>Adding the width criterion lowers the invalid polygons to 14 to 34, with 460,000 to 710,000 vertices, and does not reach zero.</li><li>The error and the invalid polygons vary from run to run by more than the differences between neighboring settings (the ladder is sensitive: a change of vertices changes the flow), so single runs of this table are indications, not a ranking.</li></ul>
+<h2>Literature</h2>
+<p>Miaji, Singhania, Goh, Le, Tharatipyakul and Gastner, &quot;Topology-Preserving Line Densification for Creating Contiguous Cartograms&quot; (<a href="https://arxiv.org/abs/2511.08121">arXiv 2511.08121</a>), address the same problem for the flow-based method of Gastner, Seguy and More (2018). They insert points in the original space at the intersections of polygon edges with the edges of a constrained Delaunay triangulation whose corners come from a quadtree refined where the density contrast is highest (about 200 to 17,000 leaves, graded so that neighbors differ by one level). The projection of a point is the piecewise affine map of its triangle, which is continuous across triangle edges, so neighboring polygons stay connected and non-overlapping. A topology-preserving simplification caps the number of vertices at 15 times the number of polygons or 10,000. On 32 maps their method (5FCarto) had no intersections and raised the vertex count by 62 % on average (median 20 %); uniform insertion at regular spacing (ggplot2 <code>coord_munch()</code>) raised it by 431 % (median 201 %) and still left intersections on 13 maps. For the US counties they report 2.2 s and no overlaps for 5FCarto against 195 and 323 for two flow-based baselines without it. The method works after the projection is known (the density-equalizing map is computed once on the grid) and replaces the polygon vertices by a piecewise affine image, so it differs from our iteration, which advects the vertices step by step and rasterizes the density from them.</p>
+<h2>Options</h2>
+<ul><li>Leave as is: 2 % invalid polygons at the finest level, <code>repair=True</code> for static maps (adds vertices), uniform densification to 1 km documented and recommended by the warning.</li><li>A pilot-based adaptive densification utility (<code>densify_adaptive(gdf, values, ...)</code> or an option of the loaders): about half of the vertices of uniform 1 km at the same error, no guarantee of validity.</li><li>A topology-preserving final step after the run in the manner of the paper: carry the subdivision points of the polygon edges through the recorded displacements (the morph already carries <code>coords</code> with the flow) and rebuild the polygons from them, which makes the output faithful without changing the morph. The subdivision points can be added to the input geometry with the same correspondence, so animations are unaffected.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
