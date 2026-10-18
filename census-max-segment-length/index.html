@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #175: Densify at load time with max_segment_length</title>
+<title>PR #175: Densify at load time with max_segment_length (all geometry loaders)</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -74,7 +74,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #175: Densify at load time with max_segment_length</h1>
+<h1>PR #175: Densify at load time with max_segment_length (all geometry loaders)</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>data</dd>
@@ -86,10 +86,10 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-19 23:00</dd>
 <dt>Before</dt><dd>main @ 08f3edf</dd>
-<dt>After</dt><dd>feat/census-max-segment-length @ 5773846</dd>
-<dt>Inputs</dt><dd>bundled states, congressional districts and counties (ACS 2020 snapshot).</dd>
+<dt>After</dt><dd>feat/census-max-segment-length @ e539ba0</dd>
+<dt>Inputs</dt><dd>bundled states, congressional districts and counties (ACS 2020 snapshot), world (177 countries) and US states (51), both EPSG:4326.</dd>
 </dl>
-<p class="desc">load_us_census(max_segment_length=...) densifies the bundled boundaries so that no segment exceeds the given length, with identical vertices on both sides of a shared boundary. The county gallery example uses it.</p>
+<p class="desc">load_us_census, load_world and load_us_states take max_segment_length, which densifies the boundaries so that no segment exceeds the given length, with identical vertices on both sides of a shared boundary. The census data is in meters, the world and US states data in degrees, where densifying before projecting follows the graticule. The county gallery example uses it.</p>
 <h2>Behavior</h2>
 <table>
 <tr><th>call</th><th>segments</th><th>counties: vertices</th></tr>
@@ -99,6 +99,14 @@
 <tr><td><code>max_segment_length=1000</code></td><td>at most 999.97 m</td><td>768,580</td></tr>
 </table>
 <ul><li>The result has the same rows, columns and CRS, valid geometries, and the same total area; the shared boundaries of the coverage stay identical.</li><li>Non-positive, boolean or non-numeric values raise <code>ValueError</code>.</li><li>The county gallery example loads with <code>max_segment_length=1000</code> (median error 0.26 %, 95th percentile 2.9 %, mean 1.7 %), replacing its explicit <code>densify_coverage</code> call.</li><li>Densification is applied after the contiguous filter, so Alaska, Hawaii and Puerto Rico are not densified unless requested.</li></ul>
+<h2>World and US states, in degrees</h2>
+<p>The world and US states datasets are in EPSG:4326, so <code>max_segment_length</code> is in degrees (a degree is about 111 km). Degrees are better than a projected length here: the vertices are inserted on straight lines in longitude and latitude, and a border along a parallel then curves correctly after the projection, whereas densifying after projecting only subdivides the straight chord. On 6 degrees of the 49th parallel the parallel is 3.5 km away from the chord between its projected ends in EPSG:5070.</p>
+<table>
+<tr><th>dataset</th><th>longest segment</th><th><code>max_segment_length=0.1</code></th><th>vertices</th></tr>
+<tr><td>world, 177 countries</td><td>1.0 degrees</td><td>0.1 degrees</td><td>14,541 to 98,411</td></tr>
+<tr><td>US states, 51</td><td>5.7 degrees</td><td>0.1 degrees</td><td>2,366 to 12,177</td></tr>
+</table>
+<p>Both stay valid and keep the total area; a value at or above the longest segment changes nothing. <code>load_sample_cities</code> has points and takes no argument.</p>
 
 <a class="back" href="../index.html">&larr; back to index</a>
 
