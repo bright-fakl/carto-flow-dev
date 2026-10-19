@@ -1,7 +1,7 @@
 ---
 issue: 171
 title: Do the lagging counties still make progress when the stall rule stops the run?
-description: The stall rule judges progress by the mean and the maximum error over all regions. At the stall of the finest county level, the 72 counties above 10 % error continue to improve for another 1,400 iterations (their median error falls from 23 % to 1.2 %, the number above 10 % from 72 to about 27), while the mean error over all counties first falls to 1.1 % and then rises above 4 %. The two aggregates cannot see the progress of a small lagging group.
+description: The stall rule judges progress by the mean and the maximum error over all regions. At the stall of the finest county level, the lagging counties continue to improve for another 1,400 iterations (the 72 above 10 % have a median error that falls from 23 % to 1.2 %), and the valid polygons converge (mean 1.3 % to 0.11 %, 60 to 6 above 10 %), while the mean over all counties first falls and then rises above 4 %. The rise comes from the invalid polygons (57 to 100, mostly Virginia), whose areas explode and shift the targets of all regions.
 kind: exploration
 topic: flow
 status: open
@@ -33,11 +33,28 @@ figure: fig1_past_stall.png — Left: median error of the 72 counties that were 
 | 1,500 | 27 | 1.2 % | 4.27 % | 0.63 % | 0.7 % | 100 |
 
 - Over the first 300 iterations everything improves, including the mean, and the number of counties above 10 % falls from 72 to 39. A mean-based progress test would have seen this progress, so the stall at iteration 170 is premature, as far as these numbers go.
-- After about 400 iterations the lagging counties continue to improve (median 23 % to 1.2 %, 72 to 27 above 10 %), but the bulk gets worse: the median error of all counties rises from 0.1 % to 0.6 %, the maximum error to 3,500 %, and the number of invalid polygons from 57 to 100. The mean error rises with them.
-- So no aggregate of all regions describes this run: the mean and the maximum follow the few regions that diverge, and the median follows the bulk. The lagging group has its own trajectory.
+- After about 400 iterations the lagging counties continue to improve (median 23 % to 1.2 %, 72 to 27 above 10 %), but the error of all counties rises: the median from 0.1 % to 0.6 %, the maximum to 3,500 %, and the number of invalid polygons from 57 to 100.
+- The rise of the median is a measurement artifact, not a degradation of the bulk (see below).
+
+## What drives the rise of the mean and median
+
+ stores the area and validity of every region at every snapshot. The invalid polygons are mostly the counties and independent cities of Virginia: their shoelace areas explode (one goes from 238 to 11,804 km2, another from 3,273 to 11,790 km2 against a target of a few hundred). The total output area grows by 0.60 %, and the target of every region is its population share of that total, so every region gets the same apparent error: the median signed error is -0.628 % at iteration 1,500 and the median error is 0.628 % in every shrink class, from 0.629 % (shrink below 0.03) to 0.628 % (above 1). Taking the targets from the valid polygons only:
+
+| iterations after the stall | valid polygons | invalid | mean error, valid | median, valid | p95, valid | valid counties above 10 % | mean error, invalid |
+|---|---|---|---|---|---|---|---|
+| 0 | 3,051 | 57 | 1.31 % | 0.22 % | 2.2 % | 60 | 9.4 % |
+| 150 | 3,040 | 68 | 0.68 % | 0.005 % | 0.57 % | 47 | 21.7 % |
+| 300 | 3,034 | 74 | 0.46 % | 0.001 % | 0.31 % | 24 | 23.0 % |
+| 600 | 3,027 | 81 | 0.30 % | 0.000 % | 0.16 % | 10 | 81.6 % |
+| 900 | 3,020 | 88 | 0.20 % | 0.000 % | 0.09 % | 8 | 84.1 % |
+| 1,500 | 3,008 | 100 | 0.11 % | 0.001 % | 0.06 % | 6 | 111.7 % |
+
+figure: fig2_valid_vs_invalid.png — Left: the mean and median error of the valid polygons and the mean error of the invalid polygons against the iterations after the stall. Right: the number of invalid polygons.
+
+The valid polygons do not degrade: they converge (median 0.22 % to 0.001 %, mean 1.31 % to 0.11 %, 60 to 6 above 10 %) while the number of invalid polygons grows from 57 to 100 and their error from 9 % to 112 %. The earlier statement that the bulk gets worse was wrong: it was the effect of a few invalid polygons on the normalization of the targets of all regions. The same effect enters the mean and max of the runs on the earlier pages, where the baseline has 57 invalid polygons, to a smaller degree (total area +0.09 % at iteration 300).
 
 ## Reading
 
-The concern is confirmed in the first half of the run: progress of the lagging regions is invisible or weak in the mean and max ratios, and the stall can end the run while many regions are still improving. The second half shows the cost of running on: the bulk and some outliers degrade. A progress measure aimed at the lagging regions has to be combined with a returned iterate that is chosen with the same measure, and probably with a check that regions already within tolerance do not leave it.
+The concern is confirmed in the first half of the run: progress of the lagging regions is invisible or weak in the mean and max ratios, and the stall can end the run while many regions are still improving. The valid polygons keep converging far past the stall, and what grows is the number and error of the invalid polygons. The mean and max of the stall rule and of the best-iterate selection are dominated by those, so the invalid polygons, not the sub-cell regions, are what the aggregates track late in the run.
 
 Candidate measures, not tested here: the count of regions above `max_tol` and the median (or a high quantile) of the ratio among them; the sum of the log ratios over the regions above tolerance, which weights each lagging region equally and is not dominated by one outlier; progress if the count falls or the median ratio among the unsatisfied falls.
