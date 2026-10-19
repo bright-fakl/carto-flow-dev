@@ -1,0 +1,126 @@
+diff --git a/src/carto_flow/flow_cartogram/algorithm.py b/src/carto_flow/flow_cartogram/algorithm.py
+index ab06b6a..6533f40 100644
+--- a/src/carto_flow/flow_cartogram/algorithm.py
++++ b/src/carto_flow/flow_cartogram/algorithm.py
+@@ -90,6 +90,10 @@ def _longest_edge_segment_length(geometries) -> float:
+ # ============================================================================
+ 
+ 
++PW_HOOK = None  # prototype hook: piecewise-affine windows with vertex insertion
++VW_HOOK = None  # prototype hook: validated windows
++
++
+ def _detect_coordinate_format(coords):
+     """
+     Automatically detect the format of displacement coordinates.
+@@ -520,6 +524,11 @@ def morph_geometries(
+     best_score = np.inf
+     best_step = 0
+     best_state: tuple | None = None
++    best_nev = 0
++    if PW_HOOK is not None:
++        PW_HOOK.events.clear()
++    if VW_HOOK is not None:
++        VW_HOOK.reset()
+     stall_monitor = StallMonitor(
+         options.stall_patience, options.stall_min_efficiency, cycle_length(options.recompute_every)
+     )
+@@ -569,6 +578,10 @@ def morph_geometries(
+             # call (~1 ms) vs the Python-loop reconstruct_geometries (~13 ms).
+             # Offsets (topology) were computed once in unpack_geometries and
+             # remain valid because morphing changes coordinate values only.
++            if VW_HOOK is not None:
++                if VW_HOOK.S is not None:
++                    best_state = VW_HOOK.repair(flat_geoms, grid, vx, vy, best_state, step)
++                best_state = VW_HOOK.start_window(flat_geoms, grid, best_state, step)
+             if _pt is not None:
+                 _t0 = _time.perf_counter()
+             current_geoms = list(
+@@ -627,6 +640,11 @@ def morph_geometries(
+             vx *= vmax_scale
+             vy *= vmax_scale
+ 
++            if PW_HOOK is not None:
++                PW_HOOK.begin(flat_geoms, rho, grid, step)
++            if VW_HOOK is not None:
++                VW_HOOK.field(vx, vy)
++
+             # 1e. Divergence of the field, for the area scaling of the landmarks
+             if landmark_log_scaling is not None or coords_log_scaling is not None or probe_log_scaling is not None:
+                 landmark_div = field_divergence(vx, vy, grid.dx, grid.dy)
+@@ -649,19 +667,24 @@ def morph_geometries(
+         dt_prime = options.dt * step_controller.current(step) * min(grid.dx, grid.dy) / max_v
+         step_moved = options.dt * step_controller.current(step) * min(grid.dx, grid.dy) / typical_size
+         since_recompute += 1
++        if VW_HOOK is not None:
++            VW_HOOK.record(dt_prime)
+ 
+         # 2a. Displace geometry coordinates using the velocity field
+-        flat_geoms.coords = displace_coords_numba(
+-            flat_geoms.coords,
+-            grid.x_coords,
+-            grid.y_coords,
+-            vx,
+-            vy,
+-            dt_prime,
+-            grid.dx,
+-            grid.dy,
+-            use_parallel=False,
+-        )
++        if PW_HOOK is not None:
++            flat_geoms.coords = PW_HOOK.advance(grid, vx, vy, dt_prime)
++        else:
++            flat_geoms.coords = displace_coords_numba(
++                flat_geoms.coords,
++                grid.x_coords,
++                grid.y_coords,
++                vx,
++                vy,
++                dt_prime,
++                grid.dx,
++                grid.dy,
++                use_parallel=False,
++            )
+         flat_geoms.invalidate_cache()
+ 
+         # 2b. Displace landmarks if provided (using same velocity field)
+@@ -765,6 +788,9 @@ def morph_geometries(
+         if score < best_score:
+             best_score = score
+             best_step = step
++            best_nev = PW_HOOK.structure(flat_geoms) if PW_HOOK is not None else 0
++            if VW_HOOK is not None:
++                VW_HOOK.mark_best(flat_geoms)
+             best_state = (
+                 flat_geoms.coords.copy(),
+                 flat_landmarks_geoms.coords.copy() if flat_landmarks_geoms is not None else None,
+@@ -789,6 +815,13 @@ def morph_geometries(
+             else MorphStatus.RUNNING
+         )
+ 
++        if VW_HOOK is not None and (converged or stalled or (step + 1) == options.n_iter):
++            best_state = VW_HOOK.repair(flat_geoms, grid, vx, vy, best_state, step + 1, force=True)
++            current_areas = flat_geoms.compute_areas(use_parallel=False)
++            error_metrics = compute_error_metrics(current_areas, target_areas, eps=error_eps)
++            if best_step == step and best_state is not None:
++                best_state = (*best_state[:3], current_areas.copy(), error_metrics, *best_state[5:])
++
+         # 4. Create snapshot data at appropriate iterations
+         # We save snapshots at the final iteration (when the algorithm has converged, stalled, or reached the maximum number
+         # of iterations), or at user-defined intervals.
+@@ -831,8 +864,15 @@ def morph_geometries(
+             b_probe_xy,
+             b_probe_log,
+         ) = best_state
++        if PW_HOOK is not None:
++            PW_HOOK.restore(flat_geoms, b_coords, best_nev)
++        if VW_HOOK is not None:
++            VW_HOOK.restore(flat_geoms, b_coords)
+         flat_geoms.coords = b_coords
+         flat_geoms.invalidate_cache()
++        if VW_HOOK is not None:
++            b_areas = flat_geoms.compute_areas(use_parallel=False)
++            b_errors = compute_error_metrics(b_areas, target_areas, eps=error_eps)
+         if b_landmarks is not None and flat_landmarks_geoms is not None:
+             flat_landmarks_geoms.coords = b_landmarks
+             landmark_log_scaling = b_log_scaling

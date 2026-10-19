@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Validity-preserving flow cartograms without per-iteration meshes (validated windows)</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Validity-preserving flow cartograms without per-iteration meshes (validated windows)</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-quadtree-windows/index.html">Piecewise-affine windows on a quadtree mesh with vertex insertion (after Miaji et al.)</a> <span class="meta">(exploration)</span><br><a href="../exploration-carried-points/index.html">Rebuilding the output polygons from carried subdivision points (option 3)</a> <span class="meta">(exploration)</span><br><a href="../exploration-invalid-regions-field/index.html">Treating invalid regions separately in the flow loop (prototype)</a> <span class="meta">(exploration)</span><br><a href="../exploration-adaptive-densification/index.html">What the remaining invalid output polygons are, and adaptive densification</a> <span class="meta">(exploration)</span><br><a href="../exploration-county-error-relation/index.html">Area error of the county flow cartogram against original and target area</a> <span class="meta">(exploration)</span><br><a href="../exploration-stall-lagging-regions/index.html">Do the lagging counties still make progress when the stall rule stops the run?</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/167">#167</a></dd>
+<dt>Created</dt><dd>2026-10-19 14:00</dd>
+<dt>Before</dt><dd>main @ 06d4ff0</dd>
+<dt>After</dt><dd>scratch worktree /home/fakl/cf-validity with hooks in algorithm.py (algorithm_hooks_vw.patch, includes the quadtree hook); not a PR</dd>
+<dt>Inputs</dt><dd>3,108 counties (population) at max_segment_length 1000, congressional districts (432) at 1000, and the coarse county input (simplify_coverage tolerance 4000, 43 k vertices); ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, one run per row unless stated (the dynamics are chaotic and numba parallel kernels add run-to-run noise).</dd>
+</dl>
+<p class="desc">Search for a cheap way to end with zero invalid output polygons and to keep the input vertices. A crossing test (uniform grid, numba) on the window-end state, splitting of the crossing segments at the midpoint of their window-start chord, and a replay of the new vertices through the recorded steps of the window give 0 invalid polygons of 3,108 counties (57 in the baseline, 50 to 116 for other step sizes) at 1.1 to 1.3 times the baseline time and +0.1 % vertices when run every 10 windows. Quadtree windows with an exact-crossing-checked pruning also reach 0 but cost 4.8 times the baseline and +61 % vertices. Higher-order advection, smaller steps and a floor on the target values do not reduce the invalid polygons.</p>
+<h2>The question</h2>
+<p>The flow cartogram moves vertices individually, so the image of a straight segment is not a straight segment. Where a region is squeezed to a strip narrower than the vertex spacing, chords cross and the polygon is invalid. The baseline ends with 57 invalid counties of 3,108. Which approach gives zero invalid polygons (or close to it) at a small cost, keeps every input vertex and gives each inserted vertex a lineage for backfilling earlier animation frames, and does not lose accuracy?</p>
+<h2>Protocol</h2>
+<p>As specified in the task: 1 km county input (768,580 vertices), <code>morph_multiresolution(min_resolution=&quot;auto&quot;, levels=&quot;auto&quot;)</code>, <code>MorphOptions(area_scale=1e-6, n_iter=1000)</code>. Invalid = <code>shapely.is_valid</code> false on the returned best iterate. Errors are computed on the valid polygons only, with the targets normalized on them. Baseline: 20 s, 57 invalid, mean/median/p95 error 1.37/0.252/2.44 %, 60 valid counties above 10 %, levels 540/110/170 iterations (all stalled). <code>harness.py</code> runs and prints all metrics, <code>run.sh</code> runs a script against the worktree.</p>
+<p>Two cautions that apply to every accuracy number below:</p>
+<ul><li>The runs are chaotic. Changing <code>dt</code> from 0.20 to 0.18 or 0.22 changes the baseline invalid count to 90 and 116 and its median error from 0.252 % to 0.014 % and 0.020 %. Mean errors of the baseline over <code>dt</code> in 0.15 to 0.25 range from 0.67 % to 5.45 %. A difference of less than a factor of 2 to 3 in a mean error or in the count above 10 % is not a result.</li><li>The counties above 10 % are the sub-cell counties (target area below about 5 cells of the finest grid, 18 km2). Their error depends on when the stall rule ends a level. The finest level ends after 50 to 300 iterations in all runs.</li></ul>
+<h2>Method that works: validated windows (<code>xing.py</code>, <code>vw.py</code>)</h2>
+<p>Inside a window (between two field recomputes) the field is fixed, so each vertex moves independently of all others. This has three consequences used here.</p>
+<ol><li>A vertex inserted at the start of the window can be advected through the recorded steps of the window afterwards (replay): it lands where the flow takes it, on the true path, not on the chord.</li><li>A segment that crosses another at the end of the window can therefore be repaired retroactively: split it at the midpoint of its window-start chord, replay the new vertices, test again, repeat (14 rounds at most, the new sub-segments are tested only against their neighborhood).</li><li>The polygon at the start of the window is not changed by the insertion (a vertex on the chord), so the repair does not create invalid polygons, and no original vertex moves or disappears.</li></ol>
+<p>What was built:</p>
+<ul><li><code>xing.py</code>: crossing detection for all segments of all rings with a uniform grid in numba (build 20 to 40 ms, scan 10 ms for 0.77 M segments). It reports proper crossings; identical segments of two rings (shared boundaries) and shared end points have orientation exactly 0 and are not reported. On the baseline output it flags all 57 invalid polygons and 40 more polygons that overlap a neighbor (no polygon is flagged that is neither). It tests across polygons, so the output is also a valid coverage: <code>shapely.coverage_invalid_edges</code> finds 33 polygons with invalid edges and 17 overlapping neighbor pairs (0.48 km2) in the baseline and none in the repaired run (<code>t_cov.py</code>).</li><li><code>vw.py</code>: <code>split_segments</code> (inserts the midpoint of the S chord, with the end points ordered lexicographically so the two rings of a shared boundary get bit-identical vertices; twins are found through the grid), the replay, the best-iterate bookkeeping (the best state is extended with the replayed positions if it belongs to the span, with the chord midpoint otherwise, and is also tested for crossings), the ring offsets and metadata update without a shapely round trip, and <code>backfill(coords, events)</code>.</li><li>Hook points in <code>algorithm.py</code> (<code>algorithm_hooks_vw.patch</code>): <code>repair</code> before the field recompute, <code>start_window</code>/<code>field</code>/<code>record</code>/<code>mark_best</code> per window and step, a forced repair before the terminal snapshot and the restore of the best iterate.</li><li>Lineage: every insertion round is stored as <code>(new_idx, left, 0.5, step)</code>; the new vertex lies at the midpoint of the segment <code>(left, left + 1)</code> of the previous vertex structure. <code>backfill</code> lifts any earlier frame to the final structure. Checked in <code>t_backfill.py</code>: the 768,580 input vertices lifted through the 26 recorded rounds give 769,473 vertices, equal to the final structure, and the level-1 and level-2 results have 768,676 and 769,072 vertices. The lifted frames are the same point sets (the vertices lie on chords), so a frame that was valid stays valid.</li><li><code>check_every</code> (k): the detection and repair run every k windows instead of every window. The start-of-span coordinates are kept and the fields of the k windows are copied (46 MB per window at the finest grid), and the replay applies them in order. The state and the best iterate are tested at the end of the span.</li><li><code>max_len</code> (cells): optional rule that splits chords longer than <code>max_len</code> cells at every window start; needed for the coarse input only.</li><li><code>min_len</code> (cells, 1e-7) and <code>depth</code> (14): refinement stops at sub-segments shorter than <code>min_len</code> cells; the invalid polygons that remain contain hundreds of segments below 1 m (<code>t_inv.py</code>), i.e. zero-width features of the input geometry.</li></ul>
+<h2>Results</h2>
+<p>County, 1 km input, n_iter 1000. Time is wall time of the whole ladder. Error columns: valid polygons, targets normalized on them, mean / median / p95, then the number above 10 %. Rows marked (old) are from the earlier reports, with their protocol.</p>
+<table>
+<tr><th>candidate</th><th>guarantee</th><th>time</th><th>invalid</th><th>vertices</th><th>mean / median / p95 error</th><th>&gt;10 %</th><th>vertex correspondence</th></tr>
+<tr><td>baseline</td><td>none</td><td>20 s</td><td>57</td><td>768,580</td><td>1.37 / 0.252 / 2.44</td><td>60</td><td>identical</td></tr>
+<tr><td>baseline, dt 0.15 / 0.18 / 0.22 / 0.25</td><td>none</td><td>18 / 21 / 27 / 16 s</td><td>62 / 90 / 116 / 76</td><td>768,580</td><td>5.45 / 1.12 / 0.67 / 1.25 (mean)</td><td>371 / 65 / 28 / 77</td><td>identical</td></tr>
+<tr><td>baseline, dt 0.05, n_iter 3000</td><td>none</td><td>36 s</td><td>105</td><td>768,580</td><td>4.52 / 0.045 / 23.2</td><td>258</td><td>identical</td></tr>
+<tr><td>RK2 advection</td><td>none</td><td>25 s</td><td>60</td><td>768,580</td><td>1.72 / 0.390 / 3.99</td><td>73</td><td>identical</td></tr>
+<tr><td>RK4 advection</td><td>none</td><td>28 s</td><td>53</td><td>768,580</td><td>3.01 / 0.431 / 11.6</td><td>177</td><td>identical</td></tr>
+<tr><td>Euler, 4 substeps per step</td><td>none</td><td>35 s</td><td>65</td><td>768,580</td><td>1.61 / 0.283 / 3.79</td><td>81</td><td>identical</td></tr>
+<tr><td>target values floored at 0.05 / 0.2 x median</td><td>none</td><td>25 / 24 s</td><td>63 / 50</td><td>768,580</td><td>measured against the true values: 2.02 / 17.5 (mean)</td><td>84 / 281</td><td>identical</td></tr>
+<tr><td>carried points 0.5 / 0.25 / 0.125 km (old)</td><td>none, empirical</td><td>1.6 / 2.7 / 4.3 x</td><td>29 / 11 / 10</td><td>not reported</td><td>unchanged morph</td><td></td><td>all input vertices kept, extra points rebuilt after the run</td></tr>
+<tr><td>quadtree 2^-8, insertion, no pruning (old)</td><td>construction, no inverted triangle seen</td><td>93 s</td><td>0</td><td>5.2 M</td><td>6.9 / 1.06 (mean / median)</td><td></td><td>inserted vertices with lift maps</td></tr>
+<tr><td>quadtree 2^-6, insertion, pruning by chord distance 0.02 cell (old)</td><td>none</td><td>99 s</td><td>91</td><td>1.08 M</td><td>1.72 / 0.11 (mean / median)</td><td></td><td>lift maps; pruning removes vertices</td></tr>
+<tr><td>quadtree 2^-6, insertion, pruning 0.02 cell checked with the crossing test (new)</td><td>exact test at each window start</td><td>97 s</td><td>0</td><td>1.24 M</td><td>3.49 / 0.055 / 15.4</td><td>207</td><td>removed vertices include input vertices</td></tr>
+<tr><td>validated windows, every window</td><td>exact test at each window end</td><td>32 s</td><td>0</td><td>770,600</td><td>2.03 / 0.097 / 6.56</td><td>108</td><td>input vertices kept, +2,020 with lineage</td></tr>
+<tr><td>validated windows, every 2</td><td>same, 2 windows</td><td>29 s</td><td>0</td><td>770,974</td><td>1.53 / 0.173 / 6.16</td><td>63</td><td>same</td></tr>
+<tr><td>validated windows, every 3</td><td>same, 3 windows</td><td>24 s</td><td>3</td><td>770,203</td><td>1.78 / 0.134 / 4.75</td><td>89</td><td>same</td></tr>
+<tr><td>validated windows, every 5</td><td>same, 5 windows</td><td>26 s</td><td>0</td><td>770,256</td><td>1.76 / 0.110 / 5.62</td><td>90</td><td>same</td></tr>
+<tr><td>validated windows, every 10</td><td>same, 10 windows</td><td>22 s (26 s in a repeat)</td><td>0</td><td>769,473</td><td>1.08 / 0.195 / 2.63</td><td>45</td><td>same, +893</td></tr>
+<tr><td>validated windows, every 20</td><td>same</td><td>22 s</td><td>0</td><td>769,411</td><td>1.08 / 0.196 / 2.68</td><td>45</td><td>same</td></tr>
+<tr><td>validated windows, every 10, dt 0.15 / 0.18 / 0.22 / 0.25</td><td>same</td><td>22 / 20 / 27 / 20 s</td><td>0 / 0 / 0 / 0</td><td>+1.0 k / 1.1 k / 2.8 k / 1.6 k</td><td>2.44 / 2.91 / 1.16 / 3.69 (mean)</td><td>167 / 177 / 71 / 217</td><td>same</td></tr>
+<tr><td>validated windows, every window, dt 0.18 / 0.22 (min_len 1e-4 or 1e-7)</td><td>same</td><td>41 / 46 s</td><td>7 / 2 to 6</td><td>+3.9 k / +11 k</td><td>0.93 / 1.24 (mean)</td><td>41 / 53</td><td>same</td></tr>
+</table>
+<p>Levels (iterations, all stalled except where the budget ended the level): baseline 540/110/170, every 10: 500/80/200, every window: 620/70/90. With every 10 the hook time is about 2 s per run (detection 1.1 s, repair 0.8 s). The <code>dt</code> rows pair a baseline with a validated run at the same step size; the validated runs have 0 invalid in all five step sizes, the baselines 57 to 116. For the mean error, the validated run is lower than its baseline for dt 0.15 and 0.20 and higher for 0.18, 0.22 and 0.25; I cannot tell a difference from the noise.</p>
+<p>Other inputs:</p>
+<table>
+<tr><th>input</th><th>run</th><th>time</th><th>invalid</th><th>vertices</th><th>mean / median / p95 error</th><th>&gt;10 %</th></tr>
+<tr><td>congressional districts, 1 km</td><td>baseline</td><td>1.6 s</td><td>2</td><td>343,042</td><td>0.48 / 0.264 / 1.90</td><td>0</td></tr>
+<tr><td>congressional districts, 1 km</td><td>validated windows, every 10</td><td>1.8 s</td><td>0</td><td>343,046</td><td>0.48 / 0.262 / 1.89</td><td>0</td></tr>
+<tr><td>coarse counties (43 k vertices)</td><td>baseline</td><td>11 s</td><td>327</td><td>43,084</td><td>12.3 / 0.934 / 49.7</td><td>508</td></tr>
+<tr><td>coarse counties</td><td>quadtree 2^-6 + coverage_simplify 0.02 cell (old)</td><td>94 s</td><td>0</td><td>552 k</td><td>1.34 / 0.074 / 4.0</td><td></td></tr>
+<tr><td>coarse counties</td><td>validated windows, every window, <code>max_len</code> 1 cell, refinement stop after 3 rounds without progress, min_len 1e-6</td><td>28 s</td><td>12</td><td>300,606 (230 k from <code>max_len</code>)</td><td>1.15 / 0.147 / 3.67</td><td>53</td></tr>
+<tr><td>coarse counties</td><td>same, every 3, min_len 1e-7</td><td>23 s</td><td>24</td><td>294,222</td><td>1.16 / 0.038 / 3.11</td><td>73</td></tr>
+<tr><td>coarse counties</td><td>same, every 10</td><td>27 s</td><td>39</td><td>301,451</td><td>3.18 / 0.066 / 15.1</td><td>200</td></tr>
+<tr><td>coarse counties</td><td>same as every window without the stop rule</td><td>470 s</td><td>5</td><td>327,801</td><td>1.15 / 0.148 / 3.67</td><td>53</td></tr>
+<tr><td>coarse counties</td><td>validated windows, no <code>max_len</code>, every window (first version, min_len 1e-4)</td><td>142 s</td><td>3</td><td>110,322</td><td>5.98 / 0.287 / 26.2</td><td>305</td></tr>
+</table>
+<h2>What works</h2>
+<ul><li>Validated windows give 0 invalid polygons on the 1 km counties in five of the six runs at the default step size (<code>check_every</code> 1, 2, 5, 10, 20; every 3 gave 3), in all five step sizes with <code>check_every</code> 10, and on the districts. The every-window runs at other step sizes gave 2 to 7. They keep every input vertex, add 0.1 % vertices and cost 10 to 30 % time with <code>check_every</code> 10 to 20 (22 to 27 s against 20 s). The detection costs 40 to 80 ms per call; every window it adds 6 s to the 20 s baseline, every 10 windows 1 s.</li><li>The result is a valid coverage, not only valid polygons, so the density and velocity fields are computed from valid regions when the check runs every window (not between checks when <code>check_every</code> is larger).</li><li>A long check interval (10 to 20 windows, i.e. a check about once per level) works on the 1 km input because the repair is retroactive: the vertices follow the same flow lines whatever the polygon looked like in between. It does not work on the coarse input (39 invalid at every 10, 12 at every window), where the chords are long and the crossings pile up.</li><li>On the coarse input the combination with the length rule gets 7 times the vertices of the input for 12 invalid polygons and mean error 1.15 %, at 28 s against 94 s for the quadtree with coverage simplification (0 invalid, 552 k vertices).</li><li>Safe removal of inserted vertices by a crossing test works as a method (91 to 0 invalid for the quadtree pruning) but the quadtree itself stays expensive.</li></ul>
+<h2>What does not work, or is open</h2>
+<ul><li>Higher-order or sub-stepped advection (RK2, RK4, 4 Euler substeps), a smaller step (dt 0.05) and a floor on the target values (0.05 and 0.2 times the median) do not change the invalid count (53 to 105; the baseline varies from 57 to 116 with the step size). The cause is the chord, not the integrator: a strip narrower than the vertex spacing has crossing chords whatever the path accuracy. A step limit cannot help for the same reason (the width goes below the spacing even with infinitely small steps).</li><li>The quadtree with checked pruning: 4.8 times the time and 61 % more vertices, with removal of input vertices, and the median error is the best of the table but the mean and the number above 10 % are not (the finest level was cut by the budget at 40 iterations). It is dominated by validated windows.</li><li>The remaining invalid polygons (every-window runs with other step sizes, coarse input) contain zero-width features: segments of 1 mm to 1 m at both sides of a crossing with start-of-window chords that already nearly coincide (<code>t_fail.py</code>, <code>t_inv.py</code>). Splitting the chord cannot separate two curves that touch at the start of the window. They would need a different treatment (collapsing the spike, which changes vertices) or are accepted as a floor.</li><li>Without a stop rule a failing refinement cascades (every window on the coarse input: 470 s, 246 k unresolved segments). The stop after 3 rounds without progress and a <code>min_len</code> bound it.</li><li>Accuracy: the tail (counties above 10 %) is dominated by the sub-cell counties and by when the stall rule ends the finest level; with every window the finest level stalled after 90 iterations with the best iterate at 42 and 99 baseline-valid counties above 10 % (against 60), with every 10 windows 43 (<code>cmp2.py</code>, <code>where.py</code>). The 97 counties above 5 % in the first run are the plains counties that have shrunk to 8 % of their area and are below target (82 of 97). I did not find a systematic effect of the repair on accuracy; I could not exclude one.</li><li>The check state is only exact at the end of a span and for the best iterate. Snapshots taken in the middle of a span (<code>snapshot_every</code>) and the frames stored per level are not repaired. A fold that appears and disappears inside a span is not detected (not observed).</li><li>Not tested: combination with the density-field repair (the repair is subsumed when the check runs every window; with a long interval the fields still see invalid polygons), the paper&#x27;s constrained Delaunay triangulation, the continuous collision control with backtracking, the mesh-deformation formulation, shared arcs.</li><li>Numba noise: a repeated run of one every-window configuration gave 2 and 4 invalid polygons.</li></ul>
+<h2>Assessment of the other ideas (not built unless a row above says so)</h2>
+<table>
+<tr><th>idea</th><th>expected payoff</th><th>reason</th></tr>
+<tr><td>continuous collision control with shorter steps (B1)</td><td>low</td><td>The crossing is caused by the chord of a squeezed strip, so a shorter step only delays it. Smaller dt gave 105 invalid (row above). Detection is useful, and was used.</td></tr>
+<tr><td>local subdivision driven by stretch and local width (B2)</td><td>covered</td><td>Validated windows are this with the exact crossing test as criterion. The stretch is not predictive: the stretch of the flagged segments has median 1.00 (<code>diag1.py</code>).</td></tr>
+<tr><td>fold detection and local repair by re-integration (B3)</td><td>covered</td><td>Validated windows.</td></tr>
+<tr><td>higher-order integration (B4)</td><td>none</td><td>Measured, no effect.</td></tr>
+<tr><td>shared arcs (B5)</td><td>speed only</td><td>Would halve the advection of shared vertices and remove the twin search, but advection is not the cost.</td></tr>
+<tr><td>mesh deformation (B6)</td><td>unknown, high cost</td><td>The quadtree prototype is the cheaper approximation of it and it costs 4 to 5 times the baseline.</td></tr>
+<tr><td>value floor / shrink limit (B7)</td><td>none</td><td>Measured, no effect on the invalid count.</td></tr>
+<tr><td>coverage-aware or twin-free repair</td><td>n/a</td><td>Twins are found through the grid; no problem seen.</td></tr>
+</table>
+<p>Literature: Miaji et al. (arXiv 2511.08121) is the only paper found that treats the invalid topology of density-equalizing cartograms (line densification plus topology-preserving simplification). Andrieu et al. (2007, rubber-sheet cartograms) try a smaller force vector when the topology fails and reject the deformation if it still fails; that is the step-limit idea above and it does not address a strip narrower than the vertex spacing.</p>
+<h2>Recommendation, ranked</h2>
+<ol><li>Build validated windows as an option of the flow algorithm (<code>check_every</code> about 10 windows for dense input, 1 to 3 with <code>max_len</code> 1 cell for coarse input). It is the only candidate with 0 invalid polygons at about baseline cost and 0.1 % extra vertices, it keeps all input vertices and has a lineage. Library parts: <code>xing.py</code> (crossing detection, candidate for <code>geo_utils</code>), <code>split_segments</code> and <code>backfill</code>, the span/replay bookkeeping, and an extra field in the result for the insertion events (<code>new_idx</code>, <code>left</code>, <code>t</code>, step). Needs: the hook points as proper code, the memory of the stored fields (460 MB at 10 windows on the finest grid; bound <code>check_every</code> by memory), repair of the mid-run snapshots if they are used for animation, and a decision on the residual zero-width cases (report them in <code>invalid_regions</code>, which exists).</li><li>Keep the quadtree prototype only as a reference. Drop RK2/RK4, smaller steps and the value floor.</li><li>Open: whether the invalid polygons seen by the density between checks (long <code>check_every</code>) cost accuracy on other inputs than the counties (not seen here, but the coarse input fails at every 10); whether an adaptive interval (check every window while crossings are found, every 10 otherwise) removes that; repeated runs for the accuracy columns.</li></ol>
+<h2>Files</h2>
+<p><code>xing.py</code>, <code>vw.py</code>, <code>algorithm_hooks_vw.patch</code>, <code>harness.py</code> (protocol and metrics), <code>run.sh</code>, <code>base.py</code>, <code>runvw.py</code> (environment variables <code>EVERY</code>, <code>MAXLEN</code>, <code>MINLEN</code>, <code>DEPTH</code>, <code>STOPR</code>, <code>MORPH_OPTS</code>, <code>LABEL</code>), <code>expb.py</code> (RK2/RK4/substeps, value floor), <code>pw2.py</code>, <code>pw.py</code>, <code>pwrun_h.py</code> (quadtree with checked pruning, <code>SAFE=1</code>), <code>t_backfill.py</code>, <code>t_cov.py</code>, <code>t_inv.py</code>, <code>t_fail.py</code>, <code>diag1.py</code>, <code>cmp.py</code>, <code>cmp2.py</code>, <code>where.py</code>, <code>figs.py</code>, <code>batch1.sh</code> to <code>batch4.sh</code> with their logs. The scripts import each other from their own directory; <code>run.sh</code> has the scratch path of this session hard-coded.</p>
+<div class="figure">
+<img src="fig1_invalid_counts.png" alt="Invalid output polygons of the 3,108 counties for the baseline at five step sizes, for the alternatives that did not help, for the quadtree with checked pruning and for validated windows every 10 windows at the same five step sizes.">
+<p class="caption">Invalid output polygons of the 3,108 counties for the baseline at five step sizes, for the alternatives that did not help, for the quadtree with checked pruning and for validated windows every 10 windows at the same five step sizes.</p>
+</div><div class="figure">
+<img src="fig2_example.png" alt="A county that is invalid in the baseline and the same county in the validated run (the two runs diverge, so the shapes differ): the thin tail is resolved by vertices inserted on the flow path.">
+<p class="caption">A county that is invalid in the baseline and the same county in the validated run (the two runs diverge, so the shapes differ): the thin tail is resolved by vertices inserted on the flow path.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
