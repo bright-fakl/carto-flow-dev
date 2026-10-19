@@ -290,3 +290,26 @@ Second round: `vwd.py` (hook with `FLAT`, `skip_s_cross`, `f32`, `mem_budget_mb`
 
 figure: fig3_plateau_vs_invalid.png — Median and p95 error of the valid counties at the plateau of the finest level (fixed schedule, 13 perturbed configurations, three methods) against the number of invalid polygons present: the runs with many invalid polygons have the lowest bulk error.
 figure: fig4_trace.png — The finest level at dt 0.20 with a fixed schedule: median and p95 error of the valid polygons every 25 iterations; the baseline settles at a median of 0.002 to 0.003 %, the validated run oscillates between 0.03 and 0.3 %.
+
+## Density smoothing (`DensitySmooth`) against invalid polygons
+
+Question: does smoothing the density field lower the number of invalid polygons, because thin features are blurred out? `density_smooth.py`: county protocol (1 km input, auto ladder, n_iter 1000, no hook), `MorphOptions(density_mod=DensitySmooth(sigma=...))`, with sigma in meters (the kernel is converted to cells at each level, so it is 0.12 to 0.5 of a cell at the finest level for 2 km and 0.5 to 2 cells for 8 km), at three step sizes. Valid-polygon errors with targets normalized on the valid polygons; single runs.
+
+| dt | sigma | levels (iterations, S stalled, C budget) | invalid | mean / median / p95 | above 10 % |
+|---|---|---|---|---|---|
+| 0.18 | none | 650 S, 80 S, 100 S | 90 | 1.12 / 0.014 / 1.6 % | 65 |
+| 0.18 | 2 km | 650 S, 80 S, 60 S | 76 | 1.72 / 0.046 / 5.4 % | 97 |
+| 0.18 | 4 km | 650 S, 80 S, 100 S | 61 | 2.11 / 0.008 / 7.8 % | 129 |
+| 0.18 | 8 km | 590 S, 410 C | 2 | 13.05 / 1.34 / 54 % | 722 |
+| 0.20 | none | 540 S, 110 S, 170 S | 57 | 1.37 / 0.252 / 2.4 % | 60 |
+| 0.20 | 2 km | 540 S, 110 S, 210 S | 55 | 1.62 / 0.342 / 3.3 % | 64 |
+| 0.20 | 4 km | 530 S, 110 S, 50 S | 35 | 5.65 / 0.328 / 26.8 % | 340 |
+| 0.20 | 8 km | 490 S, 510 C | 4 | 12.65 / 1.10 / 52 % | 694 |
+| 0.22 | none | 540 S, 120 S, 300 S | 116 | 0.67 / 0.020 / 0.5 % | 28 |
+| 0.22 | 2 km | 540 S, 120 S, 120 S | 104 | 1.38 / 0.050 / 3.7 % | 75 |
+| 0.22 | 4 km | 540 S, 160 S, 50 S | 108 | 3.43 / 0.108 / 13.9 % | 209 |
+| 0.22 | 8 km | 500 S, 500 C | 5 | 14.29 / 1.30 / 61 % | 752 |
+
+- Smoothing lowers the invalid count only a little at 2 km (57 to 55, 90 to 76, 116 to 104) and at 4 km (35, 61, 108), and removes almost all of them at 8 km (2 to 5), but the accuracy falls at every sigma: the tail grows (p95 0.5 to 1.6 % without, 3 to 8 % at 2 to 4 km, above 50 % at 8 km) and the number of counties above 10 % goes from 28 to 65 up to 100 to 340 (and to 700 at 8 km).
+- The mechanism is the opposite of what the targets ask for: smoothing keeps small regions from being squeezed (fewer needles), by lowering the density contrast that drives their shrinkage, so those regions end larger than their targets. It does not make the polygons better represented.
+- At 8 km the ladder uses two levels and ends at the budget; the result is not comparable with the others.
