@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Treating invalid regions separately in the flow loop (prototype)</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Treating invalid regions separately in the flow loop (prototype)</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-stall-lagging-regions/index.html">Do the lagging counties still make progress when the stall rule stops the run?</a> <span class="meta">(exploration)</span><br><a href="../exploration-quadtree-windows/index.html">Piecewise-affine windows on a quadtree mesh with vertex insertion (after Miaji et al.)</a> <span class="meta">(exploration)</span><br><a href="../exploration-county-error-relation/index.html">Area error of the county flow cartogram against original and target area</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/171">#171</a></dd>
+<dt>Created</dt><dd>2026-10-19 20:00</dd>
+<dt>Before</dt><dd>main @ 06d4ff0</dd>
+<dt>After</dt><dd>scratch worktree with hooks in algorithm.py (algorithm_hooks.patch); not a PR</dd>
+<dt>Inputs</dt><dd>3,108 bundled counties (population) with max_segment_length 1000, auto ladder, n_iter 1000, area_scale 1e-6, default options. Errors are of the valid output polygons against targets normalized on the valid polygons only; neighbors are valid regions that intersect an invalid one. Runs are deterministic (repeating a run gives identical numbers).</dd>
+</dl>
+<p class="desc">Rasterizing a repaired polygon (shapely.make_valid) instead of the invalid ring when the density field is built lowers the median error of the valid counties from 0.25 % to 0.012 % and their p95 from 2.4 % to 1.3 %, and the median error of the valid neighbors of invalid regions from 0.86 % to 0.12 %. The number of invalid polygons rises from 57 to 83 and the number of counties above 10 % is unchanged. Excluding the invalid regions from the error statistics or measuring them by their point-set area makes the result worse.</p>
+<h2>Why</h2>
+<p>An invalid (self-intersecting) polygon is rasterized with its winding-weighted coverage: a cell inside an overlap of the ring gets the density twice, a cell inside a reversed lobe gets a negative density, and the density of the region is its value over the signed shoelace area. The field around an invalid region is therefore wrong, and so is the velocity that moves its neighbors. Valid regions that touch an invalid one end at 3 to 10 times the median error of other valid regions of the same shrink class (<code>nbr.py</code>; exploration-stall-lagging-regions).</p>
+<h2>Prototype</h2>
+<p>Hooks in <code>algorithm.py</code> (<code>algorithm_hooks.patch</code>, <code>INV_HOOK</code>), class <code>InvHook</code> in <code>inv.py</code>, driver <code>invrun.py &lt;mode&gt; &lt;n_iter&gt;</code>:</p>
+<ul><li><code>repair</code>: at every recompute (every 10 iterations) the polygons are checked with <code>shapely.is_valid</code> (0.04 s for 3,108 polygons with 0.77 M vertices) and each invalid one is replaced for the density field by the polygonal part of <code>shapely.make_valid</code> (0.32 s for 100 polygons). The vertices of the morph geometry are not changed.</li><li><code>exclude</code>: the area of an invalid region is set to its target in the error metrics (mean, max, stall rule, best-iterate score), so it does not count.</li><li><code>both</code>: the two together.</li><li><code>pointset</code>: the error metric uses the <code>make_valid</code> area of the invalid regions.</li></ul>
+<h2>Results</h2>
+<table>
+<tr><th>mode</th><th>levels (iterations, S = stalled)</th><th>time</th><th>invalid</th><th>valid: mean / median / p95</th><th>valid above 10 %</th><th>neighbors of invalid: median, above 5 %</th></tr>
+<tr><td>none</td><td>540 S, 110 S, 170 S</td><td>21 s</td><td>57</td><td>1.37 % / 0.252 % / 2.4 %</td><td>60</td><td>0.86 %, 21 of 190</td></tr>
+<tr><td>repair</td><td>540 S, 90 S, 150 S</td><td>24 s</td><td>83</td><td>0.94 % / 0.012 % / 1.3 %</td><td>59</td><td>0.12 %, 44 of 252</td></tr>
+<tr><td>exclude</td><td>640 S, 70 S, 90 S</td><td>24 s</td><td>53</td><td>2.14 % / 0.147 % / 6.0 %</td><td>105</td><td>0.89 %, 34 of 177</td></tr>
+<tr><td>both</td><td>690 S, 70 S, 90 S</td><td>27 s</td><td>66</td><td>1.62 % / 0.106 % / 5.4 %</td><td>77</td><td>0.78 %, 38 of 208</td></tr>
+<tr><td>pointset</td><td>630 S, 70 S, 90 S</td><td>25 s</td><td>66</td><td>1.62 % / 0.106 % / 5.4 %</td><td>77</td><td>0.78 %, 38 of 208</td></tr>
+</table>
+<p>(The <code>pointset</code> row is identical to <code>both</code> in every statistic; I have not checked whether that is a coincidence or a defect of the hook.)</p>
+<ul><li>Repairing the polygons for the density field is the effective part. The valid regions get a 20 times lower median error and a lower tail, and the neighbors of invalid regions improve 7 times at the median; the cost is 3 s.</li><li>It does not reduce the number of counties above 10 % (59 against 60), and the number of invalid polygons rises from 57 to 83, so the invalid regions are not repaired and more of them appear: those polygons no longer disturb the field, and nothing moves them back to validity.</li><li>Excluding the invalid regions from the metrics is worse than doing nothing: the finest level stalls after 90 iterations instead of 170 and the tail grows (p95 6 %, 105 counties above 10 %). I did not isolate why; the stall rule and the best iterate are chosen on a score that now ignores those regions.</li><li>Every level ends stalled in all modes: the stall rule is unchanged by the repair.</li></ul>
+<h2>Reading</h2>
+<p>The concern was justified: the invalid regions do disturb the field of their neighbors, and repairing them for the density removes most of that disturbance. Treating them separately in the progress statistics is not helpful as implemented. What remains is the invalid polygons themselves (83 at the end) and the lagging strongly shrunk counties.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
