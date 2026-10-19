@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Piecewise-affine windows on a quadtree mesh with vertex insertion (after Miaji et al.)</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Piecewise-affine windows on a quadtree mesh with vertex insertion (after Miaji et al.)</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-carried-points/index.html">Rebuilding the output polygons from carried subdivision points (option 3)</a> <span class="meta">(exploration)</span><br><a href="../exploration-adaptive-densification/index.html">What the remaining invalid output polygons are, and adaptive densification</a> <span class="meta">(exploration)</span><br><a href="../segment-density-warning/index.html">Warn when input segments are too long for the expected stretch</a> <span class="meta">(pr)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/167">#167</a></dd>
+<dt>Created</dt><dd>2026-10-18 18:00</dd>
+<dt>Before</dt><dd>main @ 06d4ff0</dd>
+<dt>After</dt><dd>scratch worktree with a hook in algorithm.py (algorithm_hooks.patch); not a PR</dd>
+<dt>Inputs</dt><dd>3,108 counties (population) at max_segment_length 1000, ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, single run per row (the dynamics are chaotic: rows differ by more than their settings suggest).</dd>
+</dl>
+<p class="desc">Prototype of the line densification of Miaji et al. inside the flow loop. At every field recompute a graded quadtree is built from the density, its leaves are triangulated, vertices are inserted where the boundaries cross triangle edges, and the vertices move with the piecewise-affine map of the advected mesh nodes for the next 10 iterations. Without pruning the 3,108 counties end with 0 invalid polygons (57 in the baseline) but with 7 to 11 times the vertices and a worse area error; with a simple pruning the vertex count is +40 % but 41 to 91 polygons are invalid again, because the pruning itself creates invalid polygons.</p>
+<h2>What was built</h2>
+<p><code>pw.py</code> builds the mesh, <code>pw2.py</code> is the hook, <code>pw2run.py</code> runs the ladder, <code>algorithm_hooks.patch</code> adds the three call sites to <code>algorithm.py</code>.</p>
+<ol><li>At every recompute the density is padded to a power-of-two square and a quadtree is built by splitting the leaf with the largest density range until <code>n_cells * 2^-x</code> leaves exist, then graded (neighboring leaves differ by at most one level, as in the paper).</li><li>Every leaf is split into a fan of triangles from its center to its corner and hanging nodes. The paper uses a constrained Delaunay triangulation; the fan is simpler and has the same property that matters here, that the map is continuous across leaves. The center is the mean of the four corners, not advected.</li><li>Optional insertion: every boundary segment is split where it crosses a leaf edge or a fan edge, with identical points on the two sides of a shared boundary (computed from the lexicographically ordered end points).</li><li>The nodes are advected with the velocity field each iteration, and the vertices are placed with their (fixed) barycentric coordinates in their triangle. After 10 iterations the field is recomputed and the mesh is rebuilt.</li><li>The best-iterate restore needs the vertex set of the best iterate: the insertions and removals are recorded as <code>(a, b, t)</code> maps (a new vertex lies at fraction <code>t</code> between old vertices <code>a</code> and <code>b</code>) and the restored coordinates are lifted through them. The same maps would backfill the vertices into earlier frames of an animation.</li></ol>
+<h2>Results</h2>
+<p>Baseline (no hook): 25 s, 820 iterations, mean error 1.52 %, median 0.25 %, 57 invalid, 0.77 M vertices.</p>
+<table>
+<tr><th>mesh leaves (cells x)</th><th>insertion</th><th>pruning</th><th>time</th><th>vertices</th><th>mean / median error</th><th>invalid</th></tr>
+<tr><td>2^-8</td><td>no</td><td></td><td>34 s</td><td>0.77 M</td><td>4.24 % / 1.06 %</td><td>183</td></tr>
+<tr><td>2^-6</td><td>no</td><td></td><td>36 s</td><td>0.77 M</td><td>1.97 % / 0.04 %</td><td>206</td></tr>
+<tr><td>2^-4</td><td>no</td><td></td><td>28 s</td><td>0.77 M</td><td>2.25 % / 0.28 % (center advected)</td><td>135</td></tr>
+<tr><td>2^-4</td><td>no, center = mean of corners</td><td></td><td>40 s</td><td>0.77 M</td><td>1.29 % / 0.26 %</td><td>71</td></tr>
+<tr><td>2^-8</td><td>yes</td><td>none</td><td>93 s</td><td>5.2 M</td><td>6.9 % / 2.4 %</td><td>0</td></tr>
+<tr><td>2^-6</td><td>yes</td><td>none</td><td>269 s</td><td>8.6 M</td><td>5.7 % / 0.67 %</td><td>0</td></tr>
+<tr><td>2^-6</td><td>yes</td><td>0.02 cell</td><td>99 s</td><td>1.08 M</td><td>1.72 % / 0.11 %</td><td>91</td></tr>
+<tr><td>2^-6</td><td>yes</td><td>0.002 cell</td><td>79 s</td><td>1.10 M</td><td>3.59 % / 0.05 %</td><td>76</td></tr>
+<tr><td>2^-6</td><td>yes</td><td>0.0002 cell</td><td>86 s</td><td>1.18 M</td><td>4.41 % / 0.65 %</td><td>41</td></tr>
+</table>
+<p>(The 2^-4 run with insertion and no pruning did not finish: it ran out of memory.)</p>
+<ul><li>The mesh alone (no insertion) does not help: 71 to 206 invalid polygons. The guarantee needs every sub-segment inside one triangle, so the inserted vertices are the essential part.</li><li>With insertion and no pruning no invalid polygon appears in two runs, and no mesh triangle was inverted in any of the sampled windows. The vertex count is the problem: the points inserted in one window are not removed, and the next window inserts new ones.</li><li>The pruning removes an inserted vertex when it lies within a tolerance of the chord of its neighbors. <code>pw2run.py ... dbg</code> counts the invalid polygons before and after each pruning: most of the increase comes from the pruning step itself (for example 6 to 10, 52 to 61), a minority from the flow window. A tolerance of 1 m (0.0002 cell) still gives invalid polygons, so the squeezed strips are narrower than that at some iteration, or the chord removed lies across a nearby boundary.</li><li>The area error is worse than the baseline in most rows because the piecewise-affine window is a coarser approximation of the flow than the per-vertex bilinear advection, and the runs are chaotic (the same settings other than the tolerance move the mean from 1.7 % to 4.4 %). I did not average over several runs.</li><li>Time: the hook costs 45 to 65 s of the 80 to 100 s (mesh construction, vertex insertion, rebuilding the geometry metadata), mostly in unoptimized Python and numba code; the baseline iteration cost is unchanged.</li></ul>
+<h2>Reading</h2>
+<p>The guarantee of the paper is reproduced in this setting: with the mesh and the insertion, the output has no invalid polygons, also for the squeezed strips that remain at 10 invalid polygons with 0.125 km carried points (exploration-carried-points). The open problem is what the paper solves with a topology-preserving simplification: keeping the vertex count bounded without creating the invalid polygons again. A simplification that is safe needs a check against nearby boundaries (an intersection test of the new chord against a spatial index of the segments), which I did not try. The area error and the run time are also not competitive yet.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

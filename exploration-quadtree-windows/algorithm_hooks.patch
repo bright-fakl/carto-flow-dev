@@ -1,0 +1,83 @@
+diff --git a/src/carto_flow/flow_cartogram/algorithm.py b/src/carto_flow/flow_cartogram/algorithm.py
+index ab06b6a..e9dcb94 100644
+--- a/src/carto_flow/flow_cartogram/algorithm.py
++++ b/src/carto_flow/flow_cartogram/algorithm.py
+@@ -90,6 +90,9 @@ def _longest_edge_segment_length(geometries) -> float:
+ # ============================================================================
+ 
+ 
++PW_HOOK = None  # prototype hook: piecewise-affine windows with vertex insertion
++
++
+ def _detect_coordinate_format(coords):
+     """
+     Automatically detect the format of displacement coordinates.
+@@ -520,6 +523,9 @@ def morph_geometries(
+     best_score = np.inf
+     best_step = 0
+     best_state: tuple | None = None
++    best_nev = 0
++    if PW_HOOK is not None:
++        PW_HOOK.events.clear()
+     stall_monitor = StallMonitor(
+         options.stall_patience, options.stall_min_efficiency, cycle_length(options.recompute_every)
+     )
+@@ -627,6 +633,9 @@ def morph_geometries(
+             vx *= vmax_scale
+             vy *= vmax_scale
+ 
++            if PW_HOOK is not None:
++                PW_HOOK.begin(flat_geoms, rho, grid, step)
++
+             # 1e. Divergence of the field, for the area scaling of the landmarks
+             if landmark_log_scaling is not None or coords_log_scaling is not None or probe_log_scaling is not None:
+                 landmark_div = field_divergence(vx, vy, grid.dx, grid.dy)
+@@ -651,17 +660,20 @@ def morph_geometries(
+         since_recompute += 1
+ 
+         # 2a. Displace geometry coordinates using the velocity field
+-        flat_geoms.coords = displace_coords_numba(
+-            flat_geoms.coords,
+-            grid.x_coords,
+-            grid.y_coords,
+-            vx,
+-            vy,
+-            dt_prime,
+-            grid.dx,
+-            grid.dy,
+-            use_parallel=False,
+-        )
++        if PW_HOOK is not None:
++            flat_geoms.coords = PW_HOOK.advance(grid, vx, vy, dt_prime)
++        else:
++            flat_geoms.coords = displace_coords_numba(
++                flat_geoms.coords,
++                grid.x_coords,
++                grid.y_coords,
++                vx,
++                vy,
++                dt_prime,
++                grid.dx,
++                grid.dy,
++                use_parallel=False,
++            )
+         flat_geoms.invalidate_cache()
+ 
+         # 2b. Displace landmarks if provided (using same velocity field)
+@@ -765,6 +777,7 @@ def morph_geometries(
+         if score < best_score:
+             best_score = score
+             best_step = step
++            best_nev = len(PW_HOOK.events) if PW_HOOK is not None else 0
+             best_state = (
+                 flat_geoms.coords.copy(),
+                 flat_landmarks_geoms.coords.copy() if flat_landmarks_geoms is not None else None,
+@@ -831,6 +844,8 @@ def morph_geometries(
+             b_probe_xy,
+             b_probe_log,
+         ) = best_state
++        if PW_HOOK is not None:
++            b_coords = PW_HOOK.lift(b_coords, best_nev)
+         flat_geoms.coords = b_coords
+         flat_geoms.invalidate_cache()
+         if b_landmarks is not None and flat_landmarks_geoms is not None:
