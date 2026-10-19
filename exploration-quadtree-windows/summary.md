@@ -46,6 +46,23 @@ Baseline (no hook): 25 s, 820 iterations, mean error 1.52 %, median 0.25 %, 57 i
 - The area error is worse than the baseline in most rows because the piecewise-affine window is a coarser approximation of the flow than the per-vertex bilinear advection, and the runs are chaotic (the same settings other than the tolerance move the mean from 1.7 % to 4.4 %). I did not average over several runs.
 - Time: the hook costs 45 to 65 s of the 80 to 100 s (mesh construction, vertex insertion, rebuilding the geometry metadata), mostly in unoptimized Python and numba code; the baseline iteration cost is unchanged.
 
+## Coarse input (the paper caps the geometry at about 15 vertices per region)
+
+The paper simplifies the geometry after every iteration to `max(10,000, 15 * regions)` vertices. The bundled counties have 194 k vertices; `simplify_coverage(tolerance=4000)` (a distance in meters) leaves 43 k, 14 per county, with the shared boundaries kept. `pw2run.py <bits> <ins|noins> coarse <tol>` runs it.
+
+| mesh leaves | insertion | pruning | time | vertices | mean / median error | invalid |
+|---|---|---|---|---|---|---|
+| none (baseline) | no | | 14 s | 43 k | 18.2 % / 1.23 % | 327 |
+| 2^-8 | yes | none | 78 s | 4.2 M | 6.35 % / 1.74 % | 0 |
+| 2^-6 | yes | none | 192 s | 10.8 M | 1.44 % / 0.243 % | 0 |
+| 2^-6 | yes | 0.02 cell | 75 s | 0.32 M | 25.5 % / 3.8 % | 432 |
+| 2^-6 | yes | 0.002 cell | 87 s | 0.36 M | 12.8 % / 1.19 % | 508 |
+
+- The flow alone cannot use the coarse input (segments of several cells, 327 invalid polygons and 18 % mean error), as expected.
+- With the mesh and insertion at 2^-6 the same input gives 0 invalid polygons and an error (1.44 % mean, 0.243 % median) equal to the 1 km densified baseline (1.52 %, 0.250 %), from 43 k instead of 0.77 M input vertices. This is the property the paper claims, reproduced.
+- The vertex count again grows to millions, because nothing is removed.
+- My pruning is unusable here: dropping an inserted vertex puts the next insertion on a straight chord instead of on the bent image of the segment, and the errors compound (432 and 508 invalid polygons). A pruning has to keep the vertices where the image bends, and the criterion that decides which are safe to drop is the unsolved part.
+
 ## Reading
 
 The guarantee of the paper is reproduced in this setting: with the mesh and the insertion, the output has no invalid polygons, also for the squeezed strips that remain at 10 invalid polygons with 0.125 km carried points (exploration-carried-points). The open problem is what the paper solves with a topology-preserving simplification: keeping the vertex count bounded without creating the invalid polygons again. A simplification that is safe needs a check against nearby boundaries (an intersection test of the new chord against a spatial index of the segments), which I did not try. The area error and the run time are also not competitive yet.

@@ -11,7 +11,12 @@ hook=pw2.Hook(2.0**-bits,insert=ins) if bits>0 else None
 if hook and len(sys.argv)>4: hook.tol=float(sys.argv[4])
 if hook and len(sys.argv)>5: hook.dbg=True
 alg.PW_HOOK=hook
-g=data.load_us_census(level=dataset,max_segment_length=1000 if dataset!="state" else None).reset_index(drop=True)
+import os
+if dataset=="coarse":
+    from carto_flow.geo_utils import simplify_coverage
+    g=simplify_coverage(data.load_us_census(level="county").reset_index(drop=True),tolerance=float(os.environ.get("TOL","4000")))
+else:
+    g=data.load_us_census(level=dataset,max_segment_length=1000 if dataset!="state" else None).reset_index(drop=True)
 v=g["Population"].to_numpy(float); gdf=g[["geometry"]].assign(v=v)
 t=time.time(); w=CartogramWorkflow(gdf,"v",validate=False); w.morph_multiresolution(min_resolution="auto",levels="auto",options=MorphOptions(area_scale=1e-6,n_iter=1000,show_progress=False))
 c=w[-1]; o=np.array(c.get_geometry(),dtype=object); a=shapely.area(o); tt=v/v.sum()*a.sum(); e=abs(a-tt)/tt*100
