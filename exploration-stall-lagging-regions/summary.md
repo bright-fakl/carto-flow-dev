@@ -38,7 +38,7 @@ figure: fig1_past_stall.png — Left: median error of the 72 counties that were 
 
 ## What drives the rise of the mean and median
 
- stores the area and validity of every region at every snapshot. The invalid polygons are mostly the counties and independent cities of Virginia: their shoelace areas explode (one goes from 238 to 11,804 km2, another from 3,273 to 11,790 km2 against a target of a few hundred). The total output area grows by 0.60 %, and the target of every region is its population share of that total, so every region gets the same apparent error: the median signed error is -0.628 % at iteration 1,500 and the median error is 0.628 % in every shrink class, from 0.629 % (shrink below 0.03) to 0.628 % (above 1). Taking the targets from the valid polygons only:
+`continue_per_region.py` stores the area and validity of every region at every snapshot. The invalid polygons are mostly the counties and independent cities of Virginia: their shoelace areas explode (one goes from 238 to 11,804 km2, another from 3,273 to 11,790 km2 against a target of a few hundred). The total output area grows by 0.60 %, and the target of every region is its population share of that total, so every region gets the same apparent error: the median signed error is -0.628 % at iteration 1,500 and the median error is 0.628 % in every shrink class, from 0.629 % (shrink below 0.03) to 0.628 % (above 1). Taking the targets from the valid polygons only:
 
 | iterations after the stall | valid polygons | invalid | mean error, valid | median, valid | p95, valid | valid counties above 10 % | mean error, invalid |
 |---|---|---|---|---|---|---|---|
