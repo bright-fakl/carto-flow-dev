@@ -1,19 +1,20 @@
 diff --git a/src/carto_flow/flow_cartogram/algorithm.py b/src/carto_flow/flow_cartogram/algorithm.py
-index ab06b6a..6533f40 100644
+index ab06b6a..ae346b7 100644
 --- a/src/carto_flow/flow_cartogram/algorithm.py
 +++ b/src/carto_flow/flow_cartogram/algorithm.py
-@@ -90,6 +90,10 @@ def _longest_edge_segment_length(geometries) -> float:
+@@ -90,6 +90,11 @@ def _longest_edge_segment_length(geometries) -> float:
  # ============================================================================
  
  
 +PW_HOOK = None  # prototype hook: piecewise-affine windows with vertex insertion
 +VW_HOOK = None  # prototype hook: validated windows
++INV_HOOK = None  # prototype hook: treat invalid regions separately
 +
 +
  def _detect_coordinate_format(coords):
      """
      Automatically detect the format of displacement coordinates.
-@@ -520,6 +524,11 @@ def morph_geometries(
+@@ -520,6 +525,11 @@ def morph_geometries(
      best_score = np.inf
      best_step = 0
      best_state: tuple | None = None
@@ -25,7 +26,7 @@ index ab06b6a..6533f40 100644
      stall_monitor = StallMonitor(
          options.stall_patience, options.stall_min_efficiency, cycle_length(options.recompute_every)
      )
-@@ -569,6 +578,10 @@ def morph_geometries(
+@@ -569,6 +579,10 @@ def morph_geometries(
              # call (~1 ms) vs the Python-loop reconstruct_geometries (~13 ms).
              # Offsets (topology) were computed once in unpack_geometries and
              # remain valid because morphing changes coordinate values only.
@@ -36,7 +37,16 @@ index ab06b6a..6533f40 100644
              if _pt is not None:
                  _t0 = _time.perf_counter()
              current_geoms = list(
-@@ -627,6 +640,11 @@ def morph_geometries(
+@@ -579,6 +593,8 @@ def morph_geometries(
+                 )
+             )
+ 
++            if INV_HOOK is not None:
++                current_geoms = INV_HOOK.repair(current_geoms)
+             rho, geom_mask = compute_density_field_from_geometries(
+                 current_geoms,
+                 values,
+@@ -627,6 +643,11 @@ def morph_geometries(
              vx *= vmax_scale
              vy *= vmax_scale
  
@@ -48,7 +58,7 @@ index ab06b6a..6533f40 100644
              # 1e. Divergence of the field, for the area scaling of the landmarks
              if landmark_log_scaling is not None or coords_log_scaling is not None or probe_log_scaling is not None:
                  landmark_div = field_divergence(vx, vy, grid.dx, grid.dy)
-@@ -649,19 +667,24 @@ def morph_geometries(
+@@ -649,19 +670,24 @@ def morph_geometries(
          dt_prime = options.dt * step_controller.current(step) * min(grid.dx, grid.dy) / max_v
          step_moved = options.dt * step_controller.current(step) * min(grid.dx, grid.dy) / typical_size
          since_recompute += 1
@@ -84,7 +94,16 @@ index ab06b6a..6533f40 100644
          flat_geoms.invalidate_cache()
  
          # 2b. Displace landmarks if provided (using same velocity field)
-@@ -765,6 +788,9 @@ def morph_geometries(
+@@ -739,6 +765,8 @@ def morph_geometries(
+         if _pt is not None:
+             _t0 = _time.perf_counter()
+         current_areas = flat_geoms.compute_areas(use_parallel=False)
++        if INV_HOOK is not None:
++            current_areas = INV_HOOK.areas(current_areas, target_areas)
+         if _pt is not None:
+             _pt.areas_s += _time.perf_counter() - _t0
+ 
+@@ -765,6 +793,9 @@ def morph_geometries(
          if score < best_score:
              best_score = score
              best_step = step
@@ -94,7 +113,7 @@ index ab06b6a..6533f40 100644
              best_state = (
                  flat_geoms.coords.copy(),
                  flat_landmarks_geoms.coords.copy() if flat_landmarks_geoms is not None else None,
-@@ -789,6 +815,13 @@ def morph_geometries(
+@@ -789,6 +820,13 @@ def morph_geometries(
              else MorphStatus.RUNNING
          )
  
@@ -108,7 +127,7 @@ index ab06b6a..6533f40 100644
          # 4. Create snapshot data at appropriate iterations
          # We save snapshots at the final iteration (when the algorithm has converged, stalled, or reached the maximum number
          # of iterations), or at user-defined intervals.
-@@ -831,8 +864,15 @@ def morph_geometries(
+@@ -831,8 +869,15 @@ def morph_geometries(
              b_probe_xy,
              b_probe_log,
          ) = best_state

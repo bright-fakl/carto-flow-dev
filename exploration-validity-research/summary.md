@@ -1,12 +1,12 @@
 ---
 issue: 167
-title: Validity-preserving flow cartograms without per-iteration meshes (validated windows)
-description: Search for a cheap way to end with zero invalid output polygons and to keep the input vertices. A crossing test (uniform grid, numba) on the window-end state, splitting of the crossing segments at the midpoint of their window-start chord, and a replay of the new vertices through the recorded steps of the window give 0 invalid polygons of 3,108 counties (57 in the baseline, 50 to 116 for other step sizes) at 1.1 to 1.3 times the baseline time and +0.1 % vertices when run every 10 windows. Quadtree windows with an exact-crossing-checked pruning also reach 0 but cost 4.8 times the baseline and +61 % vertices. Higher-order advection, smaller steps and a floor on the target values do not reduce the invalid polygons.
+title: Validity-preserving flow cartograms without per-iteration meshes (validated windows), regression protocol, coarse input, memory
+description: Validated windows (crossing test on the window-end state, splitting of the crossing segments at the midpoint of their window-start chord, replay of the new vertices through the recorded steps) give 0 invalid polygons of 3,108 counties (baseline 12 to 158 over 18 perturbed configurations) at 1.1 to 1.3 times the baseline time and +0.1 % vertices. The second round tests accuracy with perturbed runs: the mean error and the number of counties above 10 % do not change, the median and p95 error of the valid counties are higher (median 0.007 % to 0.07 %, p95 0.6 % to 1.8 % in the returned iterate of the fixed-schedule test) with the baseline's invalid polygons frozen as the likely cause; the earlier single-run differences are stall timing. Coarse input: densifying to 1.4 cells and checking every 10 windows gives 0 to 3 invalid at 24 s; the flatness-criterion variants on the raw input leave 6 to 11. Memory: float32 fields plus a 64 to 128 MB budget bound the stored fields at the same output. The density-field repair adds nothing once polygons are valid.
 kind: exploration
 topic: flow
 status: open
 related: exploration-quadtree-windows, exploration-carried-points, exploration-invalid-regions-field, exploration-adaptive-densification, exploration-county-error-relation, exploration-stall-lagging-regions
-date: 2026-10-19 14:00
+date: 2026-10-19 18:00
 before: main @ 06d4ff0
 after: scratch worktree /home/fakl/cf-validity with hooks in algorithm.py (algorithm_hooks_vw.patch, includes the quadtree hook); not a PR
 inputs: 3,108 counties (population) at max_segment_length 1000, congressional districts (432) at 1000, and the coarse county input (simplify_coverage tolerance 4000, 43 k vertices); ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, one run per row unless stated (the dynamics are chaotic and numba parallel kernels add run-to-run noise).
@@ -102,7 +102,7 @@ figure: fig2_example.png — A county that is invalid in the baseline and the sa
 - The quadtree with checked pruning: 4.8 times the time and 61 % more vertices, with removal of input vertices, and the median error is the best of the table but the mean and the number above 10 % are not (the finest level was cut by the budget at 40 iterations). It is dominated by validated windows.
 - The remaining invalid polygons (every-window runs with other step sizes, coarse input) contain zero-width features: segments of 1 mm to 1 m at both sides of a crossing with start-of-window chords that already nearly coincide (`t_fail.py`, `t_inv.py`). Splitting the chord cannot separate two curves that touch at the start of the window. They would need a different treatment (collapsing the spike, which changes vertices) or are accepted as a floor.
 - Without a stop rule a failing refinement cascades (every window on the coarse input: 470 s, 246 k unresolved segments). The stop after 3 rounds without progress and a `min_len` bound it.
-- Accuracy: the tail (counties above 10 %) is dominated by the sub-cell counties and by when the stall rule ends the finest level; with every window the finest level stalled after 90 iterations with the best iterate at 42 and 99 baseline-valid counties above 10 % (against 60), with every 10 windows 43 (`cmp2.py`, `where.py`). The 97 counties above 5 % in the first run are the plains counties that have shrunk to 8 % of their area and are below target (82 of 97). I did not find a systematic effect of the repair on accuracy; I could not exclude one.
+- Accuracy: the single-run differences of the first round are stall timing and chaos, with one real effect on the median and p95 error of the valid counties; see the follow-up section (item 1).
 - The check state is only exact at the end of a span and for the best iterate. Snapshots taken in the middle of a span (`snapshot_every`) and the frames stored per level are not repaired. A fold that appears and disappears inside a span is not detected (not observed).
 - Not tested: combination with the density-field repair (the repair is subsumed when the check runs every window; with a long interval the fields still see invalid polygons), the paper's constrained Delaunay triangulation, the continuous collision control with backtracking, the mesh-deformation formulation, shared arcs.
 - Numba noise: a repeated run of one every-window configuration gave 2 and 4 invalid polygons.
@@ -128,6 +128,165 @@ Literature: Miaji et al. (arXiv 2511.08121) is the only paper found that treats 
 2. Keep the quadtree prototype only as a reference. Drop RK2/RK4, smaller steps and the value floor.
 3. Open: whether the invalid polygons seen by the density between checks (long `check_every`) cost accuracy on other inputs than the counties (not seen here, but the coarse input fails at every 10); whether an adaptive interval (check every window while crossings are found, every 10 otherwise) removes that; repeated runs for the accuracy columns.
 
+## Follow-up: regression protocol, coarse input, memory, density repair
+
+New scripts use `runall.py` (one runner for the baseline, validated windows and the density-field repair; environment variables `HOOK`, `INV`, `EVERY`, `FLAT`, `FLATREL`, `MAXLEN`, `F32`, `BUDGET`, `MODE`, `CSEG`, `MSEG`, `VFLOOR`, `SCHED`, `SNAP`) and `vwd.py` (the hook with the additions below; `vw.py` is the first-round version that produced the tables above). Every row is one run; runs with the same settings repeat exactly except for numba noise (a repeated coarse run gave 6, 7 and 8 invalid polygons).
+
+### 1. Does validated windows regress accuracy?
+
+(a) Why every window can look worse than every 10 windows. Two runs of the first round differ (every window: mean 2.03 %, 108 counties above 10 %, finest level stalled after 90 iterations with the best iterate at 42; every 10: 1.08 %, 45, 200 iterations). The finest level is not the cause. `fine.py` starts the finest level from one common level-2 output (the valid output of the every-window run) and runs baseline, every window and every 10 with the same options:
+
+| finest level from a common valid start | iterations | best | invalid | mean / median / p95 | >10 % |
+|---|---|---|---|---|---|
+| stall rule on, baseline | 90 | 42 | 32 | 1.88 / 0.093 / 6.20 | 98 |
+| stall rule on, every window | 90 | 42 | 0 | 2.03 / 0.097 / 6.56 | 108 |
+| stall rule on, every 10 | 90 | 42 | 0 | 2.04 / 0.097 / 6.61 | 109 |
+| stall off, 200 iterations, common valid set of 3,067: baseline / every window / every 10 | 200 | | 41 / 0 / 0 | 0.849 / 0.853 / 0.853 mean, median 0.134 for all, p95 2.27 / 2.28 / 2.27 | 36 / 37 / 36 |
+| stall off, 400 iterations, common set of 3,061 | 400 | | 47 / 0 / 0 | 0.605 / 0.601 / 0.599, median 0.137 for all | 21 / 20 / 20 |
+| stall off, 800 iterations, common set of 3,048 | 800 | | 60 / 3 / 0 | 0.872 / 0.886 / 0.884, median 0.384 / 0.430 / 0.428 | 18 / 12 / 12 |
+
+- From the same start the three runs stall at the same iteration (90, best 42): the error rises after iteration 42 and the stall rule fires in that transient. Without the stall rule the three agree to 1 % in the mean and the median on the counties that are valid in all runs. The first-round difference between the statistics of the baseline and of the validated runs also came from the evaluation set: the baseline's own valid set excludes its 41 to 60 worst (invalid) counties, the validated runs include them.
+- From the baseline's own level-2 output (57 invalid polygons in it) the three finest levels also agree (stall on: mean 1.37 / 1.40 / 1.49 %, 60 / 55 / 65 counties above 10 %), and the baseline cannot improve beyond iteration 150 (best 150 at 200 and 400 iterations), while the runs from the valid start keep improving (0.60 % at 400 iterations). The validated runs that start from a polygon set that is already invalid cannot repair it (36 and 34 invalid polygons remain): the repair needs a valid window start.
+- So the difference arises in the levels before the finest one, through the hand-off and through when the stall rule fires. In the protocol below every window and every 10 windows do not differ: over 18 configurations the ratio every 10 / every window of the mean error has a median of 0.96 (95 % bootstrap interval 0.48 to 1.67, Wilcoxon p 0.77), of the number above 10 % 1.00 (0.44 to 2.23); the first-round pair was one of the 18.
+
+(b) Protocol that separates a regression from noise (`proto.sh`, `proto3b.sh`, `analyze_proto.py`, `analyze_plat.py`; records in `protocol.jsonl`).
+
+- Perturbations: dt 0.16 to 0.24 (nine values), `max_segment_length` 700 to 1300 (six), `n_iter` 500, 600, 700 (n_iter 400, 800 and 900 are degenerate or duplicates and are excluded): 18 independent configurations for the stall-on protocol (p1), 13 for the fixed-schedule protocol (p4).
+- Metrics on the counties that are valid in all compared runs of a configuration (common set; targets normalized on it): mean, median, p95, number above 10 %; also the number of invalid polygons of each run. Paired ratios over configurations (method / baseline) with a bootstrap interval of the median and a Wilcoxon test.
+- Fixed schedule (p4): 600, 150 and 400 iterations per level with the stall rule off, so that no run is ended early. The finest level is snapshotted every 25 iterations and the plateau metrics are the mean over the snapshots of the last 100 iterations (valid polygons of each snapshot). The returned iterate is also compared.
+- The returned iterate is chosen by the score (mean and max error of all regions), not by the bulk, and the median of the valid counties oscillates by factors of 5 to 20 from iteration to iteration at the plateau (`trace.py`, fig4_trace.png), so a single returned median is a draw from that oscillation. The mean and the number above 10 % are the robust statistics; the median and p95 are compared at the plateau as well.
+
+Results, stall rule on (p1, 18 configurations, returned iterate, common set): invalid polygons baseline median 68 (12 to 158), every window 0 (0 to 6), every 10 windows 0 (0 to 1).
+
+| paired ratio to the baseline | mean error | median | p95 | >10 % |
+|---|---|---|---|---|
+| every window | 1.00 (0.79 to 1.56), p 0.61 | 1.44 (0.72 to 6.7), p 0.20 | 1.97 (0.98 to 2.64), p 0.12 | 1.01 (0.59 to 1.53), p 0.91 |
+| every 10 windows | 1.01 (0.78 to 1.42), p 0.61 | 1.16 (0.69 to 2.75), p 0.35 | 1.32 (0.82 to 2.93), p 0.06 | 0.98 (0.66 to 1.65), p 0.69 |
+
+Results, fixed schedule (p4, 13 configurations). Medians over the configurations of the returned iterate (common set) and of the plateau:
+
+| | invalid (returned) | mean | median | p95 | >10 % | plateau mean | plateau median | plateau p95 |
+|---|---|---|---|---|---|---|---|---|
+| baseline | 104 (52 to 161) | 0.62 | 0.007 | 0.59 | 34 | 0.54 | 0.011 | 0.43 |
+| every window | 3 (0 to 9) | 0.76 | 0.129 | 2.28 | 19 | 0.62 | 0.037 | 1.50 |
+| every 10 | 0 (0 to 1) | 0.66 | 0.068 | 1.78 | 16 | 0.61 | 0.056 | 1.51 |
+
+Paired ratios (method / baseline), returned iterate: every window mean 1.22 (0.92 to 1.44, p 0.22), median 7.3 (2.0 to 33, p < 0.01), p95 3.8 (3.0 to 8.1), >10 % 0.73 (0.39 to 1.00, p 0.06); every 10 mean 1.01 (0.72 to 1.41, p 1.00), median 4.6 (1.0 to 26, p 0.01), p95 2.7 (1.5 to 6.5, p 0.03), >10 % 0.58 (0.37 to 1.00, p 0.01). Plateau: every window mean 1.24 (1.02 to 1.45, p 0.01), median 2.7, p95 4.0 (13 of 13 configurations higher), >10 % 1.18 (p 0.95); every 10 mean 1.20 (1.00 to 1.56, p 0.02), median 3.6, p95 3.1 (13 of 13 higher), >10 % 1.11 (p 1.0). Plateau medians per configuration are in the output of `analyze_plat.py p4`.
+
+(c) Conclusion on regression.
+
+- No regression in the number of counties above 10 % (equal on the plateau, lower for every 10 windows in the returned iterate: 16 against 34, p 0.01) and none in the mean error of the returned iterate (ratio 1.01 for every 10 windows, 1.22 with an interval that contains 1 for every window). The plateau mean is 20 % higher (p 0.01 to 0.02).
+- A real regression in the bulk of the distribution: the median error of the valid counties is 0.007 % for the baseline and 0.07 to 0.13 % with validated windows in the returned iterate (plateau: 0.011 % against 0.04 to 0.06 %), the p95 0.6 % against 1.8 to 2.3 % (plateau 0.43 % against 1.5 %), at both check intervals and in 13 of 13 configurations for the p95 on the plateau. All numbers are far below the default tolerances (5 % mean, 10 % max), but they are a change of the distribution.
+- The effect is the same size in the stall-on protocol only as a tendency (p 0.06 to 0.35), because the stall timing adds more variance than the effect.
+- Why. The median and p95 of a run fall with the number of invalid polygons present (fig3_plateau_vs_invalid.png; Spearman -0.68 for the median, -0.66 for the p95, 39 runs, `corr.py`). The following tests were run at dt 0.20, 0.3 times the median population as a floor on the targets, fixed schedule (`batch_mode.sh`, `MODE`):
+  - Detection only (no insertion): identical to the baseline (plateau mean 0.030 %, p95 0.010 %).
+  - Insertion at the midpoint of the end-of-window chord, no replay (the polygons are unchanged at the moment of insertion; 37 remain invalid): plateau mean 0.54 %, p95 2.45 %. This is as degraded as the full repair (0.45 %, 1.82 %).
+  - Full repair: plateau mean 0.45 %, p95 1.82 %, 1 invalid.
+  So the degradation does not come from the validity of the shapes or from the replayed positions. It appears as soon as the vertices of the crossing polygons are free to move (any inserted vertex moves with the flow afterwards). In the baseline the crossing polygons are frozen in a state with wrong shoelace areas that does not respond to the field; with inserted vertices they respond, and the global Poisson coupling carries their residual error to the bulk. This is my reading of the three runs and the correlation; I did not isolate it further.
+  - A floor on the target values (0.1 and 0.3 times the median population, `VFLOOR`, three configurations each) does not remove the difference: with the floor 0.3 the baseline plateau reaches mean 0.03 to 0.10 % with 46 to 88 invalid polygons, validated windows 0.4 to 0.55 %.
+  - The step fraction of the controller stays 1.0 in both runs (`frac.py`), so it is not the step control.
+- What removes it: I did not find a setting of the repair that does. Candidates that I did not test: leaving the hopeless polygons frozen (an explicit exclusion of regions that shrank by more than a factor from the forcing and the score, which is a change of the algorithm), or a stronger damping of the step on the plateau. If the effect is not acceptable, a validated-windows option would have to ship with such an exclusion; it is a decision for the algorithm owner.
+
+### 2. Coarse input
+
+Inputs: coarse = `simplify_coverage` tolerance 4000 (43,084 vertices); `mid2000` and `mid3000` = `simplify_coverage` tolerance 1000 followed by `densify_coverage` to 2000 or 3000 m (394,665 and 280,377 vertices); `cseg` N = coarse followed by `densify_coverage` to N m. Baseline = no hook. `FLAT` = refinement criterion of this round: at the window end, the replayed image of the window-start midpoint of every segment longer than 0.25 cells is compared with the end-of-window chord; the segment is split if the distance exceeds `FLATREL` times the chord length (and 0.005 cell) (`flat_flags` in `vwd.py`; it replaces the blind length rule `MAXLEN`). `SKIPS` excludes segments that already cross at the window start (a refinement cannot help them); `STOPR` 3 stops a refinement after 3 rounds without progress; min length 1e-6 cell.
+
+| input | run | time | invalid | vertices | mean / median / p95 | >10 % |
+|---|---|---|---|---|---|---|
+| coarse | baseline | 12 s | 327 | 43,084 | 12.3 / 0.934 / 49.7 | 508 |
+| coarse | quadtree + coverage_simplify 0.02 cell (earlier report) | 94 s | 0 | 552 k | 1.34 / 0.074 / 4.0 | |
+| coarse | first round: every window, length rule 1 cell | 28 s | 12 | 300,606 | 1.15 / 0.147 / 3.67 | 53 |
+| coarse | flatness 3 %, gate 0.25 cell, every window | 158 s (loaded machine) | 30 | 169,630 | 0.64 / 0.035 / 1.58 | 35 |
+| coarse | flatness 10 %, every window | 55 s (62 s earlier) | 8 (6 earlier, 7 in a rerun) | 99,776 | 0.86 / 0.081 / 2.12 | 35 |
+| coarse | flatness 10 %, every window, float32 fields | 66 s | 25 | 101,700 | 0.83 / 0.081 / 2.10 | 33 |
+| coarse | flatness 10 %, every 2 | 21 s | 7 | 74,018 | 6.30 / 0.521 / 30.1 | 345 |
+| coarse | flatness 10 %, every 3 | 55 s | 11 | 99,934 | 1.09 / 0.266 / 3.39 | 46 |
+| coarse | flatness 1 %, every window | 34 s | 6 | 127,946 | 4.31 / 0.154 / 19.2 | 243 |
+| coarse | flatness 3 %, gate 0.1 cell | 116 s (loaded) | 34 | 171,068 | 0.31 / 0.011 / 0.52 | 16 |
+| mid2000 | baseline | 23 s | 170 | 394,665 | 1.66 / 0.208 / 6.65 | 100 |
+| mid2000 | every window | 35 s | 3 | 403,515 | 2.01 / 0.118 / 8.35 | 136 |
+| mid2000 | every 10 | 29 s | 1 | 399,459 | 2.13 / 0.195 / 10.95 | 171 |
+| mid2000 | flatness 10 %, every window | 50 s | 4 | 418,140 | 3.08 / 0.157 / 13.0 | 182 |
+| mid3000 | baseline | 12 s | 194 | 280,377 | 3.12 / 0.441 / 11.0 | 169 |
+| mid3000 | every 10 | 15.5 s | 0 | 283,545 | 1.59 / 0.131 / 4.18 | 75 |
+| mid3000 | flatness 10 %, every window | 21 s | 0 | 283,880 | 3.21 / 0.184 / 14.3 | 207 |
+| cseg 3000 | baseline | 16.5 s | 125 | 238,589 | 1.76 / 0.028 / 4.60 | 93 |
+| cseg 3000 | every window / every 10 | 31 / 20 s | 2 / 0 | 252,578 / 241,744 | 3.36 / 2.60 mean | 201 / 145 |
+| cseg 6000 | baseline | 16 s | 219 | 131,389 | 2.04 / 0.150 / 5.13 | 102 |
+| cseg 6000 | every window | 35 s | 3 | 150,184 | 1.16 / 0.164 / 4.15 | 46 |
+| cseg 6000 | every 10 | 24 s | 0 | 138,108 | 0.55 / 0.047 / 1.37 | 26 |
+| cseg 6000, dt 0.18 / 0.22 | baseline | 14 / 13 s | 179 / 228 | 131,389 | 3.06 / 4.22 mean | 158 / 211 |
+| cseg 6000, dt 0.18 / 0.22 | every 10 | 21 / 26 s | 2 / 3 | 137,481 / 139,778 | 1.02 / 0.58 mean | 57 / 37 |
+| cseg 6000 | every 10, float32 fields and 64 MB budget | 24 s | 1 | 138,906 | 0.35 / 0.044 / 0.70 | 22 |
+| cseg 10000 (88,980 vertices) | baseline / every 10 / every 3 | 13 / 15.5 / 381 s | 278 / 4 / 1 | 88,980 / 103,336 / 373,471 | 5.2 / 5.0 / 5.1 mean | 255 / 258 / 277 |
+
+Time is the wall time of the ladder; several of the flatness runs and the first mid runs were made while other jobs were running on the machine (marked loaded), the other rows are from runs of comparable load.
+
+What remains in the coarse runs (`t_inv.py`, `t_nest.py`, `spikefix.py`):
+
+- Invalid polygons that contain hundreds of segments shorter than 1 m (sub-centimeter to a few centimeters): zero-width cusps of the flow image of a needle. They persist from window to window and cost refinement rounds each time (`min_len` and `STOPR` bound the cost).
+- Nested shells and holes outside their shell (1 to 5 invalid polygons in each coarse run; the same few indices recur: counties 327, 341, 876, 2727, 53, 2192, which are multi-part geometries with islands or holes). The crossing test finds 0 crossing segments in them: an island moved through a thin boundary within one window, so the end-of-window state has no crossing. The input is valid. A containment test would detect them, but the replay cannot repair them (the original vertices already jumped).
+- A few real crossings of segments tens of meters long that stayed unresolved after 3 rounds without progress or because they already crossed at the window start.
+- Where the first crossing arises: the input is valid; the first crossing appears in the first window (coarse input, every window, length rule: 3 flagged segments at step 10), and a crossing that exists before a window is always one that a previous window failed to resolve (the `SKIPS` count), never an input property.
+
+Zero-width features. A polygon that is narrower than the vertex spacing has a valid representation only if its two sides stay separated by a positive distance at the resolution of the coordinates: the refinement gets there for widths down to about 1e-6 cell (4 mm at the finest grid) and not below. For narrower cusps a valid result needs the vertices of the cusp to be merged or removed. `spikefix.py` removes, for each pair of crossing segments of a ring, the loop of smaller area between them and puts the intersection point in its place (the same point for the twin ring, computed from the ordered end points): on the first-round coarse output it makes 10 of 12 invalid polygons valid and removes 1,456 vertices, with area changes of one polygon up to 0.65 %; on the flatness run 25 of 30 become valid, with area changes up to 21 % and 49 polygons with invalid coverage edges afterwards. A local vertex removal therefore does not preserve the coverage in general (the two rings do not always decide alike) and changes areas by more than the cusp is worth in some cases. `shapely.coverage_simplify` with a tolerance of 1 cm to 10 m on the final output removes 3,500 to 26,000 vertices of all polygons and leaves 6 to 10 of 12 invalid. I did not pursue this.
+
+Conclusion for the coarse input.
+
+- No variant reaches 0 invalid polygons on the raw 43 k input at a cost well below the quadtree: the best flatness runs leave 6 to 11 (0.2 to 0.4 % of the counties) at 55 s, 2.3 times the vertices of the input (100 k) and error values as good as or better than the quadtree reference (mean 0.86 against 1.34 %); the quadtree run takes 94 s and 552 k vertices. The remaining polygons are the cusp and island cases above.
+- A pre-emptive refinement of a different kind works: densifying the coarse input to segments of about 1.4 cells (6 km for the 4.3 km finest cell, `cseg` 6000: 131 k vertices) and running validated windows every 10 windows gives 0 invalid polygons at dt 0.20 and 2 and 3 at dt 0.18 and 0.22, 138 to 146 k vertices at the end (+5 %), 24 s (1.5 times the baseline, one quarter of the quadtree), mean error 0.55 / 1.02 / 0.58 %. The mid-density inputs behave the same way: mid3000 0 invalid at 15.5 s with every 10 windows (baseline 194), mid2000 1 to 4. With segments of 2.3 cells (`cseg` 10000) it leaves 4 and a check every 3 windows cascades (381 s, 373 k vertices).
+- The flatness criterion is not needed once the input is densified; on mid2000 and mid3000 it is not better than the plain check (4 and 0 invalid, 50 and 21 s).
+- Still unknown: whether the densification length should be tied to the cell size (the segments of `cseg` 6000 are 1.4 times the finest cell and 0.35 times the coarsest). The library already warns about input segments that are too long for their regions (check_segments); a rule such as `max_segment_length` of 1.5 cells of the finest grid would be the pre-emptive step.
+
+### 3. Memory
+
+Stored fields at the finest grid: 46 MB per window in float64. The process peak is `ru_maxrss` of the run (the baseline run is 963 MB). County protocol, default dt, 1,000 iterations (`batch_mem.sh`):
+
+| run | max stored fields | process peak | time | invalid | vertices | mean error | >10 % |
+|---|---|---|---|---|---|---|---|
+| baseline | | 963 MB | 23 s | 57 | 768,580 | 1.37 | 60 |
+| every 10, float64 | 444 MB | 1,437 MB | 28 s | 0 | 769,473 | 1.082 | 45 |
+| every 10, float32 | 222 MB | 1,234 MB | 26 s | 0 | 769,473 | 1.082 | 45 |
+| every 10, float64, budget 128 MB | 133 MB | 1,136 MB | 26 s | 0 | 769,561 | 1.082 | 45 |
+| every 10, float32, budget 64 MB | 67 MB | 1,106 MB | 25 s | 0 | 769,561 | 1.082 | 45 |
+| every 20, float64 | 888 MB | 1,863 MB | 23 s | 0 | 769,411 | 1.084 | 45 |
+| every 20, float32, budget 128 MB | 133 MB | 1,140 MB | 24 s | 0 | 769,461 | 1.082 | 45 |
+| every window, float64 | 44 MB | 1,048 MB | 35 s | 0 | 770,602 | 2.03 | 108 |
+
+- Float32 storage halves the stored fields and gives the identical output on the counties (same 893 inserted vertices, same errors). On the raw coarse input it is not neutral in the one run made (25 invalid against 6 to 8), on the densified coarse input (`cseg` 6000) with the budget it was (1 invalid); I cannot say whether the coarse difference is noise.
+- A budget (a repair is forced when the stored fields reach it) bounds the memory by construction and costs no time on the counties: the output differs only by 88 vertices because the checks fall in other windows (769,561 against 769,473 vertices, mean error 1.0815 against 1.0819 %). With 64 to 128 MB the process peak is 140 to 180 MB above the baseline (including the grids of the test and the stored start-of-span coordinates).
+- Recomputing the field on demand instead of storing it: the density rasterization and the FFT cost 109 and 158 ms per window at the finest grid (`bench.py`, loaded machine), 0.27 s per window, so replaying 10 windows costs 2.7 s per refinement round, and a repair has up to 14 rounds (4 to 5 on average): 6 repairs per run would add 60 to 150 s. The recomputation needs the geometry at the start of each window (12 MB per window) and does not bound the peak either, unless the rounds are reorganized to go through the windows once. I did not implement it. Cropping the stored field to the bounding boxes of crossed segments is not possible in advance (the crossing is known only at the end of the span), and quantizing to 16 bits would move the replayed paths by about 8 m at the finest grid, comparable to the needles that matter. Storing displacements per vertex and step is larger than the field.
+- Recommendation: float32 plus a budget of 64 to 128 MB; `check_every` then only sets the frequency, not the memory.
+
+### 4. Combination with the density-field repair (`INV=1`, `inv.py`)
+
+County protocol, five step sizes (p2 against p1; the density repair replaces each invalid polygon by the polygonal part of `make_valid` in the field and does not change the morph geometry):
+
+| run | invalid (5 dt) | median invalid | mean error (median over dt) | median error | p95 | >10 % |
+|---|---|---|---|---|---|---|
+| baseline | 18 to 116 | 80 | 1.30 | 0.144 | 2.3 | 61 |
+| baseline + repair | 18 to 108 | 83 | 2.70 | 0.032 | 11.0 | 159 |
+| every window | 0 to 4 | 1 | 1.43 | 0.088 | 5.1 | 81 |
+| every window + repair | 0 to 4 | 1 | identical to every window in all five | | | |
+| every 10 | 0 | 0 | 2.64 | 0.189 | 10.2 | 155 |
+| every 10 + repair | 0 to 2 | 0 | identical in four of five, dt 0.22: 0.77 against 0.93 mean, 2 invalid | | | |
+
+- The repair alone does not lower the invalid count (median 83 against 80) and raises the mean and the tail (mean 2.70 against 1.30 %, 159 against 61 counties above 10 %), with a lower median (0.032 against 0.144 %). The median of 0.012 % of the earlier report (dt 0.20: 0.013 % here) is in the range that the baseline itself reaches at other step sizes (0.014 and 0.020 % at dt 0.18 and 0.22): it is the low-median state of runs with many invalid polygons, not an effect of the repair beyond that (item 1).
+- With every window the repair has nothing to do (no invalid polygon at a field computation) and the results are identical. With every 10 windows the transient invalid polygons are too few to change the result (identical in four of five). On the densified coarse input (`cseg` 6000, every 10): with the repair 0 / 2 / 3 invalid and mean 0.09 / 0.74 / 2.53 % at dt 0.20 / 0.18 / 0.22, without 0 / 2 / 3 and 0.55 / 1.02 / 0.58 %: no consistent effect.
+- Conclusion: once no polygon is invalid at the field computation the repair adds nothing. It is not needed with `check_every` 1 and not useful with 10.
+
+### Updated recommendation
+
+1. Validated windows remains the method to build; the changes after this round: `check_every` 10 with float32 fields and a 64 to 128 MB budget; for coarse input, densify to about 1.4 cells first (the library's input warning already measures this) instead of the flatness criterion, which costs more and leaves 6 to 11 invalid polygons on the raw input.
+2. Say in the documentation that the bulk median and p95 error rise (returned iterate 0.007 to 0.07 % and 0.6 to 1.8 % in the fixed-schedule test) while the mean error and the number of counties above 10 % do not change, and that the baseline's low median is a property of runs whose invalid polygons are frozen.
+3. Drop the density-field repair for this purpose, the flatness criterion on raw coarse input, `spikefix`-type vertex removal (changes areas up to 21 %, breaks the coverage) and on-demand field recomputation.
+4. Open: a rule that keeps hopeless polygons from forcing the bulk (not tested); a containment test and a smaller step for islands that pass through thin boundaries (nested shells); the zero-width cusps below 4 mm.
+
 ## Files
 
-`xing.py`, `vw.py`, `algorithm_hooks_vw.patch`, `harness.py` (protocol and metrics), `run.sh`, `base.py`, `runvw.py` (environment variables `EVERY`, `MAXLEN`, `MINLEN`, `DEPTH`, `STOPR`, `MORPH_OPTS`, `LABEL`), `expb.py` (RK2/RK4/substeps, value floor), `pw2.py`, `pw.py`, `pwrun_h.py` (quadtree with checked pruning, `SAFE=1`), `t_backfill.py`, `t_cov.py`, `t_inv.py`, `t_fail.py`, `diag1.py`, `cmp.py`, `cmp2.py`, `where.py`, `figs.py`, `batch1.sh` to `batch4.sh` with their logs. The scripts import each other from their own directory; `run.sh` has the scratch path of this session hard-coded.
+First round: `xing.py`, `vw.py`, `algorithm_hooks_vw.patch` (now includes the density-repair hook and the `field` call), `harness.py` (protocol and metrics; environment variables `MSL`, `MSEG`, `CSEG`, `SCHED`, `SNAP`, `VFLOOR`, `PROTO`), `run.sh`, `base.py`, `runvw.py`, `expb.py`, `pw2.py`, `pw.py`, `pwrun_h.py`, `t_backfill.py`, `t_cov.py`, `t_inv.py`, `t_fail.py`, `diag1.py`, `cmp.py`, `cmp2.py`, `where.py`, `figs.py`, `batch1.sh` to `batch4.sh` with their logs.
+
+Second round: `vwd.py` (hook with `FLAT`, `skip_s_cross`, `f32`, `mem_budget_mb`, `mode`, local refinement), `runall.py`, `fine.py` (finest level from a common start), `proto.sh`, `proto2.sh`, `proto3.sh`, `proto3b.sh` (perturbed protocols), `analyze_proto.py`, `analyze_plat.py`, `analyze_fine.py`, `trace.py`, `frac.py`, `where2.py`, `corr.py`, `spikefix.py`, `t_spike.py`, `t_nest.py`, `bench.py`, `inv.py` (from exploration-invalid-regions-field), `figs2.py`, `batch5.sh` to `batch7.sh`, `batch_mem.sh`, `batch_mode.sh`, `batch_t2.sh`, `batch_t2b.sh`, `batch_t2c.sh`, `batch_t2d.sh`, `batch_t4b.sh`, the logs `log_*.log` and all records in `protocol.jsonl`. fig3_plateau_vs_invalid.png and fig4_trace.png are drawn by `figs2.py`. The scripts import each other from their own directory; `run.sh` has the scratch path of the session hard-coded.
+
+figure: fig3_plateau_vs_invalid.png — Median and p95 error of the valid counties at the plateau of the finest level (fixed schedule, 13 perturbed configurations, three methods) against the number of invalid polygons present: the runs with many invalid polygons have the lowest bulk error.
+figure: fig4_trace.png — The finest level at dt 0.20 with a fixed schedule: median and p95 error of the valid polygons every 25 iterations; the baseline settles at a median of 0.002 to 0.003 %, the validated run oscillates between 0.03 and 0.3 %.

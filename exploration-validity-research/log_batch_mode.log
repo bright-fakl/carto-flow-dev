@@ -1,0 +1,4 @@
+[p6_none] county n_iter=1000 time 66.0s inv 40 nv 768580->768580 err mean 0.55 med 0.113 p95 2.92 >10% 11 | levels 17.0km 600it COMPL best 441 mean 9.
+[p6_chord] county n_iter=1000 time 70.0s inv 37 nv 768580->780787 err mean 0.22 med 0.088 p95 0.94 >10% 0 | levels 17.0km 600it COMPL best 482 mean 7.
+[p6_replay] county n_iter=1000 time 39.5s inv 0 nv 768580->771739 err mean 0.57 med 0.272 p95 2.02 >10% 0 | levels 17.0km 600it COMPL best 555 mean 8.
+[p6_base] county n_iter=1000 time 46.8s inv 40 nv 768580->768580 err mean 0.55 med 0.113 p95 2.92 >10% 11 | levels 17.0km 600it COMPL best 441 mean 9.
