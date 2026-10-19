@@ -1,5 +1,5 @@
 diff --git a/src/carto_flow/flow_cartogram/algorithm.py b/src/carto_flow/flow_cartogram/algorithm.py
-index ab06b6a..e9dcb94 100644
+index ab06b6a..c8e2030 100644
 --- a/src/carto_flow/flow_cartogram/algorithm.py
 +++ b/src/carto_flow/flow_cartogram/algorithm.py
 @@ -90,6 +90,9 @@ def _longest_edge_segment_length(geometries) -> float:
@@ -68,7 +68,7 @@ index ab06b6a..e9dcb94 100644
          if score < best_score:
              best_score = score
              best_step = step
-+            best_nev = len(PW_HOOK.events) if PW_HOOK is not None else 0
++            best_nev = PW_HOOK.structure(flat_geoms) if PW_HOOK is not None else 0
              best_state = (
                  flat_geoms.coords.copy(),
                  flat_landmarks_geoms.coords.copy() if flat_landmarks_geoms is not None else None,
@@ -77,7 +77,7 @@ index ab06b6a..e9dcb94 100644
              b_probe_log,
          ) = best_state
 +        if PW_HOOK is not None:
-+            b_coords = PW_HOOK.lift(b_coords, best_nev)
++            PW_HOOK.restore(flat_geoms, b_coords, best_nev)
          flat_geoms.coords = b_coords
          flat_geoms.invalidate_cache()
          if b_landmarks is not None and flat_landmarks_geoms is not None:

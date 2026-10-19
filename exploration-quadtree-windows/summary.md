@@ -63,6 +63,23 @@ The paper simplifies the geometry after every iteration to `max(10,000, 15 * reg
 - The vertex count again grows to millions, because nothing is removed.
 - My pruning is unusable here: dropping an inserted vertex puts the next insertion on a straight chord instead of on the bent image of the segment, and the errors compound (432 and 508 invalid polygons). A pruning has to keep the vertices where the image bends, and the criterion that decides which are safe to drop is the unsolved part.
 
+## Coverage simplification at every window (coarse input)
+
+At each window start, before the insertion, `shapely.coverage_simplify` (shared boundaries simplified once, topology kept) runs on the current geometry, with a tolerance given in cells of the current grid (`COV=<cells> pw2run.py 6 ins coarse 0`). The kept vertices are matched to the old ones by coordinates (the simplifier rotates the ring start), so the lift maps stay valid. The restore of the best iterate now stores that iterate's ring structure, instead of lifting its coordinates through later events: the lifted best iterate was itself simplified by later windows, and gave 16 invalid polygons at the first level change.
+
+| tolerance | time | vertices | mean / median / p95 / p99 error | invalid |
+|---|---|---|---|---|
+| 0.02 cell | 94 s | 552 k | 1.34 % / 0.074 % / 4.0 % / 25 % | 0 |
+| 0.05 cell | 72 s | 442 k | 4.41 % / 0.119 % / 19.5 % / 78 % | 0 |
+| 0.1 cell | 76 s | 204 k | 4.23 % / 0.492 % / 17.3 % / 66 % | 0 |
+| 0.2 cell | 71 s | 175 k | 4.85 % / 0.185 % / | 0 |
+| (densified 1 km baseline, no hook) | 25 s | 0.77 M | 1.52 % / 0.250 % / | 57 |
+
+- All simplified runs end with 0 invalid polygons from the 43 k-vertex input, with 175 k to 552 k vertices at the end (4 to 13 times the input, 0.2 to 0.7 times the 1 km input), against 10.8 M without simplification.
+- The 0.02 cell run matches the baseline accuracy (median 0.074 %). The 0.05 to 0.2 cell runs have the same or lower median but 4 % mean and heavy tails (p95 17 to 20 %): they end earlier or on a worse iterate. These are single runs of a chaotic process, so I cannot tell a tolerance effect from run-to-run variation; the five rows should be repeated.
+- The time is 3 to 4 times the baseline, mostly in the hook (mesh, insertion, simplification, rebuilding the geometry metadata), none of it optimized.
+- The correspondence with the input vertices is lost: the simplifier removes original vertices too, and the animation frames before a removal cannot be reconstructed from the lift maps.
+
 ## Reading
 
 The guarantee of the paper is reproduced in this setting: with the mesh and the insertion, the output has no invalid polygons, also for the squeezed strips that remain at 10 invalid polygons with 0.125 km carried points (exploration-carried-points). The open problem is what the paper solves with a topology-preserving simplification: keeping the vertex count bounded without creating the invalid polygons again. A simplification that is safe needs a check against nearby boundaries (an intersection test of the new chord against a spatial index of the segments), which I did not try. The area error and the run time are also not competitive yet.

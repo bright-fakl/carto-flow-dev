@@ -140,6 +140,25 @@ def _prune_mask(c, rs, rn, orig, tol):
                 keep[i] = False
     return keep
 
+def _match(old, oo, new, no):
+    import pandas as pd
+    ro = np.repeat(np.arange(len(oo) - 1), np.diff(oo)); rn_ = np.repeat(np.arange(len(no) - 1), np.diff(no))
+    lo = np.ones(len(old), bool); lo[oo[1:] - 1] = False
+    ln = np.ones(len(new), bool); ln[no[1:] - 1] = False
+    om = pd.MultiIndex.from_arrays([ro[lo], old[lo, 0], old[lo, 1]])
+    nm = pd.MultiIndex.from_arrays([rn_[ln], new[ln, 0], new[ln, 1]])
+    if not om.is_unique:
+        return -np.ones(len(new), np.int64)
+    pos_old = np.flatnonzero(lo)
+    k = om.get_indexer(nm)
+    idx = -np.ones(len(new), np.int64)
+    ok = k >= 0
+    sel = np.flatnonzero(ln)
+    idx[sel[ok]] = pos_old[k[ok]]
+    idx[sel[~ok]] = -1
+    idx[no[1:] - 1] = idx[no[:-1]]
+    return idx
+
 class Hook:
     def __init__(self, frac=2.0 ** -6, insert=True):
         self.frac = frac; self.insert = insert
@@ -159,7 +178,23 @@ class Hook:
             self.orig = np.ones(len(coords), bool)
         if getattr(self,'dbg',False):
             self._n_before = int((~shapely.is_valid(shapely.from_ragged_array(fg.ragged_geometry_type, coords, fg.ragged_offsets))).sum())
-        if self.insert and self.tol > 0:
+        if self.insert and getattr(self, "cov", 0) > 0:
+            offs = fg.ragged_offsets[0]
+            rn = np.diff(offs).astype(np.int64)
+            geoms = shapely.from_ragged_array(fg.ragged_geometry_type, coords, fg.ragged_offsets)
+            simp = shapely.coverage_simplify(geoms, self.cov * min(dx, dy))
+            _gt, newc, noffs = shapely.to_ragged_array(simp)
+            nrn = np.diff(noffs[0]).astype(np.int64)
+            if len(newc) < len(coords) and len(nrn) == len(rn):
+                idx = _match(coords, offs.astype(np.int64), newc, noffs[0].astype(np.int64))
+                if (idx >= 0).all():
+                    self._restructure(fg, newc, noffs[0].astype(offs.dtype))
+                    self.events.append((idx, idx, np.zeros(len(idx))))
+                    self.pruned += len(coords) - len(newc)
+                    coords = newc
+                else:
+                    self.nomatch = getattr(self, "nomatch", 0) + 1
+        if self.insert and self.tol > 0 and getattr(self, "cov", 0) == 0:
             offs = fg.ragged_offsets[0]
             rs = np.asarray(offs[:-1], dtype=np.int64); rn = np.diff(offs).astype(np.int64)
             keep = _prune_mask(coords, rs, rn, self.orig, self.tol * min(dx, dy))
@@ -234,6 +269,21 @@ class Hook:
         W["P"] = _disp(W["P"], grid.x_coords, grid.y_coords, vx, vy, dt, grid.dx, grid.dy, False)
         W["P"][W["cen"]] = W["P"][W["c4"]].mean(axis=1)
         return pw._apply(W["ids"], W["w"], W["P"])
+
+    def structure(self, fg):
+        return tuple(np.array(o) for o in fg.ragged_offsets)
+
+    def restore(self, fg, coords, offsets):
+        self._restructure_full(fg, coords, offsets)
+
+    def _restructure_full(self, fg, outc, offsets):
+        geoms = list(shapely.from_ragged_array(fg.ragged_geometry_type, outc, offsets))
+        info = unpack_geometries(geoms)
+        fg.coords = outc
+        fg.metadata = info.metadata
+        fg.ragged_offsets = info.ragged_offsets
+        fg._ring_info = None; fg._polygon_indices = None
+        fg.invalidate_cache()
 
     def lift(self, c, since):
         for pa, pb, pt in self.events[since:]:
