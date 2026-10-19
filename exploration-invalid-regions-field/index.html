@@ -116,6 +116,16 @@
 <tr><td>quadtree windows, n_iter 3000 (finest level 2,070 iterations, budget)</td><td>432 s</td><td>0.57 M</td><td>0</td><td>0.194 % / 0.127 % / 0.68 %</td><td>1</td></tr>
 </table>
 <ul><li>The bulk accuracy gain (median) comes from the repair of the density field, not from the mesh: the repair reaches a median of 0.012 % in 25 s, the quadtree windows 0.11 to 0.13 % (the piecewise-affine window is a coarser flow map than the per-vertex advection).</li><li>What the windows add is validity (0 invalid polygons in both runs) and, given the iterations, the lagging counties: 1 valid county above 10 % after 3,000 iterations, against 59 at the repair&#x27;s stall and 6 after 1,500 more iterations of the repair, which then has 205 invalid polygons.</li><li>The price is 20 times the run time at the same stall-free finest level, and the budget (the finest level used 2,070 iterations and ended at the cap, not at a stall).</li></ul>
+<h2>Are the invalid polygons the same regions? (<code>invsets.py</code>)</h2>
+<p>At the end of the ladder (n_iter 1000), 52 of the baseline&#x27;s 57 invalid regions are also invalid with the repair; the repair adds 31 and loses 5. After 1,500 further iterations on the finest grid, 90 of the baseline&#x27;s 100 are invalid with the repair as well, and the repair has 115 more (205 against 100).</p>
+<table>
+<tr><th></th><th>invalid regions</th><th>by state</th></tr>
+<tr><td>baseline at 1,500</td><td>100</td><td>VA 40, TX 17, CO 13, NE 10, UT 6, WV 2, MT 2, NV 2</td></tr>
+<tr><td>repair at 1,500</td><td>205</td><td>VA 59, TX 48, NE 32, CO 17, WV 12, KS 11, UT 7, ND 5</td></tr>
+<tr><td>only with the repair, at 1,500</td><td>115</td><td>TX 36, NE 24, VA 19, WV 10, KS 9, CO 5, ND 5, SD 2</td></tr>
+</table>
+<ul><li>The repair keeps the baseline&#x27;s invalid regions (Virginia, the plains strips) and adds more of the same kind: the 115 extra regions have a median shrink factor of 0.10, 57 of them below 0.1, in the same states. Only 6 of them were invalid in the baseline at any snapshot.</li><li>Few regions heal: 6 of the baseline&#x27;s 106 regions that were ever invalid and 4 of the repair&#x27;s 209 are valid again at the end.</li><li>The baseline&#x27;s invalid regions appear at the first snapshot (iteration 1 of the continuation, that is, during the ladder); the repair&#x27;s median first invalid snapshot is 6 (iteration 300 of the continuation), so they arise throughout the run.</li></ul>
+<p>A reading, not tested: with the repaired field the strongly shrinking counties are driven toward their targets without the distortion of the invalid neighbors, shrink further and faster, and more of them fold into needles, so the repair exposes regions that the corrupted field was holding back. Testing it needs the shrink history of the extra regions with and without the repair.</p>
 <h2>Reading</h2>
 <p>The concern was justified: the invalid regions do disturb the field of their neighbors, and repairing them for the density removes most of that disturbance. Treating them separately in the progress statistics is not helpful as implemented. What remains is the invalid polygons themselves (83 at the end) and the lagging strongly shrunk counties.</p>
 <div class="figure">

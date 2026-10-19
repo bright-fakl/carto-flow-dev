@@ -68,6 +68,22 @@ figure: fig5_past_stall.png — Continuation of the finest level past the stall 
 - What the windows add is validity (0 invalid polygons in both runs) and, given the iterations, the lagging counties: 1 valid county above 10 % after 3,000 iterations, against 59 at the repair's stall and 6 after 1,500 more iterations of the repair, which then has 205 invalid polygons.
 - The price is 20 times the run time at the same stall-free finest level, and the budget (the finest level used 2,070 iterations and ended at the cap, not at a stall).
 
+## Are the invalid polygons the same regions? (`invsets.py`)
+
+At the end of the ladder (n_iter 1000), 52 of the baseline's 57 invalid regions are also invalid with the repair; the repair adds 31 and loses 5. After 1,500 further iterations on the finest grid, 90 of the baseline's 100 are invalid with the repair as well, and the repair has 115 more (205 against 100).
+
+| | invalid regions | by state |
+|---|---|---|
+| baseline at 1,500 | 100 | VA 40, TX 17, CO 13, NE 10, UT 6, WV 2, MT 2, NV 2 |
+| repair at 1,500 | 205 | VA 59, TX 48, NE 32, CO 17, WV 12, KS 11, UT 7, ND 5 |
+| only with the repair, at 1,500 | 115 | TX 36, NE 24, VA 19, WV 10, KS 9, CO 5, ND 5, SD 2 |
+
+- The repair keeps the baseline's invalid regions (Virginia, the plains strips) and adds more of the same kind: the 115 extra regions have a median shrink factor of 0.10, 57 of them below 0.1, in the same states. Only 6 of them were invalid in the baseline at any snapshot.
+- Few regions heal: 6 of the baseline's 106 regions that were ever invalid and 4 of the repair's 209 are valid again at the end.
+- The baseline's invalid regions appear at the first snapshot (iteration 1 of the continuation, that is, during the ladder); the repair's median first invalid snapshot is 6 (iteration 300 of the continuation), so they arise throughout the run.
+
+A reading, not tested: with the repaired field the strongly shrinking counties are driven toward their targets without the distortion of the invalid neighbors, shrink further and faster, and more of them fold into needles, so the repair exposes regions that the corrupted field was holding back. Testing it needs the shrink history of the extra regions with and without the repair.
+
 ## Reading
 
 The concern was justified: the invalid regions do disturb the field of their neighbors, and repairing them for the density removes most of that disturbance. Treating them separately in the progress statistics is not helpful as implemented. What remains is the invalid polygons themselves (83 at the end) and the lagging strongly shrunk counties.
