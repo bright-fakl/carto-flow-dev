@@ -80,6 +80,26 @@ At each window start, before the insertion, `shapely.coverage_simplify` (shared 
 - The time is 3 to 4 times the baseline, mostly in the hook (mesh, insertion, simplification, rebuilding the geometry metadata), none of it optimized.
 - The correspondence with the input vertices is lost: the simplifier removes original vertices too, and the animation frames before a removal cannot be reconstructed from the lift maps.
 
+## Test conditions, stalls and the iteration budget
+
+All rows: 3,108 counties, population, `morph_multiresolution(min_resolution="auto", levels="auto")` with `MorphOptions(area_scale=1e-6, n_iter=1000)` and otherwise default options (`recompute_every` 10, `dt` 0.2, `adaptive_dt`, `mean_tol` 5 %, `max_tol` 10 %, `stall_patience` 4, `stall_min_efficiency` 0.05). The ladder is 355 x 512, 710 x 1024 and 1420 x 2048 cells (17.0, 8.5 and 4.3 km). `n_iter` is pooled over the levels. Quadtree leaves 2^-6 of the cells. Single runs.
+
+The counties never converge in any configuration, with or without the hook: the maximum error stays at 450 to 1,000 % (the sub-cell counties), so a level ends in a stall or at the end of the pooled budget. `lv.py <base|cov0.02|cov0.05>` prints the levels (`NIT`, `EFF` environment variables set `n_iter` and `stall_min_efficiency`).
+
+| run | level 1 | level 2 | level 3 (4.3 km) | final mean / max error |
+|---|---|---|---|---|
+| baseline, n_iter 1000 | 540 it stalled | 110 stalled | 170 stalled | 1.30 % / 523 % |
+| 0.02 cell, n_iter 1000 | 720 stalled | 140 stalled | 140, budget exhausted | 1.16 % / 450 % |
+| 0.02 cell, n_iter 3000 | 720 stalled | 140 stalled | 1,080 stalled, best at 1,036 | 0.51 % / 66.8 % |
+| 0.05 cell, n_iter 1000 or 3000 | 700 stalled | 170 stalled | 50 stalled, best at 11 | 3.59 % / 509 % |
+
+- The stalls are not new. The baseline stalls at all three levels as well; the stall rule is what ends a county run.
+- With the hook the first level takes more iterations (720 against 540), so with `n_iter=1000` the finest level of the 0.02 cell run is cut off by the budget after 140 iterations (status COMPLETED, not stalled). The earlier table compared these runs at a budget that is binding for the hook and not for the baseline.
+- With 3,000 iterations the 0.02 cell run continues to improve at the finest level for 1,080 iterations and ends with 0.51 % mean error and a maximum of 66.8 %, against 1.30 % and 523 % for the baseline at its stall. The baseline stalls at 170 iterations with the error still far from zero; I did not test why. A possible reason is that the invalid polygons of the baseline have wrong shoelace areas, which would make their errors hard to reduce; this is a hypothesis.
+- The 0.05 cell run stalls at the finest level after 50 iterations with its best iterate at iteration 11. The error is not decreasing in that level, so the stall rule is behaving as designed, but it is a premature end for the run: whether the cause is the hook (the rebuilt mesh changes the areas between windows) or the simplification at this tolerance I have not isolated. With `stall_min_efficiency=0` the runs use the whole budget in the first level, so that does not separate the two either.
+
+So the table above is biased in two ways: the 1000-iteration budget penalizes the hook at the finest level, and the 0.05 to 0.2 cell rows include a premature stall. The first row of this section is the better comparison.
+
 ## Reading
 
 The guarantee of the paper is reproduced in this setting: with the mesh and the insertion, the output has no invalid polygons, also for the squeezed strips that remain at 10 invalid polygons with 0.125 km carried points (exploration-carried-points). The open problem is what the paper solves with a topology-preserving simplification: keeping the vertex count bounded without creating the invalid polygons again. A simplification that is safe needs a check against nearby boundaries (an intersection test of the new chord against a spatial index of the segments), which I did not try. The area error and the run time are also not competitive yet.
