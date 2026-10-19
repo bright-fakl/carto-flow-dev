@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Area error of the county flow cartogram against original and target area</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Area error of the county flow cartogram against original and target area</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-counties-subcell/index.html">Why the counties do not converge: targets below the grid resolution</a> <span class="meta">(exploration)</span><br><a href="../exploration-quadtree-windows/index.html">Piecewise-affine windows on a quadtree mesh with vertex insertion (after Miaji et al.)</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/167">#167</a></dd>
+<dt>Created</dt><dd>2026-10-19 12:00</dd>
+<dt>Before</dt><dd>main @ 06d4ff0</dd>
+<dt>After</dt><dd>the same checkout; script only, no library change</dd>
+<dt>Inputs</dt><dd>3,108 bundled counties (population) with max_segment_length 1000, ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, default options. Error is the output area against the population share of the total output area; the cell is that of the finest level (4.26 km, 18.1 km2). Single run.</dd>
+</dl>
+<p class="desc">72 of 3,108 counties end above 10 % area error. The error depends on the shrink factor (target over original area) and on the target size in grid cells together. No county that shrinks by less than 10 times, and almost none with a target of 16 cells or more, is above 10 %. The failing counties are thin strips along the Great Plains and a cluster in Virginia.</p>
+<p><code>relation.py &lt;output dir&gt;</code> runs the morph and draws the four figures. The run ends stalled with a mean error of 1.52 %, a median of 0.25 % and a maximum of 523 %.</p>
+<h2>Error against shrink and target size</h2>
+<h2>Where they are</h2>
+<h2>Reading</h2>
+<ul><li>Counties that shrink by less than 10 times (shrink above 0.1) are within 10 % whatever their target size; the median error there is 0.1 to 0.5 %.</li><li>Counties with a target of 16 cells or more are within 10 % except for 6 of 2,273.</li><li>A county has to be both strongly shrunk (below 0.1, down to 0.003) and small (below about 16 cells) to fail. A floor at one cell on the convergence test would excuse 15 of the 72; at four cells 45 stay above 10 %.</li><li>The failing counties are on average larger than the others in the original map (median 131 cells against 89), so they are large rural counties squeezed to strips. In the cartogram they form the thin dividing line along the plains.</li></ul>
+<div class="figure">
+<img src="fig1_error_vs_shrink.png" alt="Absolute area error against the shrink factor (target area over original area), colored by the target area in grid cells. The errors above 10 % are at shrink factors below 0.1, and the darkest points (targets below four cells) dominate them.">
+<p class="caption">Absolute area error against the shrink factor (target area over original area), colored by the target area in grid cells. The errors above 10 % are at shrink factors below 0.1, and the darkest points (targets below four cells) dominate them.</p>
+</div><div class="figure">
+<img src="fig2_error_vs_target.png" alt="Absolute area error against the target area in grid cells, colored by the shrink factor. The errors rise below about 10 cells and are above 10 % for targets under four cells with a shrink below 0.1. Targets of 16 cells or more are at 0.1 to 1 % whatever the shrink.">
+<p class="caption">Absolute area error against the target area in grid cells, colored by the shrink factor. The errors rise below about 10 cells and are above 10 % for targets under four cells with a shrink below 0.1. Targets of 16 cells or more are at 0.1 to 1 % whatever the shrink.</p>
+</div><div class="figure">
+<img src="fig3_share_over_10pct.png" alt="Share of counties above 10 % error by shrink factor and target size. The failures sit in one corner: shrink below 0.1 and target below 16 cells; the corner is darkest at shrink below 0.01 and target below one cell (76 %).">
+<p class="caption">Share of counties above 10 % error by shrink factor and target size. The failures sit in one corner: shrink below 0.1 and target below 16 cells; the corner is darkest at shrink below 0.01 and target below one cell (76 %).</p>
+</div><div class="figure">
+<img src="fig4_where.png" alt="The cartogram output with the 72 counties above 10 % error in red. Most are thin strips along the Great Plains (TX 22, NE 18, MT 7, ND 7) and a cluster in Virginia (7), where the independent cities enlarge and their surrounding counties shrink.">
+<p class="caption">The cartogram output with the 72 counties above 10 % error in red. Most are thin strips along the Great Plains (TX 22, NE 18, MT 7, ND 7) and a cluster in Virginia (7), where the independent cities enlarge and their surrounding counties shrink.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
