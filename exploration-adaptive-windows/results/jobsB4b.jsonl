@@ -1,0 +1,10 @@
+{"id": "B4/county/r0RL", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.001, "ROF": 1, "LIMIT": 1}}
+{"id": "B4/county/r2RL", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.2, "ROF": 1, "LIMIT": 1}}
+{"id": "B4/cd/r0RL", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.001, "ROF": 1, "LIMIT": 1}}
+{"id": "B4/cd/r2RL", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.2, "ROF": 1, "LIMIT": 1}}
+{"id": "B4/coarse/r0RL", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.001, "ROF": 1, "LIMIT": 1}}
+{"id": "B4/coarse/r2RL", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.2, "ROF": 1, "LIMIT": 1}}
+{"id": "B4/mid2000/r0RL", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.001, "ROF": 1, "LIMIT": 1}}
+{"id": "B4/mid2000/r2RL", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.2, "ROF": 1, "LIMIT": 1}}
+{"id": "B4/mid3000/r0RL", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.001, "ROF": 1, "LIMIT": 1}}
+{"id": "B4/mid3000/r2RL", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 0, "REBUILD": 100000, "MINRATIO": 0.2, "ROF": 1, "LIMIT": 1}}

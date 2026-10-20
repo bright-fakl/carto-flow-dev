@@ -1,0 +1,40 @@
+{"id": "B4/county/q1", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 1, "MINRATIO": 0}}
+{"id": "B4/county/q4", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 4, "MINRATIO": 0.6}}
+{"id": "B4/county/q8", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 8, "MINRATIO": 0.6}}
+{"id": "B4/county/r8", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.8}}
+{"id": "B4/county/r6", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.6}}
+{"id": "B4/county/r4", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.4}}
+{"id": "B4/county/r2", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.2}}
+{"id": "B4/county/r0", "script": "pwo3_run.py", "args": ["county", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.001}}
+{"id": "B4/cd/q1", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 1, "MINRATIO": 0}}
+{"id": "B4/cd/q4", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 4, "MINRATIO": 0.6}}
+{"id": "B4/cd/q8", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 8, "MINRATIO": 0.6}}
+{"id": "B4/cd/r8", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.8}}
+{"id": "B4/cd/r6", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.6}}
+{"id": "B4/cd/r4", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.4}}
+{"id": "B4/cd/r2", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.2}}
+{"id": "B4/cd/r0", "script": "pwo3_run.py", "args": ["cd", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.001}}
+{"id": "B4/coarse/q1", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 1, "MINRATIO": 0}}
+{"id": "B4/coarse/q4", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 4, "MINRATIO": 0.6}}
+{"id": "B4/coarse/q8", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 8, "MINRATIO": 0.6}}
+{"id": "B4/coarse/r8", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.8}}
+{"id": "B4/coarse/r6", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.6}}
+{"id": "B4/coarse/r4", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.4}}
+{"id": "B4/coarse/r2", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.2}}
+{"id": "B4/coarse/r0", "script": "pwo3_run.py", "args": ["coarse", 1000], "env": {"BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.001}}
+{"id": "B4/mid2000/q1", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 1, "MINRATIO": 0}}
+{"id": "B4/mid2000/q4", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 4, "MINRATIO": 0.6}}
+{"id": "B4/mid2000/q8", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 8, "MINRATIO": 0.6}}
+{"id": "B4/mid2000/r8", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.8}}
+{"id": "B4/mid2000/r6", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.6}}
+{"id": "B4/mid2000/r4", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.4}}
+{"id": "B4/mid2000/r2", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.2}}
+{"id": "B4/mid2000/r0", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.001}}
+{"id": "B4/mid3000/q1", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 1, "MINRATIO": 0}}
+{"id": "B4/mid3000/q4", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 4, "MINRATIO": 0.6}}
+{"id": "B4/mid3000/q8", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 8, "MINRATIO": 0.6}}
+{"id": "B4/mid3000/r8", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.8}}
+{"id": "B4/mid3000/r6", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.6}}
+{"id": "B4/mid3000/r4", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.4}}
+{"id": "B4/mid3000/r2", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.2}}
+{"id": "B4/mid3000/r0", "script": "pwo3_run.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "BITS": 6, "PEVERY": 1, "FIX": "kernel", "SUBSTEP": 1, "REBUILD": 100000, "MINRATIO": 0.001}}

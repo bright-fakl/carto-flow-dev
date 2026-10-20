@@ -1,0 +1,286 @@
+  detect step 10 nseg 764584 grid 820x570 t_build 0.04
+  detect step 10 flagged 0 t 0.11
+  detect step 20 nseg 764584 grid 815x568 t_build 0.03
+  detect step 20 flagged 0 t 0.09
+  detect step 30 nseg 764584 grid 811x565 t_build 0.03
+  detect step 30 flagged 0 t 0.09
+  detect step 40 nseg 764584 grid 807x563 t_build 0.03
+  detect step 40 flagged 0 t 0.10
+  detect step 50 nseg 764584 grid 803x560 t_build 0.03
+  detect step 50 flagged 0 t 0.09
+  detect step 60 nseg 764584 grid 798x558 t_build 0.03
+  detect step 60 flagged 0 t 0.10
+  detect step 70 nseg 764584 grid 793x555 t_build 0.03
+  detect step 70 flagged 0 t 0.09
+  detect step 80 nseg 764584 grid 791x552 t_build 0.03
+  detect step 80 flagged 0 t 0.09
+  detect step 90 nseg 764584 grid 789x549 t_build 0.03
+  detect step 90 flagged 0 t 0.09
+  detect step 100 nseg 764584 grid 786x546 t_build 0.03
+  detect step 100 flagged 0 t 0.09
+  detect step 110 nseg 764584 grid 783x544 t_build 0.03
+  detect step 110 flagged 0 t 0.09
+  detect step 120 nseg 764584 grid 781x541 t_build 0.03
+  detect step 120 flagged 0 t 0.09
+  detect step 130 nseg 764584 grid 778x538 t_build 0.03
+  detect step 130 flagged 0 t 0.11
+  detect step 140 nseg 764584 grid 775x535 t_build 0.03
+  detect step 140 flagged 0 t 0.09
+  detect step 150 nseg 764584 grid 772x532 t_build 0.03
+  detect step 150 flagged 0 t 0.11
+  detect step 160 nseg 764584 grid 768x530 t_build 0.03
+  detect step 160 flagged 0 t 0.10
+  detect step 170 nseg 764584 grid 765x529 t_build 0.04
+  detect step 170 flagged 0 t 0.11
+  detect step 180 nseg 764584 grid 762x528 t_build 0.03
+  detect step 180 flagged 0 t 0.10
+  detect step 190 nseg 764584 grid 758x527 t_build 0.03
+  detect step 190 flagged 0 t 0.10
+  detect step 200 nseg 764584 grid 755x526 t_build 0.04
+  detect step 200 flagged 0 t 0.11
+  detect step 210 nseg 764584 grid 751x525 t_build 0.03
+  detect step 210 flagged 0 t 0.11
+  detect step 220 nseg 764584 grid 747x523 t_build 0.03
+  detect step 220 flagged 0 t 0.10
+  detect step 230 nseg 764584 grid 743x522 t_build 0.03
+  detect step 230 flagged 0 t 0.11
+  detect step 240 nseg 764584 grid 739x520 t_build 0.03
+  detect step 240 flagged 0 t 0.11
+  detect step 250 nseg 764584 grid 734x517 t_build 0.03
+  detect step 250 flagged 0 t 0.12
+  detect step 260 nseg 764584 grid 726x511 t_build 0.03
+  detect step 260 flagged 4 t 0.23
+  step 260 round 0 new 4 flagged 0 local 190 nseg 764588 t 0.01
+  detect step 270 nseg 764588 grid 719x506 t_build 0.03
+  detect step 270 flagged 24 t 0.24
+  step 270 round 0 new 24 flagged 10 local 1798 nseg 764612 t 0.01
+  step 270 round 1 new 10 flagged 4 local 1808 nseg 764622 t 0.01
+  step 270 round 2 new 4 flagged 0 local 1812 nseg 764626 t 0.01
+  detect step 280 nseg 764626 grid 714x503 t_build 0.03
+  detect step 280 flagged 72 t 0.25
+  step 280 round 0 new 72 flagged 24 local 4369 nseg 764698 t 0.01
+  step 280 round 1 new 24 flagged 4 local 4393 nseg 764722 t 0.01
+  step 280 round 2 new 4 flagged 0 local 4397 nseg 764726 t 0.01
+  detect step 290 nseg 764726 grid 710x501 t_build 0.03
+  detect step 290 flagged 102 t 0.18
+  step 290 round 0 new 102 flagged 32 local 6025 nseg 764828 t 0.00
+  step 290 round 1 new 32 flagged 0 local 6057 nseg 764860 t 0.00
+  detect step 300 nseg 764860 grid 708x499 t_build 0.03
+  detect step 300 flagged 100 t 0.18
+  step 300 round 0 new 100 flagged 22 local 5074 nseg 764960 t 0.01
+  step 300 round 1 new 22 flagged 4 local 5096 nseg 764982 t 0.01
+  step 300 round 2 new 4 flagged 0 local 5100 nseg 764986 t 0.01
+  detect step 310 nseg 764986 grid 706x497 t_build 0.03
+  detect step 310 flagged 122 t 0.23
+  step 310 round 0 new 122 flagged 52 local 5888 nseg 765108 t 0.00
+  step 310 round 1 new 52 flagged 6 local 5940 nseg 765160 t 0.00
+  step 310 round 2 new 6 flagged 0 local 5946 nseg 765166 t 0.00
+  detect step 320 nseg 765166 grid 704x496 t_build 0.03
+  detect step 320 flagged 126 t 0.20
+  step 320 round 0 new 126 flagged 52 local 6986 nseg 765292 t 0.01
+  step 320 round 1 new 52 flagged 10 local 7038 nseg 765344 t 0.01
+  step 320 round 2 new 10 flagged 0 local 7048 nseg 765354 t 0.01
+  detect step 330 nseg 765354 grid 702x495 t_build 0.03
+  detect step 330 flagged 240 t 0.24
+  step 330 round 0 new 240 flagged 70 local 17281 nseg 765594 t 0.02
+  step 330 round 1 new 70 flagged 6 local 17351 nseg 765664 t 0.02
+  step 330 round 2 new 6 flagged 0 local 17357 nseg 765670 t 0.02
+  detect step 340 nseg 765670 grid 701x494 t_build 0.03
+  detect step 340 flagged 182 t 0.22
+  step 340 round 0 new 182 flagged 50 local 15428 nseg 765852 t 0.01
+  step 340 round 1 new 50 flagged 16 local 15478 nseg 765902 t 0.01
+  step 340 round 2 new 16 flagged 6 local 15494 nseg 765918 t 0.01
+  step 340 round 3 new 6 flagged 0 local 15500 nseg 765924 t 0.01
+  detect step 350 nseg 765924 grid 700x493 t_build 0.04
+  detect step 350 flagged 234 t 0.26
+  step 350 round 0 new 234 flagged 98 local 16874 nseg 766158 t 0.01
+  step 350 round 1 new 98 flagged 56 local 16972 nseg 766256 t 0.01
+  step 350 round 2 new 56 flagged 38 local 17028 nseg 766312 t 0.01
+  step 350 round 3 new 38 flagged 44 local 17066 nseg 766350 t 0.01
+  step 350 round 4 new 44 flagged 28 local 17110 nseg 766394 t 0.01
+  step 350 round 5 new 28 flagged 16 local 17138 nseg 766422 t 0.01
+  step 350 round 6 new 16 flagged 6 local 17154 nseg 766438 t 0.01
+  step 350 round 7 new 6 flagged 0 local 17160 nseg 766444 t 0.01
+  detect step 360 nseg 766444 grid 699x492 t_build 0.03
+  detect step 360 flagged 308 t 0.22
+  step 360 round 0 new 308 flagged 144 local 18030 nseg 766752 t 0.01
+  step 360 round 1 new 144 flagged 84 local 18174 nseg 766896 t 0.01
+  step 360 round 2 new 84 flagged 46 local 18258 nseg 766980 t 0.01
+  step 360 round 3 new 46 flagged 28 local 18304 nseg 767026 t 0.01
+  step 360 round 4 new 28 flagged 6 local 18332 nseg 767054 t 0.01
+  step 360 round 5 new 6 flagged 0 local 18338 nseg 767060 t 0.01
+  detect step 370 nseg 767060 grid 698x492 t_build 0.03
+  detect step 370 flagged 470 t 0.27
+  step 370 round 0 new 470 flagged 146 local 28484 nseg 767530 t 0.01
+  step 370 round 1 new 146 flagged 48 local 28630 nseg 767676 t 0.02
+  step 370 round 2 new 48 flagged 30 local 28678 nseg 767724 t 0.01
+  step 370 round 3 new 30 flagged 10 local 28708 nseg 767754 t 0.02
+  step 370 round 4 new 10 flagged 6 local 28718 nseg 767764 t 0.02
+  step 370 round 5 new 6 flagged 6 local 28724 nseg 767770 t 0.02
+  step 370 round 6 new 6 flagged 0 local 28730 nseg 767776 t 0.02
+  detect step 380 nseg 767776 grid 697x491 t_build 0.03
+  detect step 380 flagged 450 t 0.22
+  step 380 round 0 new 450 flagged 202 local 31011 nseg 768226 t 0.02
+  step 380 round 1 new 202 flagged 40 local 31213 nseg 768428 t 0.02
+  step 380 round 2 new 40 flagged 16 local 31253 nseg 768468 t 0.02
+  step 380 round 3 new 16 flagged 0 local 31269 nseg 768484 t 0.02
+  detect step 390 nseg 768484 grid 696x490 t_build 0.03
+  detect step 390 flagged 455 t 0.23
+  step 390 round 0 new 455 flagged 204 local 25593 nseg 768939 t 0.02
+  step 390 round 1 new 204 flagged 86 local 25797 nseg 769143 t 0.01
+  step 390 round 2 new 86 flagged 52 local 25883 nseg 769229 t 0.01
+  step 390 round 3 new 52 flagged 26 local 25935 nseg 769281 t 0.01
+  step 390 round 4 new 26 flagged 6 local 25961 nseg 769307 t 0.01
+  step 390 round 5 new 6 flagged 0 local 25967 nseg 769313 t 0.01
+  detect step 400 nseg 769313 grid 695x490 t_build 0.03
+  detect step 400 flagged 906 t 0.25
+  step 400 round 0 new 906 flagged 358 local 36031 nseg 770219 t 0.02
+  step 400 round 1 new 358 flagged 154 local 36389 nseg 770577 t 0.02
+  step 400 round 2 new 154 flagged 26 local 36543 nseg 770731 t 0.02
+  step 400 round 3 new 26 flagged 16 local 36569 nseg 770757 t 0.02
+  step 400 round 4 new 16 flagged 6 local 36585 nseg 770773 t 0.02
+  step 400 round 5 new 6 flagged 6 local 36591 nseg 770779 t 0.02
+  step 400 round 6 new 6 flagged 6 local 36597 nseg 770785 t 0.02
+  step 400 round 7 new 6 flagged 0 local 36603 nseg 770791 t 0.02
+  detect step 410 nseg 770791 grid 695x490 t_build 0.03
+  detect step 410 flagged 608 t 0.29
+  step 410 round 0 new 608 flagged 230 local 32003 nseg 771399 t 0.02
+  step 410 round 1 new 230 flagged 96 local 32233 nseg 771629 t 0.02
+  step 410 round 2 new 96 flagged 52 local 32329 nseg 771725 t 0.01
+  step 410 round 3 new 52 flagged 42 local 32381 nseg 771777 t 0.02
+  step 410 round 4 new 42 flagged 30 local 32423 nseg 771819 t 0.02
+  step 410 round 5 new 30 flagged 26 local 32453 nseg 771849 t 0.01
+  step 410 round 6 new 26 flagged 26 local 32479 nseg 771875 t 0.01
+  step 410 round 7 new 26 flagged 22 local 32505 nseg 771901 t 0.02
+  step 410 round 8 new 22 flagged 22 local 32527 nseg 771923 t 0.02
+  step 410 round 9 new 6 flagged 20 local 32533 nseg 771929 t 0.02
+  step 410 round 10 new 4 flagged 16 local 32537 nseg 771933 t 0.02
+  detect step 420 nseg 771933 grid 694x489 t_build 0.03
+  detect step 420 flagged 785 t 0.24
+  step 420 round 0 new 785 flagged 348 local 42295 nseg 772718 t 0.03
+  step 420 round 1 new 348 flagged 110 local 42643 nseg 773066 t 0.03
+  step 420 round 2 new 110 flagged 50 local 42753 nseg 773176 t 0.03
+  step 420 round 3 new 50 flagged 14 local 42803 nseg 773226 t 0.03
+  step 420 round 4 new 14 flagged 24 local 42817 nseg 773240 t 0.03
+  step 420 round 5 new 24 flagged 16 local 42841 nseg 773264 t 0.03
+  step 420 round 6 new 16 flagged 18 local 42857 nseg 773280 t 0.03
+  detect step 430 nseg 773280 grid 694x489 t_build 0.03
+  detect step 430 flagged 1288 t 0.31
+  step 430 round 0 new 1288 flagged 594 local 40867 nseg 774568 t 0.03
+  step 430 round 1 new 594 flagged 214 local 41461 nseg 775162 t 0.03
+  step 430 round 2 new 214 flagged 136 local 41675 nseg 775376 t 0.03
+  step 430 round 3 new 136 flagged 120 local 41811 nseg 775512 t 0.03
+  step 430 round 4 new 120 flagged 106 local 41931 nseg 775632 t 0.03
+  step 430 round 5 new 106 flagged 108 local 42037 nseg 775738 t 0.03
+  step 430 round 6 new 78 flagged 112 local 42115 nseg 775816 t 0.03
+  step 430 round 7 new 36 flagged 112 local 42151 nseg 775852 t 0.04
+  detect step 440 nseg 775852 grid 695x489 t_build 0.03
+  detect step 440 flagged 1308 t 0.27
+  step 440 round 0 new 1308 flagged 812 local 39025 nseg 777160 t 0.05
+  step 440 round 1 new 812 flagged 636 local 39837 nseg 777972 t 0.05
+  step 440 round 2 new 636 flagged 564 local 40473 nseg 778608 t 0.06
+  step 440 round 3 new 556 flagged 554 local 41029 nseg 779164 t 0.07
+  step 440 round 4 new 534 flagged 550 local 41563 nseg 779698 t 0.09
+  step 440 round 5 new 492 flagged 556 local 42055 nseg 780190 t 0.10
+  step 440 round 6 new 410 flagged 556 local 42465 nseg 780600 t 0.11
+  step 440 round 7 new 228 flagged 568 local 42693 nseg 780828 t 0.09
+  detect step 450 nseg 780828 grid 698x492 t_build 0.03
+  detect step 450 flagged 1350 t 0.41
+  step 450 round 0 new 1350 flagged 602 local 47742 nseg 782178 t 0.12
+  step 450 round 1 new 602 flagged 200 local 48344 nseg 782780 t 0.11
+  step 450 round 2 new 200 flagged 94 local 48544 nseg 782980 t 0.13
+  step 450 round 3 new 94 flagged 40 local 48638 nseg 783074 t 0.12
+  step 450 round 4 new 40 flagged 36 local 48678 nseg 783114 t 0.09
+  step 450 round 5 new 32 flagged 32 local 48710 nseg 783146 t 0.13
+  step 450 round 6 new 16 flagged 36 local 48726 nseg 783162 t 0.12
+  step 450 round 7 new 20 flagged 28 local 48746 nseg 783182 t 0.12
+  step 450 round 8 new 12 flagged 32 local 48758 nseg 783194 t 0.09
+  step 450 round 9 new 14 flagged 34 local 48772 nseg 783208 t 0.08
+  step 450 round 10 new 16 flagged 34 local 48788 nseg 783224 t 0.10
+  detect step 460 nseg 783224 grid 699x493 t_build 0.03
+  detect step 460 flagged 1763 t 0.41
+  step 460 round 0 new 1763 flagged 640 local 51299 nseg 784987 t 0.14
+  step 460 round 1 new 640 flagged 344 local 51939 nseg 785627 t 0.13
+  step 460 round 2 new 344 flagged 242 local 52283 nseg 785971 t 0.16
+  step 460 round 3 new 242 flagged 220 local 52525 nseg 786213 t 0.09
+  step 460 round 4 new 212 flagged 196 local 52737 nseg 786425 t 0.15
+  step 460 round 5 new 178 flagged 168 local 52915 nseg 786603 t 0.15
+  step 460 round 6 new 84 flagged 168 local 52999 nseg 786687 t 0.18
+  step 460 round 7 new 44 flagged 168 local 53043 nseg 786731 t 0.16
+  step 460 round 8 new 20 flagged 164 local 53063 nseg 786751 t 0.10
+  step 460 round 9 new 4 flagged 164 local 53067 nseg 786755 t 0.11
+  detect step 470 nseg 786755 grid 702x494 t_build 0.03
+  detect step 470 flagged 1636 t 0.58
+  step 470 round 0 new 1636 flagged 878 local 59196 nseg 788391 t 0.12
+  step 470 round 1 new 878 flagged 654 local 60074 nseg 789269 t 0.19
+  step 470 round 2 new 654 flagged 572 local 60728 nseg 789923 t 0.23
+  step 470 round 3 new 570 flagged 548 local 61298 nseg 790493 t 0.25
+  step 470 round 4 new 528 flagged 510 local 61826 nseg 791021 t 0.25
+  step 470 round 5 new 394 flagged 518 local 62220 nseg 791415 t 0.18
+  step 470 round 6 new 268 flagged 522 local 62488 nseg 791683 t 0.30
+  step 470 round 7 new 102 flagged 524 local 62590 nseg 791785 t 0.30
+  detect step 480 nseg 791785 grid 705x497 t_build 0.04
+  detect step 480 flagged 2942 t 0.79
+  step 480 round 0 new 2942 flagged 1638 local 67608 nseg 794727 t 0.34
+  step 480 round 1 new 1638 flagged 1092 local 69246 nseg 796365 t 0.46
+  step 480 round 2 new 1092 flagged 868 local 70338 nseg 797457 t 0.41
+  step 480 round 3 new 850 flagged 760 local 71188 nseg 798307 t 0.38
+  step 480 round 4 new 692 flagged 758 local 71880 nseg 798999 t 0.44
+  step 480 round 5 new 502 flagged 756 local 72382 nseg 799501 t 0.35
+  step 480 round 6 new 222 flagged 738 local 72604 nseg 799723 t 0.49
+  step 480 round 7 new 36 flagged 736 local 72640 nseg 799759 t 0.56
+  step 480 round 8 new 8 flagged 736 local 72648 nseg 799767 t 0.60
+  step 480 round 9 new 6 flagged 738 local 72654 nseg 799773 t 0.63
+  step 480 round 10 new 6 flagged 736 local 72660 nseg 799779 t 0.64
+  detect step 490 nseg 799779 grid 712x501 t_build 0.03
+  detect step 490 flagged 5022 t 1.49
+  step 490 round 0 new 5020 flagged 3646 local 76380 nseg 804799 t 0.79
+  step 490 round 1 new 3642 flagged 3136 local 80022 nseg 808441 t 1.07
+  step 490 round 2 new 3112 flagged 2832 local 83134 nseg 811553 t 0.98
+  step 490 round 3 new 2698 flagged 2806 local 85832 nseg 814251 t 1.55
+  step 490 round 4 new 2344 flagged 2780 local 88176 nseg 816595 t 1.20
+  step 490 round 5 new 1710 flagged 2792 local 89886 nseg 818305 t 1.22
+  step 490 round 6 new 960 flagged 2840 local 90846 nseg 819265 t 1.04
+  step 490 round 7 new 278 flagged 2856 local 91124 nseg 819543 t 2.37
+  detect step 500 nseg 819543 grid 728x513 t_build 0.03
+  detect step 500 flagged 5367 t 4.43
+  step 500 round 0 new 5367 flagged 3586 local 87529 nseg 824910 t 2.75
+  step 500 round 1 new 3584 flagged 2486 local 91113 nseg 828494 t 3.25
+  step 500 round 2 new 2430 flagged 2086 local 93543 nseg 830924 t 3.51
+  step 500 round 3 new 1940 flagged 1814 local 95483 nseg 832864 t 3.58
+  step 500 round 4 new 1526 flagged 1738 local 97009 nseg 834390 t 4.05
+  step 500 round 5 new 1082 flagged 1696 local 98091 nseg 835472 t 2.99
+  step 500 round 6 new 526 flagged 1676 local 98617 nseg 835998 t 2.55
+  step 500 round 7 new 102 flagged 1666 local 98719 nseg 836100 t 2.79
+  step 500 round 8 new 32 flagged 1662 local 98751 nseg 836132 t 3.38
+  step 500 round 9 new 6 flagged 1662 local 98757 nseg 836138 t 3.35
+  detect step 510 nseg 836138 grid 742x523 t_build 0.03
+  detect step 510 flagged 7164 t 9.43
+  step 510 round 0 new 7158 flagged 3892 local 109655 nseg 843296 t 3.39
+  step 510 round 1 new 3862 flagged 2594 local 113517 nseg 847158 t 5.45
+  step 510 round 2 new 2482 flagged 2134 local 115999 nseg 849640 t 3.88
+  step 510 round 3 new 1904 flagged 1818 local 117903 nseg 851544 t 6.11
+  step 510 round 4 new 1388 flagged 1758 local 119291 nseg 852932 t 6.40
+  step 510 round 5 new 760 flagged 1734 local 120051 nseg 853692 t 6.52
+  step 510 round 6 new 228 flagged 1704 local 120279 nseg 853920 t 4.74
+  step 510 round 7 new 72 flagged 1692 local 120351 nseg 853992 t 3.84
+  step 510 round 8 new 26 flagged 1692 local 120377 nseg 854018 t 3.98
+  step 510 round 9 new 8 flagged 1692 local 120385 nseg 854026 t 4.00
+  detect step 520 nseg 854026 grid 756x533 t_build 0.03
+  detect step 520 flagged 6469 t 12.35
+  step 520 round 0 new 6465 flagged 2869 local 134526 nseg 860491 t 7.20
+  step 520 round 1 new 2839 flagged 1474 local 137365 nseg 863330 t 4.80
+  step 520 round 2 new 1380 flagged 1100 local 138745 nseg 864710 t 7.47
+  step 520 round 3 new 888 flagged 906 local 139633 nseg 865598 t 7.69
+  step 520 round 4 new 568 flagged 840 local 140201 nseg 866166 t 7.79
+  step 520 round 5 new 278 flagged 812 local 140479 nseg 866444 t 7.87
+  step 520 round 6 new 76 flagged 814 local 140555 nseg 866520 t 7.87
+  step 520 round 7 new 56 flagged 798 local 140611 nseg 866576 t 7.80
+  step 520 round 8 new 12 flagged 794 local 140623 nseg 866588 t 7.49
+  step 520 round 9 new 6 flagged 792 local 140629 nseg 866594 t 7.66
+  step 520 round 10 new 4 flagged 788 local 140633 nseg 866598 t 7.78
+  detect step 530 nseg 866598 grid 766x540 t_build 0.04
+  detect step 530 flagged 4261 t 18.25
+  step 530 round 0 new 4261 flagged 1567 local 142309 nseg 870859 t 5.84
+  step 530 round 1 new 1567 flagged 950 local 143876 nseg 872426 t 7.90
+exit 124

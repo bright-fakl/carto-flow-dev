@@ -1,0 +1,2 @@
+{"id": "B1b/coarse/f3_f64", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"F32": 0, "POLICY": "fixed", "N": 3}}
+{"id": "B1b/coarse/f10_f64", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"F32": 0, "POLICY": "fixed", "N": 10}}

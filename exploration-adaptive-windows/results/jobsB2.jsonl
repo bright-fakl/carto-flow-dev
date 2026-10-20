@@ -1,0 +1,96 @@
+{"id": "B2/county/dt0.16/base", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.16}", "HOOK": "none"}}
+{"id": "B2/county/dt0.16/f3", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.16}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/county/dt0.16/f10", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.16}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/county/dt0.16/f20", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.16}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/county/dt0.16/dens2", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.16}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/county/dt0.16/bo", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.16}", "POLICY": "backoff"}}
+{"id": "B2/county/dt0.18/base", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.18}", "HOOK": "none"}}
+{"id": "B2/county/dt0.18/f3", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.18}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/county/dt0.18/f10", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.18}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/county/dt0.18/f20", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.18}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/county/dt0.18/dens2", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.18}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/county/dt0.18/bo", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.18}", "POLICY": "backoff"}}
+{"id": "B2/county/dt0.20/base", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.2}", "HOOK": "none"}}
+{"id": "B2/county/dt0.20/f3", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.2}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/county/dt0.20/f10", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.2}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/county/dt0.20/f20", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.2}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/county/dt0.20/dens2", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.2}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/county/dt0.20/bo", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.2}", "POLICY": "backoff"}}
+{"id": "B2/county/dt0.22/base", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.22}", "HOOK": "none"}}
+{"id": "B2/county/dt0.22/f3", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.22}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/county/dt0.22/f10", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.22}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/county/dt0.22/f20", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.22}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/county/dt0.22/dens2", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.22}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/county/dt0.22/bo", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.22}", "POLICY": "backoff"}}
+{"id": "B2/county/dt0.24/base", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.24}", "HOOK": "none"}}
+{"id": "B2/county/dt0.24/f3", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.24}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/county/dt0.24/f10", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.24}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/county/dt0.24/f20", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.24}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/county/dt0.24/dens2", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.24}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/county/dt0.24/bo", "script": "runvwa.py", "args": ["county", 1000], "env": {"MORPH_OPTS": "{\"dt\":0.24}", "POLICY": "backoff"}}
+{"id": "B2/county/msl800/base", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 800, "HOOK": "none"}}
+{"id": "B2/county/msl800/f3", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 800, "POLICY": "fixed", "N": 3}}
+{"id": "B2/county/msl800/f10", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 800, "POLICY": "fixed", "N": 10}}
+{"id": "B2/county/msl800/f20", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 800, "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/county/msl800/dens2", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 800, "POLICY": "dens", "R0": 2}}
+{"id": "B2/county/msl800/bo", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 800, "POLICY": "backoff"}}
+{"id": "B2/county/msl1200/base", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 1200, "HOOK": "none"}}
+{"id": "B2/county/msl1200/f3", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 1200, "POLICY": "fixed", "N": 3}}
+{"id": "B2/county/msl1200/f10", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 1200, "POLICY": "fixed", "N": 10}}
+{"id": "B2/county/msl1200/f20", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 1200, "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/county/msl1200/dens2", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 1200, "POLICY": "dens", "R0": 2}}
+{"id": "B2/county/msl1200/bo", "script": "runvwa.py", "args": ["county", 1000], "env": {"MSL": 1200, "POLICY": "backoff"}}
+{"id": "B2/mid2000/dt0.16/base", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.16}", "HOOK": "none"}}
+{"id": "B2/mid2000/dt0.16/f3", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/mid2000/dt0.16/f10", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/mid2000/dt0.16/f20", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/mid2000/dt0.16/dens2", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/mid2000/dt0.16/bo", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "backoff"}}
+{"id": "B2/mid2000/dt0.20/base", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.2}", "HOOK": "none"}}
+{"id": "B2/mid2000/dt0.20/f3", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/mid2000/dt0.20/f10", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/mid2000/dt0.20/f20", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/mid2000/dt0.20/dens2", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/mid2000/dt0.20/bo", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "backoff"}}
+{"id": "B2/mid2000/dt0.24/base", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.24}", "HOOK": "none"}}
+{"id": "B2/mid2000/dt0.24/f3", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/mid2000/dt0.24/f10", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/mid2000/dt0.24/f20", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/mid2000/dt0.24/dens2", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/mid2000/dt0.24/bo", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 2000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "backoff"}}
+{"id": "B2/mid3000/dt0.16/base", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.16}", "HOOK": "none"}}
+{"id": "B2/mid3000/dt0.16/f3", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/mid3000/dt0.16/f10", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/mid3000/dt0.16/f20", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/mid3000/dt0.16/dens2", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/mid3000/dt0.16/bo", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "backoff"}}
+{"id": "B2/mid3000/dt0.20/base", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.2}", "HOOK": "none"}}
+{"id": "B2/mid3000/dt0.20/f3", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/mid3000/dt0.20/f10", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/mid3000/dt0.20/f20", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/mid3000/dt0.20/dens2", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/mid3000/dt0.20/bo", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "backoff"}}
+{"id": "B2/mid3000/dt0.24/base", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.24}", "HOOK": "none"}}
+{"id": "B2/mid3000/dt0.24/f3", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/mid3000/dt0.24/f10", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/mid3000/dt0.24/f20", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/mid3000/dt0.24/dens2", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/mid3000/dt0.24/bo", "script": "runvwa.py", "args": ["mid", 1000], "env": {"MSEG": 3000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "backoff"}}
+{"id": "B2/coarse6000/dt0.16/base", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.16}", "HOOK": "none"}}
+{"id": "B2/coarse6000/dt0.16/f3", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/coarse6000/dt0.16/f10", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/coarse6000/dt0.16/f20", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/coarse6000/dt0.16/dens2", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/coarse6000/dt0.16/bo", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.16}", "POLICY": "backoff"}}
+{"id": "B2/coarse6000/dt0.20/base", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.2}", "HOOK": "none"}}
+{"id": "B2/coarse6000/dt0.20/f3", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/coarse6000/dt0.20/f10", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/coarse6000/dt0.20/f20", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/coarse6000/dt0.20/dens2", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/coarse6000/dt0.20/bo", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.2}", "POLICY": "backoff"}}
+{"id": "B2/coarse6000/dt0.24/base", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.24}", "HOOK": "none"}}
+{"id": "B2/coarse6000/dt0.24/f3", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "fixed", "N": 3}}
+{"id": "B2/coarse6000/dt0.24/f10", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "fixed", "N": 10}}
+{"id": "B2/coarse6000/dt0.24/f20", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "fixed", "N": 20, "NCAP": 20}}
+{"id": "B2/coarse6000/dt0.24/dens2", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "dens", "R0": 2}}
+{"id": "B2/coarse6000/dt0.24/bo", "script": "runvwa.py", "args": ["coarse", 1000], "env": {"CSEG": 6000, "MORPH_OPTS": "{\"dt\": 0.24}", "POLICY": "backoff"}}
