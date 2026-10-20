@@ -1,0 +1,211 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Optimized quadtree windows (after Miaji et al.): profile, a numba path, mesh reuse and a checked pruning</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Optimized quadtree windows (after Miaji et al.): profile, a numba path, mesh reuse and a checked pruning</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-validity-research/index.html">Validity-preserving flow cartograms without per-iteration meshes (validated windows), regression protocol, coarse input, memory</a> <span class="meta">(exploration)</span><br><a href="../exploration-quadtree-windows/index.html">Piecewise-affine windows on a quadtree mesh with vertex insertion (after Miaji et al.)</a> <span class="meta">(exploration)</span><br><a href="../exploration-invalid-regions-field/index.html">Treating invalid regions separately in the flow loop (prototype)</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/167">#167</a></dd>
+<dt>Created</dt><dd>2026-10-20 12:00</dd>
+<dt>Before</dt><dd>main @ 06d4ff0</dd>
+<dt>After</dt><dd>scratch worktree /home/fakl/cf-validity with hooks in algorithm.py (algorithm_hooks_vw.patch); not a PR</dd>
+<dt>Inputs</dt><dd>3,108 counties (population) at max_segment_length 1000, 432 congressional districts, the raw coarse county input (simplify_coverage tolerance 4000, 43,084 vertices), and two mid-density inputs (tolerance 1000, densified to 2000 m: 394,665 vertices; to 3000 m: 280,377 vertices); ladder with min_resolution and levels auto, area_scale 1e-6; timings on an otherwise idle machine, 3 repeats.</dd>
+</dl>
+<p class="desc">The quadtree-window prototype took 102.8 s on the 3,108 counties (5 times the baseline, 78 s of it in the per-window hook, 43 s in a shapely round trip). A numba path without the round trip, a one-pass checked pruning of inserted vertices and reuse of the deformed mesh for several windows bring it to 29.4 s (median of 3, spread 28.3 to 30.1 s; baseline 20.6 s) at 0 invalid polygons in 45 of 45 runs at the baseline iteration budget, and to 19.4 s on the raw 43 k-vertex coarse input (the earlier coverage_simplify variant: 94 s). Accuracy at that budget is worse than the baseline (the finest level is not reached); with a budget of 3,000 iterations the runs that do not stall reach a mean error of 0.4 to 0.8 % but take 126 to 265 s. Against validated windows the quadtree is 1.3 to 3.3 times slower, ends with 1.2 to 1.4 M vertices (1.6 to 1.8 times the input) and still has failure modes (one inverted triangle in 140 runs gave 4 invalid polygons); its advantage is the raw coarse input, where validated windows leaves 6 to 11 invalid polygons.</p>
+<h2>The question</h2>
+<p>The quadtree-window prototype (exploration-quadtree-windows) reached 0 invalid polygons but took 72 to 94 s on the counties (3 to 4 times the baseline) and 102 s with a topology-checked pruning. How fast can the method be made, at 0 invalid polygons, and what does it keep (input vertices, lineage, accuracy, vertex count)? This page profiles the prototype, describes the optimized hook (<code>pwo.py</code>), and compares it with validated windows.</p>
+<h2>Profile of the prototype</h2>
+<p><code>prof_pw.py</code>: the first-round hook with the checked pruning (<code>SAFE=1</code>, leaves 2^-6 of the cells, pruning tolerance 0.02 cell), 3,108 counties, n_iter 1000, 102.8 s in total (the baseline run is 20.6 s).</p>
+<table>
+<tr><th>component</th><th>time</th><th>share</th></tr>
+<tr><td>hook <code>begin</code> (per window, 100 windows)</td><td>78.4 s</td><td>76 %</td></tr>
+<tr><td>of which: <code>_restructure</code> (shapely <code>from_ragged_array</code> + <code>unpack_geometries</code> per window, 198 calls)</td><td>43.0 s</td><td>42 %</td></tr>
+<tr><td>crossing test of the checked pruning: grid build 7.9 s + scan 13.3 s (220 calls)</td><td>21.1 s</td><td>21 %</td></tr>
+<tr><td>point location 3.3 s, quadtree construction and grading 2.5 s, insertion (<code>_count</code> 1.1 s + <code>_fill</code> 1.7 s), pruning mask 0.2 s</td><td>8.8 s</td><td>9 %</td></tr>
+<tr><td>node advection and affine apply per iteration (1,000 calls)</td><td>4.4 s</td><td>4 %</td></tr>
+<tr><td>the flow pipeline shared with the baseline (density, FFT, areas, scores)</td><td>about 20 s</td><td>19 %</td></tr>
+</table>
+<p>So 62 % of the time was bookkeeping of the prototype (the shapely round trip and the unoptimized crossing test), not the method.</p>
+<h2>What was built (<code>pwo.py</code>)</h2>
+<ol><li>No shapely round trip. The insertion kernels (<code>_count</code>, <code>_fill</code>) already return the new coordinates and ring offsets; the hook writes <code>coords</code>, the first ragged offset array and the geometry metadata (<code>rebuild_metadata</code>, a loop over the regions) in place. The pandas lineage matching is gone: the events are recorded directly, <code>(&#x27;ins&#x27;, new_idx, pa, pb, pt)</code> and <code>(&#x27;rm&#x27;, kept_idx)</code>, and <code>backfill(coords, events)</code> lifts any earlier frame to the final structure. Checked in <code>t_backfill_pw.py</code>: the 768,580 input vertices lifted through 79 events give 1,373,587 vertices, equal to the final structure, the signed ring areas of the lifted input equal the input (collinear points), and all 768,580 input vertices are still flagged as input vertices at the end. (The events after the returned best iterate are discarded when the best iterate is restored.)</li><li>Pruning only of inserted vertices, never input vertices, in one pass:<ul><li>a vertex is a candidate if it is within 0.02 cell of the chord of its neighbors and is a local maximum of a coordinate hash among its two neighbors, so that no two adjacent vertices are removed (the sliver between path and chord is then at most 0.02 cell wide) and the two rings of a shared boundary decide alike;</li><li>the new chord is tested in a uniform grid built once over the unpruned segments plus the chords (crossing test, chords against chords, and a foreign vertex within 0.02 cell of the chord; the own path and the twin path of the shared boundary are excluded by coordinate equality), and a flagged chord restores its vertex. No second pass is needed.</li></ul></li><li>Mesh reuse: the nodes of the deformed mesh keep moving with the field of the following windows, the vertices keep their barycentric coordinates, and the mesh is rebuilt (with insertion and pruning) only every <code>rebuild_every</code> windows or earlier if a triangle area fell below <code>min_ratio</code> (0.6) of its area at construction or a triangle is inverted. A piecewise-affine map of a non-inverted mesh stays injective, so the sub-segments inside triangles cannot cross.</li><li>Inversion control per iteration: after each node step the number of inverted triangles is counted (0.5 ms); if any, the step is repeated with 2, 4, 8, 16 substeps of the nodes.</li><li>Hook points in <code>algorithm.py</code> (<code>PW_HOOK.reset</code>, <code>begin</code>, <code>advance</code>, <code>structure</code>, <code>restore</code>).</li></ol>
+<p>Progression on the counties, n_iter 1000 (single runs while developing, idle machine):</p>
+<table>
+<tr><th>step</th><th>time</th><th>vertices at the end</th><th>invalid</th></tr>
+<tr><td>prototype with checked pruning</td><td>102 s</td><td>1.24 M</td><td>0</td></tr>
+<tr><td>+ numba path, lineage without pandas, chord test counting the own path as an obstacle (conservative)</td><td>43.0 s</td><td>2.0 M</td><td>0</td></tr>
+<tr><td>+ own-path and twin-path exclusion in the chord test (output identical to the prototype: mean 3.49 %, median 0.055 %)</td><td>38.6 s</td><td>1.10 M</td><td>0</td></tr>
+<tr><td>+ pruning every 3rd window</td><td>30.7 s</td><td>0.91 M</td><td>0</td></tr>
+<tr><td>+ mesh reuse 8 with the area rule</td><td>22.2 s</td><td>0.91 M</td><td>0</td></tr>
+<tr><td>(same, protocol runs with the final settings, median of 3)</td><td>29.4 s</td><td>1.2 M</td><td>0</td></tr>
+</table>
+<p>The last two rows differ because the first was one run that stalled early and the second is the median of 3 with the budget used (the same code; the iteration count differs, see below).</p>
+<h2>Variants and settings tried</h2>
+<table>
+<tr><th>setting</th><th>result (counties, n_iter 1000, one run unless stated)</th></tr>
+<tr><td>leaves 2^-4 / 2^-5 / 2^-6 / 2^-8 of the cells, pruning every 3rd window</td><td>44 / 32 / 30.7 / 28.6 s; 2.5 M / 1.3 M / 0.9 M / 0.86 M vertices; 0 invalid in all; the final errors vary from 2.6 to 7.5 % (budget and stall chaos)</td></tr>
+<tr><td>mesh reuse k = 2 / 4 / 8 without the area rule</td><td>29.8 / 22.2 / 19.2 s; 0 / 6 / 2 invalid: inverted triangles inside windows (6 iterations with 26 inverted triangles at k = 4)</td></tr>
+<tr><td>mesh reuse with node substeps and the area rule 0.3</td><td>k = 4 / 8 / 16: 0 invalid, 32 / 22 / 26 s (the rule forces a rebuild in 13 of 26 windows at k = 8)</td></tr>
+<tr><td>area rule 0.6 (final)</td><td>0 invalid on all inputs, 45 of 45 runs</td></tr>
+<tr><td>window map error against the baseline per-vertex advection (<code>pwshadow.py</code>, shadow mode, no dynamics change)</td><td>mean 0.0016 cell, p99 0.017, max 0.19 to 0.95 cell at the finest level (leaves 2^-6); 2^-4 leaves: mean 0.0012; splitting the leaves by the curvature of the velocity field instead of the density range: no better (mean 0.0031 at 2^-6, 0.0013 at 2^-4)</td></tr>
+<tr><td>pruning every 2nd or 3rd rebuild with mesh reuse</td><td>slower (36.8 s and 31 to 33 s against 29.4 s): more vertices to insert</td></tr>
+<tr><td>pruning without the foreign-vertex test</td><td>36.6 s, 813 k vertices, but 6 invalid polygons (nested shells, below)</td></tr>
+</table>
+<p>Pitfalls found in the checked pruning (all produced invalid polygons or no pruning at all before they were fixed):</p>
+<ul><li>Removing vertices that are each within the tolerance of their neighbors&#x27; chord does not bound the deviation from the chord of the run: the run deviation must be tested, or removals must not be adjacent (the hash rule).</li><li>The crossing test alone leaves nested shells and holes outside their shell: a multi-part region swallows an island that lies in the thin sliver between path and chord (13 invalid polygons on the raw coarse input). The fix is a test for foreign vertices within the tolerance of the chord; applied to all rings it rejects most chords (5 of 6 candidates) and the run takes 248 s with 9.1 M vertices; applied only to rings of at most 64 vertices (<code>maxring</code>) it prunes as well as without the test and gave 0 invalid polygons in all runs. That limit is a heuristic (a long thin region with more than 64 vertices inside the sliver would be missed); I have no proof.</li><li>The fan triangulation with the center at the mean of the corners is not valid when a leaf becomes non-convex; one inverted triangle in 140 runs (q1, dt 0.24, 1000 iterations: 4 invalid polygons; with 3000 iterations 2) survived the substeps. A leaf that is split into two triangles, or a center chosen in the kernel of the leaf, would be needed. Not implemented.</li></ul>
+<h2>Results with 3 repeats on an idle machine</h2>
+<p>Variants: q1 = mesh rebuilt every window; q4, q8 = reuse for up to 4 or 8 windows with the area rule 0.6; leaves 2^-6, pruning tolerance 0.02 cell, <code>maxring</code> 64. Baseline = no hook; vw10 = validated windows every 10 windows (first-round hook, float64 fields). Time = median of 3 with [min-max]; peak memory = <code>ru_maxrss</code> of the run. The repeats are deterministic except for numba noise, which changes the iteration count of the long runs.</p>
+<p>n_iter 1000 (the baseline protocol; the pooled budget ends the runs before the finest level, so the errors are budget-bound):</p>
+<table>
+<tr><th>input</th><th>run</th><th>time</th><th>peak memory</th><th>invalid</th><th>vertices at the end</th><th>mean / median / p95 error</th><th>&gt;10 %</th></tr>
+<tr><td>counties</td><td>baseline</td><td>20.6 s [20.5-22.7]</td><td>965 MB</td><td>57</td><td>768,580</td><td>1.37 / 0.252 / 2.44</td><td>60</td></tr>
+<tr><td>counties</td><td>vw10</td><td>23.0 s [22.0-23.6]</td><td>1,448 MB</td><td>0</td><td>769,473</td><td>1.08 / 0.195 / 2.63</td><td>45</td></tr>
+<tr><td>counties</td><td>q8</td><td>29.4 s [28.3-30.1]</td><td>1,249 MB</td><td>0</td><td>1,215,166</td><td>5.22 / 0.448 / 22.4</td><td>290</td></tr>
+<tr><td>counties</td><td>q4</td><td>35.4 s [35.2-36.2]</td><td>1,595 MB</td><td>0</td><td>1,373,587</td><td>4.10 / 0.569 / 17.4</td><td>224</td></tr>
+<tr><td>counties</td><td>q1</td><td>49.3 s [48.3-51.4]</td><td>2,119 MB</td><td>0</td><td>1,385,077</td><td>4.30 / 0.764 / 15.2</td><td>263</td></tr>
+<tr><td>districts</td><td>baseline</td><td>1.8 s [1.6-1.8]</td><td>414 MB</td><td>2</td><td>343,042</td><td>0.48 / 0.264 / 1.90</td><td>0</td></tr>
+<tr><td>districts</td><td>vw10</td><td>2.1 s [2.0-2.2]</td><td>453 MB</td><td>0</td><td>343,046</td><td>0.48 / 0.262 / 1.89</td><td>0</td></tr>
+<tr><td>districts</td><td>q8</td><td>7.0 s [6.4-8.4]</td><td>599 MB</td><td>0</td><td>373,326</td><td>2.13 / 1.639 / 5.66</td><td>0</td></tr>
+<tr><td>coarse, raw</td><td>baseline</td><td>11.4 s [10.8-13.5]</td><td>794 MB</td><td>327</td><td>43,084</td><td>12.3 / 0.934 / 49.7</td><td>508</td></tr>
+<tr><td>coarse, raw</td><td>q8</td><td>19.4 s [18.4-20.1]</td><td>777 MB</td><td>0</td><td>483,957</td><td>6.70 / 0.493 / 28.8</td><td>388</td></tr>
+<tr><td>coarse, raw</td><td>q4</td><td>19.8 s [18.7-20.4]</td><td>790 MB</td><td>0</td><td>484,677</td><td>5.91 / 0.706 / 25.7</td><td>320</td></tr>
+<tr><td>coarse, raw</td><td>q1</td><td>40.2 s [32.6-44.1]</td><td>1,598 MB</td><td>0</td><td>939,164</td><td>1.60 / 0.117 / 3.72</td><td>83</td></tr>
+<tr><td>mid2000</td><td>baseline</td><td>17.9 s [17.7-18.9]</td><td>868 MB</td><td>170</td><td>394,665</td><td>1.66 / 0.208 / 6.65</td><td>100</td></tr>
+<tr><td>mid2000</td><td>vw10</td><td>23.2 s [21.9-23.7]</td><td>1,340 MB</td><td>1</td><td>399,459</td><td>2.13 / 0.195 / 10.95</td><td>171</td></tr>
+<tr><td>mid2000</td><td>q8</td><td>23.0 s [21.5-23.4]</td><td>975 MB</td><td>0</td><td>843,088</td><td>5.03 / 0.535 / 21.7</td><td>283</td></tr>
+<tr><td>mid3000</td><td>baseline</td><td>11.2 s [10.9-12.0]</td><td>844 MB</td><td>194</td><td>280,377</td><td>3.12 / 0.441 / 11.0</td><td>169</td></tr>
+<tr><td>mid3000</td><td>vw10</td><td>15.0 s [14.1-15.1]</td><td>1,274 MB</td><td>0</td><td>283,545</td><td>1.59 / 0.131 / 4.18</td><td>75</td></tr>
+<tr><td>mid3000</td><td>q8</td><td>20.7 s [20.5-21.1]</td><td>912 MB</td><td>0</td><td>737,682</td><td>6.63 / 0.611 / 28.1</td><td>369</td></tr>
+</table>
+<p>n_iter 3000 (the stall rule ends the baseline and validated runs at the same point as with 1000; the quadtree runs that do not stall continue to improve):</p>
+<table>
+<tr><th>input</th><th>run</th><th>time</th><th>peak memory</th><th>invalid</th><th>vertices at the end</th><th>mean / median / p95 error</th><th>&gt;10 %</th></tr>
+<tr><td>counties</td><td>q4</td><td>35.6 s [33.9-35.9]</td><td>1,610 MB</td><td>0</td><td>1,373,587</td><td>4.10 / 0.569 / 17.4</td><td>224</td></tr>
+<tr><td>counties</td><td>q8</td><td>144 s [39.5-160.8]</td><td>2,335 MB</td><td>0</td><td>1,666,394</td><td>0.55 / 0.286 / 2.43</td><td>4</td></tr>
+<tr><td>counties</td><td>q1</td><td>54.5 s [51.9-55.2]</td><td>2,305 MB</td><td>0</td><td>1,589,674</td><td>3.35 / 0.661 / 15.0</td><td>239</td></tr>
+<tr><td>districts</td><td>q8 / q4 / q1</td><td>5.7 / 7.9 / 12.2 s</td><td>597 / 615 / 795 MB</td><td>0</td><td>373,326 / 373,180 / 390,080</td><td>2.13 / 2.27 / 1.56 mean</td><td>0</td></tr>
+<tr><td>coarse, raw</td><td>q4</td><td>73.5 s [69.1-74.6]</td><td>1,656 MB</td><td>0</td><td>937,895</td><td>0.85 / 0.197 / 2.05</td><td>40</td></tr>
+<tr><td>coarse, raw</td><td>q8</td><td>126 s [37.8-127.3]</td><td>1,857 MB</td><td>0</td><td>942,376</td><td>0.65 / 0.346 / 1.44</td><td>14</td></tr>
+<tr><td>coarse, raw</td><td>q1</td><td>265 s [206-281]</td><td>4,902 MB</td><td>0</td><td>970,910</td><td>0.39 / 0.201 / 0.96</td><td>4</td></tr>
+<tr><td>mid2000</td><td>q8</td><td>139 s [134-142]</td><td>2,067 MB</td><td>0</td><td>1,294,257</td><td>0.36 / 0.157 / 1.36</td><td>9</td></tr>
+<tr><td>mid2000</td><td>q4</td><td>28.2 s [27.3-28.8]</td><td>1,383 MB</td><td>0</td><td>1,009,313</td><td>4.52 / 0.458 / 19.3</td><td>262</td></tr>
+<tr><td>mid3000</td><td>q8</td><td>143 s [131-161]</td><td>2,224 MB</td><td>0</td><td>1,189,440</td><td>0.76 / 0.390 / 2.05</td><td>13</td></tr>
+<tr><td>mid3000</td><td>q4</td><td>29.5 s [29.1-30.1]</td><td>1,328 MB</td><td>0</td><td>881,436</td><td>3.65 / 0.664 / 14.5</td><td>205</td></tr>
+</table>
+<ul><li>0 invalid polygons in 45 of 45 runs at 1,000 iterations and in 45 of 45 at 3,000 (q1, q4, q8; five inputs; three repeats). The two exceptions are in the perturbation protocol (below): q1 at dt 0.24.</li><li>Time per 1,000 iterations on the counties: baseline 25 s, vw10 29.5 s, q4 36 s, q8 29 to 48 s (the long runs spend their iterations at the finest grid), q1 52 s (<code>analyze_timing.py</code>). The quadtree needs more iterations than the baseline to reach the stall (counties 980 to 1,050 against 820; districts 418 to 470 against 135).</li><li>A run that does not stall continues to the budget: counties q8 reached mean 0.55 % and 4 counties above 10 % in 144 to 161 s in 2 of 3 repeats (the third stalled at 1,190 iterations after 39.5 s with a worse result). The baseline cannot reach such errors (it stalls at 1.37 % with 57 invalid polygons).</li><li>The earlier quadtree with coverage_simplify took 94 s on the raw coarse input at 1,000 iterations (0 invalid, 552 k vertices, mean 1.34 %); q8 takes 19.4 s at 1,000 iterations (0 invalid, 484 k vertices, mean 6.7 % because the budget ends the run before the finest level), and 73.5 s (q4) to 126 s (q8) at 3,000 iterations with mean 0.65 to 0.85 %.</li></ul>
+<h2>Accuracy under perturbations</h2>
+<p>Perturbed configurations: dt 0.16, 0.18, 0.20, 0.22, 0.24 and max_segment_length 800 and 1200 (7 configurations at 1,000 iterations; 6 at 3,000: the q1 run of max_segment_length 800 failed to produce a record). Baseline: the first-round protocol (<code>p1</code>, same configurations). Metrics on the counties valid in all compared runs (<code>analyze_proto.py</code>).</p>
+<p>n_iter 1000, 7 configurations, medians over configurations: invalid baseline 80 (18 to 116), q1 0 (0 to 4), q4 0, q8 0. Mean error 1.37 (baseline), 3.84 (q1), 3.07 (q4), 4.61 (q8); counties above 10 %: 60, 240, 204, 244. The quadtree runs are worse because the pooled budget ends them before the finest level (runs of 700 to 870 iterations in the first level against 540 to 650 for the baseline).</p>
+<p>n_iter 3000, 6 configurations, medians over configurations (paired ratios to the baseline with a 95 % bootstrap interval of the median):</p>
+<table>
+<tr><th></th><th>invalid</th><th>mean</th><th>median</th><th>p95</th><th>&gt;10 %</th></tr>
+<tr><td>baseline</td><td>83.5 (18 to 116)</td><td>1.24</td><td>0.131</td><td>2.68</td><td>62.5</td></tr>
+<tr><td>q1</td><td>0 (0 to 2)</td><td>1.12, ratio 0.56 (0.08 to 3.8)</td><td>0.354, ratio 3.0 (1.0 to 12)</td><td>2.53, ratio 0.75 (0.08 to 6.7)</td><td>37.5, ratio 0.13 (0.0 to 4.6)</td></tr>
+<tr><td>q4</td><td>0</td><td>2.10, ratio 1.77 (0.54 to 3.3)</td><td>0.298, ratio 2.5 (1.2 to 15)</td><td>6.5, ratio 2.5 (0.4 to 10)</td><td>111, ratio 1.78 (0.45 to 3.9)</td></tr>
+<tr><td>q8</td><td>0</td><td>2.12, ratio 1.29 (0.71 to 3.0)</td><td>0.213, ratio 1.8 (0.9 to 7.8)</td><td>8.1, ratio 1.6 (0.7 to 10)</td><td>127.5, ratio 1.10 (0.22 to 4.0)</td></tr>
+</table>
+<p>With six configurations the intervals are wide: the mean error and the count above 10 % cannot be told apart from the baseline for any variant (the q4 and q8 ratios lean worse, the q1 ratio leans better), and the median error is 1.8 to 3 times higher, as for validated windows (the same mechanism applies: the baseline&#x27;s invalid polygons stay frozen, see exploration-validity-research). The accuracy of the piecewise-affine window itself is not the cause: its error against the per-vertex advection is 0.0016 cell on average (shadow mode above). I could not show that the accuracy is in the range of the baseline for q4 and q8 with this protocol; q1 is the closest.</p>
+<h2>Does the quadtree still have an advantage over validated windows?</h2>
+<table>
+<tr><th></th><th>validated windows (every 10 windows)</th><th>optimized quadtree (q8)</th></tr>
+<tr><td>raw coarse input (43 k vertices)</td><td>6 to 11 invalid with the flatness criterion at 55 s and 100 k vertices; 0 to 3 only after densifying the input to 1.4 cells (24 s, 131 to 146 k vertices)</td><td>0 invalid in all 18 coarse runs (q1, q4, q8, two budgets, three repeats): q8 19.4 s (n_iter 1000) or 37 to 126 s (n_iter 3000), 0.48 to 0.94 M vertices</td></tr>
+<tr><td>counties</td><td>23.0 s, +0.1 % vertices, 1,448 MB (float64; 1.1 GB with float32 and a budget)</td><td>29.4 s, +58 % vertices (1.2 M), 1,249 MB</td></tr>
+<tr><td>mid3000</td><td>15.0 s, +1 % vertices</td><td>20.7 s, +163 % vertices</td></tr>
+<tr><td>mid2000</td><td>23.2 s, 1 invalid</td><td>23.0 s, 0 invalid, +114 % vertices</td></tr>
+<tr><td>districts</td><td>2.1 s</td><td>7.0 s</td></tr>
+<tr><td>guarantee</td><td>empirical (exact test at the window end, retroactive repair); residual cases are cusps below 4 mm and islands jumping thin boundaries</td><td>by construction while no triangle inverts; 1 inversion in about 140 runs gave 4 invalid polygons; the island-ring limit of the pruning test is a heuristic</td></tr>
+<tr><td>input vertices, lineage</td><td>kept; events <code>(new_idx, left, t)</code></td><td>kept (only inserted vertices are removed); events for insertion and removal</td></tr>
+<tr><td>accuracy</td><td>median and p95 error higher than the baseline, mean and &gt;10 % unchanged</td><td>same effect; at the baseline budget the finest level is not reached</td></tr>
+</table>
+<ul><li>The optimized quadtree is 1.3 times slower than validated windows on the counties, 1.4 times on mid3000 (and equal on mid2000), 3.3 times on the districts, and ends with 1.6 to 2.6 times the vertices of the input where validated windows adds 0.1 to 1 %.</li><li>Its remaining advantage is the raw coarse input: validated windows needs the input densified to about 1.4 cells to reach 0 to 3 invalid polygons (a 1.2 to 1.8 times slower baseline input), while the quadtree handles the 43 k-vertex input directly at 19 to 40 s.</li><li>On the mid-density and 1 km inputs validated windows is cheaper and keeps the vertex count; the quadtree does not buy a stronger guarantee there.</li></ul>
+<h2>What remains slow</h2>
+<p>At 1,000 iterations on the counties (q8, 30.0 s): the flow pipeline shared with the baseline 15 s, the crossing test of the pruning 6.0 s (grid build over 1.2 M segments plus the chord scan, 143 ms per rebuild), the rest of the pruning 1.2 s, insertion 2.0 s, mesh 0.7 s, geometry write 0.7 s, location 0.4 s, node advection and apply 3.8 s. On the raw coarse input (q8, 17.6 s): the pruning check 5.8 s of 8.0 s in <code>begin</code>, advection 1.6 s. Not tried: a local grid built only around the chords (about a 2 times faster check), prefiltering the chords by the local triangle edge distance, a single-pass insertion (the count pass walks every segment once more), and a mesh on a coarser density. The mesh reuse is limited by the area rule: with 0.6 it forces a rebuild in 28 of 42 windows at k = 8.</p>
+<p>The vertex count of the quadtree runs (1.2 to 1.4 M on the counties, 0.5 to 0.97 M on the raw coarse input) is not in the range of the baseline (0.77 M, 43 k) and is set by the pruning tolerance and the iteration count; the pruning only removes vertices that were inserted.</p>
+<h2>Not done</h2>
+<ul><li>A combination with the crossing test of validated windows as a safety net (mesh gives most of the guarantee, the test repairs the residual): the two hooks keep separate best-iterate structures and I did not merge them.</li><li>A leaf count chosen by the local Jacobian: the curvature criterion was tested in the shadow mode only (not better than the density range).</li><li>A fix for the inverted-triangle case (center of the leaf in its kernel, or two triangles per leaf).</li><li>A longer perturbation protocol for the accuracy (6 and 7 configurations only).</li></ul>
+<h2>Library candidates</h2>
+<ul><li><code>pwo.py</code>: <code>PWO</code> hook (mesh reuse, inversion control, node substeps), <code>prune_mask2</code> (hash local maxima), the chord check <code>scan_q</code> and <code>build_grid_m</code>, <code>backfill</code> for insertion and removal events. Dependencies: <code>pw.py</code> (quadtree construction, grading, location, apply), <code>pw2.py</code> (<code>_count</code>, <code>_fill</code>), <code>xing.py</code> (grid), <code>vw.py</code> (<code>rebuild_metadata</code>).</li></ul>
+<h2>Files</h2>
+<p><code>pwo.py</code> (current hook), <code>pwo2.py</code> (development copy with the curvature criterion), <code>pwshadow.py</code> (shadow mode), <code>pwo_run.py</code> (runner; environment variables <code>BITS</code>, <code>TOL</code>, <code>PEVERY</code>, <code>REBUILD</code>, <code>MINRATIO</code>, <code>MAXRING</code>, <code>NODIST</code>, <code>DIAG</code>, <code>PF</code>), <code>prof_pw.py</code> (profile of the prototype), <code>protopw.sh</code> (perturbation protocol), <code>timing.sh</code>, <code>timing1.sh</code> (repeated timings), <code>analyze_timing.py</code>, <code>analyze_proto.py</code>, <code>t_backfill_pw.py</code>, <code>t_meta.py</code>, <code>figs3.py</code>, the logs <code>log_*.log</code>, <code>protocol.jsonl</code>, <code>algorithm_hooks_vw.patch</code> (hook sites, <code>PW_HOOK.reset</code> and the velocity argument), and the dependencies <code>harness.py</code>, <code>xing.py</code>, <code>vw.py</code>, <code>pw.py</code>, <code>pw2.py</code>, <code>run.sh</code> (scratch path of the session hard-coded).</p>
+<div class="figure">
+<img src="fig_time_composition.png" alt="Where the time of the 3,108-county run goes: the prototype with checked pruning, the optimized hook with mesh reuse 8, and the baseline.">
+<p class="caption">Where the time of the 3,108-county run goes: the prototype with checked pruning, the optimized hook with mesh reuse 8, and the baseline.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

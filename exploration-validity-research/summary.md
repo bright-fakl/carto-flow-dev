@@ -313,3 +313,7 @@ Question: does smoothing the density field lower the number of invalid polygons,
 - Smoothing lowers the invalid count only a little at 2 km (57 to 55, 90 to 76, 116 to 104) and at 4 km (35, 61, 108), and removes almost all of them at 8 km (2 to 5), but the accuracy falls at every sigma: the tail grows (p95 0.5 to 1.6 % without, 3 to 8 % at 2 to 4 km, above 50 % at 8 km) and the number of counties above 10 % goes from 28 to 65 up to 100 to 340 (and to 700 at 8 km).
 - The mechanism is the opposite of what the targets ask for: smoothing keeps small regions from being squeezed (fewer needles), by lowering the density contrast that drives their shrinkage, so those regions end larger than their targets. It does not make the polygons better represented.
 - At 8 km the ladder uses two levels and ends at the budget; the result is not comparable with the others.
+
+## Optimized quadtree windows (later work)
+
+The quadtree windows were optimized in a separate page, exploration-quadtree-optimized: 102.8 s to 29.4 s on the counties at 0 invalid polygons (baseline 20.6 s, validated windows 23.0 s), 19.4 s on the raw coarse input, with 1.2 to 1.4 M vertices on the counties; against validated windows its advantage is the raw coarse input, its cost 1.3 to 3.3 times the time and 1.6 to 2.6 times the vertices. Files and tables are on that page.
