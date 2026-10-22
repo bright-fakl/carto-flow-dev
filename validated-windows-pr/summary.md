@@ -1,11 +1,13 @@
 ---
 pr: 180
+url: https://github.com/bright-fakl/carto-flow/pull/180
 issue: 178
 title: Validated windows keep the flow cartogram output polygons valid
 description: validity="windows" adds a crossing test and repair to the morph. On the 3,108 counties (1 km input) the output has 0 invalid polygons instead of 57, with 0.1 % more vertices, 1.1 times the time and the mean error and the count above 10 % unchanged; the median and p95 error of the valid regions are higher. Districts: 2 invalid polygons become 0 with identical errors.
 kind: pr
 topic: flow
-status: open
+base: main
+branch: feat/validated-windows
 related: exploration-validity-research, exploration-adaptive-windows, exploration-quadtree-optimized
 date: 2026-10-22 14:00
 before: main @ 06d4ff0
