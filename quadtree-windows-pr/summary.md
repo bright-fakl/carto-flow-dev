@@ -40,3 +40,7 @@ Counties and districts were reproduced independently (counties 38.9 s, 0 invalid
 - At 1,000 iterations the ladder ends before the finest level on the counties, so the error is budget-bound and varies a lot between runs. On the districts, which converge without the option, the median error is 1.23 % against 0.26 %.
 - Runs with n_iter 3000 on the counties stalled early (1.76 to 4.96 % mean); the 0.55 % result of the prototype was not reproduced and the cause was not investigated.
 - Whether to keep the option next to validated windows is a decision for the review.
+
+## Animations (added to the PR after the first review pass)
+
+As for the validated windows, with the quadtree lineage (insertions and removals): `lift_geometries(geometries, state=None)`, `VertexLineage.state_at`, linear `animate_morph_history` up to the best iterate (`through="best"`, `"last"` with linear raises), and `align_vertices` for separate morphs. Two quadtree morphs with 387,619 and 414,428 vertices align to 458,981 each (Hausdorff distance 5e-10, 432 of 432 valid). A snapshot lifted to the final vertex set drops the vertices removed later, so its area differs from the recorded one by the pruning tolerance. 15 new tests; full suite 1654 passed, docs build passes.

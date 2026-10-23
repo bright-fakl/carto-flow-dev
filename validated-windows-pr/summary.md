@@ -36,3 +36,7 @@ These are the numbers of the prototype reports (0 invalid, 769,473 vertices, 1.0
 - The option removes the invalid polygons at 1.1 times the time, 0.1 % more vertices and +150 MB of memory (float32 fields, 128 MB budget).
 - The mean error and the number of counties above 10 % do not get worse; the median and p95 error of the valid counties are higher than in the baseline in the perturbation protocol of the reports (the baseline's invalid polygons are frozen and stop forcing the bulk).
 - Not covered: raw coarse input (43 k vertices; use densified input), islands that jump a boundary within a window, zero-width cusps (segments down to 0.5 mm).
+
+## Animations (added to the PR after the first review pass)
+
+`Cartogram.lift_geometries`, automatic lifting in `animate_morph_history` (linear interpolation) and `align_vertices` (a common vertex set for separate morphs of the same input) make the outputs usable in the animation functions. On the districts, `animate_morph_history(..., interpolation="linear", facecolor=...)` raised `ValueError: operands could not be broadcast together with shapes (405,2) (407,2)` for snapshots with 343,042 and 343,046 vertices before the change and builds the animation after it; two morphs with 343,046 and 343,042 vertices align to 343,046 each (area change 0, Hausdorff distance 0, 432 of 432 valid). The scripts `anim_test.py` and `align_proto.py` of the session scratch directory are the acceptance checks; 23 new tests, full suite 1592 passed.
