@@ -3,7 +3,7 @@ pr: 181
 url: https://github.com/bright-fakl/carto-flow/pull/181
 issue: 179
 title: Quadtree windows keep the flow cartogram output polygons valid
-description: validity="quadtree" (stacked on the validated-windows PR) builds a graded quadtree mesh from the density at every field recompute, inserts vertices where the boundaries cross the mesh, and moves the vertices with the piecewise-affine map of the advected mesh nodes. On raw coarse counties (43 k vertices) the output has 0 invalid polygons against 327 without the option and 107 with validated windows; on the 1 km counties 0 against 57 (the accuracy at a fixed budget is lower than with validated windows and the vertex count 1.6 to 2 times higher).
+description: validity="repair-quadtree" (stacked on the validated-windows PR) builds a graded quadtree mesh from the density at every field recompute, inserts vertices where the boundaries cross the mesh, and moves the vertices with the piecewise-affine map of the advected mesh nodes. On raw coarse counties (43 k vertices) the output has 0 invalid polygons against 327 without the option and 107 with validated windows; on the 1 km counties 0 against 57 (the accuracy at a fixed budget is lower than with validated windows and the vertex count 1.6 to 2 times higher).
 kind: pr
 topic: flow
 base: feat/validated-windows
@@ -17,7 +17,7 @@ inputs: raw coarse counties (simplify_coverage tolerance 4000 of the bundled cou
 
 `coarse_comparison.py <output dir>` runs the three cases on the branch and draws the figure.
 
-figure: fig1_raw_coarse.png — Raw coarse counties (43,084 vertices) with validity="none" (327 invalid polygons in black), "windows" (107) and "quadtree" (0). The validated windows cannot catch the crossings on this input because the segments are much longer than the cells; the mesh of the quadtree method splits them before they cross.
+figure: fig1_raw_coarse.png — Raw coarse counties (43,084 vertices) with validity="check" (327 invalid polygons in black), "windows" (107) and "quadtree" (0). The validated windows cannot catch the crossings on this input because the segments are much longer than the cells; the mesh of the quadtree method splits them before they cross.
 
 ## Results
 

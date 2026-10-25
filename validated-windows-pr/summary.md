@@ -3,7 +3,7 @@ pr: 180
 url: https://github.com/bright-fakl/carto-flow/pull/180
 issue: 178
 title: Validated windows keep the flow cartogram output polygons valid
-description: validity="windows" adds a crossing test and repair to the morph. On the 3,108 counties (1 km input) the output has 0 invalid polygons instead of 57, with 0.1 % more vertices, 1.1 times the time and the mean error and the count above 10 % unchanged; the median and p95 error of the valid regions are higher. Districts: 2 invalid polygons become 0 with identical errors.
+description: validity="repair-crossings" adds a crossing test and repair to the morph. On the 3,108 counties (1 km input) the output has 0 invalid polygons instead of 57, with 0.1 % more vertices, 1.1 times the time and the mean error and the count above 10 % unchanged; the median and p95 error of the valid regions are higher. Districts: 2 invalid polygons become 0 with identical errors.
 kind: pr
 topic: flow
 base: main
@@ -17,15 +17,15 @@ inputs: 3,108 bundled counties (population) and 432 congressional districts with
 
 `before_after.py <output dir>` runs the two cases on the branch and draws the figures.
 
-figure: fig1_invalid_regions.png — The county cartogram with validity="none" (57 invalid polygons in black: the Virginia cluster, the strips along the plains) and with validity="windows" (none).
-figure: fig2_zoom.png — The densest cluster of invalid polygons of the baseline (Virginia counties and independent cities) and the same area with validity="windows". The polygons are valid, and the strips that were squeezed to less than the vertex spacing are drawn as thin valid polygons.
+figure: fig1_invalid_regions.png — The county cartogram with validity="check" (57 invalid polygons in black: the Virginia cluster, the strips along the plains) and with validity="repair-crossings" (none).
+figure: fig2_zoom.png — The densest cluster of invalid polygons of the baseline (Virginia counties and independent cities) and the same area with validity="repair-crossings". The polygons are valid, and the strips that were squeezed to less than the vertex spacing are drawn as thin valid polygons.
 
 ## Results
 
 | | time | invalid | vertices | mean / median / p95 error | above 10 % | peak RSS |
 |---|---|---|---|---|---|---|
-| counties, validity="none" | 39 s | 57 | 768,580 | 1.37 / 0.252 / 2.44 % | 60 | 951 MB |
-| counties, validity="windows" | 44 s | 0 | 769,475 | 1.08 / 0.195 / 2.63 % | 45 | 1,105 MB |
+| counties, validity="check" | 39 s | 57 | 768,580 | 1.37 / 0.252 / 2.44 % | 60 | 951 MB |
+| counties, validity="repair-crossings" | 44 s | 0 | 769,475 | 1.08 / 0.195 / 2.63 % | 45 | 1,105 MB |
 | districts, "none" | 3.5 s | 2 | 343,042 | 0.48 / 0.264 / 1.90 % | 0 | |
 | districts, "windows" | 4.2 s | 0 | 343,046 | 0.48 / 0.262 / 1.89 % | 0 | |
 
