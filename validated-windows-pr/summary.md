@@ -26,8 +26,8 @@ figure: fig2_zoom.png — The densest cluster of invalid polygons of the baselin
 |---|---|---|---|---|---|---|
 | counties, validity="check" | 39 s | 57 | 768,580 | 1.37 / 0.252 / 2.44 % | 60 | 951 MB |
 | counties, validity="repair-crossings" | 44 s | 0 | 769,475 | 1.08 / 0.195 / 2.63 % | 45 | 1,105 MB |
-| districts, "none" | 3.5 s | 2 | 343,042 | 0.48 / 0.264 / 1.90 % | 0 | |
-| districts, "windows" | 4.2 s | 0 | 343,046 | 0.48 / 0.262 / 1.89 % | 0 | |
+| districts, "check" | 3.5 s | 2 | 343,042 | 0.48 / 0.264 / 1.90 % | 0 | |
+| districts, "repair-crossings" | 4.2 s | 0 | 343,046 | 0.48 / 0.262 / 1.89 % | 0 | |
 
 These are the numbers of the prototype reports (0 invalid, 769,473 vertices, 1.08 / 0.195 / 2.63 %, 45 above 10 %). The library reproduces them; the author of the implementation and I ran the county cases (the same values). Counties at dt 0.18 / 0.22 and recompute_every 5 / 10 / 20: 0 / 1 / 3 / 0 / 0 invalid against 90 / 116 / 85 / 57 / 104 without the option.
 

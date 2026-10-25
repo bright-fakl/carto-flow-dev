@@ -17,7 +17,7 @@ inputs: raw coarse counties (simplify_coverage tolerance 4000 of the bundled cou
 
 `coarse_comparison.py <output dir>` runs the three cases on the branch and draws the figure.
 
-figure: fig1_raw_coarse.png — Raw coarse counties (43,084 vertices) with validity="check" (327 invalid polygons in black), "windows" (107) and "quadtree" (0). The validated windows cannot catch the crossings on this input because the segments are much longer than the cells; the mesh of the quadtree method splits them before they cross.
+figure: fig1_raw_coarse.png — Raw coarse counties (43,084 vertices) with validity="check" (327 invalid polygons in black), "repair-crossings" (107) and "repair-quadtree" (0). The validated windows cannot catch the crossings on this input because the segments are much longer than the cells; the mesh of the quadtree method splits them before they cross.
 
 ## Results
 
