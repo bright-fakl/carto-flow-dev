@@ -2,7 +2,7 @@
 pr: 186
 url: https://github.com/bright-fakl/carto-flow/pull/186
 issue: 177
-title: The stall rule follows the lagging regions (wait_for_lagging_regions)
+title: The stall rule waits for the lagging regions (wait_for_lagging_regions)
 description: A third component of the stall rule judges the lagging error (total log2 error above the tolerances) and the best iterate is chosen by the same measure; only the finest level of a ladder follows it. On the county ladder (repair-crossings, budget 3000) the finest level ends CONVERGED after 1842 iterations (mean 0.32 %, none above 10 %) instead of stalled after 200 (mean 1.08 %, 45 above 10 %); with a budget of 1000 the mean is 0.46 % and 16 counties are above 10 %. Districts and states are unchanged. Cost is up to the budget.
 kind: pr
 topic: flow
