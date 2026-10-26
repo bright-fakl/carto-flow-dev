@@ -79,7 +79,7 @@
 <dt>Kind</dt><dd>exploration</dd>
 <dt>Topic</dt><dd>flow</dd>
 <dt>Status</dt><dd><span class="status todo">open</span></dd>
-<dt>Related</dt><dd><a href="../exploration-stall-after-validity/index.html">Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</a> <span class="meta">(exploration)</span><br><a href="../exploration-unresolved-regions/index.html">Absolute area tolerance as an early stop, and sub-cell exclusion, for regions of a few cells (counties)</a> <span class="meta">(exploration)</span><br><a href="../stall-lagging-pr/index.html">The stall rule follows the lagging regions (stall_lagging)</a> <span class="meta">(pr)</span></dd>
+<dt>Related</dt><dd><a href="../exploration-stall-after-validity/index.html">Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</a> <span class="meta">(exploration)</span><br><a href="../exploration-unresolved-regions/index.html">Absolute area tolerance as an early stop, and sub-cell exclusion, for regions of a few cells (counties)</a> <span class="meta">(exploration)</span><br><a href="../stall-lagging-pr/index.html">The stall rule follows the lagging regions (wait_for_lagging_regions)</a> <span class="meta">(pr)</span></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/177">#177</a></dd>
 <dt>Created</dt><dd>2026-10-26 23:00</dd>
 <dt>Before</dt><dd>feat/unresolved-regions @ f30c2b4</dd>
@@ -128,9 +128,9 @@
 <tr><td>check</td><td>3000</td><td>(a) count, finest only, best by excess</td><td>820</td><td>stal 540 / stal 110 / stal 170</td><td>60</td><td>1.01</td><td>0.03</td><td>544</td><td>58</td><td>80</td></tr>
 <tr><td>check</td><td>3000</td><td>(b) excess, finest only, best by excess = chosen</td><td>1180</td><td>stal 540 / stal 110 / stal 530</td><td>70</td><td>0.42</td><td>0.00</td><td>528</td><td>18</td><td>44</td></tr>
 </table>
-<p>The shipped design (excess, finest level only, best by excess), <code>final.py</code>, with the old rule (stall_lagging False) beside it:</p>
+<p>The shipped design (excess, finest level only, best by excess), <code>final.py</code>, with the old rule (wait_for_lagging_regions False) beside it:</p>
 <table>
-<tr><th>validity</th><th>budget</th><th>stall_lagging</th><th>iterations</th><th>levels</th><th>invalid</th><th>mean %</th><th>above 10 %</th><th>returned vs final iterate above 10 % (finest)</th></tr>
+<tr><th>validity</th><th>budget</th><th>wait_for_lagging_regions</th><th>iterations</th><th>levels</th><th>invalid</th><th>mean %</th><th>above 10 %</th><th>returned vs final iterate above 10 % (finest)</th></tr>
 <tr><td>repair-crossings</td><td>500</td><td>False / True</td><td>500 / 500</td><td>one level, budget used by the coarse level</td><td>0 / 0</td><td>14.09 / 14.09</td><td>744 / 744</td><td></td></tr>
 <tr><td>repair-crossings</td><td>1000</td><td>False</td><td>780</td><td>stal 500 / stal 80 / stal 200</td><td>0</td><td>1.08</td><td>45</td><td>46 / 46</td></tr>
 <tr><td>repair-crossings</td><td>1000</td><td>True</td><td>1000</td><td>stal 500 / stal 80 / comp 420</td><td>0</td><td>0.46</td><td>16</td><td>17 / 18</td></tr>

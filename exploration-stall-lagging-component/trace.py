@@ -15,7 +15,7 @@ stall.StallMonitor.update = update
 g = data.load_us_census(level="county", max_segment_length=1000).reset_index(drop=True)
 gdf = g[["geometry"]].assign(v=g["Population"].to_numpy(float))
 w = CartogramWorkflow(gdf, "v", validate=False)
-w.morph_multiresolution(min_resolution="auto", levels="auto", options=MorphOptions(area_scale=1e-6, n_iter=3000, show_progress=False, validity="repair-crossings", stall_lagging=True))
+w.morph_multiresolution(min_resolution="auto", levels="auto", options=MorphOptions(area_scale=1e-6, n_iter=3000, show_progress=False, validity="repair-crossings", wait_for_lagging_regions=True))
 levels = [dict(grid=c.grid.sx, status=c.status.value, niter=c.niterations, best=c.best_iteration, cycle=None) for c in list(w)[1:]]
 ids = list(dict.fromkeys(r[0] for r in log))
 runs = [[r[1:] for r in log if r[0] == i] for i in ids]

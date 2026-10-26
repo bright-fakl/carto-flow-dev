@@ -65,9 +65,9 @@ All judge the cycle minimum like the mean and max components (progress if it fal
 | check | 3000 | (a) count, finest only, best by excess | 820 | stal 540 / stal 110 / stal 170 | 60 | 1.01 | 0.03 | 544 | 58 | 80 |
 | check | 3000 | (b) excess, finest only, best by excess = chosen | 1180 | stal 540 / stal 110 / stal 530 | 70 | 0.42 | 0.00 | 528 | 18 | 44 |
 
-The shipped design (excess, finest level only, best by excess), `final.py`, with the old rule (stall_lagging False) beside it:
+The shipped design (excess, finest level only, best by excess), `final.py`, with the old rule (wait_for_lagging_regions False) beside it:
 
-| validity | budget | stall_lagging | iterations | levels | invalid | mean % | above 10 % | returned vs final iterate above 10 % (finest) |
+| validity | budget | wait_for_lagging_regions | iterations | levels | invalid | mean % | above 10 % | returned vs final iterate above 10 % (finest) |
 |---|---|---|---|---|---|---|---|---|
 | repair-crossings | 500 | False / True | 500 / 500 | one level, budget used by the coarse level | 0 / 0 | 14.09 / 14.09 | 744 / 744 | |
 | repair-crossings | 1000 | False | 780 | stal 500 / stal 80 / stal 200 | 0 | 1.08 | 45 | 46 / 46 |

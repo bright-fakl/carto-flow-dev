@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #186: The stall rule follows the lagging regions (stall_lagging)</title>
+<title>PR #186: The stall rule follows the lagging regions (wait_for_lagging_regions)</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -74,7 +74,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #186: The stall rule follows the lagging regions (stall_lagging)</h1>
+<h1>PR #186: The stall rule follows the lagging regions (wait_for_lagging_regions)</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
@@ -92,17 +92,17 @@
 <p class="desc">A third component of the stall rule judges the lagging error (total log2 error above the tolerances) and the best iterate is chosen by the same measure; only the finest level of a ladder follows it. On the county ladder (repair-crossings, budget 3000) the finest level ends CONVERGED after 1842 iterations (mean 0.32 %, none above 10 %) instead of stalled after 200 (mean 1.08 %, 45 above 10 %); with a budget of 1000 the mean is 0.46 % and 16 counties are above 10 %. Districts and states are unchanged. Cost is up to the budget.</p>
 <p>The comparison of the candidates and the figure are in <code>exploration-stall-lagging-component</code>; this page lists the change.</p>
 <h2>Behavior</h2>
-<ul><li><code>MorphOptions.stall_lagging</code> (default True). <code>StallMonitor.update</code> takes an optional <code>lag</code>; its cycle minimum is judged like the mean and the max (progress if it falls below the best of the earlier cycles by the efficiency fraction, and only while it is above 0). <code>errors.lagging_error</code> is the sum of the absolute log2 errors in excess of <code>max_tol</code> plus the excess of the mean over <code>mean_tol</code> times the number of regions; regions excused by <code>area_tol_cells</code> count as zero.</li><li>The best iterate is the one with the lowest lagging error (in place of the lowest of the mean and max ratios) when <code>stall_lagging</code> is True; <code>False</code> restores both the stall rule and the choice of the best iterate.</li><li>In a ladder with one set of options only the finest level follows the lagging regions; levels with their own options (a list) are untouched.</li><li>Runs that stagnate still stall and <code>n_iter</code> bounds the run.</li></ul>
+<ul><li><code>MorphOptions.wait_for_lagging_regions</code> (default True). <code>StallMonitor.update</code> takes an optional <code>lag</code>; its cycle minimum is judged like the mean and the max (progress if it falls below the best of the earlier cycles by the efficiency fraction, and only while it is above 0). <code>errors.lagging_error</code> is the sum of the absolute log2 errors in excess of <code>max_tol</code> plus the excess of the mean over <code>mean_tol</code> times the number of regions; regions excused by <code>area_tol_cells</code> count as zero.</li><li>The best iterate is the one with the lowest lagging error (in place of the lowest of the mean and max ratios) when <code>wait_for_lagging_regions</code> is True; <code>False</code> restores both the stall rule and the choice of the best iterate.</li><li>In a ladder with one set of options only the finest level follows the lagging regions; levels with their own options (a list) are untouched.</li><li>Runs that stagnate still stall and <code>n_iter</code> bounds the run.</li></ul>
 <h2>Results (counties, 1 km input, auto ladder)</h2>
 <table>
-<tr><th>validity</th><th>budget</th><th>stall_lagging</th><th>finest level</th><th>invalid</th><th>mean</th><th>above 10 %</th></tr>
+<tr><th>validity</th><th>budget</th><th>wait_for_lagging_regions</th><th>finest level</th><th>invalid</th><th>mean</th><th>above 10 %</th></tr>
 <tr><td>repair-crossings</td><td>1000</td><td>False</td><td>stalled, 200</td><td>0</td><td>1.08 %</td><td>45</td></tr>
 <tr><td>repair-crossings</td><td>1000</td><td>True</td><td>budget, 420</td><td>0</td><td>0.46 %</td><td>16</td></tr>
 <tr><td>repair-crossings</td><td>3000</td><td>True</td><td>converged, 1842</td><td>1</td><td>0.32 %</td><td>0</td></tr>
 <tr><td>check</td><td>1000</td><td>False</td><td>stalled, 170</td><td>57</td><td>1.37 %</td><td>60</td></tr>
 <tr><td>check</td><td>1000</td><td>True</td><td>budget, 350</td><td>64</td><td>0.56 %</td><td>32</td></tr>
 </table>
-<p>Districts and states: identical. Test changes: the tests of the old best-iterate rule (<code>TestBestIterate</code>, <code>TestBestAndLast</code>) and the strip-scene helper of the alignment tests run with <code>stall_lagging=False</code>; the <code>StallMonitor</code> spy accepts the extra argument.</p>
+<p>Districts and states: identical. Test changes: the tests of the old best-iterate rule (<code>TestBestIterate</code>, <code>TestBestAndLast</code>) and the strip-scene helper of the alignment tests run with <code>wait_for_lagging_regions=False</code>; the <code>StallMonitor</code> spy accepts the extra argument.</p>
 <h2>Known costs</h2>
 <p>Iterations up to the budget (2422 iterations, about 5 times the stalled ladder, at 3000); on chaotic strip scenes the best iterate by lagging error can have one invalid polygon (seed 11) where the old one had none, and longer county runs with <code>&quot;repair-crossings&quot;</code> leave a few invalid polygons (1 at 3000 iterations).</p>
 
