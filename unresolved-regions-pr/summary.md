@@ -11,7 +11,7 @@ branch: feat/unresolved-regions
 related: exploration-unresolved-regions, exploration-stall-after-validity
 date: 2026-10-26 21:00
 before: main @ 6921aca
-after: feat/unresolved-regions @ 073db56
+after: feat/unresolved-regions @ 7ba2271
 inputs: 3,108 bundled counties (1 km input, auto ladder, validity="repair-crossings", n_iter 1000), 432 districts and the states as controls; see exploration-unresolved-regions.
 ---
 
