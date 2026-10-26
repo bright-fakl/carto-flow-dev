@@ -4,13 +4,16 @@ title: Inverted triangles of the quadtree mesh and an adaptive interval for the 
 description: The inverted fan triangles of the quadtree mesh come from leaves squeezed into a sliver with a reflex corner, where the mean of the corners leaves the kernel of the leaf; placing the center in the kernel, rebuilding the mesh after a fix and limiting the nodes of unresolved leaves gives 0 inversions and 0 invalid polygons in 128 runs, and the substeps never repaired an inversion. No adaptive check interval for the validated windows (distance, segment length, backoff) beat a fixed 10 to 20 windows with a byte budget; frequent checks hurt. The quadtree needs no window parameter: rebuilding when a fix was needed or a triangle area falls below a ratio gives 9 to 12 rebuilds and 0 invalid on all five inputs.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-quadtree-optimized, exploration-validity-research, exploration-quadtree-windows
 date: 2026-10-20 12:00
 before: main @ 06d4ff0
 after: scratch worktree /home/fakl/cf-validity with hooks in algorithm.py; not a PR
 inputs: counties (1 km), districts, raw coarse counties (43 k vertices), mid2000 and mid3000 (see exploration-quadtree-optimized), ladder with min_resolution and levels auto, area_scale 1e-6, n_iter 1000 or 3000, perturbations over dt 0.16 to 0.24 and max_segment_length 800 to 1200. Mostly single runs; the accuracy at the 1,000-iteration budget is chaotic (two quadtree runs without any inversion gave 5.84 % and 10.79 %).
 ---
+
+**Outcome (2026-10-26).** The inversion fix (kernel centroid, rebuild after a fix, limiter) and the rebuild rule without a window parameter are in `validity="repair-quadtree"` (PR 181); the check interval of `validity="repair-crossings"` stays a fixed number of windows (`validity_repair_every`, default 10) with the memory budget `validity_memory_mb` as the hard bound (PR 180).
+
 
 This page was written by the main session from the report of the research agent (the agent could not write the page itself). One configuration was reproduced: counties, r0RL (rebuild after a fix, limiter, kernel centroid, no substeps, area rule 0.001), 1,000 iterations: 19.6 s, 0 invalid, 9 rebuilds (report 19.5 s, 9 rebuilds); its mean error is 6.28 % because the run ends at the 8.5 km level (760 and 240 iterations), so the 1,000-iteration accuracy is budget-bound.
 

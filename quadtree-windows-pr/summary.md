@@ -8,10 +8,10 @@ kind: pr
 topic: flow
 base: feat/validated-windows
 branch: feat/quadtree-windows
-related: validated-windows-pr, exploration-adaptive-windows, exploration-quadtree-optimized
+related: validated-windows-pr, exploration-adaptive-windows, exploration-quadtree-optimized, exploration-quadtree-windows
 date: 2026-10-22 18:00
-before: feat/validated-windows @ 60130c5
-after: feat/quadtree-windows @ 6ccd063
+before: main @ ec2affc
+after: main @ 4271a3b (merged)
 inputs: raw coarse counties (simplify_coverage tolerance 4000 of the bundled counties, 43,084 vertices), 1 km counties and districts; morph_multiresolution with min_resolution and levels auto, area_scale 1e-6, n_iter 1000, default options except validity. Errors of the valid polygons against targets normalized on the valid polygons. The machine is about 2 times slower than the one of the prototype reports.
 ---
 

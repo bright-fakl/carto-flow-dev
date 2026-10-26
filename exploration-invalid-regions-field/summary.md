@@ -4,7 +4,8 @@ title: Treating invalid regions separately in the flow loop (prototype)
 description: Rasterizing a repaired polygon (shapely.make_valid) instead of the invalid ring when the density field is built lowers the median error of the valid counties from 0.25 % to 0.012 % and their p95 from 2.4 % to 1.3 %, and the median error of the valid neighbors of invalid regions from 0.86 % to 0.12 %. The number of invalid polygons rises from 57 to 83 and the number of counties above 10 % is unchanged. Excluding the invalid regions from the error statistics or measuring them by their point-set area makes the result worse.
 kind: exploration
 topic: flow
-status: open
+status: no-action
+outcome: The density-field repair does not hold up over perturbed runs (higher mean and tail, more invalid polygons) and adds nothing once no polygon is invalid at field time; the issue was closed as superseded by validity=repair-crossings and repair-quadtree
 related: exploration-stall-lagging-regions, exploration-quadtree-windows, exploration-county-error-relation
 date: 2026-10-19 20:00
 before: main @ 06d4ff0

@@ -4,13 +4,16 @@ title: Optimized quadtree windows (after Miaji et al.): profile, a numba path, m
 description: The quadtree-window prototype took 102.8 s on the 3,108 counties (5 times the baseline, 78 s of it in the per-window hook, 43 s in a shapely round trip). A numba path without the round trip, a one-pass checked pruning of inserted vertices and reuse of the deformed mesh for several windows bring it to 29.4 s (median of 3, spread 28.3 to 30.1 s; baseline 20.6 s) at 0 invalid polygons in 45 of 45 runs at the baseline iteration budget, and to 19.4 s on the raw 43 k-vertex coarse input (the earlier coverage_simplify variant: 94 s). Accuracy at that budget is worse than the baseline (the finest level is not reached); with a budget of 3,000 iterations the runs that do not stall reach a mean error of 0.4 to 0.8 % but take 126 to 265 s. Against validated windows the quadtree is 1.3 to 3.3 times slower, ends with 1.2 to 1.4 M vertices (1.6 to 1.8 times the input) and still has failure modes (one inverted triangle in 140 runs gave 4 invalid polygons); its advantage is the raw coarse input, where validated windows leaves 6 to 11 invalid polygons.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-validity-research, exploration-quadtree-windows, exploration-invalid-regions-field
 date: 2026-10-20 12:00
 before: main @ 06d4ff0
 after: scratch worktree /home/fakl/cf-validity with hooks in algorithm.py (algorithm_hooks_vw.patch); not a PR
 inputs: 3,108 counties (population) at max_segment_length 1000, 432 congressional districts, the raw coarse county input (simplify_coverage tolerance 4000, 43,084 vertices), and two mid-density inputs (tolerance 1000, densified to 2000 m: 394,665 vertices; to 3000 m: 280,377 vertices); ladder with min_resolution and levels auto, area_scale 1e-6; timings on an otherwise idle machine, 3 repeats.
 ---
+
+**Outcome (2026-10-26).** The optimized implementation is the basis of `validity="repair-quadtree"` (PR 181, merged), with the inversion fix of exploration-adaptive-windows.
+
 
 ## The question
 

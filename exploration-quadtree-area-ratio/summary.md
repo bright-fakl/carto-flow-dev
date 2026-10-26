@@ -4,13 +4,16 @@ title: The area ratio of the quadtree rebuild rule
 description: validity="repair-quadtree" rebuilds its mesh when a triangle falls below a fraction (area_ratio, 0.001) of its area at construction. Over 36 runs with ratios from 0.001 to 0.2 on counties, districts and raw coarse counties, at dt 0.2 to 0.4, every run has 0 invalid polygons and no inversion left. The ratio changes the number of rebuilds only from 10 to 18 on the counties, and the differences in time, vertices and error between ratios come from where the ladder stalls, not from the ratio itself, so there is no evidence for a cost advantage of 0.001 over values up to 0.03.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: quadtree-windows-pr, exploration-adaptive-windows
 date: 2026-10-25 18:00
 before: feat/quadtree-windows @ 233ad80
 after: the same branch; script only
 inputs: counties (1 km input), congressional districts (1 km) and raw coarse counties (43,084 vertices), morph_multiresolution with auto ladder, area_scale 1e-6, n_iter 1000, dt as stated, validity="repair-quadtree", QuadtreeSettings(area_ratio=...) swept. One run per row (a second run of the counties at dt 0.2 reproduced every row exactly). The errors are of the valid polygons against targets normalized on the valid polygons.
 ---
+
+**Outcome (2026-10-26).** The area ratio stays 0.001 in `validity="repair-quadtree"` (PR 181, merged); the rule did not trigger in any tested run at 0.001 and below.
+
 
 `sweep.py INPUT DT [REPEAT]` runs the six ratios on one input; `results.jsonl` holds all 36 runs. The mesh is rebuilt when the area of a triangle falls below the ratio times its area at construction, at the start of each ladder level, and at the next window after an inversion fix.
 

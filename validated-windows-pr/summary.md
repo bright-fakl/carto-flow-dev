@@ -8,10 +8,10 @@ kind: pr
 topic: flow
 base: main
 branch: feat/validated-windows
-related: exploration-validity-research, exploration-adaptive-windows, exploration-quadtree-optimized
+related: exploration-validity-research, exploration-adaptive-windows, exploration-quadtree-optimized, exploration-carried-points, exploration-adaptive-densification
 date: 2026-10-22 14:00
 before: main @ 06d4ff0
-after: feat/validated-windows @ 60130c5
+after: main @ ec2affc (merged)
 inputs: 3,108 bundled counties (population) and 432 congressional districts with max_segment_length 1000, morph_multiresolution with min_resolution and levels auto, area_scale 1e-6, n_iter 1000, default options except validity. Errors are of the valid polygons against targets normalized on the valid polygons. The machine is about 2 times slower than the one of the prototype reports.
 ---
 

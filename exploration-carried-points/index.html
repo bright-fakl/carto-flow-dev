@@ -78,9 +78,9 @@
 <dl class="meta-list">
 <dt>Kind</dt><dd>exploration</dd>
 <dt>Topic</dt><dd>flow</dd>
-<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Status</dt><dd><span class="status done">superseded</span></dd>
 <dt>Related</dt><dd><a href="../exploration-adaptive-densification/index.html">What the remaining invalid output polygons are, and adaptive densification</a> <span class="meta">(exploration)</span><br><a href="../segment-density-warning/index.html">Warn when input segments are too long for the expected stretch</a> <span class="meta">(pr)</span><br><a href="../census-max-segment-length/index.html">Densify at load time with max_segment_length (all geometry loaders)</a> <span class="meta">(pr)</span></dd>
-<dt>Referenced by</dt><dd><a href="../exploration-validity-research/index.html">Validity-preserving flow cartograms without per-iteration meshes (validated windows), regression protocol, coarse input, memory</a> <span class="meta">(exploration)</span><br><a href="../exploration-quadtree-windows/index.html">Piecewise-affine windows on a quadtree mesh with vertex insertion (after Miaji et al.)</a> <span class="meta">(exploration)</span></dd>
+<dt>Referenced by</dt><dd><a href="../validated-windows-pr/index.html">Validated windows keep the flow cartogram output polygons valid</a> <span class="meta">(pr)</span><br><a href="../exploration-validity-research/index.html">Validity-preserving flow cartograms without per-iteration meshes (validated windows), regression protocol, coarse input, memory</a> <span class="meta">(exploration)</span><br><a href="../exploration-quadtree-windows/index.html">Piecewise-affine windows on a quadtree mesh with vertex insertion (after Miaji et al.)</a> <span class="meta">(exploration)</span></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/167">#167</a></dd>
 <dt>Created</dt><dd>2026-10-18 12:00</dd>
 <dt>Before</dt><dd>main @ 06d4ff0</dd>
@@ -88,6 +88,7 @@
 <dt>Inputs</dt><dd>3,108 bundled counties (population) densified to 1 km with load_us_census(max_segment_length=1000), CartogramWorkflow(coords=...).morph_multiresolution with min_resolution and levels auto, n_iter 1000, area_scale 1e-6. The carried points are densify_coverage(counties, s) for s in 500, 250 and 125 m (shared boundaries get identical points), all vertices carried including the original ones.</dd>
 </dl>
 <p class="desc">Subdivision points of the 1 km county boundaries are carried through the flow as extra coordinates and the polygons are rebuilt from them after the run. The morph is unchanged (same iterates, same area errors), and the invalid polygons drop from 57 to 29 (0.5 km points), 11 (0.25 km) and 10 (0.125 km) of 3,108, at 1.6, 2.7 and 4.3 times the run time. A floor of about 10 remains.</p>
+<p><strong>Outcome (2026-10-26).</strong> Superseded by the validity methods <code>validity=&quot;repair-crossings&quot;</code> and <code>validity=&quot;repair-quadtree&quot;</code> (PR 180 and PR 181, merged): carrying subdivision points through the flow leaves invalid polygons and costs more per vertex than validated windows.</p>
 <h2>Method</h2>
 <p><code>opt3.py</code> densifies the input a second time with <code>densify_coverage</code> and passes every vertex of the densified geometries as <code>coords</code> to <code>CartogramWorkflow</code>. The morph itself runs on the 1 km geometry, so iterates, step sizes and stall detection are those of the baseline. After the run <code>shapely.set_coordinates</code> writes the displaced points back into the densified geometries, which have the same ring structure.</p>
 <h2>Result</h2>

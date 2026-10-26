@@ -4,13 +4,16 @@ title: What the remaining invalid output polygons are, and adaptive densificatio
 description: After the grid and stall fixes and input densified to 1 km, 57 of the 3,108 county polygons are still invalid. The first invalid polygons were Virginia counties next to enlarging independent cities (stretched segments); at 0.25 km the remaining ones are Great Plains counties that shrink 10 to 100 times into needles narrower than a cell, where chords between vertices 3 to 4 km apart cross across the width. Densifying by a pilot run (stretch and local width) reaches the quality of uniform 1 km densification with 40 to 90 % of its vertices but does not reach zero invalid polygons.
 kind: exploration
 topic: flow
-status: open
+status: superseded
 related: segment-density-warning, exploration-county-hierarchical-prototype
 date: 2026-10-19 21:00
 before: main @ 08f3edf
 after: the same checkout; scripts only, no library change
 inputs: 3,108 bundled counties (population), ladder with grid auto, n_iter 1000, square grid margin 0.5, NUMBA_NUM_THREADS=8. Pilot: the same ladder on the 5 km bundled geometry, per-segment length at the end of every level.
 ---
+
+**Outcome (2026-10-26).** Superseded by the validity methods `validity="repair-crossings"` and `validity="repair-quadtree"` (PR 180 and PR 181, merged); the vertex-density warning and the `max_segment_length` option of the loaders remain the way to prepare coarse input.
+
 
 ## What the invalid polygons are
 

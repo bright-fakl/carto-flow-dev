@@ -78,7 +78,7 @@
 <dl class="meta-list">
 <dt>Kind</dt><dd>exploration</dd>
 <dt>Topic</dt><dd>flow</dd>
-<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Status</dt><dd><span class="status done">led-to</span></dd>
 <dt>Related</dt><dd><a href="../quadtree-windows-pr/index.html">Quadtree windows keep the flow cartogram output polygons valid</a> <span class="meta">(pr)</span><br><a href="../exploration-adaptive-windows/index.html">Inverted triangles of the quadtree mesh and an adaptive interval for the validity checks</a> <span class="meta">(exploration)</span></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/179">#179</a></dd>
 <dt>Created</dt><dd>2026-10-25 18:00</dd>
@@ -87,6 +87,7 @@
 <dt>Inputs</dt><dd>counties (1 km input), congressional districts (1 km) and raw coarse counties (43,084 vertices), morph_multiresolution with auto ladder, area_scale 1e-6, n_iter 1000, dt as stated, validity=&quot;repair-quadtree&quot;, QuadtreeSettings(area_ratio=...) swept. One run per row (a second run of the counties at dt 0.2 reproduced every row exactly). The errors are of the valid polygons against targets normalized on the valid polygons.</dd>
 </dl>
 <p class="desc">validity=&quot;repair-quadtree&quot; rebuilds its mesh when a triangle falls below a fraction (area_ratio, 0.001) of its area at construction. Over 36 runs with ratios from 0.001 to 0.2 on counties, districts and raw coarse counties, at dt 0.2 to 0.4, every run has 0 invalid polygons and no inversion left. The ratio changes the number of rebuilds only from 10 to 18 on the counties, and the differences in time, vertices and error between ratios come from where the ladder stalls, not from the ratio itself, so there is no evidence for a cost advantage of 0.001 over values up to 0.03.</p>
+<p><strong>Outcome (2026-10-26).</strong> The area ratio stays 0.001 in <code>validity=&quot;repair-quadtree&quot;</code> (PR 181, merged); the rule did not trigger in any tested run at 0.001 and below.</p>
 <p><code>sweep.py INPUT DT [REPEAT]</code> runs the six ratios on one input; <code>results.jsonl</code> holds all 36 runs. The mesh is rebuilt when the area of a triangle falls below the ratio times its area at construction, at the start of each ladder level, and at the next window after an inversion fix.</p>
 <h2>Results</h2>
 <p>Counties, dt 0.2:</p>

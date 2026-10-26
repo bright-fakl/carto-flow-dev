@@ -4,13 +4,16 @@ title: Rebuilding the output polygons from carried subdivision points (option 3)
 description: Subdivision points of the 1 km county boundaries are carried through the flow as extra coordinates and the polygons are rebuilt from them after the run. The morph is unchanged (same iterates, same area errors), and the invalid polygons drop from 57 to 29 (0.5 km points), 11 (0.25 km) and 10 (0.125 km) of 3,108, at 1.6, 2.7 and 4.3 times the run time. A floor of about 10 remains.
 kind: exploration
 topic: flow
-status: open
+status: superseded
 related: exploration-adaptive-densification, segment-density-warning, census-max-segment-length
 date: 2026-10-18 12:00
 before: main @ 06d4ff0
 after: the same checkout; script only, no library change
 inputs: 3,108 bundled counties (population) densified to 1 km with load_us_census(max_segment_length=1000), CartogramWorkflow(coords=...).morph_multiresolution with min_resolution and levels auto, n_iter 1000, area_scale 1e-6. The carried points are densify_coverage(counties, s) for s in 500, 250 and 125 m (shared boundaries get identical points), all vertices carried including the original ones.
 ---
+
+**Outcome (2026-10-26).** Superseded by the validity methods `validity="repair-crossings"` and `validity="repair-quadtree"` (PR 180 and PR 181, merged): carrying subdivision points through the flow leaves invalid polygons and costs more per vertex than validated windows.
+
 
 ## Method
 

@@ -4,13 +4,16 @@ title: Piecewise-affine windows on a quadtree mesh with vertex insertion (after 
 description: Prototype of the line densification of Miaji et al. inside the flow loop. At every field recompute a graded quadtree is built from the density, its leaves are triangulated, vertices are inserted where the boundaries cross triangle edges, and the vertices move with the piecewise-affine map of the advected mesh nodes for the next 10 iterations. Without pruning the 3,108 counties end with 0 invalid polygons (57 in the baseline) but with 7 to 11 times the vertices and a worse area error; with a simple pruning the vertex count is +40 % but 41 to 91 polygons are invalid again, because the pruning itself creates invalid polygons.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-carried-points, exploration-adaptive-densification, segment-density-warning
 date: 2026-10-18 18:00
 before: main @ 06d4ff0
 after: scratch worktree with a hook in algorithm.py (algorithm_hooks.patch); not a PR
 inputs: 3,108 counties (population) at max_segment_length 1000, ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, single run per row (the dynamics are chaotic: rows differ by more than their settings suggest).
 ---
+
+**Outcome (2026-10-26).** The method is in the library as `validity="repair-quadtree"` (PR 181, merged); the prototype of this page is the first version, see exploration-quadtree-optimized and exploration-adaptive-windows for the optimized and corrected one.
+
 
 ## What was built
 

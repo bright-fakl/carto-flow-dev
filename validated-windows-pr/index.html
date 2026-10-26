@@ -79,7 +79,7 @@
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
 <dt>Status</dt><dd><span class="status done">merged</span></dd>
-<dt>Related</dt><dd><a href="../exploration-validity-research/index.html">Validity-preserving flow cartograms without per-iteration meshes (validated windows), regression protocol, coarse input, memory</a> <span class="meta">(exploration)</span><br><a href="../exploration-adaptive-windows/index.html">Inverted triangles of the quadtree mesh and an adaptive interval for the validity checks</a> <span class="meta">(exploration)</span><br><a href="../exploration-quadtree-optimized/index.html">Optimized quadtree windows (after Miaji et al.): profile, a numba path, mesh reuse and a checked pruning</a> <span class="meta">(exploration)</span></dd>
+<dt>Related</dt><dd><a href="../exploration-validity-research/index.html">Validity-preserving flow cartograms without per-iteration meshes (validated windows), regression protocol, coarse input, memory</a> <span class="meta">(exploration)</span><br><a href="../exploration-adaptive-windows/index.html">Inverted triangles of the quadtree mesh and an adaptive interval for the validity checks</a> <span class="meta">(exploration)</span><br><a href="../exploration-quadtree-optimized/index.html">Optimized quadtree windows (after Miaji et al.): profile, a numba path, mesh reuse and a checked pruning</a> <span class="meta">(exploration)</span><br><a href="../exploration-carried-points/index.html">Rebuilding the output polygons from carried subdivision points (option 3)</a> <span class="meta">(exploration)</span><br><a href="../exploration-adaptive-densification/index.html">What the remaining invalid output polygons are, and adaptive densification</a> <span class="meta">(exploration)</span></dd>
 <dt>Referenced by</dt><dd><a href="../quadtree-windows-pr/index.html">Quadtree windows keep the flow cartogram output polygons valid</a> <span class="meta">(pr)</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/180">https://github.com/bright-fakl/carto-flow/pull/180</a></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/178">#178</a></dd>
@@ -88,7 +88,7 @@
 <dt>Created</dt><dd>2026-10-22 14:00</dd>
 <dt>Closed</dt><dd>2026-10-26 01:48</dd>
 <dt>Before</dt><dd>main @ 06d4ff0</dd>
-<dt>After</dt><dd>feat/validated-windows @ 60130c5</dd>
+<dt>After</dt><dd>main @ ec2affc (merged)</dd>
 <dt>Inputs</dt><dd>3,108 bundled counties (population) and 432 congressional districts with max_segment_length 1000, morph_multiresolution with min_resolution and levels auto, area_scale 1e-6, n_iter 1000, default options except validity. Errors are of the valid polygons against targets normalized on the valid polygons. The machine is about 2 times slower than the one of the prototype reports.</dd>
 </dl>
 <p class="desc">validity=&quot;repair-crossings&quot; adds a crossing test and repair to the morph. On the 3,108 counties (1 km input) the output has 0 invalid polygons instead of 57, with 0.1 % more vertices, 1.1 times the time and the mean error and the count above 10 % unchanged; the median and p95 error of the valid regions are higher. Districts: 2 invalid polygons become 0 with identical errors.</p>

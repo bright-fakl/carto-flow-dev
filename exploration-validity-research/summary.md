@@ -4,13 +4,16 @@ title: Validity-preserving flow cartograms without per-iteration meshes (validat
 description: Validated windows (crossing test on the window-end state, splitting of the crossing segments at the midpoint of their window-start chord, replay of the new vertices through the recorded steps) give 0 invalid polygons of 3,108 counties (baseline 12 to 158 over 18 perturbed configurations) at 1.1 to 1.3 times the baseline time and +0.1 % vertices. The second round tests accuracy with perturbed runs: the mean error and the number of counties above 10 % do not change, the median and p95 error of the valid counties are higher (median 0.007 % to 0.07 %, p95 0.6 % to 1.8 % in the returned iterate of the fixed-schedule test) with the baseline's invalid polygons frozen as the likely cause; the earlier single-run differences are stall timing. Coarse input: densifying to 1.4 cells and checking every 10 windows gives 0 to 3 invalid at 24 s; the flatness-criterion variants on the raw input leave 6 to 11. Memory: float32 fields plus a 64 to 128 MB budget bound the stored fields at the same output. The density-field repair adds nothing once polygons are valid.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-quadtree-windows, exploration-carried-points, exploration-invalid-regions-field, exploration-adaptive-densification, exploration-county-error-relation, exploration-stall-lagging-regions
 date: 2026-10-19 18:00
 before: main @ 06d4ff0
 after: scratch worktree /home/fakl/cf-validity with hooks in algorithm.py (algorithm_hooks_vw.patch, includes the quadtree hook); not a PR
 inputs: 3,108 counties (population) at max_segment_length 1000, congressional districts (432) at 1000, and the coarse county input (simplify_coverage tolerance 4000, 43 k vertices); ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, one run per row unless stated (the dynamics are chaotic and numba parallel kernels add run-to-run noise).
 ---
+
+**Outcome (2026-10-26).** Validated windows were implemented as `validity="repair-crossings"` (PR 180, merged) and the quadtree windows as `validity="repair-quadtree"` (PR 181, merged). In this page the values are called `windows` and `quadtree` (the names of the prototypes). The density-field repair was dropped (issue 176 closed); the raw coarse input is handled by densifying the input first or by `"repair-quadtree"`.
+
 
 ## The question
 

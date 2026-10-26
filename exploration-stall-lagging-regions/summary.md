@@ -1,5 +1,5 @@
 ---
-issue: 171
+issue: 171, 177
 title: Do the lagging counties still make progress when the stall rule stops the run?
 description: The stall rule judges progress by the mean and the maximum error over all regions. At the stall of the finest county level, the lagging counties continue to improve for another 1,400 iterations (the 72 above 10 % have a median error that falls from 23 % to 1.2 %), and the valid polygons converge (mean 1.3 % to 0.11 %, 60 to 6 above 10 %), while the mean over all counties first falls and then rises above 4 %. The rise comes from the invalid polygons (57 to 100, mostly Virginia), whose areas explode and shift the targets of all regions.
 kind: exploration

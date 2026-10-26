@@ -1,5 +1,5 @@
 ---
-issue: 167
+issue: 167, 177
 title: Area error of the county flow cartogram against original and target area
 description: 72 of 3,108 counties end above 10 % area error. The error depends on the shrink factor (target over original area) and on the target size in grid cells together. No county that shrinks by less than 10 times, and almost none with a target of 16 cells or more, is above 10 %. The failing counties are thin strips along the Great Plains and a cluster in Virginia.
 kind: exploration
