@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Absolute area tolerance and sub-cell exclusion for regions of a few cells (counties)</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Absolute area tolerance and sub-cell exclusion for regions of a few cells (counties)</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status done">led-to</span></dd>
+<dt>Related</dt><dd><a href="../exploration-stall-after-validity/index.html">Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</a> <span class="meta">(exploration)</span><br><a href="../exploration-stall-lagging-regions/index.html">Do the lagging counties still make progress when the stall rule stops the run?</a> <span class="meta">(exploration)</span><br><a href="../exploration-county-error-relation/index.html">Area error of the county flow cartogram against original and target area</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/177">#177</a></dd>
+<dt>Created</dt><dd>2026-10-26 20:00</dd>
+<dt>Before</dt><dd>main @ 6921aca</dd>
+<dt>After</dt><dd>feat/unresolved-regions (area_tol_cells)</dd>
+<dt>Inputs</dt><dd>3,108 bundled counties (population), max_segment_length 1000, morph_multiresolution with min_resolution and levels auto (grids 512, 1024, 2048), area_scale 1e-6, n_iter 1000, validity=&quot;repair-crossings&quot;, default tolerances (mean_tol 5 %, max_tol 10 %). Controls: 432 congressional districts (max_segment_length 1000) and the 49 states, n_iter 300. Single runs. Errors are the relative errors of the returned geometries.</dd>
+</dl>
+<p class="desc">An absolute area tolerance (a region within k cells of its target counts as on target) makes the county ladder end CONVERGED only from k = 4 finest-grid cells, and then with a worse true result than the stalled run (mean 1.28 % against 0.94 %, 103 counties above 10 % against 46). Excluding regions with a target below k cells does not converge the finest level up to 8 cells. At 1 to 2 cells the tolerance only reports (34 and 59 counties unresolved) without changing the run. Districts and states are unchanged. No default is supported; the option is off by default.</p>
+<p><code>measure.py &lt;dir&gt;</code> runs the ladders with <code>area_tol_cells</code> (the library branch), <code>analyze.py &lt;dir&gt;</code> computes what each rule excuses on the baseline levels and draws the figure. <code>measure_per_level.json</code> is the first measurement, in which k counted cells of the grid of each level.</p>
+<h2>1. What each rule excuses (offline, baseline levels, k in cells of the level&#x27;s own grid)</h2>
+<p>Counties above 10 % in the baseline: 762 (grid 512), 413 (1024), 46 (2048).</p>
+<table>
+<tr><th>k</th><th>grid 2048: abs. excused / still above</th><th>grid 2048: targets below k cells / of those above 10 % / still above after exclusion</th><th>grid 512: abs. excused / still above</th></tr>
+<tr><td>0.5</td><td>28 / 18</td><td>2 / 2 / 44</td><td>683 / 79</td></tr>
+<tr><td>1</td><td>34 / 12</td><td>20 / 12 / 34</td><td>746 / 16</td></tr>
+<tr><td>2</td><td>38 / 8</td><td>58 / 20 / 26</td><td>762 / 0</td></tr>
+<tr><td>4</td><td>44 / 2</td><td>171 / 35 / 11</td><td>762 / 0</td></tr>
+<tr><td>8</td><td>46 / 0</td><td>383 / 38 / 8</td><td>762 / 0</td></tr>
+</table>
+<p>At the finest level the absolute tolerance needs 8 cells to excuse all 46 counties above 10 %, the exclusion of sub-cell targets never converges the level up to 8 cells (8 to 44 regions remain above tolerance). At the coarsest level (512) a tolerance of 2 cells of that grid excuses all 762 counties and the ladder would stop on a grid that is too coarse; hence the tolerance is the same area at every level (cells of the finest grid).</p>
+<h2>2. Ladder runs with <code>area_tol_cells</code> = k cells of the finest grid</h2>
+<table>
+<tr><th>k</th><th>time</th><th>level (grid: status, iterations)</th><th>n_unresolved at the end</th><th>mean error</th><th>above 10 %</th></tr>
+<tr><td>0</td><td>46 s</td><td>512: stalled 500, 1024: stalled 80, 2048: stalled 200</td><td>0</td><td>0.94 %</td><td>46</td></tr>
+<tr><td>1</td><td>41 s</td><td>same, same iterations</td><td>34</td><td>0.94 %</td><td>46</td></tr>
+<tr><td>2</td><td>44 s</td><td>512: stalled 620, 1024: stalled 70, 2048: stalled 140</td><td>59</td><td>1.20 %</td><td>62</td></tr>
+<tr><td>4</td><td>40 s</td><td>512: stalled 580, 1024: stalled 130, 2048: converged 15</td><td>103</td><td>1.28 %</td><td>103</td></tr>
+<tr><td>8</td><td>23 s</td><td>512: stalled 470, 1024: converged 63</td><td>228</td><td>3.11 %</td><td>229</td></tr>
+<tr><td>16</td><td>17 s</td><td>512: stalled 350, 1024: converged 20</td><td>436</td><td>5.86 %</td><td>436</td></tr>
+</table>
+<p>Controls (area_tol_cells 4): districts converge after 135 iterations with a mean of 0.4625 % and a max of 8.26 %, states after 65 with 1.19 % and 5.65 %, both identical to the runs without the tolerance.</p>
+<h2>Reading</h2>
+<ul><li>With k counted in the cells of each level (the first measurement), the coarse level 512 converged at k 2 or 4 with a mean of 15 to 17 % and ended the ladder; the districts ended earlier with a worse error (mean 0.46 to 1.16 %, max 8 to 24 % at k 1). The tolerance therefore counts cells of the finest grid in a ladder, which leaves districts and states unchanged at k 4.</li><li>At 1 cell the tolerance changes nothing in the run and reports the 34 counties that are as close as one cell. From 2 cells the runs differ (trajectories are chaotic; the iteration counts change), and at 4 cells the finest level converges after 15 iterations, with a worse result than the stalled run: 103 counties above 10 % against 46, because the previous level ended in a poorer state and the tolerance stops the refinement as soon as the remaining regions are within 4 cells.</li><li>The measurement does not support a default. The option reports the unresolved regions (<code>n_unresolved</code>) at any k and lets <code>CONVERGED</code> be reachable, at the price of stopping at a less accurate state; the continuation of a stalled run (<code>stall_patience=None</code>) gave the better counties (mean 0.68 %, 8 above 10 %) at 2.3 times the ladder time.</li></ul>
+<div class="figure">
+<img src="fig1_excused.png" alt="Left: at the finest level (2048) of the baseline ladder, the counties above 10 % that an absolute tolerance of k cells excuses and that the exclusion of targets below k cells removes. Right: time of the ladder per `area_tol_cells`.">
+<p class="caption">Left: at the finest level (2048) of the baseline ladder, the counties above 10 % that an absolute tolerance of k cells excuses and that the exclusion of targets below k cells removes. Right: time of the ladder per <code>area_tol_cells</code>.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
