@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../exploration-stall-lagging-regions/index.html">Do the lagging counties still make progress when the stall rule stops the run?</a> <span class="meta">(exploration)</span><br><a href="../exploration-county-error-relation/index.html">Area error of the county flow cartogram against original and target area</a> <span class="meta">(exploration)</span><br><a href="../validated-windows-pr/index.html">Validated windows keep the flow cartogram output polygons valid</a> <span class="meta">(pr)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/177">#177</a></dd>
+<dt>Created</dt><dd>2026-10-26 17:00</dd>
+<dt>Before</dt><dd>main @ 4271a3b</dd>
+<dt>After</dt><dd>the same checkout; scripts only, no library change</dd>
+<dt>Inputs</dt><dd>3,108 bundled counties (population), max_segment_length 1000, auto ladder, n_iter 1000, area_scale 1e-6, grid 2048 for the continuation. Errors of valid polygons against targets normalized on the valid polygons. Single runs; NUMBA default threads.</dd>
+</dl>
+<p class="desc">With validity=&quot;repair-crossings&quot; the county ladder has no invalid polygons and its mean error falls from 1.37 to 1.08 %, but every level still ends STALLED and 45 valid counties stay above 10 %. Continued for 1,000 iterations they fall to 8 (mean 1.0 to 0.68 %). The earlier gain (mean 1.3 to 0.11 %) came from the normalization on invalid polygons; the real gain of continuing is smaller, and the unresolved tail is sub-cell counties.</p>
+<p><code>ladder_modes.py &lt;dir&gt;</code> runs the ladder per validity mode, <code>continue_valid.py &lt;dir&gt;</code> continues the finest level of the <code>&quot;repair-crossings&quot;</code> run with the stall rule off and snapshots every 20 iterations, <code>analyze.py</code> replays candidate progress measures on those snapshots, <code>fig.py</code> draws the figure.</p>
+<h2>1. How the ladder ends per validity mode</h2>
+<table>
+<tr><th>mode</th><th>time</th><th>levels (grid: status, iterations)</th><th>invalid</th><th>mean / median / p95 error</th><th>above 10 %</th><th>max error</th></tr>
+<tr><td>&quot;check&quot;</td><td>39 s</td><td>512: stalled 540, 1024: stalled 110, 2048: stalled 170</td><td>57</td><td>1.37 / 0.25 / 2.44 %</td><td>60</td><td>523 %</td></tr>
+<tr><td>&quot;repair-crossings&quot;</td><td>47 s</td><td>512: stalled 500, 1024: stalled 80, 2048: stalled 200</td><td>0</td><td>1.08 / 0.20 / 2.63 %</td><td>45</td><td>548 %</td></tr>
+<tr><td>&quot;repair-quadtree&quot;</td><td>36 s</td><td>512: stalled 760, 1024: completed 240</td><td>0</td><td>5.34 / 0.24 / 27.99 %</td><td>303</td><td>540 %</td></tr>
+</table>
+<p>The quadtree run ended at grid 1024 (the ladder has two levels with it); its numbers are at that grid and are not comparable with the other two.</p>
+<h2>2. Continuing the finest level (repair-crossings)</h2>
+<table>
+<tr><th>iterations after the stall</th><th>mean</th><th>median</th><th>above 10 %</th><th>above 5 %</th><th>max</th></tr>
+<tr><td>0</td><td>1.01 %</td><td>0.17 %</td><td>45</td><td>77</td><td>549 %</td></tr>
+<tr><td>200</td><td>0.81 %</td><td>0.22 %</td><td>22</td><td>38</td><td>428 %</td></tr>
+<tr><td>500</td><td>0.69 %</td><td>0.25 %</td><td>9</td><td>20</td><td>175 %</td></tr>
+<tr><td>1000</td><td>0.68 %</td><td>0.32 %</td><td>8</td><td>13</td><td>50 %</td></tr>
+</table>
+<p>The continuation takes 109 s (the ladder took 47 s). Of the 45 counties above 10 % at the stall, 7 remain above it, their median falling from 14.9 % to 1.9 %. The 8 counties above 10 % at the end all shrink by more than 10 times in area. The median error of all counties rises from 0.17 to 0.32 % while the tail falls. The returned best iterate of this run (iteration 992) has a mean of 0.35 % and 113 counties above 1 %, the final iterate (1000) a mean of 0.68 % and 651 above 1 %; the error is not monotone in the iteration.</p>
+<h2>3. Candidate progress measures, replayed on the snapshots</h2>
+<p>The stall rule (patience 4 cycles, efficiency 0.05) applied to other measures of the 20-iteration snapshots (a cycle here is 20 iterations, the library&#x27;s is 10, and <code>moved</code> is taken as 0.1 per iteration):</p>
+<table>
+<tr><th>measure</th><th>stalls after</th></tr>
+<tr><td>max error</td><td>never within 1,000 iterations</td></tr>
+<tr><td>count of valid counties above 10 %</td><td>581 iterations</td></tr>
+<tr><td>sum of log2(1 + error) over the counties above 10 %</td><td>never within 1,000 iterations</td></tr>
+<tr><td>median error of the counties that were above 10 % at the start</td><td>never within 1,000 iterations</td></tr>
+</table>
+<h2>Reading</h2>
+<ul><li>The invalid polygons are no longer part of the problem when <code>validity=&quot;repair-crossings&quot;</code> is used: the earlier gain from continuing (mean 1.3 to 0.11 %, 60 to 6 above 10 %) was measured with targets normalized on a set that contained invalid polygons and is not reproduced. With valid polygons the gain is mean 1.0 to 0.68 % and 45 to 8 counties above 10 %, for 2.3 times the ladder time.</li><li>Two problems remain. (1) Every county ladder ends <code>STALLED</code> although the counties above tolerance keep improving; the three candidate measures that follow the lagging counties would continue for 581 to more than 1,000 iterations, which is 1 to 2 minutes on counties. (2) <code>CONVERGED</code> stays unreachable: the max is held by sub-cell counties (548 % at the stall, 50 % after 1,000 iterations).</li><li>Replaying on snapshots gives the order of magnitude only; a change to the rule needs a run of the library.</li></ul>
+<div class="figure">
+<img src="fig1_continue_valid.png" alt="The finest county level continued for 1,000 iterations after its stall (validity=&quot;repair-crossings&quot;, no invalid polygons). Left: valid counties above 10 % and above 5 %. Middle: the maximum error. Right: mean and median error.">
+<p class="caption">The finest county level continued for 1,000 iterations after its stall (validity=&quot;repair-crossings&quot;, no invalid polygons). Left: valid counties above 10 % and above 5 %. Middle: the maximum error. Right: mean and median error.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

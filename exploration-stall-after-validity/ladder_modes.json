@@ -1,0 +1,111 @@
+{
+ "check": {
+  "time": 38.98348379135132,
+  "levels": [
+   {
+    "grid": 512,
+    "status": "stalled",
+    "niter": 540,
+    "best": 439,
+    "mean_pct": 12.295607785948848,
+    "max_pct": 1065.4872352484522
+   },
+   {
+    "grid": 1024,
+    "status": "stalled",
+    "niter": 110,
+    "best": 70,
+    "mean_pct": 4.891260397843955,
+    "max_pct": 627.5445517730434
+   },
+   {
+    "grid": 2048,
+    "status": "stalled",
+    "niter": 170,
+    "best": 150,
+    "mean_pct": 1.3033438010437326,
+    "max_pct": 523.0087892059755
+   }
+  ],
+  "final": {
+   "invalid": 57,
+   "mean_valid": 1.3667873969918523,
+   "median_valid": 0.2515025838034519,
+   "p95_valid": 2.4431122635380267,
+   "max_valid": 522.9449528918293,
+   "n10_valid": 60,
+   "n1_valid": 517
+  },
+  "nverts": 768580
+ },
+ "repair-crossings": {
+  "time": 47.08642840385437,
+  "levels": [
+   {
+    "grid": 512,
+    "status": "stalled",
+    "niter": 500,
+    "best": 496,
+    "mean_pct": 12.066745993530281,
+    "max_pct": 972.1649933278451
+   },
+   {
+    "grid": 1024,
+    "status": "stalled",
+    "niter": 80,
+    "best": 33,
+    "mean_pct": 5.65161579359994,
+    "max_pct": 635.1948095451728
+   },
+   {
+    "grid": 2048,
+    "status": "stalled",
+    "niter": 200,
+    "best": 200,
+    "mean_pct": 0.9386430046952388,
+    "max_pct": 548.0542572096135
+   }
+  ],
+  "final": {
+   "invalid": 0,
+   "mean_valid": 1.0815573228643511,
+   "median_valid": 0.195187652697558,
+   "p95_valid": 2.6297288899918247,
+   "max_valid": 548.045414734557,
+   "n10_valid": 45,
+   "n1_valid": 494
+  },
+  "nverts": 769475
+ },
+ "repair-quadtree": {
+  "time": 36.15839147567749,
+  "levels": [
+   {
+    "grid": 512,
+    "status": "stalled",
+    "niter": 760,
+    "best": 760,
+    "mean_pct": 14.293894781346728,
+    "max_pct": 1768.1576757699754
+   },
+   {
+    "grid": 1024,
+    "status": "completed",
+    "niter": 240,
+    "best": 236,
+    "mean_pct": 4.583352115538131,
+    "max_pct": 540.0599936821919
+   }
+  ],
+  "final": {
+   "invalid": 0,
+   "mean_valid": 5.3355998857295885,
+   "median_valid": 0.24162000628948582,
+   "p95_valid": 27.99362199246563,
+   "max_valid": 540.0506148276652,
+   "n10_valid": 303,
+   "n1_valid": 773
+  },
+  "nverts": 1277109
+ }
+}
