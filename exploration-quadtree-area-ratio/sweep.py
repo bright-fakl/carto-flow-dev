@@ -13,7 +13,8 @@ from carto_flow.geo_utils import simplify_coverage
 
 inp, dt = sys.argv[1], float(sys.argv[2])
 repeat = int(sys.argv[3]) if len(sys.argv) > 3 else 1
-RATIOS = [0.001, 0.003, 0.01, 0.03, 0.1, 0.2]
+import os
+RATIOS = [float(x) for x in os.environ.get("RATIOS", "0.001,0.003,0.01,0.03,0.1,0.2").split(",")]
 if inp == "county":
     g = data.load_us_census(level="county", max_segment_length=1000).reset_index(drop=True)
 elif inp == "district":
@@ -27,7 +28,13 @@ for ratio in RATIOS:
         class Q(QuadtreeWindows):
             def __init__(self, n, settings=None, _r=ratio):
                 super().__init__(n, QuadtreeSettings(area_ratio=_r))
+                self.min_seen = 1.0
                 instances.append(self)
+
+            def _min_area_ratio(self):
+                value = super()._min_area_ratio()
+                self.min_seen = min(self.min_seen, value)
+                return value
         algorithm.QuadtreeWindows = Q
         instances.clear()
         t = time.time(); w = CartogramWorkflow(gdf, "v", validate=False)
@@ -38,5 +45,5 @@ for ratio in RATIOS:
         row = dict(input=inp, dt=dt, ratio=ratio, rep=rep, time=round(el, 1), invalid=int((~val).sum()), vertices=int(len(shapely.get_coordinates(o))),
                    mean=round(float(e.mean()), 2), median=round(float(np.median(e)), 3), p95=round(float(np.percentile(e, 95)), 2), above10=int((e > 10).sum()),
                    rebuilds=sum(q.n_rebuilds for q in instances), fixed=sum(q.n_fixed for q in instances), limited=sum(q.n_limited for q in instances),
-                   unresolved=sum(q.n_unresolved for q in instances), levels=[x.niterations for x in w if x.grid is not None], rss=round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024))
+                   unresolved=sum(q.n_unresolved for q in instances), min_area_ratio_seen=min(q.min_seen for q in instances), levels=[x.niterations for x in w if x.grid is not None], rss=round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024))
         print(json.dumps(row), flush=True)

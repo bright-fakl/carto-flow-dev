@@ -46,3 +46,25 @@ Districts, dt 0.2 and dt 0.4 and raw coarse counties, dt 0.2: every ratio gives 
 - The rebuild count rises with the ratio, but little: 10 at 0.001 to 18 at 0.2 on the counties at dt 0.2, 12 to 25 at dt 0.35. Most rebuilds are not caused by the area rule at small ratios.
 - The differences in time, vertices and error between ratios come from the path of the run, not from the cost of the rule: the ladder stalls at different iterations, so runs end at different levels (0.001 ends at 740 and 260 iterations without reaching the finest level and has the lowest vertex count and the highest error; 0.003 reaches the finest level and takes 68 s with 1.84 M vertices and 0.84 % mean error). The time per iteration (39 to 68 ms) follows the share of iterations spent at the finest grid. The earlier comparison of 0.001 with 0.2 (38 to 40 s against 44 to 68 s on the counties) mixes the two effects and is not evidence of a cost advantage.
 - So the data do not distinguish values between 0.001 and about 0.03; 0.1 and 0.2 rebuild more often (15 to 25) at no visible gain. Whether a ratio between 0.001 and 0.01 gives more margin against squeezed triangles at larger step sizes than dt 0.4 on the districts is not tested.
+
+## Lower ratios, and the rule switched off
+
+The ratio had only been tested from 0.001 upwards, so the sweep was extended downwards: 0.001, 0.0003, 0.0001, 0.00001 and 0 (the area rule never triggers; the rebuilds are the level starts and the inversion fixes), on counties (dt 0.2 and 0.35), districts (dt 0.4 and 0.6) and raw coarse counties (dt 0.2 and 0.35); then 0.001 against 0 at larger step sizes (districts dt 0.8 and 1.0, counties dt 0.6 and 0.8). `sweep.py` now also records the smallest triangle area ratio that the rule saw (`min_area_ratio_seen`, sampled when the rule is evaluated, once per window); `results_low.jsonl` and `results_stress.jsonl` hold the runs (38 in total).
+
+| input | dt | ratios | identical output for all ratios | invalid | unresolved inversions | inversion fixes / limiter runs | rebuilds | smallest area ratio seen |
+|---|---|---|---|---|---|---|---|---|
+| district | 0.4 | 0.0, 1e-05, 0.0001, 0.0003, 0.001 | yes | 0 | 0 | 47 / 0 | 13 | 5.0e-02 |
+| district | 0.6 | 0.0, 1e-05, 0.0001, 0.0003, 0.001 | yes | 0 | 0 | 31 / 2 | 13 | 1.2e-02 |
+| coarse | 0.2 | 0.0, 1e-05, 0.0001, 0.0003, 0.001 | yes | 0 | 0 | 46 / 0 | 11 | 8.5e-03 |
+| coarse | 0.35 | 0.0, 1e-05, 0.0001, 0.0003, 0.001 | yes | 0 | 0 | 62 / 2 | 14 | 4.6e-03 |
+| county | 0.2 | 0.0, 1e-05, 0.0001, 0.0003, 0.001 | yes | 0 | 0 | 56 / 0 | 10 | 1.7e-03 |
+| county | 0.35 | 0.0, 1e-05, 0.0001, 0.0003, 0.001 | yes | 0 | 0 | 33 / 2 | 11 | 4.8e-03 |
+| district | 0.8 | 0.0, 0.001 | yes | 0 | 0 | 31 / 5 | 12 | 9.3e-02 |
+| district | 1.0 | 0.0, 0.001 | yes | 0 | 0 | 22 / 4 | 13 | 4.1e-02 |
+| county | 0.6 | 0.0, 0.001 | yes | 0 | 0 | 88 / 14 | 25 | 7.4e-03 |
+| county | 0.8 | 0.0, 0.001 | yes | 0 | 0 | 67 / 13 | 18 | 2.2e-02 |
+
+- For every ratio from 0.001 down to 0 the output is identical (same vertices, same error, same rebuilds): the area rule at 0.001 never triggered in any of these runs, and switching it off changes nothing. All runs have 0 invalid polygons and no unresolved inversion.
+- The smallest area ratio that any mesh triangle reached before a rebuild was 1.7e-3 on the counties at dt 0.2 (4.8e-3 at dt 0.35, 7.4e-3 at dt 0.6, 2.2e-2 at dt 0.8), 4.6e-3 to 8.5e-3 on the raw coarse counties, 1.2e-2 to 9.3e-2 on the districts. The value 0.001 therefore sits just below the smallest triangle ratio observed on the counties (a factor of 1.7) and well below everything else. The earlier sweep agrees: on the counties the rule starts to act between 0.0017 and 0.003 (0.003 changed the run path).
+- So 0.001 is not near a threshold where validity fails: the rule is a backstop that is inactive on these inputs, and the validity comes from the inversion fix, the rebuild after a fix and the limiter. Where the rule becomes active (above about 0.002 on the counties) the runs stay valid as well, only the trajectory changes.
+- Not covered: whether a mesh that is kept very long (rule off) on an input whose triangles get squeezed much more than on these (the smallest ratio seen is 1.7e-3) stays valid. The inversion control is what would have to hold; its record in these runs is 0 unresolved inversions in 74 runs.
