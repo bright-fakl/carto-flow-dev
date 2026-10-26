@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #186: The stall rule follows the lagging regions (stall_lagging)</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #186: The stall rule follows the lagging regions (stall_lagging)</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-stall-lagging-component/index.html">Which stall-rule component follows the lagging regions? Candidates on real county, district, state and scene runs</a> <span class="meta">(exploration)</span><br><a href="../unresolved-regions-pr/index.html">area_tol_cells (early stop), n_unresolved and a stall warning that names the continuation</a> <span class="meta">(pr)</span><br><a href="../exploration-stall-after-validity/index.html">Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</a> <span class="meta">(exploration)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/186">https://github.com/bright-fakl/carto-flow/pull/186</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/177">#177</a></dd>
+<dt>Branch</dt><dd>feat/stall-lagging-regions</dd>
+<dt>Base</dt><dd>feat/unresolved-regions</dd>
+<dt>Created</dt><dd>2026-10-26 23:30</dd>
+<dt>Before</dt><dd>feat/unresolved-regions @ f30c2b4</dd>
+<dt>After</dt><dd>feat/stall-lagging-regions @ 904bfc3</dd>
+<dt>Inputs</dt><dd>see exploration-stall-lagging-component (counties with 1 km input, districts, states and strip scenes).</dd>
+</dl>
+<p class="desc">A third component of the stall rule judges the lagging error (total log2 error above the tolerances) and the best iterate is chosen by the same measure; only the finest level of a ladder follows it. On the county ladder (repair-crossings, budget 3000) the finest level ends CONVERGED after 1842 iterations (mean 0.32 %, none above 10 %) instead of stalled after 200 (mean 1.08 %, 45 above 10 %); with a budget of 1000 the mean is 0.46 % and 16 counties are above 10 %. Districts and states are unchanged. Cost is up to the budget.</p>
+<p>The comparison of the candidates and the figure are in <code>exploration-stall-lagging-component</code>; this page lists the change.</p>
+<h2>Behavior</h2>
+<ul><li><code>MorphOptions.stall_lagging</code> (default True). <code>StallMonitor.update</code> takes an optional <code>lag</code>; its cycle minimum is judged like the mean and the max (progress if it falls below the best of the earlier cycles by the efficiency fraction, and only while it is above 0). <code>errors.lagging_error</code> is the sum of the absolute log2 errors in excess of <code>max_tol</code> plus the excess of the mean over <code>mean_tol</code> times the number of regions; regions excused by <code>area_tol_cells</code> count as zero.</li><li>The best iterate is the one with the lowest lagging error (in place of the lowest of the mean and max ratios) when <code>stall_lagging</code> is True; <code>False</code> restores both the stall rule and the choice of the best iterate.</li><li>In a ladder with one set of options only the finest level follows the lagging regions; levels with their own options (a list) are untouched.</li><li>Runs that stagnate still stall and <code>n_iter</code> bounds the run.</li></ul>
+<h2>Results (counties, 1 km input, auto ladder)</h2>
+<table>
+<tr><th>validity</th><th>budget</th><th>stall_lagging</th><th>finest level</th><th>invalid</th><th>mean</th><th>above 10 %</th></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>False</td><td>stalled, 200</td><td>0</td><td>1.08 %</td><td>45</td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>True</td><td>budget, 420</td><td>0</td><td>0.46 %</td><td>16</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>True</td><td>converged, 1842</td><td>1</td><td>0.32 %</td><td>0</td></tr>
+<tr><td>check</td><td>1000</td><td>False</td><td>stalled, 170</td><td>57</td><td>1.37 %</td><td>60</td></tr>
+<tr><td>check</td><td>1000</td><td>True</td><td>budget, 350</td><td>64</td><td>0.56 %</td><td>32</td></tr>
+</table>
+<p>Districts and states: identical. Test changes: the tests of the old best-iterate rule (<code>TestBestIterate</code>, <code>TestBestAndLast</code>) and the strip-scene helper of the alignment tests run with <code>stall_lagging=False</code>; the <code>StallMonitor</code> spy accepts the extra argument.</p>
+<h2>Known costs</h2>
+<p>Iterations up to the budget (2422 iterations, about 5 times the stalled ladder, at 3000); on chaotic strip scenes the best iterate by lagging error can have one invalid polygon (seed 11) where the old one had none, and longer county runs with <code>&quot;repair-crossings&quot;</code> leave a few invalid polygons (1 at 3000 iterations).</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

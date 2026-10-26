@@ -1,0 +1,362 @@
+{
+ "3-check-None": {
+  "time": 6.171070098876953,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 16.70997281888946,
+  "max": 121.5926639645148,
+  "invalid": 0
+ },
+ "3-check-count1": {
+  "time": 0.1112673282623291,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 16.70997281888946,
+  "max": 121.5926639645148,
+  "invalid": 0
+ },
+ "3-check-count": {
+  "time": 0.1051795482635498,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 16.70997281888946,
+  "max": 121.5926639645148,
+  "invalid": 0
+ },
+ "3-check-excess": {
+  "time": 0.11182999610900879,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 16.70997281888946,
+  "max": 121.5926639645148,
+  "invalid": 0
+ },
+ "3-check-median": {
+  "time": 0.13535737991333008,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 16.70997281888946,
+  "max": 121.5926639645148,
+  "invalid": 0
+ },
+ "3-repair-crossings-None": {
+  "time": 18.133989810943604,
+  "status": "stalled",
+  "niter": 240,
+  "best": 200,
+  "mean": 23.591021035770332,
+  "max": 227.7928671825347,
+  "invalid": 0
+ },
+ "3-repair-crossings-count1": {
+  "time": 3.754256248474121,
+  "status": "stalled",
+  "niter": 240,
+  "best": 200,
+  "mean": 23.591021035770332,
+  "max": 227.7928671825347,
+  "invalid": 0
+ },
+ "3-repair-crossings-count": {
+  "time": 3.732732057571411,
+  "status": "stalled",
+  "niter": 240,
+  "best": 200,
+  "mean": 23.591021035770332,
+  "max": 227.7928671825347,
+  "invalid": 0
+ },
+ "3-repair-crossings-excess": {
+  "time": 3.639356851577759,
+  "status": "stalled",
+  "niter": 240,
+  "best": 200,
+  "mean": 23.591021035770332,
+  "max": 227.7928671825347,
+  "invalid": 0
+ },
+ "3-repair-crossings-median": {
+  "time": 3.9031128883361816,
+  "status": "stalled",
+  "niter": 240,
+  "best": 200,
+  "mean": 23.591021035770332,
+  "max": 227.7928671825347,
+  "invalid": 0
+ },
+ "7-check-None": {
+  "time": 0.16564106941223145,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "7-check-count1": {
+  "time": 0.1255793571472168,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "7-check-count": {
+  "time": 0.12493705749511719,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "7-check-excess": {
+  "time": 0.12278270721435547,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "7-check-median": {
+  "time": 0.1492161750793457,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "7-repair-crossings-None": {
+  "time": 0.39620351791381836,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "7-repair-crossings-count1": {
+  "time": 0.3631014823913574,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "7-repair-crossings-count": {
+  "time": 0.32361316680908203,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "7-repair-crossings-excess": {
+  "time": 0.32820892333984375,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "7-repair-crossings-median": {
+  "time": 0.3553946018218994,
+  "status": "completed",
+  "niter": 400,
+  "best": 400,
+  "mean": 6.059316423999128,
+  "max": 16.98567443043968,
+  "invalid": 0
+ },
+ "11-check-None": {
+  "time": 0.22320842742919922,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 15.810019996267567,
+  "max": 114.6833092051509,
+  "invalid": 1
+ },
+ "11-check-count1": {
+  "time": 0.11019492149353027,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 15.810019996267567,
+  "max": 114.6833092051509,
+  "invalid": 1
+ },
+ "11-check-count": {
+  "time": 0.11427974700927734,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 15.810019996267567,
+  "max": 114.6833092051509,
+  "invalid": 1
+ },
+ "11-check-excess": {
+  "time": 0.11436319351196289,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 15.810019996267567,
+  "max": 114.6833092051509,
+  "invalid": 1
+ },
+ "11-check-median": {
+  "time": 0.14266729354858398,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 15.810019996267567,
+  "max": 114.6833092051509,
+  "invalid": 1
+ },
+ "11-repair-crossings-None": {
+  "time": 0.5127151012420654,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 14.44786205634825,
+  "max": 87.90034812146781,
+  "invalid": 0
+ },
+ "11-repair-crossings-count1": {
+  "time": 0.512580394744873,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 14.44786205634825,
+  "max": 87.90034812146781,
+  "invalid": 0
+ },
+ "11-repair-crossings-count": {
+  "time": 0.5045280456542969,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 14.44786205634825,
+  "max": 87.90034812146781,
+  "invalid": 0
+ },
+ "11-repair-crossings-excess": {
+  "time": 0.5236859321594238,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 14.44786205634825,
+  "max": 87.90034812146781,
+  "invalid": 0
+ },
+ "11-repair-crossings-median": {
+  "time": 0.5637252330780029,
+  "status": "completed",
+  "niter": 400,
+  "best": 390,
+  "mean": 14.44786205634825,
+  "max": 87.90034812146781,
+  "invalid": 0
+ },
+ "19-check-None": {
+  "time": 0.19471454620361328,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ },
+ "19-check-count1": {
+  "time": 0.060190439224243164,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ },
+ "19-check-count": {
+  "time": 0.06424713134765625,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ },
+ "19-check-excess": {
+  "time": 0.06861662864685059,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ },
+ "19-check-median": {
+  "time": 0.07776355743408203,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ },
+ "19-repair-crossings-None": {
+  "time": 0.20574426651000977,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ },
+ "19-repair-crossings-count1": {
+  "time": 0.221923828125,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ },
+ "19-repair-crossings-count": {
+  "time": 0.21456694602966309,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ },
+ "19-repair-crossings-excess": {
+  "time": 0.22489643096923828,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ },
+ "19-repair-crossings-median": {
+  "time": 0.2420029640197754,
+  "status": "converged",
+  "niter": 165,
+  "best": 165,
+  "mean": 1.0058762665579257,
+  "max": 2.4661466059701542,
+  "invalid": 0
+ }
+}

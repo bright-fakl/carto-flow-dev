@@ -1,0 +1,94 @@
+{
+ "congressional_district-False": {
+  "time": 3.6861393451690674,
+  "levels": [
+   {
+    "grid": 128,
+    "status": "converged",
+    "niter": 135,
+    "best_it": 135,
+    "n10_best": 0,
+    "n10_last": 0
+   }
+  ],
+  "total_iter": 135,
+  "final": {
+   "invalid": 2,
+   "mean": 0.4837625523891091,
+   "median": 0.26367517478911107,
+   "p95": 1.895160784506614,
+   "max": 7.694791693153694,
+   "n10": 0,
+   "n5": 2
+  }
+ },
+ "congressional_district-True": {
+  "time": 3.021024465560913,
+  "levels": [
+   {
+    "grid": 128,
+    "status": "converged",
+    "niter": 135,
+    "best_it": 135,
+    "n10_best": 0,
+    "n10_last": 0
+   }
+  ],
+  "total_iter": 135,
+  "final": {
+   "invalid": 2,
+   "mean": 0.4837625523891091,
+   "median": 0.26367517478911107,
+   "p95": 1.895160784506614,
+   "max": 7.694791693153694,
+   "n10": 0,
+   "n5": 2
+  }
+ },
+ "state-False": {
+  "time": 0.42814135551452637,
+  "levels": [
+   {
+    "grid": 128,
+    "status": "converged",
+    "niter": 65,
+    "best_it": 65,
+    "n10_best": 0,
+    "n10_last": 0
+   }
+  ],
+  "total_iter": 65,
+  "final": {
+   "invalid": 0,
+   "mean": 1.1940934119692004,
+   "median": 0.6173556793972217,
+   "p95": 4.310496683019633,
+   "max": 5.662113557244278,
+   "n10": 0,
+   "n5": 1
+  }
+ },
+ "state-True": {
+  "time": 0.45371389389038086,
+  "levels": [
+   {
+    "grid": 128,
+    "status": "converged",
+    "niter": 65,
+    "best_it": 65,
+    "n10_best": 0,
+    "n10_last": 0
+   }
+  ],
+  "total_iter": 65,
+  "final": {
+   "invalid": 0,
+   "mean": 1.1940934119692004,
+   "median": 0.6173556793972217,
+   "p95": 4.310496683019633,
+   "max": 5.662113557244278,
+   "n10": 0,
+   "n5": 1
+  }
+ }
+}

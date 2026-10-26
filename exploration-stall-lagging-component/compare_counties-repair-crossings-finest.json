@@ -1,0 +1,236 @@
+{
+ "1000-count1": {
+  "time": 66.79870200157166,
+  "levels": [
+   {
+    "grid": 512,
+    "status": "stalled",
+    "niter": 500,
+    "best_it": 496,
+    "n_above_best": 762,
+    "n_above_last": 765
+   },
+   {
+    "grid": 1024,
+    "status": "stalled",
+    "niter": 80,
+    "best_it": 33,
+    "n_above_best": 413,
+    "n_above_last": 225
+   },
+   {
+    "grid": 2048,
+    "status": "completed",
+    "niter": 420,
+    "best_it": 411,
+    "n_above_best": 17,
+    "n_above_last": 18
+   }
+  ],
+  "total_iter": 1000,
+  "final": {
+   "invalid": 0,
+   "mean": 0.6500070151321259,
+   "median": 0.13946329768698018,
+   "p95": 1.301713803578539,
+   "max": 495.91230361452847,
+   "n10": 16,
+   "n5": 27
+  }
+ },
+ "1000-count": {
+  "time": 61.749412298202515,
+  "levels": [
+   {
+    "grid": 512,
+    "status": "stalled",
+    "niter": 500,
+    "best_it": 496,
+    "n_above_best": 762,
+    "n_above_last": 765
+   },
+   {
+    "grid": 1024,
+    "status": "stalled",
+    "niter": 80,
+    "best_it": 33,
+    "n_above_best": 413,
+    "n_above_last": 225
+   },
+   {
+    "grid": 2048,
+    "status": "completed",
+    "niter": 420,
+    "best_it": 411,
+    "n_above_best": 17,
+    "n_above_last": 18
+   }
+  ],
+  "total_iter": 1000,
+  "final": {
+   "invalid": 0,
+   "mean": 0.6500070151321259,
+   "median": 0.13946329768698018,
+   "p95": 1.301713803578539,
+   "max": 495.91230361452847,
+   "n10": 16,
+   "n5": 27
+  }
+ },
+ "1000-excess": {
+  "time": 59.57772731781006,
+  "levels": [
+   {
+    "grid": 512,
+    "status": "stalled",
+    "niter": 500,
+    "best_it": 496,
+    "n_above_best": 762,
+    "n_above_last": 765
+   },
+   {
+    "grid": 1024,
+    "status": "stalled",
+    "niter": 80,
+    "best_it": 33,
+    "n_above_best": 413,
+    "n_above_last": 225
+   },
+   {
+    "grid": 2048,
+    "status": "completed",
+    "niter": 420,
+    "best_it": 411,
+    "n_above_best": 17,
+    "n_above_last": 18
+   }
+  ],
+  "total_iter": 1000,
+  "final": {
+   "invalid": 0,
+   "mean": 0.6500070151321259,
+   "median": 0.13946329768698018,
+   "p95": 1.301713803578539,
+   "max": 495.91230361452847,
+   "n10": 16,
+   "n5": 27
+  }
+ },
+ "3000-count1": {
+  "time": 275.0267958641052,
+  "levels": [
+   {
+    "grid": 512,
+    "status": "stalled",
+    "niter": 500,
+    "best_it": 496,
+    "n_above_best": 762,
+    "n_above_last": 765
+   },
+   {
+    "grid": 1024,
+    "status": "stalled",
+    "niter": 80,
+    "best_it": 33,
+    "n_above_best": 413,
+    "n_above_last": 225
+   },
+   {
+    "grid": 2048,
+    "status": "converged",
+    "niter": 1842,
+    "best_it": 1842,
+    "n_above_best": 0,
+    "n_above_last": 0
+   }
+  ],
+  "total_iter": 2422,
+  "final": {
+   "invalid": 1,
+   "mean": 0.32364892226592396,
+   "median": 0.18036337704758693,
+   "p95": 1.2129099061758446,
+   "max": 9.505050155140745,
+   "n10": 0,
+   "n5": 2
+  }
+ },
+ "3000-count": {
+  "time": 269.1367211341858,
+  "levels": [
+   {
+    "grid": 512,
+    "status": "stalled",
+    "niter": 500,
+    "best_it": 496,
+    "n_above_best": 762,
+    "n_above_last": 765
+   },
+   {
+    "grid": 1024,
+    "status": "stalled",
+    "niter": 80,
+    "best_it": 33,
+    "n_above_best": 413,
+    "n_above_last": 225
+   },
+   {
+    "grid": 2048,
+    "status": "converged",
+    "niter": 1842,
+    "best_it": 1842,
+    "n_above_best": 0,
+    "n_above_last": 0
+   }
+  ],
+  "total_iter": 2422,
+  "final": {
+   "invalid": 1,
+   "mean": 0.32364892226592396,
+   "median": 0.18036337704758693,
+   "p95": 1.2129099061758446,
+   "max": 9.505050155140745,
+   "n10": 0,
+   "n5": 2
+  }
+ },
+ "3000-excess": {
+  "time": 260.24488043785095,
+  "levels": [
+   {
+    "grid": 512,
+    "status": "stalled",
+    "niter": 500,
+    "best_it": 496,
+    "n_above_best": 762,
+    "n_above_last": 765
+   },
+   {
+    "grid": 1024,
+    "status": "stalled",
+    "niter": 80,
+    "best_it": 33,
+    "n_above_best": 413,
+    "n_above_last": 225
+   },
+   {
+    "grid": 2048,
+    "status": "converged",
+    "niter": 1842,
+    "best_it": 1842,
+    "n_above_best": 0,
+    "n_above_last": 0
+   }
+  ],
+  "total_iter": 2422,
+  "final": {
+   "invalid": 1,
+   "mean": 0.32364892226592396,
+   "median": 0.18036337704758693,
+   "p95": 1.2129099061758446,
+   "max": 9.505050155140745,
+   "n10": 0,
+   "n5": 2
+  }
+ }
+}

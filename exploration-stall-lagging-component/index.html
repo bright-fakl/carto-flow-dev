@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Which stall-rule component follows the lagging regions? Candidates on real county, district, state and scene runs</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Which stall-rule component follows the lagging regions? Candidates on real county, district, state and scene runs</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status done">led-to</span></dd>
+<dt>Related</dt><dd><a href="../exploration-stall-after-validity/index.html">Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</a> <span class="meta">(exploration)</span><br><a href="../exploration-unresolved-regions/index.html">Absolute area tolerance as an early stop, and sub-cell exclusion, for regions of a few cells (counties)</a> <span class="meta">(exploration)</span><br><a href="../stall-lagging-pr/index.html">The stall rule follows the lagging regions (stall_lagging)</a> <span class="meta">(pr)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/177">#177</a></dd>
+<dt>Created</dt><dd>2026-10-26 23:00</dd>
+<dt>Before</dt><dd>feat/unresolved-regions @ f30c2b4</dd>
+<dt>After</dt><dd>feat/stall-lagging-regions (library runs of each candidate on an experimental option)</dd>
+<dt>Inputs</dt><dd>3,108 bundled counties (1 km input, auto ladder), validity=&quot;repair-crossings&quot; and &quot;check&quot;, n_iter 1000 and 3000 (the total budget of the ladder), default tolerances. Districts (1 km input) and states, n_iter 500 and 1000. Strip scenes of the test suite (seeds 3, 7, 11, 19, 23, 31; grid 64, n_iter 400, mean_tol 2 %, max_tol 5 %). Single runs; several runs shared the machine, so the times are indicative only (iterations are the cost measure). Errors of the valid polygons against targets normalized on the valid polygons.</dd>
+</dl>
+<p class="desc">Four candidate progress measures for the stall rule (count of regions above max_tol, the same by efficiency, the total log2 excess over the tolerance, the median of the lagging regions) were run in the library on the county ladder (repair-crossings and check), districts, states and strip scenes. Applied on all ladder levels they use the budget on the coarse levels; on the finest level only, the count and the excess behave alike (counties, repair-crossings, budget 3000, no invalid polygons at the stall: CONVERGED after 1842 iterations, mean 0.32 %, none above 10 %), the excess also continues in check mode, and choosing the best iterate by the same excess measure improves the returned iterate. The median does not help. Districts and states are unchanged.</p>
+<p><code>compare.py</code> runs the candidates (an experimental option, removed again), <code>final.py</code> the shipped design, <code>tables.py</code> builds the table and the figure.</p>
+<h2>Candidates</h2>
+<p>All judge the cycle minimum like the mean and max components (progress if it falls by the fraction <code>stall_min_efficiency * moved</code>):</p>
+<ul><li>(a) the count of regions above <code>max_tol</code> (a variant: any fall by 1 or more, and one by the efficiency rule);</li><li>(b) the total log2 excess of the regions above <code>max_tol</code> (plus the excess of the mean over <code>mean_tol</code>, times the number of regions);</li><li>(c) the median log2 error of the regions above <code>max_tol</code>.</li></ul>
+<p>&quot;All levels&quot; applies the component on every ladder level; &quot;finest level only&quot; only on the finest. &quot;Best by excess&quot; returns the iterate with the lowest excess instead of the lowest mean/max score.</p>
+<h2>Counties</h2>
+<table>
+<tr><th>validity</th><th>budget</th><th>design</th><th>iterations</th><th>levels (status, iterations)</th><th>invalid</th><th>mean %</th><th>median %</th><th>max %</th><th>above 10 %</th><th>above 5 %</th></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>baseline (mean, max)</td><td>780</td><td>stal 500 / stal 80 / stal 200</td><td>0</td><td>1.08</td><td>0.20</td><td>548</td><td>45</td><td>84</td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>(a) count above max_tol, all levels</td><td>1000</td><td>stal 840 / comp 160</td><td>1</td><td>3.71</td><td>0.27</td><td>543</td><td>247</td><td>408</td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>(b) excess, all levels</td><td>1000</td><td>stal 500 / stal 360 / comp 140</td><td>0</td><td>1.51</td><td>0.20</td><td>515</td><td>74</td><td>127</td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>(c) median of lagging, all levels</td><td>920</td><td>stal 500 / stal 100 / stal 320</td><td>0</td><td>0.94</td><td>0.24</td><td>517</td><td>26</td><td>51</td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>(a) count, finest level only</td><td>1000</td><td>stal 500 / stal 80 / comp 420</td><td>0</td><td>0.65</td><td>0.14</td><td>496</td><td>16</td><td>27</td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>(b) excess, finest level only</td><td>1000</td><td>stal 500 / stal 80 / comp 420</td><td>0</td><td>0.65</td><td>0.14</td><td>496</td><td>16</td><td>27</td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>(a) count, finest only, best by excess</td><td>1000</td><td>stal 500 / stal 80 / comp 420</td><td>0</td><td>0.46</td><td>0.04</td><td>497</td><td>16</td><td>26</td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>(b) excess, finest only, best by excess = chosen</td><td>1000</td><td>stal 500 / stal 80 / comp 420</td><td>0</td><td>0.46</td><td>0.04</td><td>497</td><td>16</td><td>26</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>baseline (mean, max)</td><td>780</td><td>stal 500 / stal 80 / stal 200</td><td>0</td><td>1.08</td><td>0.20</td><td>548</td><td>45</td><td>84</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>(a) count above max_tol, all levels</td><td>2320</td><td>stal 840 / stal 580 / stal 900</td><td>10</td><td>0.69</td><td>0.32</td><td>48</td><td>12</td><td>20</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>(b) excess, all levels</td><td>1760</td><td>stal 500 / stal 360 / stal 900</td><td>2</td><td>0.17</td><td>0.02</td><td>69</td><td>6</td><td>15</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>(c) median of lagging, all levels</td><td>920</td><td>stal 500 / stal 100 / stal 320</td><td>0</td><td>0.94</td><td>0.24</td><td>517</td><td>26</td><td>51</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>(a) count, finest level only</td><td>2422</td><td>stal 500 / stal 80 / conv 1842</td><td>1</td><td>0.32</td><td>0.18</td><td>10</td><td>0</td><td>2</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>(b) excess, finest level only</td><td>2422</td><td>stal 500 / stal 80 / conv 1842</td><td>1</td><td>0.32</td><td>0.18</td><td>10</td><td>0</td><td>2</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>(a) count, finest only, best by excess</td><td>2422</td><td>stal 500 / stal 80 / conv 1842</td><td>1</td><td>0.32</td><td>0.18</td><td>10</td><td>0</td><td>2</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>(b) excess, finest only, best by excess = chosen</td><td>2422</td><td>stal 500 / stal 80 / conv 1842</td><td>1</td><td>0.32</td><td>0.18</td><td>10</td><td>0</td><td>2</td></tr>
+<tr><td>check</td><td>1000</td><td>baseline (mean, max)</td><td>820</td><td>stal 540 / stal 110 / stal 170</td><td>57</td><td>1.37</td><td>0.25</td><td>523</td><td>60</td><td>86</td></tr>
+<tr><td>check</td><td>1000</td><td>(a) count above max_tol, all levels</td><td>1000</td><td>comp 1000</td><td>15</td><td>14.46</td><td>1.22</td><td>865</td><td>763</td><td>1023</td></tr>
+<tr><td>check</td><td>1000</td><td>(b) excess, all levels</td><td>1000</td><td>stal 580 / comp 420</td><td>38</td><td>5.38</td><td>0.72</td><td>628</td><td>298</td><td>485</td></tr>
+<tr><td>check</td><td>1000</td><td>(c) median of lagging, all levels</td><td>940</td><td>stal 540 / stal 230 / stal 170</td><td>57</td><td>1.37</td><td>0.25</td><td>523</td><td>60</td><td>86</td></tr>
+<tr><td>check</td><td>1000</td><td>(a) count, finest level only</td><td>820</td><td>stal 540 / stal 110 / stal 170</td><td>57</td><td>1.37</td><td>0.25</td><td>523</td><td>60</td><td>86</td></tr>
+<tr><td>check</td><td>1000</td><td>(b) excess, finest level only</td><td>1000</td><td>stal 540 / stal 110 / comp 350</td><td>57</td><td>1.37</td><td>0.25</td><td>523</td><td>60</td><td>86</td></tr>
+<tr><td>check</td><td>1000</td><td>(a) count, finest only, best by excess</td><td>820</td><td>stal 540 / stal 110 / stal 170</td><td>60</td><td>1.01</td><td>0.03</td><td>544</td><td>58</td><td>80</td></tr>
+<tr><td>check</td><td>1000</td><td>(b) excess, finest only, best by excess = chosen</td><td>1000</td><td>stal 540 / stal 110 / comp 350</td><td>64</td><td>0.56</td><td>0.00</td><td>557</td><td>32</td><td>61</td></tr>
+<tr><td>check</td><td>3000</td><td>baseline (mean, max)</td><td>820</td><td>stal 540 / stal 110 / stal 170</td><td>57</td><td>1.37</td><td>0.25</td><td>523</td><td>60</td><td>86</td></tr>
+<tr><td>check</td><td>3000</td><td>(a) count above max_tol, all levels</td><td>1700</td><td>stal 1160 / stal 370 / stal 170</td><td>57</td><td>1.37</td><td>0.25</td><td>523</td><td>60</td><td>86</td></tr>
+<tr><td>check</td><td>3000</td><td>(b) excess, all levels</td><td>1740</td><td>stal 580 / stal 630 / stal 530</td><td>71</td><td>0.40</td><td>0.00</td><td>519</td><td>17</td><td>37</td></tr>
+<tr><td>check</td><td>3000</td><td>(c) median of lagging, all levels</td><td>940</td><td>stal 540 / stal 230 / stal 170</td><td>57</td><td>1.37</td><td>0.25</td><td>523</td><td>60</td><td>86</td></tr>
+<tr><td>check</td><td>3000</td><td>(a) count, finest level only</td><td>820</td><td>stal 540 / stal 110 / stal 170</td><td>57</td><td>1.37</td><td>0.25</td><td>523</td><td>60</td><td>86</td></tr>
+<tr><td>check</td><td>3000</td><td>(b) excess, finest level only</td><td>1180</td><td>stal 540 / stal 110 / stal 530</td><td>71</td><td>0.40</td><td>0.00</td><td>519</td><td>17</td><td>37</td></tr>
+<tr><td>check</td><td>3000</td><td>(a) count, finest only, best by excess</td><td>820</td><td>stal 540 / stal 110 / stal 170</td><td>60</td><td>1.01</td><td>0.03</td><td>544</td><td>58</td><td>80</td></tr>
+<tr><td>check</td><td>3000</td><td>(b) excess, finest only, best by excess = chosen</td><td>1180</td><td>stal 540 / stal 110 / stal 530</td><td>70</td><td>0.42</td><td>0.00</td><td>528</td><td>18</td><td>44</td></tr>
+</table>
+<p>The shipped design (excess, finest level only, best by excess), <code>final.py</code>, with the old rule (stall_lagging False) beside it:</p>
+<table>
+<tr><th>validity</th><th>budget</th><th>stall_lagging</th><th>iterations</th><th>levels</th><th>invalid</th><th>mean %</th><th>above 10 %</th><th>returned vs final iterate above 10 % (finest)</th></tr>
+<tr><td>repair-crossings</td><td>500</td><td>False / True</td><td>500 / 500</td><td>one level, budget used by the coarse level</td><td>0 / 0</td><td>14.09 / 14.09</td><td>744 / 744</td><td></td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>False</td><td>780</td><td>stal 500 / stal 80 / stal 200</td><td>0</td><td>1.08</td><td>45</td><td>46 / 46</td></tr>
+<tr><td>repair-crossings</td><td>1000</td><td>True</td><td>1000</td><td>stal 500 / stal 80 / comp 420</td><td>0</td><td>0.46</td><td>16</td><td>17 / 18</td></tr>
+<tr><td>repair-crossings</td><td>3000</td><td>True</td><td>2422</td><td>stal 500 / stal 80 / conv 1842</td><td>1</td><td>0.32</td><td>0</td><td>0 / 0</td></tr>
+<tr><td>check</td><td>1000</td><td>False</td><td>820</td><td>stal 540 / stal 110 / stal 170</td><td>57</td><td>1.37</td><td>60</td><td>74 / 71</td></tr>
+<tr><td>check</td><td>1000</td><td>True</td><td>1000</td><td>stal 540 / stal 110 / comp 350</td><td>64</td><td>0.56</td><td>32</td><td>45 / 45</td></tr>
+<tr><td>check</td><td>3000</td><td>True</td><td>1180</td><td>stal 540 / stal 110 / stal 530</td><td>70</td><td>0.42</td><td>18</td><td>29 / 27</td></tr>
+</table>
+<h2>Districts, states, scenes</h2>
+<ul><li>Districts and states (ladder, n_iter 500) end <code>CONVERGED</code> after 135 and 65 iterations with and without the component, with identical errors.</li><li>Strip scenes (6 seeds, check and repair-crossings, 12 pairs): status and iterations are identical in all 12 pairs (the scenes mostly run to <code>n_iter</code>; seed 19 converges). The best iterate by excess has the lower mean error in 10 of 12 pairs (seed 7: 6.06 to 1.66 %) and a higher max in 9 (seed 31: 3712 to 4052 %), and one pair (seed 11, repair-crossings) returns 1 invalid polygon where the baseline returns 0. These scenes are chaotic by construction (two regions with 0.3 % of the target).</li></ul>
+<h2>Reading</h2>
+<ul><li>The component must not be on at the coarse levels: with the budget shared by the ladder (<code>n_iter</code> is the total), the coarse level 512 keeps improving its unresolvable sub-cell regions and uses 840 to 1000 of the 1000 iterations in four of the &quot;all levels&quot; runs (mean error 1.8 to 14.5 % against 1.08 %).</li><li>Count and excess give the same finest-level runs in repair-crossings; in check mode (invalid polygons that grow) the count never counts progress and the excess does. The excess is smooth where the count has thresholds and noise at them, needs no parameter, and is also the measure that chooses the best iterate, so one measure serves both.</li><li>The best iterate must follow the same measure: with the old score the returned iterate can be an earlier one with many more regions above tolerance (check mode, budget 1000: mean 1.37 % returned although the run continued for 350 iterations; by excess 0.56 %).</li><li>The median (c) does not help: it stalls like the baseline in check mode and gives 0.94 % at repair-crossings, since regions entering or leaving the lagging set move it.</li><li>Runs that stagnate still stall (counties with validity=&quot;check&quot; and the count, 170 iterations; the &quot;finest level only&quot; runs of the old rule), and no run exceeds the budget. The cost is iterations up to the budget: 780 to 1000 at a budget of 1000, 2422 at 3000 (about 5 times the time of the stalled ladder).</li><li>Remaining defect: longer runs with <code>&quot;repair-crossings&quot;</code> can end with a few invalid polygons (1 at 3000 iterations on counties; 6 to 10 in the all-level runs).</li></ul>
+<div class="figure">
+<img src="fig1_designs.png" alt="Counties, repair-crossings: mean error against the iterations of the ladder for each design, at a budget of 1000 and of 3000 iterations. Red: the chosen design.">
+<p class="caption">Counties, repair-crossings: mean error against the iterations of the ladder for each design, at a budget of 1000 and of 3000 iterations. Red: the chosen design.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
