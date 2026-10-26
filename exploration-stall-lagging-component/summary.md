@@ -12,9 +12,11 @@ after: feat/stall-lagging-regions (library runs of each candidate on an experime
 inputs: 3,108 bundled counties (1 km input, auto ladder), validity="repair-crossings" and "check", n_iter 1000 and 3000 (the total budget of the ladder), default tolerances. Districts (1 km input) and states, n_iter 500 and 1000. Strip scenes of the test suite (seeds 3, 7, 11, 19, 23, 31; grid 64, n_iter 400, mean_tol 2 %, max_tol 5 %). Single runs; several runs shared the machine, so the times are indicative only (iterations are the cost measure). Errors of the valid polygons against targets normalized on the valid polygons.
 ---
 
-`compare.py` runs the candidates (an experimental option, removed again), `final.py` the shipped design, `tables.py` builds the table and the figure.
+`trace.py` records the three measures at every iteration of the chosen design (counties, repair-crossings, n_iter 3000) and `trace_fig.py` plots them and replays the old rule on the recorded values; `compare.py` runs the candidates (an experimental option, removed again), `final.py` the shipped design, `tables.py` builds the table and the figure.
 
 figure: fig1_designs.png — Counties, repair-crossings: mean error against the iterations of the ladder for each design, at a budget of 1000 and of 3000 iterations. Red: the chosen design.
+
+figure: fig2_trace.png — The finest county level (grid 2048) of the chosen design, per iteration: the mean error ratio and the max error ratio (the two measures of the old rule) and the lagging error (the new one). Red dashed: the iteration at which the old rule, replayed on the same values, stalls (200). Green dashed: where the run ends with the new rule (CONVERGED, 1842).
 
 ## Candidates
 
@@ -79,6 +81,13 @@ The shipped design (excess, finest level only, best by excess), `final.py`, with
 
 - Districts and states (ladder, n_iter 500) end `CONVERGED` after 135 and 65 iterations with and without the component, with identical errors.
 - Strip scenes (6 seeds, check and repair-crossings, 12 pairs): status and iterations are identical in all 12 pairs (the scenes mostly run to `n_iter`; seed 19 converges). The best iterate by excess has the lower mean error in 10 of 12 pairs (seed 7: 6.06 to 1.66 %) and a higher max in 9 (seed 31: 3712 to 4052 %), and one pair (seed 11, repair-crossings) returns 1 invalid polygon where the baseline returns 0. These scenes are chaotic by construction (two regions with 0.3 % of the target).
+
+## The three measures over the iterations (finest county level)
+
+- **Mean ratio:** below 1 (satisfied) from the first iterations, and it swings within every 10-iteration cycle (the field is recomputed once per cycle), between about 0.01 and 0.15. A satisfied component does not count as progress.
+- **Max ratio:** about 20 at the old stall (iteration 200) and still 20 at iteration 400, then it falls steadily to 2 by iteration 1,400 and to 1 at 1,842. The old rule stops while this fall has not yet started to show in a cycle minimum by the required fraction.
+- **Lagging error:** 10 at iteration 200, falling smoothly to 0.7 at 1,400 and to 0 at 1,842, without the swings of the mean. The step at about 1,420 is a group of regions entering the tolerance.
+- The old rule's stall point (200) lies on the part of the curves where both the max ratio and the lagging error are still 10 to 20 times above their values at the end of the run.
 
 ## Reading
 
