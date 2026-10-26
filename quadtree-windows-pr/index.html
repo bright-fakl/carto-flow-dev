@@ -78,7 +78,7 @@
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
-<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
 <dt>Related</dt><dd><a href="../validated-windows-pr/index.html">Validated windows keep the flow cartogram output polygons valid</a> <span class="meta">(pr)</span><br><a href="../exploration-adaptive-windows/index.html">Inverted triangles of the quadtree mesh and an adaptive interval for the validity checks</a> <span class="meta">(exploration)</span><br><a href="../exploration-quadtree-optimized/index.html">Optimized quadtree windows (after Miaji et al.): profile, a numba path, mesh reuse and a checked pruning</a> <span class="meta">(exploration)</span></dd>
 <dt>Referenced by</dt><dd><a href="../exploration-quadtree-area-ratio/index.html">The area ratio of the quadtree rebuild rule</a> <span class="meta">(exploration)</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/181">https://github.com/bright-fakl/carto-flow/pull/181</a></dd>
@@ -86,6 +86,7 @@
 <dt>Branch</dt><dd>feat/quadtree-windows</dd>
 <dt>Base</dt><dd>feat/validated-windows</dd>
 <dt>Created</dt><dd>2026-10-22 18:00</dd>
+<dt>Closed</dt><dd>2026-10-26 02:01</dd>
 <dt>Before</dt><dd>feat/validated-windows @ 60130c5</dd>
 <dt>After</dt><dd>feat/quadtree-windows @ 6ccd063</dd>
 <dt>Inputs</dt><dd>raw coarse counties (simplify_coverage tolerance 4000 of the bundled counties, 43,084 vertices), 1 km counties and districts; morph_multiresolution with min_resolution and levels auto, area_scale 1e-6, n_iter 1000, default options except validity. Errors of the valid polygons against targets normalized on the valid polygons. The machine is about 2 times slower than the one of the prototype reports.</dd>
