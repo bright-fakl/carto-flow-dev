@@ -85,8 +85,8 @@ The shipped design (excess, finest level only, best by excess), `final.py`, with
 ## The three measures over the iterations (finest county level)
 
 - **Mean ratio:** below 1 (satisfied) from the first iterations, and it swings within every 10-iteration cycle (the field is recomputed once per cycle), between about 0.01 and 0.15. A satisfied component does not count as progress.
-- **Max ratio:** about 20 at the old stall (iteration 200) and still 20 at iteration 400, then it falls steadily to 2 by iteration 1,400 and to 1 at 1,842. The old rule stops while this fall has not yet started to show in a cycle minimum by the required fraction.
-- **Lagging error:** 10 at iteration 200, falling smoothly to 0.7 at 1,400 and to 0 at 1,842, without the swings of the mean. The step at about 1,420 is a group of regions entering the tolerance.
+- **Max ratio:** about 20 at the old stall (iteration 200) and still 20 at iteration 400, then it falls steadily to 2 by iteration 1,400 and to 1 at 1,842. The old rule stops at 200, before the steady fall.
+- **Lagging error:** 10 at iteration 200, falling smoothly to 0.7 at 1,400 and to 0 at 1,842, without the swings of the mean. All three measures change abruptly at about 1,420 iterations; the cause was not investigated.
 - The old rule's stall point (200) lies on the part of the curves where both the max ratio and the lagging error are still 10 to 20 times above their values at the end of the run.
 
 ## Reading
