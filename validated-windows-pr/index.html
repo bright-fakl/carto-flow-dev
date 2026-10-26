@@ -78,7 +78,7 @@
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
-<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Status</dt><dd><span class="status done">merged</span></dd>
 <dt>Related</dt><dd><a href="../exploration-validity-research/index.html">Validity-preserving flow cartograms without per-iteration meshes (validated windows), regression protocol, coarse input, memory</a> <span class="meta">(exploration)</span><br><a href="../exploration-adaptive-windows/index.html">Inverted triangles of the quadtree mesh and an adaptive interval for the validity checks</a> <span class="meta">(exploration)</span><br><a href="../exploration-quadtree-optimized/index.html">Optimized quadtree windows (after Miaji et al.): profile, a numba path, mesh reuse and a checked pruning</a> <span class="meta">(exploration)</span></dd>
 <dt>Referenced by</dt><dd><a href="../quadtree-windows-pr/index.html">Quadtree windows keep the flow cartogram output polygons valid</a> <span class="meta">(pr)</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/180">https://github.com/bright-fakl/carto-flow/pull/180</a></dd>
@@ -86,6 +86,7 @@
 <dt>Branch</dt><dd>feat/validated-windows</dd>
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-22 14:00</dd>
+<dt>Closed</dt><dd>2026-10-26 01:48</dd>
 <dt>Before</dt><dd>main @ 06d4ff0</dd>
 <dt>After</dt><dd>feat/validated-windows @ 60130c5</dd>
 <dt>Inputs</dt><dd>3,108 bundled counties (population) and 432 congressional districts with max_segment_length 1000, morph_multiresolution with min_resolution and levels auto, area_scale 1e-6, n_iter 1000, default options except validity. Errors are of the valid polygons against targets normalized on the valid polygons. The machine is about 2 times slower than the one of the prototype reports.</dd>
