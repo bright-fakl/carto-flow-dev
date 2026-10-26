@@ -4,7 +4,7 @@ title: Which stall-rule component follows the lagging regions? Candidates on rea
 description: Four candidate progress measures for the stall rule (count of regions above max_tol, the same by efficiency, the total log2 excess over the tolerance, the median of the lagging regions) were run in the library on the county ladder (repair-crossings and check), districts, states and strip scenes. Applied on all ladder levels they use the budget on the coarse levels; on the finest level only, the count and the excess behave alike (counties, repair-crossings, budget 3000, no invalid polygons at the stall: CONVERGED after 1842 iterations, mean 0.32 %, none above 10 %), the excess also continues in check mode, and choosing the best iterate by the same excess measure improves the returned iterate. The median does not help. Districts and states are unchanged.
 kind: exploration
 topic: flow
-status: led-to
+status: open
 related: exploration-stall-after-validity, exploration-unresolved-regions, stall-lagging-pr
 date: 2026-10-26 23:00
 before: feat/unresolved-regions @ f30c2b4

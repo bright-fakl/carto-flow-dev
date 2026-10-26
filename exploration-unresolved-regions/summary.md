@@ -4,7 +4,7 @@ title: Absolute area tolerance as an early stop, and sub-cell exclusion, for reg
 description: area_tol_cells is an early-stopping option, not an accuracy option: users who accept a small absolute size for small regions let the convergence test pass earlier. On the county ladder the finest level ends CONVERGED from 4 finest-grid cells, after 15 iterations and with a less accurate result than the stalled run (mean 1.28 % against 0.94 %, 103 counties above 10 % against 46); at 1 to 2 cells it only reports (34 and 59 counties unresolved). Excluding regions with a target below k cells does not converge the finest level up to 8 cells. Districts and states are unchanged. The option is off by default.
 kind: exploration
 topic: flow
-status: led-to
+status: open
 related: exploration-stall-after-validity, exploration-stall-lagging-regions, exploration-county-error-relation, unresolved-regions-pr
 date: 2026-10-26 20:00
 before: main @ 6921aca
