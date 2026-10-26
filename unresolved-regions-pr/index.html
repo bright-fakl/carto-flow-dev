@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #185: area_tol_cells, n_unresolved and a stall warning that names the continuation</title>
+<title>PR #185: area_tol_cells (early stop), n_unresolved and a stall warning that names the continuation</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -74,12 +74,12 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #185: area_tol_cells, n_unresolved and a stall warning that names the continuation</h1>
+<h1>PR #185: area_tol_cells (early stop), n_unresolved and a stall warning that names the continuation</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Topic</dt><dd>flow</dd>
 <dt>Status</dt><dd><span class="status todo">needs review</span></dd>
-<dt>Related</dt><dd><a href="../exploration-unresolved-regions/index.html">Absolute area tolerance and sub-cell exclusion for regions of a few cells (counties)</a> <span class="meta">(exploration)</span><br><a href="../exploration-stall-after-validity/index.html">Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</a> <span class="meta">(exploration)</span></dd>
+<dt>Related</dt><dd><a href="../exploration-unresolved-regions/index.html">Absolute area tolerance as an early stop, and sub-cell exclusion, for regions of a few cells (counties)</a> <span class="meta">(exploration)</span><br><a href="../exploration-stall-after-validity/index.html">Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</a> <span class="meta">(exploration)</span></dd>
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/185">https://github.com/bright-fakl/carto-flow/pull/185</a></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/177">#177</a></dd>
 <dt>Branch</dt><dd>feat/unresolved-regions</dd>
@@ -89,10 +89,10 @@
 <dt>After</dt><dd>feat/unresolved-regions @ 7ba2271</dd>
 <dt>Inputs</dt><dd>3,108 bundled counties (1 km input, auto ladder, validity=&quot;repair-crossings&quot;, n_iter 1000), 432 districts and the states as controls; see exploration-unresolved-regions.</dd>
 </dl>
-<p class="desc">MorphOptions.area_tol_cells (default off) excuses regions within k cells of their target from the relative tolerances; Cartogram.n_unresolved counts the excused regions above max_tol; a stalled morph warns and names workflow.morph(stall_patience=None, n_iter=N). On the county ladder the finest level converges from 4 cells but with a worse result than the stalled run, so the default stays off; districts and states are unchanged.</p>
+<p class="desc">MorphOptions.area_tol_cells (default off) stops a morph early when small regions are within k cells of their target, whatever their relative error; Cartogram.n_unresolved counts the excused regions above max_tol; a stalled morph warns and names workflow.morph(stall_patience=None, n_iter=N). It is not an accuracy option. On the county ladder the finest level converges from 4 cells with a less accurate result than the stalled run; districts and states are unchanged.</p>
 <p>The measurement and its figure are in <code>exploration-unresolved-regions</code>; this page lists the change.</p>
 <h2>Behavior</h2>
-<ul><li><code>area_tol_cells</code> (&gt;= 0, default 0): a region with <code>|area - target| &lt;= area_tol_cells * dx * dy</code> counts as on target in the convergence test, the stall rule and the best-iterate score. The reported errors (<code>mean_error_pct</code>, <code>max_error_pct</code>, history, snapshots) are the relative errors. In a ladder every level uses the same area: the cells of the finest grid.</li><li><code>Cartogram.n_unresolved</code>: excused regions whose relative error is not below <code>max_tol</code> (0 when off). It is not stored by <code>save_cartogram</code>.</li><li><code>CartogramWorkflow.morph</code> and <code>morph_multiresolution</code> warn when the last pass is stalled; the message names <code>workflow.morph(stall_patience=None, n_iter=N)</code>, which continues from the best iterate with the stall rule off. The quality report of <code>metrics</code> names it too.</li><li>Not in this PR: a stall component that follows the count of regions above <code>max_tol</code>.</li></ul>
+<ul><li><code>area_tol_cells</code> (&gt;= 0, default 0), an early-stopping option for users who accept a small absolute size for small regions: a region with <code>|area - target| &lt;= area_tol_cells * dx * dy</code> counts as on target in the convergence test, the stall rule and the best-iterate score. The reported errors (<code>mean_error_pct</code>, <code>max_error_pct</code>, history, snapshots) are the relative errors. In a ladder every level uses the same area: the cells of the finest grid.</li><li><code>Cartogram.n_unresolved</code>: excused regions whose relative error is not below <code>max_tol</code> (0 when off). It is not stored by <code>save_cartogram</code>.</li><li><code>CartogramWorkflow.morph</code> and <code>morph_multiresolution</code> warn when the last pass is stalled; the message names <code>workflow.morph(stall_patience=None, n_iter=N)</code>, which continues from the best iterate with the stall rule off. The quality report of <code>metrics</code> names it too.</li><li>Not in this PR: a stall component that follows the count of regions above <code>max_tol</code>.</li></ul>
 <h2>Results</h2>
 <table>
 <tr><th>k (finest cells)</th><th>finest level</th><th>n_unresolved</th><th>mean / above 10 % (true)</th></tr>

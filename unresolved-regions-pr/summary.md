@@ -2,8 +2,8 @@
 pr: 185
 url: https://github.com/bright-fakl/carto-flow/pull/185
 issue: 177
-title: area_tol_cells, n_unresolved and a stall warning that names the continuation
-description: MorphOptions.area_tol_cells (default off) excuses regions within k cells of their target from the relative tolerances; Cartogram.n_unresolved counts the excused regions above max_tol; a stalled morph warns and names workflow.morph(stall_patience=None, n_iter=N). On the county ladder the finest level converges from 4 cells but with a worse result than the stalled run, so the default stays off; districts and states are unchanged.
+title: area_tol_cells (early stop), n_unresolved and a stall warning that names the continuation
+description: MorphOptions.area_tol_cells (default off) stops a morph early when small regions are within k cells of their target, whatever their relative error; Cartogram.n_unresolved counts the excused regions above max_tol; a stalled morph warns and names workflow.morph(stall_patience=None, n_iter=N). It is not an accuracy option. On the county ladder the finest level converges from 4 cells with a less accurate result than the stalled run; districts and states are unchanged.
 kind: pr
 topic: flow
 base: main
@@ -19,7 +19,7 @@ The measurement and its figure are in `exploration-unresolved-regions`; this pag
 
 ## Behavior
 
-- `area_tol_cells` (>= 0, default 0): a region with `|area - target| <= area_tol_cells * dx * dy` counts as on target in the convergence test, the stall rule and the best-iterate score. The reported errors (`mean_error_pct`, `max_error_pct`, history, snapshots) are the relative errors. In a ladder every level uses the same area: the cells of the finest grid.
+- `area_tol_cells` (>= 0, default 0), an early-stopping option for users who accept a small absolute size for small regions: a region with `|area - target| <= area_tol_cells * dx * dy` counts as on target in the convergence test, the stall rule and the best-iterate score. The reported errors (`mean_error_pct`, `max_error_pct`, history, snapshots) are the relative errors. In a ladder every level uses the same area: the cells of the finest grid.
 - `Cartogram.n_unresolved`: excused regions whose relative error is not below `max_tol` (0 when off). It is not stored by `save_cartogram`.
 - `CartogramWorkflow.morph` and `morph_multiresolution` warn when the last pass is stalled; the message names `workflow.morph(stall_patience=None, n_iter=N)`, which continues from the best iterate with the stall rule off. The quality report of `metrics` names it too.
 - Not in this PR: a stall component that follows the count of regions above `max_tol`.
