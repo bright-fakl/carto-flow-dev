@@ -166,14 +166,26 @@ def patch(pal, ttype, k=8, tints=None, gap=2.6, n_tiles=40, rotate=0.0, pad=6.0,
     return out
 
 
-def escher(pal, spec, ttype=1, k=7, tints=None, gap=1.6, pad=6.0, rotate=0.0, centre=None, keep=None):
+def connected_patch(ts, k):
+    """Indices of k edge-connected tiles grown from the middle tile, each step adding the neighbor nearest the middle."""
+    c = ts.centroids
+    mid = np.array([0.5, 0.5])
+    A = ts.adjacency("edge").toarray()
+    cur = [int(np.argmin(np.linalg.norm(c - mid, axis=1)))]
+    while len(cur) < k:
+        cand = [j for j in np.nonzero(A[cur].any(axis=0))[0] if j not in cur]
+        cur.append(int(min(cand, key=lambda j: np.linalg.norm(c[j] - mid))))
+    return np.array(cur)
+
+
+def escher(pal, spec, ttype=1, k=7, tints=None, gap=1.6, pad=6.0, rotate=0.0, centre=None, keep=None, connected=False):
     """Interlocking curved tiles: one prototile with curved edges, repeated by the tiling's symmetries."""
     tints = tints or levels(pal)
     t = IsohedralTiling(ttype)
     if rotate:
         t = t.rotated(rotate)
     ts = t.fill_region((0, 0, 1, 1), n_tiles=30)
-    sel = nearest(ts, k, np.array([0.5, 0.5]))
+    sel = nearest(ts, k, np.array([0.5, 0.5])) if not connected else connected_patch(ts, k)
     ts = ts.select(sel)
     polys = curved_tiles(ts, spec)
     ci = int(np.argmin(np.linalg.norm(ts.centroids - np.array([0.5, 0.5]), axis=1))) if centre is None else centre
@@ -293,6 +305,16 @@ def neighbors(pal, ttype=29, gap=2.4, n_tiles=40, pad=6.0, lw=3.0, rad=4.2, fain
     return out
 
 
+# Designed edge curves in canonical edge coordinates (edge from (0, 0) to (1, 0)); the kind of each edge (J, S, U, I)
+# is fixed by the tiling type, so the symmetry rule is applied by `canonical_curve`: J free, S point symmetric
+# about (1/2, 0) (control points end at (1/2, 0)), U mirror symmetric about x = 1/2 (control points end at x = 1/2).
+KNOB = [(0.32, 0.0), (0.40, 0.06), (0.36, 0.17), (0.50, 0.28), (0.64, 0.17), (0.60, 0.06), (0.68, 0.0)]  # rounded tab
+KNOB_IN = [(x, -y) for x, y in KNOB]  # the same tab pointing the other way
+WAVE = [(0.2, 0.3), (0.5, 0.0)]  # S: one crest and one trough
+WAVE_SOFT = [(0.25, 0.2), (0.5, 0.0)]
+LOBE = [(0.25, 0.12), (0.5, 0.2)]  # U: one symmetric lobe
+FLOW = [(0.5, 0.2)]  # J: a single lobe, the neighbor receives it as a dent
+
 MARKS = {
     "a_patch": lambda pal: patch(pal, 28, k=7, params=[0.3153, 0.5], valence=4),
     "b_escher": lambda pal: escher(pal, rand_spec(105, amp=0.5), 1, k=4, gap=2.0),
@@ -301,11 +323,22 @@ MARKS = {
     "d_letter_i": lambda pal: monogram(pal, "i"),
     "d_letter_i2": lambda pal: monogram(pal, "i2"),
     "e_links": lambda pal: neighbors(pal, 29),
+    # improved Escher-like variants (designed curves)
+    "b1_jigsaw": lambda pal: escher(pal, {0: KNOB, 1: KNOB_IN}, 41, k=6, gap=2.0, connected=True),
+    "b2_pinwheel": lambda pal: escher(pal, {0: WAVE}, 62, k=5, gap=2.4),
+    "b3_trefoil": lambda pal: escher(pal, {0: LOBE}, 18, k=7, gap=2.4, connected=True),
+    "b4_flow": lambda pal: escher(pal, {0: FLOW}, 34, k=5, gap=2.2, connected=True),
+    "b5_swirl": lambda pal: escher(pal, {0: WAVE_SOFT, 1: WAVE_SOFT, 2: WAVE_SOFT}, 84, k=7, gap=2.4),
     # favicon variants: fewer tiles, wider gaps, thicker lines
     "a_patch_fav": lambda pal: patch(pal, 28, k=5, params=[0.3153, 0.5], valence=4, gap=4.4, pad=4.0, tints=levels(pal, (1.0, 0.55), (1.0, 0.65))),
     "b_escher_fav": lambda pal: escher(pal, rand_spec(105, amp=0.5), 1, k=3, gap=3.6, pad=4.0, tints=levels(pal, (1.0, 0.55), (1.0, 0.65))),
     "c_cell_fav": lambda pal: lattice(pal, 34, ctx=0, dots=5.0, gap=3.6, pad=7.0, min_piece=0.04, tints=(0.3,)),
     "d_letter_fav": lambda pal: monogram(pal, "i2", gap=3.4, pad=4.0),
+    "b1_jigsaw_fav": lambda pal: escher(pal, {0: KNOB, 1: KNOB_IN}, 41, k=4, gap=3.6, pad=4.0, tints=levels(pal, (1.0, 0.55), (1.0, 0.65)), connected=True),
+    "b2_pinwheel_fav": lambda pal: escher(pal, {0: WAVE}, 62, k=3, gap=3.8, pad=4.0, tints=levels(pal, (1.0, 0.55), (1.0, 0.65))),
+    "b3_trefoil_fav": lambda pal: escher(pal, {0: LOBE}, 18, k=4, gap=4.0, pad=4.0, tints=levels(pal, (1.0, 0.55), (1.0, 0.65)), connected=True),
+    "b4_flow_fav": lambda pal: escher(pal, {0: FLOW}, 34, k=4, gap=3.8, pad=4.0, tints=levels(pal, (1.0, 0.55), (1.0, 0.65)), connected=True),
+    "b5_swirl_fav": lambda pal: escher(pal, {0: WAVE_SOFT, 1: WAVE_SOFT, 2: WAVE_SOFT}, 84, k=4, gap=4.0, pad=4.0, tints=levels(pal, (1.0, 0.55), (1.0, 0.65))),
     "e_links_fav": lambda pal: neighbors(pal, 29, gap=3.0, pad=5.0, lw=4.4, rad=6.0, faint=0.0),
 }
 
@@ -332,7 +365,7 @@ def lockup(mark_body, variant, text="isotile", size=50.0, gap=14.0):
     return svg(mark_body + t, total, 96), total
 
 
-LOCKUPS = ("a_patch", "b_escher")  # concepts with a lockup draft
+LOCKUPS = ("a_patch", "b_escher", "b3_trefoil")  # concepts with a lockup draft
 
 
 def main(out_dir):

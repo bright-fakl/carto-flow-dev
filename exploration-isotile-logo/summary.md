@@ -1,7 +1,7 @@
 ---
 issue: 159
 title: Logo concepts for isotile
-description: Five mark concepts for isotile (a pentagon tiling patch, interlocking curved tiles, a lattice cell, an `it` monogram of hexagon tiles, one tile with its neighbor links), drawn in the carto-flow palette from real isotile geometry and shown at 128, 64, 32 and 16 px on the light and dark surfaces and in one color. At 16 px only the simplified favicon variants of the neighbor-links and lattice-cell marks keep a clear amber shape; the tile patches become a cluster of specks with one amber speck, and the monogram does not hold. The recommendation is the pentagon patch (a_patch, with the four-tile favicon variant a_patch_fav), ahead of the interlocking tiles; its weak point is that it is generic at 16 px.
+description: Five mark concepts for isotile (a pentagon tiling patch, interlocking curved tiles, a lattice cell, an `it` monogram of hexagon tiles, one tile with its neighbor links), drawn in the carto-flow palette from real isotile geometry and shown at 128, 64, 32 and 16 px on the light and dark surfaces and in one color. At 16 px only the simplified favicon variants of the neighbor-links and lattice-cell marks keep a clear amber shape; the tile patches become a cluster of specks with one amber speck, and the monogram does not hold. The recommendation is the pentagon patch (a_patch, with the four-tile favicon variant a_patch_fav), ahead of the interlocking tiles. A second round replaced the random curves of the interlocking tiles by designed ones (jigsaw tabs, a trefoil of U edges, a single-lobe J flow); the trefoil patch (b3_trefoil) is now level with or slightly ahead of the pentagon patch, and both are generic at 16 px.
 kind: exploration
 topic: symbol
 status: open
@@ -71,3 +71,27 @@ Recommendation: `a_patch`, with `a_patch_fav` as the favicon. It is built from a
 - The curved tile of `b_escher` is not a designed shape; no creature-like tile was drawn, and the library has no edge curves to validate against.
 - No check against existing logos beyond avoiding the obvious ones; leaf-like and hexagon or pentagon clusters are common motifs.
 - Other types of the pentagon and rhombille families (27, 29, 33, 37) were only screened visually.
+
+## Follow-up (2026-10-27): designed edge curves for the interlocking tiles
+
+The random curves of `b_escher` read as leaves. Five variants with deliberate curves were built (curves in `marks.py`: `KNOB`, `WAVE`, `LOBE`, `FLOW`; the symmetry rule of each edge kind is applied by `canonical_curve`, so shared edges coincide and every tile is congruent). Fewer, larger lobes; 4 to 7 tiles; gaps 2.0 to 2.4 units (3.6 to 4.0 in the favicon variants).
+
+| Variant | Idea | Type and edges | Verdict |
+|---|---|---|---|
+| `b1_jigsaw` | Puzzle pieces: one round tab per edge pair, the neighbor has the blank | Type 41, two J curves (tab out, tab in) | Reads at once and holds at 32 px, the 2x2 favicon is the most legible of the interlocking set. But it says "puzzle" (plugins, extensions), a very common icon, and a 2x2 grid of four pieces recalls the four-part cross of the Windows mark, which was to be avoided |
+| `b2_pinwheel` | Cross-like tiles from one S curve, flowing | Type 62, one S curve | Dropped: the arms are thin, at 32 px it is a tangle |
+| `b3_trefoil` | Three-lobed tiles in a hexagonal flower, one amber at the center | Type 18, one U curve (mirror-symmetric lobe) | Best of the set: clean silhouette at 64 and 32 px, the interlocking is visible, one-color version holds. At 16 px a flower of specks. Reads as a flower or clover |
+| `b4_flow` | Tiles that swell and dent into each other, like a flow | Type 34, one J curve with a single lobe | The most characteristic and the closest to "flow", but irregular as a patch; at 32 px the shape is vague and the favicon is the weakest of the three |
+| `b5_swirl` | Triangle swirl from S edges | Type 84, three S curves | Dropped: busy, thin arms, fails at 32 px |
+
+figure: fig4_escher_variants.png — Rows from the top: `a_patch` (reference), `b1_jigsaw`, `b3_trefoil`, `b4_flow`. Same columns and surfaces as the first figure (128, 64, 32, 16 px, then 32 px in one color; light left, dark right). `b2_pinwheel` and `b5_swirl` were dropped after viewing and are not in the figure; their marks stay in `svg/`.
+
+figure: fig5_escher_favicons.png — The favicon variants of the same rows (`a_patch_fav`, `b1_jigsaw_fav` with 4 pieces, `b3_trefoil_fav` with 4 tiles, `b4_flow_fav` with 4 tiles; wider gaps).
+
+figure: fig6_lockups_trefoil.png — Lockup drafts `a_patch` (above) and `b3_trefoil` (below) at 360 and 180 px wide, light left, dark right; live DejaVu Sans Bold text, draft only.
+
+Observations. The designed curves fix the leaf look: the tiles are now clearly deliberate shapes and the interlocking reads at 64 px. At 16 px none of the interlocking variants beats `a_patch_fav`; the trefoil is a flower of specks with an amber one, comparable to the pentagon pinwheel. The trefoil also has a clearer silhouette at 32 px than the pentagon patch, which is irregular. What is still weak: the trefoil resembles a flower or clover (a hexagonal cluster of rounded tiles also looks like a molecule or a bolt-head pattern); the curve of the trefoil is symmetric, so it shows the U edge rule but not much of the "tiles that fit into each other" idea, which the jigsaw shows better but at the price of the puzzle cliche; none of the variants has been checked against existing logos.
+
+Updated ranking and recommendation. 1. `b3_trefoil` and `a_patch` (level: the trefoil has the stronger silhouette and the Escher link, the pentagon patch is the more neutral, less flower-like mark and the safer one); 3. `b1_jigsaw` (most legible, but a cliche and a four-piece cross); 4. `c_cell`; 5. `b4_flow`; 6. `e_links`; 7. `d_letter`. If the maintainer wants the interlocking idea, use `b3_trefoil` with `b3_trefoil_fav`; if the priority is neutrality, keep `a_patch`. The old `b_escher` is superseded.
+
+Not done in this round: no hand-drawn creature tile, no check of curves against the library once it has edge curves, no outlined wordmark.

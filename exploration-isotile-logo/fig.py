@@ -45,9 +45,9 @@ def legibility(names, out, marks=MARKS):
     canvas.save(HERE / out)
 
 
-def lockups(out, widths=(360, 180)):
+def lockups(out, names=LOCKUPS, widths=(360, 180)):
     """Mark + wordmark draft (live DejaVu Sans Bold text), light and dark, at two widths, for the concepts in LOCKUPS."""
-    rows = [(n, w) for n in LOCKUPS for w in widths]
+    rows = [(n, w) for n in names for w in widths]
     panels = []
     for variant in ("light", "dark"):
         pal = PALETTES[variant]
@@ -73,4 +73,7 @@ def lockups(out, widths=(360, 180)):
 if __name__ == "__main__":
     legibility(["a_patch", "b_escher", "c_cell", "d_letter", "e_links"], "fig1_concepts.png")
     legibility(["a_patch_fav", "b_escher_fav", "c_cell_fav", "d_letter_fav", "e_links_fav"], "fig2_favicon_variants.png")
-    lockups("fig3_lockups.png")
+    legibility(["a_patch", "b1_jigsaw", "b3_trefoil", "b4_flow"], "fig4_escher_variants.png")
+    legibility(["a_patch_fav", "b1_jigsaw_fav", "b3_trefoil_fav", "b4_flow_fav"], "fig5_escher_favicons.png")
+    lockups("fig3_lockups.png", ("a_patch", "b_escher"))
+    lockups("fig6_lockups_trefoil.png", ("a_patch", "b3_trefoil"))
