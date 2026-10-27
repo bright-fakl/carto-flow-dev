@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #188: Move the report index builder to carto-flow-dev</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #188: Move the report index builder to carto-flow-dev</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/188">https://github.com/bright-fakl/carto-flow/pull/188</a></dd>
+<dt>Branch</dt><dd>chore/move-visual-checks-builder</dd>
+<dt>Created</dt><dd>2026-10-27 15:10</dd>
+<dt>After</dt><dd>chore/move-visual-checks-builder @ bf23b5e (carto-flow); carto-flow-dev main at 29c8889</dd>
+</dl>
+<p class="desc">The builder (scripts/build_visual_checks_index.py) and its tests move from carto-flow to this repository, read each page&#x27;s repository from its url and filter the index by project. Nothing in the carto-flow package changes and there is nothing to compare visually except one screenshot of the new Project filter; the page gives the written evidence.</p>
+<p>The change removes a script and its test from carto-flow and adds them to this repository, so cartogram output cannot change. The one visible result is the new Project filter of the index.</p>
+<h2>What changed</h2>
+<ul><li>carto-flow: <code>scripts/build_visual_checks_index.py</code> and <code>tests/test_visual_checks_index.py</code> are deleted; <code>CONTRIBUTING.md</code> points to this repository and the command <code>python3 scripts/build_visual_checks_index.py</code>; the <code>.gitignore</code> comment no longer names the script. <code>notify-visual-checks.yml</code> stays.</li><li>This repository (<a href="https://github.com/bright-fakl/carto-flow-dev/commit/6559f30">6559f30</a>): the script and tests were copied from carto-flow <code>a126c0d</code>; the root defaults to the repository that contains the script; <code>scripts</code> and <code>tests</code> are not pages; the Check and Update workflows run the script from this repository (no sparse checkout of carto-flow) and Check runs the builder tests.</li><li>This repository (<a href="https://github.com/bright-fakl/carto-flow-dev/commit/5e6eaed">5e6eaed</a>): a page&#x27;s repository comes from its <code>url</code>, with one <code>gh pr list</code> call per repository, states and closed times keyed by repository and number, and <code>owner/repo#N</code> shown for pages of other repositories. The five isotile PR pages lost their hand-written <code>status: merged</code>.</li><li>This repository (<a href="https://github.com/bright-fakl/carto-flow-dev/commit/0c98415">0c98415</a>): the <code>project</code> header (default: repository name of the <code>url</code>, else carto-flow) and the Project filter. <code>exploration-isotile-logo</code> and <code>proposal-isohedral-tiling-library</code> have no <code>url</code> and are set to <code>project: isotile</code>; <code>exploration-logo-concepts</code> (the carto-flow logo) and the other pages without a <code>url</code> fall in carto-flow.</li></ul>
+<h2>Evidence</h2>
+<ul><li>Builder tests in this repository: 95 passed (<code>uv run --with pytest pytest tests</code>): the 74 tests moved from carto-flow, adjusted for keys of the form (repository, number), plus 21 new tests for repository parsing from the url, the fallback, same number in two repositories with different states, an unreachable repository, <code>--convert --repo</code>, the project derivation and the filter.</li><li>Check and Update runs of this repository after the move: Check succeeded on each of the three builder commits and on the review-page commit (it builds the index in a scratch copy, fails on builder warnings and runs the builder tests); a manually started Update run succeeded and read the isotile PR states from bright-fakl/isotile.</li><li>carto-flow: <code>uv run ruff check .</code>, <code>uv run ruff format --check .</code> and pre-commit pass; <code>uv run pytest -m &quot;not slow&quot; tests</code>: 1,676 passed, 2 skipped, 4 xfailed; nothing references the removed test. CI of PR 188: quality, check-docs, tests on Python 3.10 to 3.13, the pandas 3 job and the wheel smoke test pass.</li></ul>
+<h2>Review status of the isotile pages before and after</h2>
+<p>Before (script of carto-flow, <code>status: merged</code> written by hand; numbers read as carto-flow&#x27;s):</p>
+<pre><code>merged           #2  isotile-doc-figures
+merged           #2  isotile-logo-assets
+merged           #2  isotile-docs-skeleton-pr
+led-to            -  exploration-isotile-logo
+merged           #3  isotile-phase-2-pr
+merged           #1  isotile-phase-1-pr</code></pre>
+<p>After (builder here, without the explicit status; states from bright-fakl/isotile):</p>
+<pre><code>merged        bright-fakl/isotile#2  isotile-doc-figures
+merged        bright-fakl/isotile#2  isotile-logo-assets
+merged        bright-fakl/isotile#2  isotile-docs-skeleton-pr
+led-to            -  exploration-isotile-logo
+merged        bright-fakl/isotile#3  isotile-phase-2-pr
+merged        bright-fakl/isotile#1  isotile-phase-1-pr</code></pre>
+<div class="figure">
+<img src="index-project-filter.png" alt="Index filtered to project isotile: 7 of 156 pages (five PR pages, the logo exploration and the library proposal), each title followed by its project because there is more than one project.">
+<p class="caption">Index filtered to project isotile: 7 of 156 pages (five PR pages, the logo exploration and the library proposal), each title followed by its project because there is more than one project.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
