@@ -2,7 +2,7 @@ name: Update
 
 # Review status comes from the state of each PR on GitHub, so
 # the index goes stale when a PR is merged or closed. Rebuild it on a schedule,
-# on request, and when carto-flow sends a `pr-closed` dispatch event.
+# on request, and when a project repository (carto-flow, isotile) sends a `pr-closed` dispatch event.
 on:
   schedule:
     - cron: "17 * * * *"
