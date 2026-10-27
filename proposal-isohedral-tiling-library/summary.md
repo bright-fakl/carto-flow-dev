@@ -5,7 +5,7 @@ description: Prototype of the core (81 types, fill, lattice adjacency; 1,143 tes
 kind: proposal
 topic: symbol
 status: open
-related:
+related: isotile-phase-1-pr, isotile-docs-skeleton-pr, isotile-logo-assets, isotile-doc-figures, isotile-phase-2-pr
 date: 2026-10-26 23:48
 inputs: tactile 0.1.0 (BSD 3-Clause, Craig S. Kaplan), the 81 types, parameters = defaults plus uniform noise of 0.05 to 0.3 (valid draws only), carto-flow main at 408284b, isohedral-tiling-ui (read only), Python 3.12, numpy 2.3.3, scipy 1.16.2, shapely 2.1.2 (GEOS 3.13.1). Single runs; benchmark timings on a 16-core WSL2 machine with other jobs running.
 ---
@@ -352,4 +352,10 @@ The principle is that the library defines each concept once, exactly, and carto-
 
 ## 12. Status (2026-10-27)
 
-Phase 1 is merged (`bright-fakl/isotile` main @ 39c5778, report `isotile-phase-1-pr`). Decisions taken during review: exact positive-overlap `cover` (touching tiles are not included), `IsohedralTiling.info()` describes the instance, `safe_ranges` stores infinity at unbounded ends (138 of 256 ends), the data file stays uncompressed. Next: phase 1.5 (documentation skeleton with API reference, strict docs build in CI, deployment to GitHub Pages from `main` through GitHub Actions, logo assets), then phase 2 (edge-curve layer). Still open: the validity rule for edge curves (phase 2).
+Merged in `bright-fakl/isotile`:
+
+- Phase 1 (PR 1, report `isotile-phase-1-pr`). Decisions taken during review: exact positive-overlap `cover` (touching tiles are not included), `IsohedralTiling.info()` describes the instance, `safe_ranges` stores infinity at unbounded ends (138 of 256 ends), the data file stays uncompressed.
+- Phase 1.5 (PR 2, reports `isotile-docs-skeleton-pr`, `isotile-logo-assets`, `isotile-doc-figures`): documentation skeleton with API reference, strict docs build in CI, deployment to GitHub Pages from `main` through GitHub Actions, the logo (`a_patch`) and the figures.
+- Phase 2 (PR 3, report `isotile-phase-2-pr`): edge curves, index-based `enforce_symmetry`, presets, serialization, plotting. The open validity rule of the edge curves is decided: the outline is a simple closed curve with positive area, the straight prototile is valid, and parts that are not consecutive are at least `1e-6 * diameter` apart. The test is exact for the curve and does not depend on sampling.
+
+Next: phase 3 (carto-flow adoption), phase 4 (`isohedral-tiling-ui`), phase 5 (docs, benchmark page, release `0.1.0`). This page stays open until phase 3 is decided.
