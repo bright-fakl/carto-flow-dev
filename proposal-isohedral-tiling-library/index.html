@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Design of the standalone isohedral tiling library (replacing tactile)</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>Design of the standalone isohedral tiling library (replacing tactile)</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>proposal</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Referenced by</dt><dd><a href="../exploration-logo-concepts/index.html">Logo concepts for carto-flow (warped grid, hexagon tiles, morph)</a> <span class="meta">(exploration)</span></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/159">#159</a></dd>
+<dt>Created</dt><dd>2026-10-26 22:00</dd>
+<dt>Inputs</dt><dd>tactile 0.1.0 (BSD 3-Clause, Craig S. Kaplan), the 81 types of tactile&#x27;s tiling_types, straight-edge prototiles, 9x9 to 71x71 lattice patches, parameters perturbed by up to ±0.15 (4 draws per type). Single runs.</dd>
+</dl>
+<p class="desc">Scope, package layout, data model, API, lattice adjacency and phasing for the new tiling library. A spike on all 81 types shows that edge and vertex adjacency is a per-type table of (lattice offset, aspect) that does not change with the parameters (offsets of at most 2 lattice steps), and that a table lookup takes 0.02 s for 15,000 tiles against 5.7 s for the geometric method on 5,000 tiles.</p>
+<p>This page works out the design of issue 159 up to the point where implementation can start. It lists the decisions that are still open at the end (section 9).</p>
+<h2>1. Findings that shape the design</h2>
+<p><code>spike.py</code> generates a patch of the lattice for each of the 81 types, finds the geometric neighbors of the tile (0, 0, aspect) by counting shared vertices (2 or more: edge, exactly 1: vertex only), and compares the result at the default parameters with four perturbed parameter sets. <code>spike2.py</code> collects statistics and timings.</p>
+<table>
+<tr><th>Finding</th><th>Result</th></tr>
+<tr><td>Types</td><td>81</td></tr>
+<tr><td>Tables that change with the parameters</td><td>0 of 81 (default and 4 perturbed draws, ±0.15)</td></tr>
+<tr><td>Edge neighbors per tile</td><td>equal to the number of prototile vertices, for every type and aspect (3 to 6)</td></tr>
+<tr><td>Largest lattice offset of any neighbor</td><td>2 (edge and vertex neighbors together)</td></tr>
+<tr><td>Vertex-only neighbors per tile</td><td>0 to 18 (0 for 35 type-aspect pairs, 18 for 18)</td></tr>
+<tr><td>Aspects per type</td><td>1 (17 types), 2 (27), 3 (6), 4 (20), 6 (8), 8 (2), 12 (1)</td></tr>
+<tr><td>Free parameters per type</td><td>0 (26 types), 1 (15), 2 (21), 3 (9), 4 (7), 5 (2), 6 (1)</td></tr>
+<tr><td>Lattice table, 15,123 tiles</td><td>0.02 s</td></tr>
+<tr><td>Current geometric method, 5,043 tiles</td><td>5.7 s</td></tr>
+</table>
+<p>Consequences:</p>
+<ul><li>Adjacency of a tiling can be computed from <code>(t1, t2, aspect)</code> alone, with a small table per type that is part of the type data. It is independent of the parameters and of the scale, and it can be precomputed once per type and shipped with the data.</li><li>The table is computed with straight edges. Custom edge curves change the shape of the tile boundary but not which tiles touch (all tiles share the same curve on a shared edge), so the table applies unchanged. Whether the tile overlap repair of carto-flow changes the neighbors (open question of the issue) is not yet checked; it needs one test per type with a set of random curves, in phase 3.</li><li>A table lookup over <code>n</code> tiles is <code>O(n * (neighbors per aspect))</code> with an integer hash of <code>(t1, t2, aspect)</code>, so tiles must carry their lattice coordinates through the generation. The current carto-flow tiling drops them (<code>TileTransform</code> has center, rotation and flip only), which is why adjacency is currently found geometrically.</li></ul>
+<h2>2. Scope</h2>
+<p>In the library:</p>
+<ol><li>The 81 types with their parameters, vertices, edges, edge shapes (I, J, U, S), aspects, translation vectors and the tile-coloring tables.</li><li>Tile generation in a rectangle or a convex quadrilateral, returning arrays.</li><li>Adjacency from the lattice (edge, vertex-or-edge, vertex-only, neighbors of a tile); a geometric method for arbitrary polygon sets.</li><li>Edge curves: storage, symmetry enforcement (U, S, I), interpolation, prototile polygon construction, validity repair.</li><li><code>to_dict</code> / <code>from_dict</code> with the existing parameter format and preset names.</li><li>Plotting of tiles and the prototile (matplotlib), as an optional extra.</li></ol>
+<p>Stays in carto-flow: symbols, sizing of symbols per tile (<code>tile_size_for_symbol_size</code>), the layouts, the presets that map to symbol use, and <code>TilingResult</code> as an adapter around the library output.</p>
+<p>Not in the library: anything that imports <code>carto_flow</code>, a GUI (it stays in <code>isohedral-tiling-ui</code>), non-isohedral tilings (square, hexagon and the triangle and quadrilateral families stay as carto-flow convenience classes that can be expressed with isohedral types later).</p>
+<h2>3. Package and distribution</h2>
+<ul><li>Name: to be decided (section 9). Working name <code>isotile</code> (the import name and the PyPI name must both be free; checked at decision time).</li><li>Repository: new, <code>src/</code> layout, MIT license for the new code, <code>NOTICE</code> file with the BSD 3-Clause notice of Craig S. Kaplan (the type data is derived from Tactile, tactile-js, and the BSD license requires that the copyright notice and the disclaimer stay with the data and any code derived from it).</li><li>Dependencies: <code>numpy</code> (core); <code>shapely</code> (geometric adjacency, polygon construction); <code>scipy</code> (spline interpolation of edge curves); <code>matplotlib</code> as an optional extra.</li><li>Python: same range as carto-flow.</li><li>Versioning: independent; carto-flow pins <code>&gt;=</code> the first release.</li></ul>
+<h2>4. Package layout</h2>
+<pre><code>isotile/
+  __init__.py        public API
+  types.py           TilingType (frozen dataclass), registry, lookup by number
+  data/              types.npz  (coefficients), adjacency.npz (lattice tables), LICENSE-tactile
+  _build_data.py     regenerates data/ from tactile and from the lattice spike (dev only)
+  tiling.py          IsohedralTiling
+  lattice.py         tile generation, TileSet
+  adjacency.py       lattice and geometric adjacency
+  edges.py           EdgeShape, EdgeCurve, symmetry enforcement, interpolation
+  prototile.py       prototile polygon from vertices and curves, validity repair
+  presets.py         named tilings (parameter format unchanged)
+  plot.py            matplotlib helpers (optional)</code></pre>
+<h2>5. Data model</h2>
+<pre><code>class EdgeShape(enum.Enum):  I = &quot;I&quot;; J = &quot;J&quot;; U = &quot;U&quot;; S = &quot;S&quot;   # values equal tactile&#x27;s names
+
+@dataclass(frozen=True)
+class TilingType:
+    number: int                    # 1..93 (81 valid)
+    n_params: int
+    n_vertices: int
+    n_aspects: int
+    edge_shapes: tuple[EdgeShape, ...]      # per distinct edge shape
+    edge_shape_ids: np.ndarray     # (n_vertices,) int
+    edge_orientations: np.ndarray  # (n_vertices, 2) int
+    default_params: np.ndarray     # (n_params,)
+    vertex_coeffs: np.ndarray      # (n_vertices, 2, n_params + 1)
+    aspect_coeffs: np.ndarray      # (n_aspects, 2, 3, n_params + 1)
+    translation_coeffs: np.ndarray # (2, 2, n_params + 1)
+    coloring: np.ndarray
+    adjacency: AdjacencyTable      # edge, vertex-only; offsets (da, db, aspect&#x27;)</code></pre>
+<p>Vertices, aspect matrices and translation vectors are <code>coeffs @ [*params, 1]</code> (one <code>einsum</code> each), so a parameter change is three small matrix products. <code>IsohedralTiling</code> holds the type, the parameter array and the derived arrays (<code>vertices</code> (n, 2), <code>aspects</code> (a, 2, 3), <code>t1</code>, <code>t2</code>, <code>edge_transforms</code> (n, 2, 3)); setting <code>parameters</code> validates the length and recomputes. Parameters are accepted as any array-like and stored as <code>float64</code>.</p>
+<p>The coefficient tables are copied from tactile&#x27;s <code>tiling_data.py</code> into <code>types.npz</code> by a build script that is part of the repository, so the provenance is reproducible and the BSD notice sits next to the file.</p>
+<h2>6. API sketch</h2>
+<pre><code>tiling = IsohedralTiling(7)                    # defaults
+tiling = IsohedralTiling(7, parameters=[0.3, 0.5])
+tiling.type, tiling.parameters, tiling.vertices, tiling.aspects, tiling.t1, tiling.t2
+
+tiles = tiling.fill(bounds=(x0, y0, x1, y1))   # TileSet
+tiles.lattice        # (n, 3) int: t1, t2, aspect
+tiles.transforms     # (n, 2, 3) affine matrices
+tiles.polygons()     # list of shapely Polygons (uses curves if set)
+tiles.centroids      # (n, 2)
+
+adj = tiles.adjacency(&quot;edge&quot;)                  # scipy.sparse CSR (n, n), bool
+adj = tiles.adjacency(&quot;vertex&quot;)                # edge or vertex
+adj = tiles.adjacency(&quot;vertex-only&quot;)
+tiles.neighbors(i, &quot;edge&quot;)                     # indices
+tiles.adjacency(&quot;edge&quot;, method=&quot;geometric&quot;)    # needed only for foreign polygon sets
+
+tiling.set_edge_curve(shape_id, points, ...)   # enforces I/J/U/S symmetry
+tiling.to_dict(); IsohedralTiling.from_dict(d)</code></pre>
+<p>Choices:</p>
+<ul><li>Adjacency returns a sparse boolean matrix by default (dense <code>(n, n)</code> arrays do not scale to the 10,000-tile layouts); <code>.toarray()</code> gives the dense form that carto-flow uses now.</li><li><code>fill</code> takes an explicit lattice range or bounds; unlike tactile&#x27;s scanline generator it returns deduplicated arrays, so the 8-line deduplication loop and the center perturbation hack in <code>IsohedralTiling.generate</code> go away.</li><li>Tile identity is the lattice triple. Tiles at the edge of the bounds keep their triple, so adjacency across the boundary is silently dropped, not guessed.</li></ul>
+<h2>7. Lattice adjacency algorithm</h2>
+<ol><li>Build a key per tile: <code>(t1 - t1_min) * W + (t2 - t2_min)</code> and multiply by <code>n_aspects</code>, plus the aspect.</li><li>For each aspect <code>a</code> and each table row <code>(da, db, a&#x27;)</code>, take the tiles of aspect <code>a</code>, compute the key of <code>(t1 + da, t2 + db, a&#x27;)</code> and look it up with <code>np.searchsorted</code> on the sorted key array (or a dense lookup grid, when the patch is compact).</li><li>Emit <code>(i, j)</code> pairs for found keys, build the CSR matrix, symmetrize.</li></ol>
+<p>The table of a type is computed once by <code>_build_data.py</code> with the same procedure as <code>spike.py</code> (shared-vertex counts on a 9x9 patch), stored as integer arrays, and a test regenerates it for every type and compares it with a fresh geometric computation at randomized parameters. Types with parameter values where the topology degenerates (a vertex coincides with another) are rejected by <code>parameters</code> validation (the valid ranges are not part of tactile&#x27;s data; the validation checks for non-zero edge lengths and a simple prototile polygon).</p>
+<h2>8. Migration and phasing</h2>
+<p>The earlier draft estimated ten weeks. The work is smaller because the adjacency design is now proven and the data exists; the larger part is carto-flow and UI integration.</p>
+<table>
+<tr><th>Phase</th><th>Content</th><th>Result</th></tr>
+<tr><td>1</td><td>Repo, data build script, <code>TilingType</code>, vertices/aspects/transforms vectorized, equivalence tests against tactile for all 81 types (vertices, edges, aspects, fill)</td><td>library reproduces tactile</td></tr>
+<tr><td>2</td><td><code>fill</code>, <code>TileSet</code>, lattice adjacency, geometric adjacency, adjacency equivalence tests (lattice against geometric on every type and random parameters)</td><td>adjacency table verified</td></tr>
+<tr><td>3</td><td>Edge curves: symmetry enforcement, interpolation, prototile construction, validity repair (moved from carto-flow with their tests); serialization and presets</td><td>feature parity with <code>symbol_cartogram/tiling.py</code> for <code>IsohedralTiling</code></td></tr>
+<tr><td>4</td><td>carto-flow adopts the library: <code>IsohedralTiling</code> and layouts use <code>TileSet.adjacency</code>; <code>tactile</code> dependency removed; all symbol cartogram tests pass; timings of the mosaic and grid layouts</td><td>PR in carto-flow</td></tr>
+<tr><td>5</td><td><code>isohedral-tiling-ui</code> adopts the library; symmetry enforcement and spline code removed from the UI</td><td>PR in the UI repo</td></tr>
+<tr><td>6</td><td>Docs, benchmark page, first PyPI release</td><td>release</td></tr>
+</table>
+<p>carto-flow&#x27;s public <code>IsohedralTiling</code>, <code>TilingResult</code>, presets, <code>plot_tile</code> and <code>plot_prototile</code> are public API. If their shape changes, the release that ships it is a major version; the plan keeps the names and moves the implementation, so phase 4 can be a minor release if <code>TilingResult</code> and the class names stay.</p>
+<h2>9. Decisions needed</h2>
+<ol><li><strong>Name</strong> of the package (working name <code>isotile</code>).</li><li><strong>Repository</strong> location (<code>bright-fakl/isotile</code>, or a subdirectory/workspace member of carto-flow until the first release).</li><li><strong>Dense or sparse</strong> adjacency in <code>TilingResult</code> (sparse in the library; carto-flow can densify at the boundary).</li><li><strong>License text</strong>: MIT for new code and a <code>NOTICE</code> carrying Kaplan&#x27;s BSD 3-Clause for the data. Confirm that the maintainer accepts this combination.</li><li><strong>Square, hexagon, triangle and quadrilateral tilings</strong>: keep them in carto-flow (proposed), or express them as isohedral types in the library and drop the hand-written classes later.</li></ol>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
