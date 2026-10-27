@@ -1,6 +1,7 @@
 ---
 issue: 159
 title: Design of the standalone isohedral tiling library (replacing tactile)
+project: isotile
 description: Prototype of the core (81 types, fill, lattice adjacency; 1,143 tests pass against tactile and against geometric adjacency), the mapping of square, hexagon, triangle and quadrilateral tilings to types IH76, IH20, IH84 and IH46 (all 19 named carto-flow cases reproduced, any triangle and simple quadrilateral expressible), the finding that valid custom curves never change the lattice neighbors (243 of 243 trials) while carto-flow's tolerance and its validity repair do, and the specification of the remaining work.
 kind: proposal
 topic: symbol

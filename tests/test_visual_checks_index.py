@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -698,3 +699,40 @@ class TestMultipleRepositories:
         monkeypatch.setattr(sys, "argv", ["prog", "--root", str(tmp_path), "--offline", "--convert", "idea", "7", "--repo", ISOTILE])
         mod.main()
         assert _url(ISOTILE, 7) in (tmp_path / "idea" / "summary.md").read_text(encoding="utf-8")
+
+
+class TestProjectFilter:
+    def test_project_comes_from_the_url(self, mod, tmp_path):
+        page = mod.scan_pr_dir(_write(tmp_path, "a", pr=2, url=_url(ISOTILE, 2), title="t", description="d"))
+        assert page.project == "isotile"
+
+    def test_explicit_project_wins(self, mod, tmp_path):
+        page = mod.scan_pr_dir(
+            _write(tmp_path, "a", pr=2, url=_url(ISOTILE, 2), project="Tile library", title="t", description="d")
+        )
+        assert page.project == "Tile library"
+
+    def test_default_is_the_name_of_the_default_repo(self, mod, tmp_path):
+        assert mod.scan_pr_dir(_write(tmp_path, "a", title="t", description="d")).project == "carto-flow"
+        other = mod.scan_pr_dir(_write(tmp_path, "b", title="t", description="d"), "me/other")
+        assert other.project == "other"
+
+    def test_filter_options_rows_and_badges(self, mod, tmp_path):
+        pages = [
+            mod.scan_pr_dir(_write(tmp_path, "a", pr=1, title="a", description="d")),
+            mod.scan_pr_dir(_write(tmp_path, "b", pr=2, url=_url(ISOTILE, 2), title="b", description="d")),
+            mod.scan_pr_dir(_write(tmp_path, "c", title="c", description="d", project="alpha")),
+        ]
+        html = mod.build_index_page(pages, {p.path: "open" for p in pages})
+        options = re.findall(r'<option value="([^"]+)">', html.split('id="filter-project"')[1].split("</select>")[0])
+        assert options == ["alpha", "carto-flow", "isotile"]
+        assert 'data-project="isotile"' in html and "(isotile)</span>" in html
+        assert '"filter-project"' in mod.SORT_SCRIPT and "d.project === project" in mod.SORT_SCRIPT
+
+    def test_single_project_shows_no_badge(self, mod, tmp_path):
+        page = mod.scan_pr_dir(_write(tmp_path, "a", pr=1, title="a", description="d"))
+        assert "(carto-flow)" not in mod.build_index_page([page], {page.path: "open"})
+
+    def test_page_lists_the_project(self, mod, tmp_path):
+        page = mod.scan_pr_dir(_write(tmp_path, "a", pr=2, url=_url(ISOTILE, 2), title="a", description="d"))
+        assert "<dt>Project</dt><dd>isotile</dd>" in mod.build_pr_page(page, "merged")

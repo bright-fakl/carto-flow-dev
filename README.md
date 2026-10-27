@@ -17,6 +17,13 @@ Every page has a `kind`:
 `topic` is a comma-separated list from `flow`, `voronoi`, `symbol`, `proportional`, `noncontiguous`,
 `data` and `infra`. The index filters and sorts on kind, topic and status.
 
+`project` names the project a page belongs to, for example `isotile` or `carto-flow`
+(a free-text name). Without it, the project is the repository name in `url`
+(`https://github.com/bright-fakl/isotile/pull/2` gives `isotile`), and for a page
+without a `url` it is the name of the default repository, `carto-flow`. Set `project:`
+on pages without a `url` that belong to another project. The index filters on it and,
+when there is more than one project, shows it next to each title.
+
 The status of a `pr` page comes from the PR on GitHub (see below). An exploration or
 proposal has no GitHub state, so its `status` is set by hand:
 
@@ -103,7 +110,7 @@ investigation workspace is easy to miss.
    ```
 
    `title` and `description` are required; `pr`, `issue` (the GitHub issue the
-   change addresses, e.g. `74` or `74, 75`), `url`, `kind`, `topic`, `status`, `outcome`,
+   change addresses, e.g. `74` or `74, 75`), `url`, `kind`, `project`, `topic`, `status`, `outcome`,
    `related`, `branch`, `base`, `date`, `updated`, `before`, `after`, and `inputs` are optional and rendered
    in a definition list on the page.  Pages are listed newest first, by `date`
    where given and by directory mtime otherwise.  Write `date`

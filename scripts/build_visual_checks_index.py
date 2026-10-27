@@ -23,8 +23,13 @@ start with a fenced metadata block, parsed as simple ``key: value`` lines
 ``title`` and ``description`` are required - a missing one prints a warning
 naming the directory and falls back to the directory name. All other keys are
 optional and, when present, are rendered in the page's definition list: ``pr``,
-``issue``, ``url``, ``kind``, ``topic``, ``status``, ``outcome``, ``related``,
+``issue``, ``url``, ``kind``, ``project``, ``topic``, ``status``, ``outcome``, ``related``,
 ``branch``, ``base``, ``date``, ``updated``, ``before``, ``after`` and ``inputs``.
+
+``project`` names the project a page belongs to (a free-text name such as
+``isotile``). Without it, the project is the repository name taken from the
+``url`` (``owner/repo`` gives ``repo``), and for a page without a ``url`` the name
+of the ``--repo`` repository. The index has a filter on it.
 
 ``kind`` is ``pr`` (a change under review; the default when ``pr`` is set),
 ``exploration`` (experiments and investigations; the default otherwise) or
@@ -197,6 +202,13 @@ Every page has a `kind`:
 `topic` is a comma-separated list from `flow`, `voronoi`, `symbol`, `proportional`, `noncontiguous`,
 `data` and `infra`. The index filters and sorts on kind, topic and status.
 
+`project` names the project a page belongs to, for example `isotile` or `carto-flow`
+(a free-text name). Without it, the project is the repository name in `url`
+(`https://github.com/bright-fakl/isotile/pull/2` gives `isotile`), and for a page
+without a `url` it is the name of the default repository, `carto-flow`. Set `project:`
+on pages without a `url` that belong to another project. The index filters on it and,
+when there is more than one project, shows it next to each title.
+
 The status of a `pr` page comes from the PR on GitHub (see below). An exploration or
 proposal has no GitHub state, so its `status` is set by hand:
 
@@ -283,7 +295,7 @@ investigation workspace is easy to miss.
    ```
 
    `title` and `description` are required; `pr`, `issue` (the GitHub issue the
-   change addresses, e.g. `74` or `74, 75`), `url`, `kind`, `topic`, `status`, `outcome`,
+   change addresses, e.g. `74` or `74, 75`), `url`, `kind`, `project`, `topic`, `status`, `outcome`,
    `related`, `branch`, `base`, `date`, `updated`, `before`, `after`, and `inputs` are optional and rendered
    in a definition list on the page.  Pages are listed newest first, by `date`
    where given and by directory mtime otherwise.  Write `date`
@@ -361,7 +373,8 @@ SORT_SCRIPT = r"""
     "superseded": 7
   };
   function cellValue(row, i) {
-    var text = (row.cells[i].innerText || "").trim();
+    var link = i === 4 ? row.cells[i].querySelector("a") : null;   // Title without the project badge
+    var text = ((link || row.cells[i]).innerText || "").trim();
     if (i === 0) {                                                  // Status
       var rank = STATUS_RANK[text.toLowerCase()];
       return rank === undefined ? -1 : rank;                        // unknown first
@@ -389,6 +402,7 @@ SORT_SCRIPT = r"""
   }
   function applyFilters() {
     var kind = document.getElementById("filter-kind").value;
+    var project = document.getElementById("filter-project").value;
     var topic = document.getElementById("filter-topic").value;
     var cls = CLASS_NAMES[document.getElementById("filter-class").value] || "";
     var superseded = document.getElementById("filter-superseded").checked;
@@ -397,6 +411,7 @@ SORT_SCRIPT = r"""
     Array.prototype.forEach.call(body.rows, function (row) {
       var d = row.dataset;
       var show = (!kind || d.kind === kind) &&
+                 (!project || d.project === project) &&
                  (!topic || d.topics.indexOf(" " + topic + " ") >= 0) &&
                  (!cls || d.class === cls) &&
                  (superseded || d.status !== "superseded") &&
@@ -408,7 +423,7 @@ SORT_SCRIPT = r"""
   }
   // The selection is kept in sessionStorage, so it survives opening a page and
   // coming back by the "back to index" link or the browser's back button.
-  var FILTER_IDS = ["filter-kind", "filter-topic", "filter-class", "filter-time", "filter-superseded"];
+  var FILTER_IDS = ["filter-kind", "filter-project", "filter-topic", "filter-class", "filter-time", "filter-superseded"];
   function saveFilters() {
     try {
       var saved = {};
@@ -646,6 +661,7 @@ OPTIONAL_META_KEYS = (
     "issue",
     "url",
     "kind",
+    "project",
     "topic",
     "status",
     "outcome",
@@ -667,6 +683,7 @@ META_LABELS = {
     "closed": "Closed",
     "status": "Status",
     "kind": "Kind",
+    "project": "Project",
     "topic": "Topic",
     "outcome": "Outcome",
     "before": "Before",
@@ -942,6 +959,7 @@ class PrDir:
     kind: str = "exploration"
     repo: str = DEFAULT_REPO
     default_repo: str = DEFAULT_REPO
+    project: str = ""
     topics: list[str] = field(default_factory=list)
     related: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
@@ -1023,6 +1041,7 @@ def scan_pr_dir(directory: Path, default_repo: str = DEFAULT_REPO) -> PrDir:
         kind=kind,
         repo=repo_from_url(url, default_repo),
         default_repo=default_repo,
+        project=(meta.get("project") or "").strip() or repo_from_url(url, default_repo).split("/")[1],
         topics=topics,
         related=_split_list(meta.get("related", ""), lower=False),
         warnings=warnings,
@@ -1077,6 +1096,7 @@ def build_pr_page(
 
     dl_items: list[tuple[str, str]] = []
     dl_items.append(("Kind", html.escape(pr.kind)))
+    dl_items.append(("Project", html.escape(pr.project)))
     if pr.topics:
         dl_items.append(("Topic", html.escape(", ".join(pr.topics))))
     dl_items.append(("Status", f'<span class="status {status_class(status)}">{html.escape(status)}</span>'))
@@ -1146,6 +1166,7 @@ def build_index_page(
 ) -> str:
     statuses = statuses or {}
     closed = closed or {}
+    projects = {pr.project for pr in pr_dirs}
     rows = []
     for pr in pr_dirs:
         status = statuses.get(pr.path, "needs review")
@@ -1158,11 +1179,13 @@ def build_index_page(
             else (pr.pr_label.lstrip("#"))
         )
         title_cell = f'<a href="{html.escape(pr.path.name)}/index.html">{html.escape(pr.title)}</a>'
+        if len(projects) > 1:
+            title_cell += f' <span class="meta">({html.escape(pr.project)})</span>'
         desc_cell = html.escape(pr.description)
         date_cell = html.escape(pr.meta.get("date", ""))
         closed_cell = html.escape(closed.get(pr.key, "") if pr.key else "")
         rows.append(
-            f'<tr{row_class} data-ord="{len(rows)}" data-kind="{pr.kind}" data-topics=" {" ".join(pr.topics)} " '
+            f'<tr{row_class} data-ord="{len(rows)}" data-kind="{pr.kind}" data-project="{html.escape(pr.project)}" data-topics=" {" ".join(pr.topics)} " '
             f'data-status="{html.escape(status)}" data-class="{cls}" data-active="{html.escape(_latest_activity(pr, closed))}">'
             f"<td>{status_cell}</td>"
             f"<td>{html.escape(pr.kind)}</td>"
@@ -1206,10 +1229,12 @@ def _filter_controls(pr_dirs: list[PrDir]) -> str:
 
     kinds = [k for k in KINDS if any(pr.kind == k for pr in pr_dirs)]
     topics = [t for t in TOPICS if any(t in pr.topics for pr in pr_dirs)]
+    projects = sorted({pr.project for pr in pr_dirs}, key=lambda name: (name.lower(), name))
     states = ["awaiting", "parked", "done"]
     return (
         '<p class="filters">'
         + select("kind", "Kind", kinds)
+        + select("project", "Project", projects)
         + select("topic", "Topic", topics)
         + select("class", "State", states)
         + '<label>Active <select id="filter-time"><option value="">any time</option>'

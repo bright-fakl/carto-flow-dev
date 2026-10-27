@@ -1,6 +1,7 @@
 ---
 issue: 159
 title: Logo concepts for isotile
+project: isotile
 description: Five mark concepts for isotile (a pentagon tiling patch, interlocking curved tiles, a lattice cell, an `it` monogram of hexagon tiles, one tile with its neighbor links), drawn in the carto-flow palette from real isotile geometry and shown at 128, 64, 32 and 16 px on the light and dark surfaces and in one color. At 16 px only the simplified favicon variants of the neighbor-links and lattice-cell marks keep a clear amber shape; the tile patches become a cluster of specks with one amber speck, and the monogram does not hold. The recommendation is the pentagon patch (a_patch, with the four-tile favicon variant a_patch_fav), ahead of the interlocking tiles. A second round replaced the random curves of the interlocking tiles by designed ones (jigsaw tabs, a trefoil of U edges, a single-lobe J flow); the trefoil patch (b3_trefoil) is now level with or slightly ahead of the pentagon patch, and both are generic at 16 px.
 kind: exploration
 topic: symbol
