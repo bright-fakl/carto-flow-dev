@@ -22,7 +22,7 @@ step is skipped when the secret is absent, so the hourly rebuild in carto-flow-d
 
 - The dev repo's `update.yml` listens for `repository_dispatch` of type `pr-closed` and rebuilds everything; it does not read the payload,
   so the extra field needs no change there. Its comment said only carto-flow sends the event; it now names the project repositories.
-- isotile CI on the PR: all jobs pass (lint, typecheck, check-docs, tests on the three platforms, wheel smoke test); the Python 3.13 job was still running when this page was written.
+- isotile CI on the PR: all jobs pass (lint, typecheck, check-docs, tests on three platforms and Python 3.10 to 3.13, minimum versions, wheel smoke test).
 - The pre-commit hooks (check-yaml, end-of-file, whitespace) pass on the new file. `actionlint` is not configured in isotile.
 - No contributors section exists in `docs/development.md`, so there is no documentation change.
 
