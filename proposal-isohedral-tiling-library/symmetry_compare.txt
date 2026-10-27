@@ -1,0 +1,9 @@
+symmetry rule: 400 random raw curves per case (k interior points, y uniform in [-0.3, 0.3])
+  S, x increasing: identical point lists in 0 of 400
+  U, x increasing: identical point lists in 0 of 400
+  UI output for S with a first-half control point beyond x = 0.5: [[0.0, 0.0], [0.2, 0.1], [0.7, 0.15], [0.5, 0.0], [0.3, -0.15], [0.8, -0.1], [1.0, 0.0]]
+  carto-flow applied to that UI output: [[0.0, 0.0], [0.2, 0.1], [0.5, 0.0], [0.3, -0.15], [0.7, 0.15], [0.5, -0.0], [0.8, -0.1], [1.0, 0.0]]
+  unchanged by carto-flow: False
+interpolation of 5 points: carto-flow 100 points, UI 100 points; same curve at the common parameters: True
+interpolation of 20 points: carto-flow 100 points, UI 200 points
+UI symmetry.interpolate_curve (clamped x-spline, not used by the UI code paths): 20 points
