@@ -11,7 +11,7 @@ branch: feat/logo-branding
 related: exploration-logo-concepts
 date: 2026-10-26 23:50
 before: main @ 408284b
-after: feat/logo-branding @ 6f6b309
+after: main @ a126c0d (merged)
 inputs: Generator scripts/make_logo_assets.py (cairosvg, pillow, fonttools); contrast by WCAG relative luminance against the docs surfaces. Design from exploration-logo-concepts (outline t1, gaps rotated +10 and -8 degrees, amber on the two right-hand regions).
 ---
 
