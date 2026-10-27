@@ -1,0 +1,10 @@
+IH7
+   n_tiles   tiles  fill_region   polygons  adjacency x2  sparse MB  dense MB  toarray x2
+      2000    2123      0.0728s     0.008s       0.0023s       0.14         9      0.010s
+     10000   10300      0.2188s     0.023s       0.0059s       0.67       212      0.038s
+     40000   40500      0.8360s     0.082s       0.0224s       2.66      3280           -
+scalloped_hexagon
+   n_tiles   tiles  fill_region   polygons  adjacency x2  sparse MB  dense MB  toarray x2
+      2000    2083      0.0473s     0.256s       0.0016s       0.13         9      0.000s
+     10000   10301      0.2127s     1.557s       0.0061s       0.67       212      0.011s
+     40000   40687      1.0762s     7.517s       0.0198s       2.67      3311           -

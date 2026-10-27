@@ -1,0 +1,8 @@
+isotile triangle, region centered at 0: 300 shapes, shapes with a sampled hole 0, with a sampled overlap 0, lowest covered fraction 1.0000, largest overlap fraction 0.0000, tiles per region 74 to 178
+isotile triangle, region centered at 1e+06: 300 shapes, shapes with a sampled hole 38, with a sampled overlap 0, lowest covered fraction 0.9999, largest overlap fraction 0.0000, tiles per region 74 to 176
+carto-flow triangle (60 shapes), region centered at 0: shapes with no tile at all 0, of the others with a sampled hole 39 of 60, lowest covered fraction 0.5041
+carto-flow triangle (60 shapes), region centered at 1e+06: shapes with no tile at all 60, of the others with a sampled hole 0 of 0, lowest covered fraction 0.0000
+isotile quadrilateral, region centered at 0: 300 shapes, shapes with a sampled hole 0, with a sampled overlap 0, lowest covered fraction 1.0000, largest overlap fraction 0.0000, tiles per region 80 to 175
+isotile quadrilateral, region centered at 1e+06: 300 shapes, shapes with a sampled hole 26, with a sampled overlap 0, lowest covered fraction 0.9999, largest overlap fraction 0.0000, tiles per region 78 to 174
+carto-flow quadrilateral (60 shapes), region centered at 0: shapes with no tile at all 0, of the others with a sampled hole 34 of 60, lowest covered fraction 0.9560
+carto-flow quadrilateral (60 shapes), region centered at 1e+06: shapes with no tile at all 60, of the others with a sampled hole 0 of 0, lowest covered fraction 0.0000

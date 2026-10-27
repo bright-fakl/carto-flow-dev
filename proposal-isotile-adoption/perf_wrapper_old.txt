@@ -1,0 +1,10 @@
+old: seconds per generate call (best of 3)
+class        n_tiles  tiles  no adjacency  with adjacency
+square          1000   1024        0.035s          0.046s
+square          5000   5041        0.170s          0.221s
+hexagon         1000   1068        0.077s          0.081s
+hexagon         5000   5159        0.376s          0.403s
+triangle        1000   1148        0.062s          0.343s
+triangle        5000   5225        0.272s          1.610s
+quadrilateral    1000   1165        0.065s          0.319s
+quadrilateral    5000   5333        0.291s          1.544s

@@ -1,0 +1,27 @@
+15 presets, carto-flow data passed to both; region (-1,-1,1,1), margin 0.1, n_tiles 100
+
+preset                                 old               cover             matched          vertex_gap       edge_old_only       edge_new_only         vertex_diff  centroid_shift_max     n_base_vertices
+regular_hexagon                        163                 133                 133            9.25e-16                   0                   0                   0            1.31e-15                 6/6
+square                                 156                 100                 100            9.54e-16                   0                   0                   0            1.03e-15                 4/4
+equilateral_triangle                   170                 133                 133            1.39e-15                   0                   0                   0            1.03e-15                 3/3
+rhombus                                153                 141                 140            1.39e-15                   0                   0                   0            1.31e-15                 4/4
+cairo                                  264                 134                 134            2.07e-15                   0                   0                   0            1.03e-15                 5/5
+wide_parallelogram                     252                 120                 120            9.25e-16                   0                   0                   0            1.31e-15                 4/4
+scalloped_hexagon                      163                 133                 133            1.31e-15                   0                   0                   0            3.61e-14                 6/6
+wavy_square                            156                 100                 100            1.67e-15                  81                   0                  81            9.03e-15                 4/4
+puzzle_piece                           156                 100                 100             0.00845                   0                   0                   0              0.0239                 4/4
+arrow_quad                             252                 100                 100            1.31e-15                   0                   0                   0              0.0424                 4/4
+wavy_triangle                          154                 120                 112            2.07e-15                   0                   0                   0            8.56e-14                 3/3
+interlocking_hexagon                   163                 133                 133            1.31e-15                   0                   0                   0            2.02e-13                 6/6
+flowers                                246                 133                 133            2.62e-15                   0                   0                   0              0.0446                 5/5
+scalloped_quad                         180                 137                 137            2.07e-15                 116                   0                 116               0.158                 4/4
+tree                                   198                 136                 120            2.78e-15                   0                   0                   0              0.0574                 6/6
+
+Preset data: carto-flow's preset against isotile's preset (same name)
+  wavy_triangle: differs in curve 0, curve 1, curve 2
+  (all other presets: equal; explicit 'spline' modes of carto-flow are isotile's default)
+
+All 81 types at the defaults, region (-1,-1,1,1), margin 0.1, n_tiles 100:
+  old tiles 17790, isotile tiles 9747, matched 9629, largest vertex gap 3.3e-15 tile sizes, edge pairs only in old 0, only in isotile 0, vertex-only differences 0
+  types whose tile counts differ (old, cover): 81 of 81, e.g. [(1, 150, 126), (2, 216, 126), (3, 216, 126), (4, 216, 126), (5, 280, 126)]
+  tiles that overlap the region and that the current IsohedralTiling.generate lacks: 118 of 9747 in 18 of 81 types (type, missing, tiles): [(1, 6, 126), (3, 12, 126), (4, 12, 126), (7, 6, 126), (8, 6, 126), (11, 9, 133), (12, 6, 126), (17, 6, 126), (18, 9, 133), (20, 9, 133), (29, 2, 144), (39, 6, 142), (53, 4, 144), (59, 7, 141), (68, 1, 141), (74, 1, 141), (84, 8, 120), (91, 8, 120)]

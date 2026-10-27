@@ -1,0 +1,11 @@
+(a) 100 random triangles, region 2 x 2 at (c, c), tile_size 0.25: shapes with a sampled hole / largest uncovered fraction
+  c =         0   as is: 0 / 0.0e+00   recentered: 0 / 0.0e+00
+  c =      1000   as is: 0 / 0.0e+00   recentered: 0 / 0.0e+00
+  c =    100000   as is: 0 / 0.0e+00   recentered: 0 / 0.0e+00
+  c =     1e+06   as is: 16 / 5.0e-05   recentered: 0 / 0.0e+00
+
+(b) square tiling, tile_size 0.2, region 2.4 x 2.4 (12 x 12 tiles, boundary on tile edges), tiles returned:
+  c =         0   as is 144, recentered 144
+  c =      1000   as is 146, recentered 144
+  c =    100000   as is 144, recentered 144
+  c =     1e+06   as is 144, recentered 144

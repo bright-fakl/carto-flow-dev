@@ -1,0 +1,42 @@
+old hexagon phase (0.00, 0.00): mean 1.350, max 3.530
+old hexagon phase (0.25, 0.50): mean 1.228, max 2.791
+old hexagon phase (0.50, 0.25): mean 1.477, max 3.060
+old hexagon phase (0.75, 0.75): mean 1.223, max 3.196
+old hexagon phase (0.40, 0.90): mean 1.323, max 3.333
+old hexagon phase (0.90, 0.10): mean 1.489, max 3.568
+old hexagon: mean displacement over 6 lattice phases 1.223 to 1.489 (spread 0.267)
+old square phase (0.00, 0.00): mean 0.787, max 2.561
+old square phase (0.25, 0.50): mean 0.872, max 2.355
+old square phase (0.50, 0.25): mean 0.937, max 2.344
+old square phase (0.75, 0.75): mean 0.746, max 2.105
+old square phase (0.40, 0.90): mean 0.903, max 1.739
+old square phase (0.90, 0.10): mean 0.790, max 2.179
+old square: mean displacement over 6 lattice phases 0.746 to 0.937 (spread 0.190)
+old triangle phase (0.00, 0.00): mean 0.757, max 2.001
+old triangle phase (0.25, 0.50): mean 0.809, max 2.043
+old triangle phase (0.50, 0.25): mean 0.804, max 2.001
+old triangle phase (0.75, 0.75): mean 0.836, max 1.986
+old triangle phase (0.40, 0.90): mean 0.836, max 1.986
+old triangle phase (0.90, 0.10): mean 0.804, max 2.001
+old triangle: mean displacement over 6 lattice phases 0.757 to 0.836 (spread 0.080)
+new hexagon phase (0.00, 0.00): mean 1.262, max 3.103
+new hexagon phase (0.25, 0.50): mean 1.401, max 3.245
+new hexagon phase (0.50, 0.25): mean 1.469, max 3.708
+new hexagon phase (0.75, 0.75): mean 1.196, max 3.088
+new hexagon phase (0.40, 0.90): mean 1.493, max 4.835
+new hexagon phase (0.90, 0.10): mean 1.397, max 5.356
+new hexagon: mean displacement over 6 lattice phases 1.196 to 1.493 (spread 0.297)
+new square phase (0.00, 0.00): mean 0.956, max 2.418
+new square phase (0.25, 0.50): mean 0.903, max 1.923
+new square phase (0.50, 0.25): mean 0.810, max 2.256
+new square phase (0.75, 0.75): mean 0.711, max 1.888
+new square phase (0.40, 0.90): mean 0.883, max 2.407
+new square phase (0.90, 0.10): mean 0.776, max 2.559
+new square: mean displacement over 6 lattice phases 0.711 to 0.956 (spread 0.245)
+new triangle phase (0.00, 0.00): mean 0.937, max 2.075
+new triangle phase (0.25, 0.50): mean 0.856, max 2.161
+new triangle phase (0.50, 0.25): mean 0.879, max 2.407
+new triangle phase (0.75, 0.75): mean 0.902, max 2.250
+new triangle phase (0.40, 0.90): mean 0.961, max 2.551
+new triangle phase (0.90, 0.10): mean 0.850, max 2.177
+new triangle: mean displacement over 6 lattice phases 0.850 to 0.961 (spread 0.111)

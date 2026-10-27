@@ -1,0 +1,46 @@
+old: 610 tests, 0 failures, 0 errors, 0 skipped, 88 s (pytest -n 5)
+new: 610 tests, 21 failures, 0 errors, 0 skipped, 52 s (pytest -n 5)
+
+Failures with the wrapper prototype (carto-flow tests of a126c0d, unchanged except IsohedralTiling._PRESETS -> list_presets()):
+  test_tilings::TestIsohedralTypeInfo::test_self_intersection_warning
+      ValueError: IH83: invalid prototile for parameters [0.196416770201]: edges cross, touch or are closer than the clearance: [0, 1, 2]
+  test_tilings::TestHexagonTiling::test_transforms_no_rotation
+      assert 4.9229627565517645e-15 == 0.0
+  test_tilings::TestIsohedralEdgeCurves::test_edge_curves_i_ignored
+      ValueError: IH93: edge shape id 0 is a straight (I) edge and cannot be curved
+  test_symbol_cartogram_mosaic::TestTopologyMetrics::test_repair_loop_assignment_is_pinned
+      assert [[14, 15, 22,... 46, 47], ...] == [[25, 26, 37,... 51, 62], ...]
+  test_tilings::TestIsohedralEdgeCurves::test_edge_curves_ih83
+      ValueError: IH83: invalid prototile for parameters [0.196416770201]: edges cross, touch or are closer than the clearance: [0, 1, 2]
+  test_tilings::TestIsohedralPresets::test_from_preset_invalid
+      AssertionError: Regex pattern did not match.
+  test_symbol_cartogram_mosaic::TestRingSwapbackReach::test_us_states_needs_more_than_8_hops[False]
+      AssertionError: assert 1 == 0
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_empty_and_single_tile
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[SquareTiling-1]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[SquareTiling-5]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[SquareTiling-20]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[SquareTiling-50]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestPlotting::test_plot_tiling[True]
+      AssertionError: assert None is not None
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[SquareTiling-200]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[SquareTiling-601]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[HexagonTiling-1]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[HexagonTiling-5]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[HexagonTiling-20]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[HexagonTiling-50]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[HexagonTiling-200]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'
+  test_symbol_cartogram_mosaic::TestVectorizedLatticeAdjacency::test_matches_naive_reference[HexagonTiling-601]
+      AttributeError: module 'carto_flow.symbol_cartogram.tiling' has no attribute '_compute_adjacency_from_lattice'

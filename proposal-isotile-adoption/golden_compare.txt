@@ -1,0 +1,12 @@
+case                               lattice tiles old/new  assigned  regions split    mean displacement (tile sizes)  footprint IoU mean / min   s old/new
+states grid hexagon                      149/149           49/49         0/0              1.350/1.262   (max 3.53/3.10)       0.231 / 0.000    11.8/12.5  
+states grid square                       150/160           49/49         0/0              0.787/0.956   (max 2.56/2.42)       0.401 / 0.000    10.9/11.9  
+states grid triangle                     190/168           49/49         0/0              0.757/0.937   (max 2.00/2.08)       0.178 / 0.000    13.6/12.4  
+states grid quadrilateral                180/180           49/49         0/0              0.961/0.997   (max 3.17/2.49)       0.196 / 0.000    13.0/4.7   
+states grid scalloped_hexagon            208/179           49/49         0/0              0.834/0.735   (max 2.13/2.17)       0.796 / 0.000    45.4/12.2  
+states mosaic hexagon                    470/447          154/154        0/0              3.918/3.375   (max 7.89/6.33)       0.233 / 0.000     6.5/12.3  
+states mosaic square                     475/520          154/154        0/0              2.298/2.551   (max 4.28/5.85)       0.254 / 0.000     5.8/6.2   
+states mosaic triangle                   543/490          154/154        1/3              2.399/2.281   (max 6.28/4.44)       0.255 / 0.000     6.8/5.6   
+states mosaic scalloped_hexagon          546/533          154/154        0/0              2.351/2.331   (max 4.67/4.67)       0.791 / 0.000    69.4/8.7   
+districts grid hexagon                  1125/1159         432/432        0/0              4.318/4.457   (max 10.20/9.64)       0.157 / 0.000   260.0/284.5 
+districts mosaic hexagon                1178/1163         432/432        0/0              7.297/6.908   (max 15.79/17.40)       0.123 / 0.000    10.2/43.0  

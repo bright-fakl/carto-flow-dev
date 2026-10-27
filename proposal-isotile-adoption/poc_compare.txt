@@ -1,0 +1,46 @@
+Columns: old = old; old_in = old_meeting; cover = cover; fill = fill_region; match = matched; unmatch = old_unmatched; old_lack = cover_missing_in_old; v_gap = vertex_gap; a_dev = area_dev; e_diff = edge_diff; v_diff = vertex_diff; rot_diff = rot_flip_diff; a_ratio = area_ratio; cov_old = cov_old; cov_fill = cov_fill_region; ov_fill = overlap_fill_region; a_spread = area_spread_fill_region
+(old_in: old tiles that overlap the padded region; old_lack: tiles overlapping the region that the old class lacks;
+ fill: tiles of isotile fill_region, lattice anchored at the region center; cov_*: sampled coverage of the region)
+
+case                                                old   old_in    cover     fill    match  unmatch old_lack    v_gap    a_dev   e_diff   v_diff rot_diff  a_ratio  cov_old cov_fill  ov_fill a_spread
+SquareTiling()                                      144      144      144      144      144        0        0  5.5e-15  1.2e-15        0        0        0        1        1        1        0    1e-15
+HexagonTiling(pointy_top=True) vs pointy-top        195      175      175      187      195        0        0    2e-11  1.3e-12        0        0        0        1        1        1        0  1.3e-15
+HexagonTiling(pointy_top=False) vs pointy-top       195      175      175      187      195        0        0    2e-11  1.3e-12        0        0        0        1        1        1        0  1.3e-15
+TriangleTiling.equilateral()                        200      170      170      170      200        0        0  2.5e-15  1.2e-15        0        0        0        1        1        1        0  8.7e-16
+TriangleTiling.right_isosceles()                    181      162      162      198      181        0        0  1.6e-15  8.7e-16        0        0        0        1        1        1        0  8.7e-16
+TriangleTiling.right(2.0)                           189      181      181      144      189        0        0    5e-15  1.2e-15        0        0        0        1        1        1        0  1.2e-15
+TriangleTiling.right(0.3)                           203      169      169      192      203        0        0  9.9e-15  1.4e-15        0        0        0        1        1        1        0    1e-15
+TriangleTiling.isosceles(30)                        189      175      175      200      189        0        0  3.5e-15  8.7e-16        0        0        0        1        1        1        0    1e-15
+TriangleTiling.isosceles(120)                       204      185      185      176      204        0        0  1.1e-15  1.6e-15        0        0        0        1        1        1        0  1.2e-15
+TriangleTiling.from_polygon(clockwise scalene)      195      178      179      188      195        0        1  5.6e-15    1e-15        0        0        0        1        1        1        0  1.6e-15
+QuadrilateralTiling.parallelogram(60, 1)            203      163      163      180      203        0        0  5.6e-15  1.7e-15        0        0        0        1        1        1        0  1.2e-15
+QuadrilateralTiling.parallelogram(75, 1.7)          197      185      185      168      197        0        0    4e-15  1.6e-15        0        0        0        1        1        1        0  1.2e-15
+QuadrilateralTiling.rectangle(1)                    169      169      169      144      169        0        0  2.5e-15  1.4e-15        0        0        0        1        1        1        0  8.7e-16
+QuadrilateralTiling.rectangle(2.5)                  207      171      171      160      207        0        0  2.2e-15  5.2e-16        0        0        0        1        1        1        0  8.7e-16
+QuadrilateralTiling.rhombus(45)                     201      177      177      188      201        0        0    8e-15  2.3e-15        0        0        0        1        1        1        0    1e-15
+QuadrilateralTiling.trapezoid(0.5, 1)               213      165      165      178      213        0        0  7.1e-15  1.2e-15        0        0        0        1        1        1        0  1.2e-15
+QuadrilateralTiling.trapezoid(0.2, 0.6)             193      169      169      156      193        0        0    4e-15  1.6e-15        0        0        0        1        1        1        0  8.7e-16
+QuadrilateralTiling.from_polygon(convex)            196      169      169      175      196        0        0  7.8e-15  1.2e-15        0        0        0        1        1        1        0  6.9e-16
+QuadrilateralTiling.from_polygon(non-convex)        199      182      182      186      199        0        0  5.1e-15  1.2e-15        0        0        0        1        1        1        0    1e-15
+
+19 cases: old tiles without isotile match 0, edge adjacency differences 0, vertex-only differences 0, rotation or flip differences 0, largest vertex gap 2.0e-11 of the tile size, largest area deviation 1.3e-12 of the tile size squared
+old tiles that do not overlap the padded region: 409 of 3673
+tiles that overlap the region and that the old class lacks: 1
+
+Region far from the origin, tile_size 0.2, margin 0.1, region 2 x 2 centered at (c, c):
+class                                                c=0         c=1         c=3        c=10    c=1000.0 c=1000000.0
+SquareTiling (old)                                   144         169         144         144         169         144
+HexagonTiling (tile_size 0.12) (old)                 195         195         195         195         195         195
+TriangleTiling.equilateral (old)                     200         189          81           0           0           0
+QuadrilateralTiling.parallelogram (old)              203         195          49           0           0           0
+square (isotile fill_region)                         144         144         144         144         146         144
+hexagon (isotile fill_region)                        187         187         187         187         187         187
+triangle (isotile fill_region)                       170         170         170         170         170         170
+quadrilateral (isotile fill_region)                  144         144         144         144         146         144
+
+Lattice stability when the bounds are expanded symmetrically (mosaic calibration: trial build, then final build):
+class                                         tiles of the first build found in the second
+SquareTiling (current)                                         0 of 100   isotile:  100 of 100
+HexagonTiling (current)                                        0 of 143   isotile:  137 of 137
+TriangleTiling.equilateral (current)                         135 of 135   isotile:  120 of 120
+QuadrilateralTiling.parallelogram (current)                  149 of 149

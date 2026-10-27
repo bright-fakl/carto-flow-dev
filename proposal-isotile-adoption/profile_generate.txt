@@ -1,0 +1,76 @@
+Part 1: wall time in seconds, current generate (compute_adjacency=False, margin 0), one run each
+
+IH7 (hexagon, 6 vertices)
+   n_tiles  returned  old generate  old per tile  isotile (best of 3)
+       250       381         0.34s        0.89ms              0.0121s
+       500       699         1.31s        1.87ms              0.0182s
+      1000      1290         3.86s        2.99ms              0.0609s
+      2000      2385        12.52s        5.25ms              0.0614s
+      4000      4491        48.81s       10.87ms              0.1199s
+  growth exponent (log-log fit over the last four sizes): 1.94
+  extrapolation to 10000 tiles: 217 s
+
+scalloped_hexagon (curved, 594 vertices per tile)
+   n_tiles  returned  old generate  old per tile  isotile (best of 3)
+       250       333         0.83s        2.49ms              0.0503s
+       500       612         2.01s        3.28ms              0.0822s
+      1000      1134         4.62s        4.07ms              0.1518s
+      2000      2176        14.25s        6.55ms              0.3004s
+      4000      4306        53.45s       12.41ms              0.5915s
+  growth exponent (log-log fit over the last four sizes): 1.69
+  extrapolation to 10000 tiles: 204 s
+
+Part 2: cProfile of the current generate, IH7, n_tiles 2000, top functions by own time
+
+returned 2385 tiles
+         23107110 function calls (23092800 primitive calls) in 23.570 seconds
+
+   Ordered by: internal time
+   List reduced from 107 to 12 due to restriction <12>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    8.499    8.499   23.582   23.582 /home/fakl/carto-flow/src/carto_flow/symbol_cartogram/tiling.py:2648(generate)
+  2842920    7.006    0.000   14.097    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2615(norm)
+  2842920    3.781    0.000    3.781    0.000 {method 'dot' of 'numpy.ndarray' objects}
+  2842920    1.199    0.000    1.199    0.000 {method 'ravel' of 'numpy.ndarray' objects}
+  2842920    0.837    0.000    1.211    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:168(isComplexType)
+  5700162    0.819    0.000    0.819    0.000 {built-in method builtins.issubclass}
+  2842920    0.547    0.000    0.547    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2611(_norm_dispatcher)
+  2845309    0.463    0.000    0.463    0.000 {built-in method numpy.asarray}
+16695/2385    0.148    0.000    0.181    0.000 /usr/lib/python3.12/copy.py:118(deepcopy)
+     2387    0.027    0.000    0.028    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/shapely/creation.py:241(linearrings)
+     2387    0.020    0.000    0.037    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/shapely/creation.py:340(polygons)
+     2387    0.019    0.000    0.091    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/shapely/geometry/polygon.py:66(__new__)
+
+
+
+by cumulative time:
+         23107110 function calls (23092800 primitive calls) in 23.570 seconds
+
+   Ordered by: cumulative time
+   List reduced from 107 to 14 due to restriction <14>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    8.499    8.499   23.582   23.582 /home/fakl/carto-flow/src/carto_flow/symbol_cartogram/tiling.py:2648(generate)
+  2842920    7.006    0.000   14.097    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2615(norm)
+  2842920    3.781    0.000    3.781    0.000 {method 'dot' of 'numpy.ndarray' objects}
+  2842920    0.837    0.000    1.211    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:168(isComplexType)
+  2842920    1.199    0.000    1.199    0.000 {method 'ravel' of 'numpy.ndarray' objects}
+  5700162    0.819    0.000    0.819    0.000 {built-in method builtins.issubclass}
+  2842920    0.547    0.000    0.547    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2611(_norm_dispatcher)
+  2845309    0.463    0.000    0.463    0.000 {built-in method numpy.asarray}
+     2386    0.002    0.000    0.203    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/tactile/tactile.py:227(fill_region_bounds)
+     2386    0.001    0.000    0.201    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/tactile/tactile.py:235(_fill_region_quad)
+     2388    0.001    0.000    0.200    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/tactile/tactile.py:298(fill_fix_x)
+     2388    0.014    0.000    0.199    0.000 /tmp/claude-1000/-home-fakl-carto-flow/ede8c6da-5d47-4428-a510-9e1f1953f075/scratchpad/phase3/venv/lib/python3.12/site-packages/tactile/tactile.py:250(do_fill)
+16695/2385    0.148    0.000    0.181    0.000 /usr/lib/python3.12/copy.py:118(deepcopy)
+     2385    0.011    0.000    0.166    0.000 /usr/lib/python3.12/copy.py:191(_deepcopy_list)
+
+
+
+Part 3: current generate with adjacency, and isotile with adjacency
+
+   n_tiles   old generate+adjacency   isotile fill_region+polygons+adjacency
+       500                    1.30s                                  0.0173s   (tiles 699 / 559)
+      1000                    3.96s                                  0.0259s   (tiles 1290 / 1068)
+      2000                   13.78s                                  0.0470s   (tiles 2385 / 2123)

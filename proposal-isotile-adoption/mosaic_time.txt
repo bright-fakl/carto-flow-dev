@@ -1,0 +1,12 @@
+old: districts, mosaic hexagon, morph=False: 7.9 s, 1178 lattice tiles
+  ncalls      1  cumulative   6.926 s  mosaic/__init__.py:527(_compute)
+  ncalls      1  cumulative   3.166 s  mosaic/_assignment.py:166(hungarian_morphed_assignment)
+  ncalls      1  cumulative   1.675 s  mosaic/_calibration.py:53(calibrate_tiling)
+  ncalls      3  cumulative   1.634 s  mosaic/_calibration.py:117(_build)
+  ncalls      1  cumulative   1.087 s  mosaic/_assignment.py:39(_build_cost_matrix)
+new: districts, mosaic hexagon, morph=False: 17.4 s, 1163 lattice tiles
+  ncalls      1  cumulative  16.343 s  mosaic/__init__.py:527(_compute)
+  ncalls      1  cumulative   8.816 s  mosaic/__init__.py:262(_chain_swap_repair)
+  ncalls      1  cumulative   2.802 s  mosaic/_assignment.py:166(hungarian_morphed_assignment)
+  ncalls      1  cumulative   2.209 s  mosaic/_calibration.py:53(calibrate_tiling)
+  ncalls      4  cumulative   1.683 s  mosaic/_calibration.py:117(_build)
