@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #187: Logo and basic project branding</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #187: Logo and basic project branding</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../exploration-logo-concepts/index.html">Logo concepts for carto-flow (warped grid, choropleth grid, streamlines, circles, hexagons, morph)</a> <span class="meta">(exploration)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/187">https://github.com/bright-fakl/carto-flow/pull/187</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/84">#84</a></dd>
+<dt>Branch</dt><dd>feat/logo-branding</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-26 23:50</dd>
+<dt>Before</dt><dd>main @ 408284b</dd>
+<dt>After</dt><dd>feat/logo-branding @ d54d527</dd>
+<dt>Inputs</dt><dd>Generator scripts/make_logo_assets.py (cairosvg, pillow, fonttools); contrast by WCAG relative luminance against the docs surfaces. Design from exploration-logo-concepts (outline t1, gaps rotated +10 and -8 degrees, amber on the two right-hand regions).</dd>
+</dl>
+<p class="desc">Logo mark (tall blob cut into four regions by two gaps crossing at 72 degrees), wordmark, favicon set, social preview, usage note, docs header and favicon wiring, README picture header. Light amber darkened to #c27400 so it reaches 3:1 on white. Figures show every asset on a light and a dark surface at 16 to 128 px.</p>
+<p><code>fig.py &lt;assets dir&gt; &lt;output dir&gt;</code> renders the assets from the PR branch.</p>
+<h2>Contents</h2>
+<ul><li><code>scripts/make_logo_assets.py</code>: generator for all assets (blob outline, cut search, SVG and PNG output, outlined text, contrast report). No dependency added to the project.</li><li><code>docs/assets/logo/</code>: <code>mark-light</code>, <code>mark-dark</code>, <code>mark-mono</code>, <code>mark-hero-light</code>, <code>mark-hero-dark</code> (gap 6), <code>wordmark-light</code>, <code>wordmark-dark</code> (DejaVu Sans Bold outlined, hyphen blue, second &quot;o&quot; amber), <code>favicon.svg</code> (gap 10, with a <code>prefers-color-scheme</code> rule), <code>favicon-32.png</code>, <code>apple-touch-icon-180.png</code>, <code>social-preview-1280x640.png</code> (dark surface, tagline &quot;Cartograms from geographic data in Python&quot;).</li><li><code>docs/branding.md</code> (usage note, nav entry &quot;Logo and Branding&quot;), <code>docs/overrides/partials/logo.html</code>, <code>docs/stylesheets/logo.css</code>, <code>mkdocs.yml</code> (<code>theme.logo</code>, <code>theme.favicon</code>, nav, <code>extra_css</code>), <code>README.md</code> header with <code>&lt;picture&gt;</code> and absolute raw.githubusercontent URLs.</li><li>The header logo is two images selected by Material&#x27;s color scheme through CSS: a single SVG with <code>prefers-color-scheme</code> would follow the operating system, not the palette toggle.</li></ul>
+<h2>Contrast (WCAG relative luminance)</h2>
+<table>
+<tr><th>Color</th><th>On white</th><th>On slate #1e2029</th><th>On black header</th></tr>
+<tr><td>Light blue #2c6e9e</td><td>5.48</td><td></td><td></td></tr>
+<tr><td>Light amber #c27400 (was #d98200, 2.94 on white)</td><td>3.63</td><td></td><td></td></tr>
+<tr><td>Light text #1b1f24</td><td>16.56</td><td></td><td></td></tr>
+<tr><td>Dark blue #85b7e0</td><td></td><td>7.54</td><td>9.85</td></tr>
+<tr><td>Dark amber #facc38</td><td></td><td>10.53</td><td>13.76</td></tr>
+<tr><td>Dark text #e8edf2</td><td></td><td>13.65</td><td>17.83</td></tr>
+</table>
+<p>The slate surface #1e2029 is computed from hsl(232, 15%, 14%) in Material&#x27;s palette CSS; the headers are white (default scheme) and black (slate scheme).</p>
+<h2>Checks</h2>
+<p>All 8 CI checks pass. <code>mkdocs build -s</code> passes and the built site links <code>assets/logo/favicon.svg</code>, both header logo images and <code>logo.css</code>. The first local docs build failed with an <code>OverflowError</code> in mkdocs-gallery (<code>_sec_to_readable</code>, execution time out of range); a rerun passed.</p>
+<h2>Not verified</h2>
+<ul><li>Behavior in a real browser: the header swap on the palette toggle, and <code>favicon.svg</code> in a dark browser tab.</li><li>README images resolve only after the merge; PyPI shows the logo after the next release.</li><li>Uploading the social preview in the repository settings (a manual step).</li><li>The 32 px minimum height of the wordmark in the usage note is based on the renders only.</li><li>No trademark clearance.</li></ul>
+<h2>Open questions</h2>
+<p>Keep the dark social preview or use a light one; keep the unrequested hero-size marks.</p>
+<div class="figure">
+<img src="fig1_assets.png" alt="Top: white surface (left) and #1b1f24 surface (right), rows at 16, 32, 64 and 128 px, columns mark, favicon, one-color mark, wordmark. Bottom: apple touch icon (180 px), `favicon-32.png` and the 1280 x 640 social preview. cairosvg ignores the `prefers-color-scheme` rule inside `favicon.svg`, so the favicon column shows the light colors on both surfaces, and the one-color mark is black (it uses `currentColor`), so it is nearly invisible on the dark surface; neither is a defect of the files.">
+<p class="caption">Top: white surface (left) and #1b1f24 surface (right), rows at 16, 32, 64 and 128 px, columns mark, favicon, one-color mark, wordmark. Bottom: apple touch icon (180 px), <code>favicon-32.png</code> and the 1280 x 640 social preview. cairosvg ignores the <code>prefers-color-scheme</code> rule inside <code>favicon.svg</code>, so the favicon column shows the light colors on both surfaces, and the one-color mark is black (it uses <code>currentColor</code>), so it is nearly invisible on the dark surface; neither is a defect of the files.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
