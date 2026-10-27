@@ -2,13 +2,14 @@
 issue: 159
 title: carto-flow adopts isotile (phase 3 design)
 project: carto-flow
-description: Design of phase 3 of the isotile plan, in which carto-flow drops tactile and its own tiling code (2,855 lines in tiling.py) for the isotile library. The page inventories every tactile-relevant symbol and the public API, gives a verdict for each function, designs thin wrappers over isotile and checks them with a prototype (the 19 named tilings are reproduced without an unmatched tile or an adjacency difference; 589 of 610 existing tests pass and each of the 21 failures is explained), lists the behavior changes with a recommendation each, plans the golden comparison with a tolerance taken from the measured effect of the lattice position, profiles the 340 to 590 s of IsohedralTiling.generate (96 percent is its quadratic deduplication loop), plans the test migration and a four-PR split, and ends with the risks and the open decisions.
+description: Design of phase 3 of the isotile plan, in which carto-flow drops tactile and its own tiling code (2,855 lines in tiling.py) for the isotile library. The page inventories every tactile-relevant symbol and the public API, gives a verdict for each function, designs thin wrappers over isotile and checks them with a prototype (the 19 named tilings are reproduced without an unmatched tile or an adjacency difference; 589 of 610 existing tests pass and each of the 21 failures is explained), lists the behavior changes with a recommendation each, plans the golden comparison with a tolerance taken from the measured effect of the lattice position, profiles the 340 to 590 s of IsohedralTiling.generate (96 percent is its quadratic deduplication loop), plans the test migration and a four-PR split, and ends with the risks and the twelve decisions, all settled.
 kind: proposal
 topic: symbol
 status: open
 related: proposal-isohedral-tiling-library, isotile-phase-1-pr, isotile-phase-2-pr
 date: 2026-10-27 18:30
-inputs: carto-flow main at a126c0d; isotile origin/main at a66ed7a (phases 1, 1.5, 2 and the notify workflow; the local clone /home/fakl/isotile is on the branch docs-skeleton, so a git archive of origin/main was used); isohedral-tiling-ui main at eb7b79e (read only); tactile 0.1.0; Python 3.12.3, numpy 2.5.4, scipy 1.18.1, shapely 2.2.0 (GEOS 3.14.1), uv 0.8.17 in a scratch venv (carto-flow installed editable from the checkout, isotile from the archive); 16-core WSL2 machine with other jobs running, timings are single runs (best of 3 where stated), seeds fixed. The prototype wrappers were written into a copy of the carto-flow sources, never into the checkout.
+updated: 2026-10-27 17:10
+inputs: carto-flow main at a126c0d; isotile origin/main at a66ed7a (phases 1, 1.5, 2 and the notify workflow; the local clone /home/fakl/isotile is on the branch docs-skeleton, so a git archive of origin/main was used); isohedral-tiling-ui main at eb7b79e (read only); tactile 0.1.0; Python 3.12.3, numpy 2.5.4, scipy 1.18.1, shapely 2.2.0 (GEOS 3.14.1), uv 0.8.17 in a scratch venv (carto-flow installed editable from the checkout, isotile from the archive); 16-core WSL2 machine with other jobs running, timings are single runs (best of 3 where stated), seeds fixed. The timings of the profile of `generate`, of the isotile speedups, of `perf_wrapper` and of the layouts in section 5.4 were taken while an energy-saving setting made the machine about 2 times slower, so their absolute seconds are about 2 times too high; the ratios between current code and isotile hold. The mosaic timing was repeated after disabling the setting (`mosaic_time_rerun.txt`, section 6). The prototype wrappers were written into a copy of the carto-flow sources, never into the checkout.
 ---
 
 Phase 3 of the plan in [proposal-isohedral-tiling-library](../proposal-isohedral-tiling-library/index.html) (section 8.2 and the review of section 11) makes carto-flow use isotile. This page does not implement it. It fixes what is replaced, what stays, how the wrappers look, which behaviors change, how the result is checked and in which PRs it lands. Every number marked as measured was produced by a script in this directory.
@@ -25,7 +26,7 @@ Files in this directory:
 | [profile_generate.py](profile_generate.py), [profile_generate.txt](profile_generate.txt) | timing and cProfile of the current `IsohedralTiling.generate` and the isotile equivalent (section 6) |
 | [perf_isotile.py](perf_isotile.py), [perf_isotile.txt](perf_isotile.txt) | isotile at 2,000 to 40,000 tiles, sparse against dense adjacency (section 6) |
 | [perf_wrapper.py](perf_wrapper.py), [perf_wrapper_old.txt](perf_wrapper_old.txt), [perf_wrapper_new.txt](perf_wrapper_new.txt) | `generate` of the four families, current against wrapper prototype (section 6) |
-| [mosaic_time.py](mosaic_time.py), [mosaic_time.txt](mosaic_time.txt) | the mosaic layout on the districts, current against wrapper prototype (section 6) |
+| [mosaic_time.py](mosaic_time.py), [mosaic_time.txt](mosaic_time.txt), [mosaic_time_rerun.txt](mosaic_time_rerun.txt) | the mosaic layout on the districts, current against wrapper prototype; the first run on the slower machine state, the rerun after disabling the energy-saving setting (section 6) |
 | [golden_layouts.py](golden_layouts.py), [golden_compare.txt](golden_compare.txt) | grid and mosaic layouts on the US states and the congressional districts, current against wrapper prototype (section 5.4) |
 | [phase_noise.py](phase_noise.py), [phase_noise.txt](phase_noise.txt) | effect of the lattice position alone on a grid layout; sets the tolerance (section 5.4) |
 | [tests_with_wrappers.txt](tests_with_wrappers.txt) | the existing tests run against the wrapper prototype (section 7) |
@@ -45,16 +46,17 @@ cd /home/fakl/carto-flow && venv/bin/python <this directory>/make_figures.py
 
 | Question | Result |
 |---|---|
-| How much carto-flow code does isotile replace? | `symbol_cartogram/tiling.py` loses 1,805 of its 2,855 lines (the four `generate` methods, the adjacency helpers, all of `IsohedralTiling` except the `Tiling` interface); the prototype wrappers need about 300 lines. `grid.py`, `adjacency.py` and `geo_utils/adjacency.py` do not use tactile or tiling classes and stay. No other module of the package imports tactile; `pyproject.toml` gets `isotile` instead. |
+| How much carto-flow code does isotile replace? | `symbol_cartogram/tiling.py` loses 1,805 of its 2,855 lines (the four `generate` methods, the adjacency helpers, all of `IsohedralTiling` except the `Tiling` interface); the prototype wrappers need about 300 lines. `adjacency.py` and `geo_utils/adjacency.py` do not use tactile or tiling classes and stay; `grid.py` (`generate_grid`, `compute_grid_symbol_size`, which nothing in `src` calls) is deleted with its 57 tests, and `TileAdjacencyType` is removed (section 4.13). No other module of the package imports tactile; `pyproject.toml` gets `isotile` instead. |
 | Do thin wrappers reproduce the 19 named cases? | Yes, with the lattice anchored as the current class anchors it: all 3,673 current tiles have an isotile tile with the same centroid, the largest vertex distance is 2.0e-11 of the tile size (hexagon; the others at most 1e-14), edge and vertex-only adjacency differ in 0 pairs, rotation and flip in 0 tiles. 409 of the 3,673 current tiles (11 percent) do not overlap the padded region, and one tile that does (clockwise scalene triangle) is missing from the current class. |
 | The 15 presets and the 81 types? | 81 types at the defaults: vertex gap 3.3e-15, adjacency identical. Presets: polygons identical except `puzzle_piece` (isotile samples 110 points on a spline with 11 control points, carto-flow 100; gap 0.8 percent of the tile size) and `wavy_triangle`, whose preset data differ (amplitude 0.15 in carto-flow, 0.12 in isotile; an isotile fix, section 2.4). The current geometric adjacency reports 81 and 116 vertex-only contacts as edges in `wavy_square` and `scalloped_quad`. |
 | Existing tests against the wrapper prototype? | 589 of the 610 tests of the 13 relevant files pass. The 21 failures: 13 test a private helper that is deleted, 3 test behavior that changes on purpose (a curve on an `I` edge, invalid curves), 1 an error message, 1 an exact float, 3 pin an outcome that depends on the lattice (section 7). |
 | Do the layouts change? | By the position of the lattice, not in kind. On 11 cases (grid and mosaic, states and districts) the mean distance of a region from its tile changes by -14 to +24 percent; the same code with the lattice shifted by fractions of a tile changes it by up to 34 percent (new square grid 0.71 to 0.96; hexagon grid 1.20 to 1.49). The mosaic layout of the states with triangles has 3 non-contiguous regions instead of 1; every other case has 0 before and after. |
 | Where does the time go in `IsohedralTiling.generate`? | In the pairwise deduplication loop: 2,842,920 distance computations for 2,385 tiles (n(n-1)/2), 22.6 of 23.6 s (96 percent); tactile's fill takes 0.20 s. Time grows with exponent 1.94 (hexagon) and 1.69 (curved preset). The isotile equivalent, with polygons and adjacency, takes 0.047 s for 2,000 tiles (290 times faster) and 0.12 s for 4,000 (400 times); 0.25 s for 10,300. The four families have no such loop; their `generate` gets 1.5 to 4 times faster, 20 times with adjacency for triangles. |
+| Is the mosaic layout slower on the new lattice? | Districts, hexagon, `morph=False`, machine at normal speed: 3.7 s now, 8.4 s with the wrapper prototype. The first measurement (7.9 s and 17.4 s) ran on a machine about 2 times slower, so the 2 times slowdown was machine speed. The remaining factor 2.3 is in `_chain_swap_repair` (below 0.5 s now, 4.39 s with the wrappers), not in tile generation. The cause (more repair work on the new lattice phase) is a hypothesis; step 1 measures three more inputs. |
 | Holes and the origin | The current triangle and quadrilateral tilings leave holes in 39 and 34 of 60 random shapes and return no tile at all when the region is more than about its own size from the origin (0 tiles for a 2 x 2 region at (10, 10)); the isotile tilings cover all 600 shapes. The current `IsohedralTiling.generate` lacks 118 of 9,747 region tiles in 18 of the 81 types. The grid layout's `rotation` rotates the tile set about the origin: for data 8e6 m from it the mean displacement is 12.2 tile sizes instead of 1.3. |
 | What does the GUI need from carto-flow? | Nothing that is not in isotile already: generation from bounds, tile count and margin is `fill_region`; type info, presets, serialization, validity, symmetry and outlines are isotile API. The only carto-flow call left in the GUI is a text snippet. No carto-flow code needs to move into isotile for the GUI (section 2.3). |
 | What changes in isotile? | Three small changes, no new concept: the `wavy_triangle` data, `TileSet.neighbor_lists` (bulk neighbor access; `neighbors(i)` rebuilds the matrix at 30 ms per call) and recentering in `cover` (holes of up to 5e-5 of the area appear at distances of 4e6 tile sizes from the origin). Section 2.4 also lists seven candidates that were rejected. |
-| PR split | isotile: one small PR first. carto-flow: (1) tilings over isotile with golden fixtures, (2) sparse adjacency, (3) grid rotation about the region center, (4) documentation, dependency and migration guide. Sections 8 and 9 give order, risk and the decisions that block each step. |
+| PR split | isotile: one small PR first (step 0, started). carto-flow: (1) tilings over isotile with golden fixtures, deleting `generate_grid`, `compute_grid_symbol_size` and `TileAdjacencyType` (layouts take isotile's adjacency kind strings), (2) sparse adjacency, (3) rotation and offset layout options, (4) documentation, dependency and migration guide. Sections 8 and 9 give order, risk and the decisions. |
 
 ## 1. Inventory
 
@@ -65,7 +67,7 @@ Public means importable without a leading underscore; "exported" means in `carto
 | Symbol | Lines | Visibility | Used by |
 |---|---|---|---|
 | `DEFAULT_BOUNDS`, `DEFAULT_N_TILES` | 47 to 52 | public, not exported | `Tiling.generate` defaults; `tests/test_tilings.py` imports `DEFAULT_N_TILES` |
-| `TileAdjacencyType` | 60 to 65 | exported | `generate(adjacency_type=)` |
+| `TileAdjacencyType` | 60 to 65 | exported | `generate(adjacency_type=)`; removed in step 1 (section 4.13) |
 | `TileTransform` | 73 to 90 | exported | the layouts that place symbols on tiles (grid, mosaic) |
 | `TilingResult` (fields `polygons`, `transforms`, `adjacency`, `vertex_adjacency`, `tile_size`, `inscribed_radius`, `canonical_tile`, `n_base_vertices`; `centers`, `n_tiles`, `rotate`, `plot`, `plot_tile`) | 93 to 376 | exported | grid, mosaic, `TiledLayoutResult`, `SymbolCartogram.save/load`, `plot_tiling` |
 | `Tiling` (ABC: `generate`, `canonical_tile`, `canonical_symbol`, `tile_size_for_symbol_size`, `symbol_size_for_tile_size`, `from_polygon`, `plot_tile`; `_n_base_vertices`, `_resolve_generate_args`) | 384 to 582 | exported | everything that takes `tiling=` |
@@ -94,7 +96,7 @@ The only import of tactile in the package is in this file (`from tactile import 
 
 | File | What it uses |
 |---|---|
-| `symbol_cartogram/__init__.py` | exports the names of section 1.3 |
+| `symbol_cartogram/__init__.py` | exports the names of section 1.3; loses the exports of `generate_grid`, `compute_grid_symbol_size` and `TileAdjacencyType` |
 | `layouts/grid/__init__.py` (178 to 380) | `resolve_tiling`, `generate(bounds, tile_size)`, `TilingResult.rotate`, `centers`, dense `adjacency` and `vertex_adjacency` (7 places), `transforms`, `tile_size`, `polygons` |
 | `layouts/grid/_placement.py` | dense tile adjacency in 5 functions (`fill_internal_holes`, `_fix_island_assignments`, `_bfs_distance_matrix`, `bfs_expand_assignments`, `assign_to_grid_hungarian`; `np.where(adj[t])`, `argwhere`, `adj[:, j]`, `sum(axis=1)`): 29 lines |
 | `layouts/mosaic/_calibration.py` | `generate` in a calibration loop (an `n_tiles=1` probe, up to `_MAX_ADJUST` trial builds without adjacency, one final build on bounds expanded by `buffer_rings + 0.5` tile sizes), `canonical_tile.area`, `result.adjacency[t]` rows into `adj_list` |
@@ -102,9 +104,11 @@ The only import of tactile in the package is in this file (`from tactile import 
 | `layouts/layout_result.py`, `visualization.py` | `TiledLayoutResult.tiling_result`, `plot_tiling` (polygons) |
 | `result.py` (631 to 756) | `SymbolCartogram.save` writes polygons, transforms, `tile_size`, `inscribed_radius`, `canonical_tile`, `n_base_vertices` (not the adjacency); `load` rebuilds a `TilingResult` with an all-False `(n, n)` adjacency |
 | `symbols.py` (567 to 690) | `IsohedralTileSymbol` builds an `IsohedralTiling` and takes its `canonical_tile` for the unit polygon; `TileSymbol` wraps the `canonical_tile` of the triangle and quadrilateral tilings |
-| `grid.py` | an independent grid generator (section 2.2), no tiling classes |
+| `grid.py` | an independent grid generator (section 2.2), no tiling classes, no caller in `src`; deleted in step 1 |
 | `adjacency.py`, `geo_utils/adjacency.py` | region adjacency of real geometries (tolerance, shared length); not tile adjacency |
-| docs | `docs/reference/symbol_cartogram/tiling.md` (mkdocstrings of the module); `docs/explanations/tiling-system.md` (describes tactile and `TilingResult`, and says `inscribed_radius` is the largest inscribed circle and used by the layouts, but the code computes the distance from the centroid to the boundary and only serialization reads it); examples `plot_symbol_plot_tiling.py`, `plot_symbol_plot_tiling_2.py` (`from_preset("wavy_triangle")`), `plot_symbol_cartogram.py`, `plot_symbol_styling.py` and the tutorial `basic-symbol-cartogram.ipynb` (`HexagonTiling()` on the states); `README.md` |
+| docs | `docs/reference/symbol_cartogram/tiling.md` (mkdocstrings of the module); `docs/explanations/tiling-system.md` (describes tactile and `TilingResult`, and says `inscribed_radius` is the largest inscribed circle and used by the layouts, but the code computes the distance from the centroid to the boundary and only serialization reads it); examples `plot_symbol_plot_tiling.py`, `plot_symbol_plot_tiling_2.py` (`from_preset("wavy_triangle")`), `plot_symbol_cartogram.py`, `plot_symbol_styling.py` and the tutorial `basic-symbol-cartogram.ipynb` (`HexagonTiling()` on the states); `README.md`; the mentions of `generate_grid`, `compute_grid_symbol_size` and `TileAdjacencyType` go |
+
+The layout options and calls that take a `TileAdjacencyType` take the strings `"edge"`, `"vertex"` or `"vertex-only"` instead.
 
 No test, notebook, doc or example calls `HexagonTiling(pointy_top=False)`. The shapes used outside `tests/test_tilings.py`: `TriangleTiling.equilateral()`, `right_isosceles()`, `QuadrilateralTiling.parallelogram()`, `rhombus()`, `trapezoid(0.5)`, the strings `"triangle"` and `"quadrilateral"`, and the preset `wavy_triangle`. No JSON design file, no saved edge curve and no custom `edge_curves` exist in tests, docs, notebooks or examples beyond the 15 presets and `tests/test_tilings.py`.
 
@@ -117,9 +121,10 @@ From `carto_flow.symbol_cartogram` (nothing tiling-related is exported from `car
 | `SquareTiling`, `HexagonTiling`, `TriangleTiling`, `QuadrilateralTiling`, `IsohedralTiling` | constructors and convenience classmethods keep their signatures; the tile set returned by `generate` changes (boundary rule, lattice position, order) and `HexagonTiling(pointy_top=False)` becomes flat-top |
 | `Tiling` | new `rotated(angle)`; `generate` signature unchanged |
 | `TilingResult` | `adjacency` and `vertex_adjacency` change type from `ndarray` to `scipy.sparse.csr_array` (breaking); new optional field `tile_set` |
-| `TileTransform`, `TileAdjacencyType`, `resolve_tiling` | unchanged |
-| `TilingPlotResult`, `TilingGridPlotResult`, `PrototilePlotResult`, `plot_tiling`, `TileSymbol`, `IsohedralTileSymbol`, `GridBasedLayout(Options)`, `MosaicLayout(Options)`, `GridMetrics`, `MosaicMetrics` | unchanged signatures; `GridBasedLayoutOptions.rotation` rotates about the region center |
-| `generate_grid`, `compute_grid_symbol_size` | unchanged (section 2.2) |
+| `TileTransform`, `resolve_tiling` | unchanged |
+| `TileAdjacencyType` | removed (breaking); `generate` and the layouts take isotile's `AdjacencyKind` strings `"edge"`, `"vertex"` and `"vertex-only"` (the enum values were already `"edge"` and `"vertex"`; `"vertex-only"` becomes available) |
+| `TilingPlotResult`, `TilingGridPlotResult`, `PrototilePlotResult`, `plot_tiling`, `TileSymbol`, `IsohedralTileSymbol`, `GridBasedLayout(Options)`, `MosaicLayout(Options)`, `GridMetrics`, `MosaicMetrics` | unchanged signatures, except for the adjacency type (strings); `GridBasedLayoutOptions.rotation` rotates about the region center; the grid and mosaic options gain `offset` (section 4.10) |
+| `generate_grid`, `compute_grid_symbol_size` | removed (breaking, section 2.2) |
 | `IsohedralTiling` methods `available_types`, `find_types`, `from_preset`, `list_presets`, `to_dict`, `from_dict`, `save`, `load`, `type_info`, `describe`, `plot_prototile` | kept as delegates to isotile (decision 3 of section 9); `to_dict` writes format 1.1 |
 | module-level `DEFAULT_BOUNDS`, `DEFAULT_N_TILES` | unchanged |
 | private `_PRESETS`, `_ih`, `_type`, `_edge_curves`, `_unit_tile`, the adjacency helpers | removed or reimplemented; the GUI reads `_ih`, `_type` and `_edge_curves` and moves to isotile in phase 4 |
@@ -134,13 +139,13 @@ Principle (from the plan): generic geometry lives in isotile; whatever the GUI n
 |---|---|
 | Tilings of the four families and the 81 types | `IsohedralTiling.square()`, `.hexagon(pointy_top)`, `.triangle(vertices)`, `.quadrilateral(vertices)`, `IsohedralTiling(type, parameters)` |
 | Fill and cover of a region, tile size from a tile count, margin | `fill_region(bounds, n_tiles= or tile_size=, margin=)`, `cover`, `fill` |
-| Adjacency (edge, edge or vertex, vertex only) | `TileSet.adjacency(kind)`, sparse boolean matrices from the lattice table |
+| Adjacency (edge, edge or vertex, vertex only) | `TileSet.adjacency(kind)`, sparse boolean matrices from the lattice table; `AdjacencyKind` (`"edge"`, `"vertex"`, `"vertex-only"`) is also the option type of `generate` and the layouts |
 | Edge curves, symmetry, interpolation, outlines | `edge_curves`, `edge_curve_modes`, `enforce_symmetry`, `interpolate`, `prototile(curved=)`, `edge_outlines`, `TileSet.polygons(curved=)` |
 | Validity | `check_prototile` and the constructor (raises `ValueError`) |
 | Frame (scale, rotation, position) | `frame`, `with_frame`, `rotated`, `scaled`; `fill_region` sets scale and position from the region and keeps the orientation |
 | Type metadata, presets, serialization, plotting | `get_type(n).info()`, `describe`, `find_types`, `tiling_types`, `list_presets`, `from_preset`, `to_dict`/`from_dict`/`save`/`load`, `isotile.plot` |
 
-Stays in carto-flow: the `Tiling` interface and `resolve_tiling` (string names for the layouts), `TilingResult`, `TileTransform`, `TileAdjacencyType`, the symbols (`canonical_symbol`, `tile_size_for_symbol_size`, `symbol_size_for_tile_size`, `IsohedralTileSymbol`, `TileSymbol`), `plot` and `plot_tile` (they use `PlotStyle`), all layouts and assignment code, and the region adjacency in `adjacency.py` and `geo_utils/adjacency.py`.
+Stays in carto-flow: the `Tiling` interface and `resolve_tiling` (string names for the layouts), `TilingResult`, `TileTransform`, the symbols (`canonical_symbol`, `tile_size_for_symbol_size`, `symbol_size_for_tile_size`, `IsohedralTileSymbol`, `TileSymbol`), `plot` and `plot_tile` (they use `PlotStyle`), all layouts and assignment code, and the region adjacency in `adjacency.py` and `geo_utils/adjacency.py`.
 
 ### 2.2 Verdict per function
 
@@ -148,7 +153,7 @@ Stays in carto-flow: the `Tiling` interface and `resolve_tiling` (string names f
 
 | Function | Verdict | Reason |
 |---|---|---|
-| `TileAdjacencyType` | stays | carto-flow option; maps to the kinds `"edge"` and `"vertex"` |
+| `TileAdjacencyType` | removed | isotile's `AdjacencyKind` strings are the option values; nothing maps |
 | `TileTransform` | stays | symbol placement convention (center, rotation in degrees, flip) |
 | `TilingResult` | stays, fields change | holds sparse adjacency; new optional `tile_set` |
 | `TilingResult.rotate` | stays | public and tested; the layouts stop using it (section 4.10) |
@@ -174,7 +179,7 @@ Stays in carto-flow: the `Tiling` interface and `resolve_tiling` (string names f
 | `IsohedralTiling.canonical_tile`, `canonical_symbol`, `tile_size_for_symbol_size`, `from_polygon` | stay | symbols |
 | `resolve_tiling`, `_TILING_REGISTRY` | stay | `"ih<N>"` and preset names go to isotile |
 
-`grid.py` (319 lines): `generate_grid` (15), `_generate_square_grid` (92), `_generate_hexagon_grid` (155) and `compute_grid_symbol_size` (243) stay unchanged. They build `GeoDataFrame` grids with symbol-aware brick patterns, use no tiling class and no tactile, no layout calls them, and `tests/test_grid.py` (57 tests) covers them. Whether they should be deprecated is a separate question (section 9, decision 8). `adjacency.py` (`compute_adjacency`, `_find_adjacent_pairs`) and `geo_utils/adjacency.py` (`find_adjacent_pairs`) compute adjacency of input regions with a tolerance and the length of the shared border; the tile lattice cannot do that, so they stay.
+`grid.py` (319 lines): `generate_grid` (15), `_generate_square_grid` (92), `_generate_hexagon_grid` (155) and `compute_grid_symbol_size` (243) are deleted in step 1, with their exports in `symbol_cartogram/__init__.py`, the 57 tests of `tests/test_grid.py` and the mentions in the docs. They build `GeoDataFrame` grids with symbol-aware brick patterns, use no tiling class and no tactile, and nothing in `src` calls them; the `fsquare` and `hexagon` tilings with `fill_region` replace them (decision 8). `adjacency.py` (`compute_adjacency`, `_find_adjacent_pairs`) and `geo_utils/adjacency.py` (`find_adjacent_pairs`) compute adjacency of input regions with a tolerance and the length of the shared border; the tile lattice cannot do that, so they stay.
 
 ### 2.3 What the GUI needs
 
@@ -199,7 +204,7 @@ No carto-flow code needs to move into isotile for the GUI: what the GUI used fro
 
 ### 2.4 Changes proposed for isotile
 
-Three small changes follow from this study. Each is checked by a test that fails before the change.
+Three small changes follow from this study, approved (decision 6); step 0 is started and has its own page, [isotile-step-0-pr](../isotile-step-0-pr/index.html). Each is checked by a test that fails before the change.
 
 | # | Change | Behavior | Tests | Size |
 |---|---|---|---|---|
@@ -242,7 +247,7 @@ The core of `generate` and of the `TilingResult` adapter, abbreviated from the p
 
 ```python
 def generate(self, bounds=DEFAULT_BOUNDS, n_tiles=None, tile_size=None, margin=0.1,
-             adjacency_type=TileAdjacencyType.EDGE, compute_adjacency=True) -> TilingResult:
+             adjacency_type: AdjacencyKind = "edge", compute_adjacency=True) -> TilingResult:
     bounds, n_tiles, tile_size = self._resolve_generate_args(bounds, n_tiles, tile_size)
     if tile_size is None:
         tiles = self._iso.fill_region(bounds, n_tiles=n_tiles, margin=margin)
@@ -251,8 +256,7 @@ def generate(self, bounds=DEFAULT_BOUNDS, n_tiles=None, tile_size=None, margin=0
     polygons = tiles.polygons()                                   # shapely, curved if the tiling has curves
     centers = shapely.get_coordinates(shapely.centroid(np.asarray(polygons, dtype=object)))
     rotation, flipped = _orientation(tiles.transforms)            # atan2 of the linear part, carto-flow's convention
-    kind = "edge" if adjacency_type == TileAdjacencyType.EDGE else "vertex"
-    adjacency = tiles.adjacency(kind) if compute_adjacency else empty
+    adjacency = tiles.adjacency(adjacency_type) if compute_adjacency else empty   # the string is isotile's kind; no mapping
     vertex_adjacency = tiles.adjacency("vertex-only") if compute_adjacency else empty
     ...
 ```
@@ -265,11 +269,12 @@ def generate(self, bounds=DEFAULT_BOUNDS, n_tiles=None, tile_size=None, margin=0
 | `n_tiles` | `fill_region(n_tiles=)`: tile size `sqrt(expanded area / n_tiles)` for every class (the hexagon formula used the literal 2.598 for 3 sqrt(3) / 2, a relative difference of 3e-5) |
 | `tile_size` | `fill_region(tile_size=tile_size * side_per_size)`: the side (square), `sqrt(area)` (triangle, quadrilateral, isohedral) or the circumradius (hexagon, side per size 1.6119). `TilingResult.tile_size` is computed back from the frame. |
 | `margin` | `fill_region(margin=)`: the same fraction of width and height on each side; isotile also rejects `margin <= -0.5` |
-| `adjacency_type` | `EDGE` gives `adjacency("edge")`, `VERTEX` gives `adjacency("vertex")`; `vertex_adjacency` is always `adjacency("vertex-only")` |
+| `adjacency_type` | an `AdjacencyKind` string passed to `adjacency(adjacency_type)` (`"edge"`, `"vertex"`, and now `"vertex-only"`); `vertex_adjacency` is always `adjacency("vertex-only")` |
 | `compute_adjacency=False` | stays in the signature; the lattice lookup costs 6 ms at 10,300 tiles, so its purpose is gone (it can be deprecated later); the matrices are empty sparse matrices of shape `(n, n)` |
 | `pointy_top` | `IsohedralTiling.hexagon(pointy_top)`: a frame rotation of 30 degrees |
 | `tile` of `TriangleTiling`, `QuadrilateralTiling` | normalized as today (centroid at the origin, area 1); `IsohedralTiling.triangle(vertices)` or `.quadrilateral(vertices)` takes it, a clockwise polygon included; a self-intersecting quadrilateral raises `ValueError` |
-| `rotation` of `GridBasedLayoutOptions` | `Tiling.rotated(angle)` rotates the frame, so the lattice rotates about the region center (section 4.10) |
+| `rotation` of the layout options (grid and mosaic) | `Tiling.rotated(angle)` rotates the frame, so the lattice rotates about the region center (section 4.10) |
+| `offset` of the layout options (grid and mosaic, new) | the lattice phase as a fraction of the tile size, `(0..1, 0..1)`, default `(0, 0)`: the frame is translated by `offset` times the tile size before `fill_region` anchors the lattice (section 4.10) |
 | `tiling_type`, `parameters`, `edge_curves`, `edge_curve_modes` | the isotile constructor, which raises `ValueError` for invalid prototiles and for curves on `I` edges (sections 4.2, 4.3) |
 
 ### 3.3 `TilingResult`
@@ -362,19 +367,32 @@ Now the families keep the input order of the polygon (a clockwise `from_polygon`
 
 Recommendation: as decided; the changelog lists the adjacency change.
 
-### 4.10 Rotation in the grid layout
+### 4.10 Rotation and offset of the lattice
 
-Now `GridBasedLayout` generates the tiling and calls `TilingResult.rotate(angle)`, which rotates tile centers and polygons about the origin (0, 0), not about the data. For the states (centered near the origin) a rotation of 30 degrees changes the mean distance of a region from its tile from 1.3 to 1.4 tile sizes. For the same data moved 8e6 m east it changes from 1.3 to 12.2 tile sizes. Recommendation: the layout calls `tiling.rotated(angle).generate(...)`, which rotates the lattice about the region center and covers the region exactly (no uncovered corners); `TilingResult.rotate` stays as a documented utility about the origin. A separate PR with before and after figures, because it changes results for every rotation other than 0.
+Now `GridBasedLayout` generates the tiling and calls `TilingResult.rotate(angle)`, which rotates tile centers and polygons about the origin (0, 0), not about the data; the mosaic layout has no rotation. For the states (centered near the origin) a rotation of 30 degrees changes the mean distance of a region from its tile from 1.3 to 1.4 tile sizes. For the same data moved 8e6 m east it changes from 1.3 to 12.2 tile sizes. Neither layout lets the user move the lattice phase, which changes the result as much as the old-new difference (section 5.4).
+
+Decision 12: the grid and mosaic layout options share two parameters.
+
+- `rotation`: degrees, about the region center. The layout calls `tiling.rotated(angle).generate(...)`, which rotates the lattice and covers the region exactly (no uncovered corners). `TilingResult.rotate` stays as a documented utility about the origin.
+- `offset`: the lattice phase as a fraction of the tile size, `(0..1, 0..1)`, default `(0, 0)`. The frame is translated by `offset` times the tile size before `fill_region`, which anchors the lattice at the translated center. An offset of 1 in a direction is one full period and gives the same tile set.
+
+Tests: an offset of one full period gives the same tile set; rotation is about the region center (data 8e6 m from the origin keep their mean distance); data shifted by a constant give the same layout metric. A helper that scans phases and rotations and reports the best by the layout's score is not in scope; it is a possible follow-up. Step 3 (section 8) changes results for every rotation other than 0 and carries before and after figures.
 
 ### 4.11 tactile in the dependencies and the docs; deprecation
 
 - `pyproject.toml`: remove `tactile>=0.1.0` and the mypy override `tactile.*`; add `isotile` (section 8.3 for the form); `uv.lock` updated. tactile is a pure-Python wheel, so removing it only drops a dependency; isotile's `NOTICE` keeps Kaplan's BSD 3-Clause notice.
 - Docs: rewrite the `IsohedralTiling` paragraph and the `TilingResult` table of `tiling-system.md` (it says the class wraps tactile, that all classes share one `generate` interface, and misdescribes `inscribed_radius`); `reference/symbol_cartogram/tiling.md` is mkdocstrings of the module and shrinks with it; the gallery images that use `HexagonTiling()` on the states change (lattice position) and are regenerated.
-- Deprecation path: no public name is removed. `IsohedralTiling.available_types`, `find_types`, `from_preset`, `list_presets`, `to_dict`, `from_dict`, `save`, `load`, `type_info`, `describe` and `plot_prototile` stay as delegates (decision 3 in section 9); the private `_PRESETS`, `_ih`, `_type`, `_edge_curves` and the adjacency helpers disappear without a warning. The behavior changes (4.1 to 4.10) go into the changelog and a migration page `docs/migrating-to-3.0.md` in the form of `migrating-to-2.0.md` (old call, new call, what a caller sees if they do nothing).
+- Removed public names: `TileAdjacencyType`, `generate_grid` and `compute_grid_symbol_size` (section 4.13). Breaking changes are accepted; the goal is a principled, clean implementation.
+- Delegates: `IsohedralTiling.available_types`, `find_types`, `from_preset`, `list_presets`, `to_dict`, `from_dict`, `save`, `load`, `type_info`, `describe` and `plot_prototile` stay as one-line delegates (decision 3); the private `_PRESETS`, `_ih`, `_type`, `_edge_curves` and the adjacency helpers disappear without a warning. The behavior changes (4.1 to 4.13) go into the changelog and a migration page `docs/migrating-to-3.0.md` in the form of `migrating-to-2.0.md` (old call, new call, what a caller sees if they do nothing).
 
 ### 4.12 Serialization format
 
 `to_dict` writes version 1.1: `edge_curves` is absent when empty (the old writer wrote `{}`), `edge_curve_modes` is added, `frame` is added when it is not the identity. Files written by carto-flow 2.0 and by the GUI load. The format of `SymbolCartogram.save/load` does not change.
+
+### 4.13 Removed public names
+
+- `TileAdjacencyType`: `generate` and the layout options take isotile's `AdjacencyKind` strings. The enum values were already `"edge"` and `"vertex"`, so a caller that passed the strings through works; a caller that imports the enum gets an `ImportError`. `"vertex-only"` becomes available.
+- `generate_grid`, `_generate_square_grid`, `_generate_hexagon_grid`, `compute_grid_symbol_size`: no code in `src` calls them, and the `fsquare` and `hexagon` tilings with `fill_region` produce the same kind of grid. Deleted with their exports in `symbol_cartogram/__init__.py`, the 57 tests of `tests/test_grid.py` and the mentions in the docs.
 
 ## 5. Golden comparison plan
 
@@ -452,7 +470,7 @@ All 81 types at the defaults: 17,790 current tiles against 9,747 isotile tiles t
 
 ### 5.4 Layouts, and the effect of the lattice position
 
-[golden_layouts.py](golden_layouts.py) runs the layouts with the sources of main and with the copy that holds the wrapper prototype (dense adjacency, so the unchanged layouts run). The mean distance is between the centroid of a state (or district) and the center of its tile (grid) or the centroid of its tiles (mosaic), in tile sizes. Wall times are single runs with other jobs on the machine.
+[golden_layouts.py](golden_layouts.py) runs the layouts with the sources of main and with the copy that holds the wrapper prototype (dense adjacency, so the unchanged layouts run). The mean distance is between the centroid of a state (or district) and the center of its tile (grid) or the centroid of its tiles (mosaic), in tile sizes. Wall times are single runs with other jobs on the machine, taken in the slower machine state (setup paragraph); the districts mosaic row is repeated in section 6.
 
 | Case | lattice tiles (current / wrappers) | assigned tiles | regions split (current / wrappers) | mean distance (current / wrappers) | largest distance | mean footprint overlap | seconds (current / wrappers) |
 |---|---|---|---|---|---|---|---|
@@ -532,7 +550,21 @@ The isotile equivalent, measured (`perf_isotile.txt`): `fill_region` plus polygo
 | triangle | 5,000 | 0.272 s | 0.072 s | 1.610 s | 0.080 s |
 | quadrilateral | 5,000 | 0.291 s | 0.094 s | 1.544 s | 0.099 s |
 
-What this means for the layouts (one run each, `golden_compare.txt`, other jobs on the machine): the grid layout of the states with `scalloped_hexagon` takes 45.4 s now and 12.2 s with the wrappers, the mosaic layout 69.4 s and 8.7 s. For the families without curves the layouts spend their time elsewhere and do not get faster: states, grid hexagon 11.8 s and 12.5 s. The mosaic layout of the districts (`mosaic_time.txt`, measured alone) takes 7.9 s now and 17.4 s with the wrappers (the 43.0 s in the table of 5.4 was measured while the test suites ran); the extra time is in `_chain_swap_repair` (8.8 s cumulative, not among the 14 largest entries of the current profile), not in tile generation (`_build` of the calibration: 1.6 s for 3 calls now, 1.7 s for 4 calls with the wrappers). Whether the repair loop is systematically slower on the new lattice needs more than one input (section 9, risk 3).
+What this means for the layouts (one run each, `golden_compare.txt`, other jobs on the machine, slower machine state): the grid layout of the states with `scalloped_hexagon` takes 45.4 s now and 12.2 s with the wrappers, the mosaic layout 69.4 s and 8.7 s. For the families without curves the layouts spend their time elsewhere and do not get faster: states, grid hexagon 11.8 s and 12.5 s.
+
+The mosaic layout of the districts (`mosaic_time.py`, measured alone, hexagon, `morph=False`) was run twice. The first run (`mosaic_time.txt`) took 7.9 s now and 17.4 s with the wrappers, on a machine about 2 times slower because of an energy-saving setting. The rerun after disabling the setting (`mosaic_time_rerun.txt`):
+
+| | current code | wrapper prototype |
+|---|---|---|
+| wall time | 3.7 s | 8.4 s |
+| lattice tiles | 1178 | 1163 |
+| `_compute` | 3.25 s | 7.95 s |
+| `_chain_swap_repair` | below the top-14 listing, so under about 0.5 s | 4.39 s |
+| `hungarian_morphed_assignment` | 1.49 s | 1.28 s |
+| `calibrate_tiling` | 0.78 s | 1.13 s |
+| `_build` (calibration) | not listed | 0.78 s |
+
+The slowdown of roughly 2 times between the two runs was machine speed. The remaining factor of 2.3 is in the repair loop, not in tile generation (`_build` and `calibrate_tiling` differ by 0.35 s). That the cause is more repair work on the new lattice phase is a hypothesis; it was not measured. Step 1 measures three more inputs (decision 10; section 9, risk 3). The 43.0 s in the table of 5.4 was measured while the test suites ran.
 
 ## 7. Test migration
 
@@ -543,9 +575,10 @@ The 13 test files that import or construct tilings, or run the layouts, contain 
 | `test_tilings.py` | 124 | 100 | 4 | 20 | by class below |
 | `test_tiling_cartogram.py` | 38 | 34 | 4 | 0 | the 4 of `TestFillInternalHoles` build dense matrices (PR 2) |
 | `test_symbol_cartogram_mosaic.py` | 153 | 137 | 3 | 13 | `TestVectorizedLatticeAdjacency`: 13 of its 14 tests exercise the deleted helpers |
-| `test_symbol_cartogram_baseline.py`, `_coverage.py`, `_zero_size.py`, `test_symbol_plot_vocabulary.py`, `test_symbol_style.py`, `test_integration.py`, `test_magnitude_scales.py`, `test_grid.py`, `test_symbol_cartogram_group_by_support.py`, `test_symbol_plot_string_dtype.py` | 295 | 295 | 0 | 0 | pass with the prototype |
+| `test_symbol_cartogram_baseline.py`, `_coverage.py`, `_zero_size.py`, `test_symbol_plot_vocabulary.py`, `test_symbol_style.py`, `test_integration.py`, `test_magnitude_scales.py`, `test_symbol_cartogram_group_by_support.py`, `test_symbol_plot_string_dtype.py` | 238 | 238 | 0 | 0 | pass with the prototype |
+| `test_grid.py` | 57 | 0 | 0 | 57 | deleted with `generate_grid` and `compute_grid_symbol_size` (decision 8); they passed with the prototype |
 
-`test_tilings.py` by class:
+The tests that pass a `TileAdjacencyType` are rewritten to pass the strings. `test_tilings.py` by class:
 
 | Class | Tests | Verdict |
 |---|---|---|
@@ -572,7 +605,8 @@ New tests in carto-flow:
 | `TilingResult` sparse types, empty matrices, `tile_set` | 6 | PR 2 |
 | far from the origin; no holes for random shapes (20 seeded shapes); region 1e6 away | 8 | PR 1 |
 | `HexagonTiling(pointy_top=False)` is flat-top and consistent with `HexagonSymbol` | 2 | PR 1 |
-| `rotated(angle)` covers the region; the grid layout with rotation on data away from the origin | 4 | PR 3 |
+| `rotated(angle)` covers the region; `rotation` is about the region center (data away from the origin, both layouts); `offset` of one full period gives the same tile set; shifted data give the same metric | about 8 | step 3 |
+| `adjacency_type="vertex-only"` reaches `generate` and the layouts | 2 | step 1 |
 | lattice stable under symmetric expansion for the four families | 4 | the calibration property |
 | invalid curve raises; `I` curve raises; one delegate test for `find_types` | 3 | PR 1 |
 
@@ -582,10 +616,10 @@ New tests in carto-flow:
 
 | Step | Repository | Scope | Depends on |
 |---|---|---|---|
-| 0 | isotile | I-1, I-2, I-3 and the `fill_region` doc note; the preset fixture. One small PR, about 60 lines and a 4 KB fixture | none |
-| 1 | carto-flow | tilings over isotile: `_IsotileTiling`, the four families and `IsohedralTiling` as wrappers, delete the old code and the adjacency helpers, `tactile` out and `isotile` in, golden fixtures and tests (G1, G2, G5), the test rewrites of section 7, dense adjacency kept | step 0 merged; the untracked `mosaic_cartogram/` deleted |
+| 0 | isotile | I-1, I-2, I-3 and the `fill_region` doc note; the preset fixture. One small PR, about 60 lines and a 4 KB fixture. Approved and started; page [isotile-step-0-pr](../isotile-step-0-pr/index.html) | none |
+| 1 | carto-flow | tilings over isotile: `_IsotileTiling`, the four families and `IsohedralTiling` as wrappers, delete the old code and the adjacency helpers, `tactile` out and `isotile` in, golden fixtures and tests (G1, G2, G5), the test rewrites of section 7, dense adjacency kept; delete `generate_grid`, `compute_grid_symbol_size`, `grid.py` and its 57 tests; remove `TileAdjacencyType` (strings instead); measure the mosaic repair cost on three more inputs | step 0 merged; the untracked `mosaic_cartogram/` deleted |
 | 2 | carto-flow | sparse adjacency in `TilingResult`; the grid and mosaic code adapted; layouts must be bit-identical to step 1 | step 1 |
-| 3 | carto-flow | `Tiling.rotated`; `GridBasedLayout` uses it | step 1 |
+| 3 | carto-flow | rotation and offset: `Tiling.rotated`; the layout options `rotation` (about the region center) and `offset` for the grid and mosaic layouts | step 1 |
 | 4 | carto-flow | docs (`tiling-system.md`, reference, gallery regeneration), `CHANGELOG`, `docs/migrating-to-3.0.md`, the dependency `isotile>=0.1.0` from PyPI | isotile 0.1.0 released (phase 5) |
 | (5) | isotile | phase 5: docs, benchmark page, release 0.1.0 | steps 0 to 3 stable |
 
@@ -596,36 +630,34 @@ Step 1 replaces the code in place instead of adding the wrappers next to it. Kee
 | PR | Size | Risk | Acceptance checks |
 |---|---|---|---|
 | 0 (isotile) | +60 lines, 4 KB | low | isotile's CI (12 jobs); the three tests of section 2.4 fail before and pass after |
-| 1 | `tiling.py` 2,855 to about 1,300 lines (-1,550 net), tests about +250 and -400 lines, fixtures 1.5 MB | high: result-changing (lattice, boundary, order, flat-top, curved adjacency) | G1 and G2 exact within tolerance; all unchanged tests pass; the 21 failing tests of the prototype resolved as in section 7; G3 within the stated tolerance; before and after figures on the states and the districts for grid and mosaic with hexagon, square, triangle and `scalloped_hexagon` (section 5.4); a report page with the profile numbers; coverage of the new wrappers |
+| 1 | `tiling.py` 2,855 to about 1,300 lines (-1,550 net), `grid.py` (319 lines) and `test_grid.py` (57 tests) deleted, other tests about +250 and -400 lines, fixtures 1.5 MB | high: result-changing (lattice, boundary, order, flat-top, curved adjacency) | G1 and G2 exact within tolerance; all unchanged tests pass; the 21 failing tests of the prototype resolved as in section 7; no remaining reference to the deleted names (`rg` over `src`, `tests`, `docs`, `examples`, notebooks); G3 within the stated tolerance; before and after figures on the states and the districts for grid and mosaic with hexagon, square, triangle and `scalloped_hexagon` (section 5.4); a report page with the profile numbers; coverage of the new wrappers |
 | 2 | about 60 lines changed in 3 files, 6 tests | medium: public type change | assignments of the grid and mosaic layouts on the states and districts equal to step 1 (identical, not within tolerance); a memory check at 10,000 tiles |
-| 3 | about 30 lines, 4 tests | low | before and after figures for rotation 0 (identical) and 30 degrees, on centered and on shifted data |
+| 3 | about 60 lines, about 8 tests (estimate) | low: new options; results change only for `rotation` other than 0 | before and after figures for rotation 0 and offset (0, 0) (identical), rotation 30 degrees and offset (0.5, 0.5), on centered and on shifted data |
 | 4 | docs, changelog, migration page, `pyproject.toml` | low | `mkdocs build --strict` (it needs the Census key for the gallery), `make check`, the wheel smoke test, `uv sync` from a clean checkout |
 
 ### 8.3 isotile release dependency
 
-carto-flow cannot depend on isotile from PyPI before `0.1.0` is released (phase 5); the name is free (HTTP 404 for `pypi.org/pypi/isotile/json` on 2026-10-27). PyPI rejects an upload whose metadata contains a direct reference (`isotile @ git+https://...`), so the published carto-flow metadata has to be `isotile>=0.1.0`. Recommendation:
+carto-flow cannot depend on isotile from PyPI before `0.1.0` is released (phase 5); the name is free (HTTP 404 for `pypi.org/pypi/isotile/json` on 2026-10-27). PyPI rejects an upload whose metadata contains a direct reference (`isotile @ git+https://...`), so the published carto-flow metadata has to be `isotile>=0.1.0`. Decided (decision 2):
 
 - Steps 1 to 3: `dependencies = ["isotile>=0.1.0.dev0"]` and `[tool.uv.sources] isotile = { git = "https://github.com/bright-fakl/isotile", rev = "<sha>" }` with the commit pinned and `uv.lock` committed. uv sources are not part of the built metadata. isotile is public, so the CI jobs that run `uv sync --frozen` (`setup-python-env`) fetch it from GitHub; the four test jobs (Python 3.10 to 3.13), `tests-pandas3`, the wheel smoke test and `make check` (`uv lock --locked`, `deptry src`) need no change. isotile's own constraints (`numpy>=1.26`, `scipy>=1.11`, Python 3.10 to 3.13) are looser than carto-flow's.
-- Release isotile 0.1.0 after step 3 and before step 4: the adoption shows which API details were missing (I-2 and I-3 were found this way) and the release freezes them.
-- Step 4 replaces the git source by `isotile>=0.1.0`. carto-flow's release (decision 1) is made after that; `pip install carto-flow` then pulls isotile from PyPI.
+- Release isotile 0.1.0 after step 3 and before step 4, so before the carto-flow release: the adoption shows which API details were missing (I-2 and I-3 were found this way) and the release freezes them.
+- Step 4 replaces the git source by `isotile>=0.1.0`. carto-flow's release (3.0.0, decision 1) is made after that; `pip install carto-flow` then pulls isotile from PyPI.
 
-The alternative, releasing isotile 0.1.0 before step 1, gives carto-flow a released dependency from the start but freezes the API before its first consumer has used it.
-
-## 9. Risks, what was not verified, open decisions
+## 9. Risks, what was not verified, decisions
 
 ### Risks
 
 1. **A result-changing PR.** Step 1 changes every grid and mosaic result by the lattice position and the order. The check is the metric tolerance of 5.4 and the figures; it cannot show that no layout gets worse on an input that was not run.
 2. **Lattice-dependent outcomes.** One pinned mosaic test fails because 16 hops leave 1 non-contiguous region on the new lattice, and the mosaic layout of the states with triangles has 3 non-contiguous regions instead of 1. The repair heuristics have no guarantee on every lattice; the test that claims one has to be restated.
-3. **Mosaic repair cost.** The districts with the mosaic layout took 7.9 s now and 17.4 s on the new lattice. The extra time is in the repair loop. One input, one lattice.
-4. **Breaking changes.** Sparse fields, flat-top hexagons, `I` curves, invalid curves and the boundary rule need a major version (decision 1).
+3. **Mosaic repair cost.** The districts with the mosaic layout take 3.7 s now and 8.4 s on the new lattice (machine at normal speed; the first run, on a machine about 2 times slower, gave 7.9 s and 17.4 s). The extra time is in `_chain_swap_repair` (4.39 s against under 0.5 s), not in tile generation. One input, one lattice; the cause is a hypothesis. Step 1 measures three more inputs.
+4. **Breaking changes.** Sparse fields, flat-top hexagons, `I` curves, invalid curves, the boundary rule and the removed names (`TileAdjacencyType`, `generate_grid`, `compute_grid_symbol_size`) need a major version (decision 1, accepted).
 5. **isotile is not released.** Its API can still change; the wrappers use about 15 names (`IsohedralTiling`, `square`, `hexagon`, `triangle`, `quadrilateral`, `fill_region`, `TileSet.polygons`, `adjacency`, `transforms`, `prototile`, `rotated`, `type.n_vertices`, `get_type`, `find_types`, `list_presets`, `from_preset`, the io methods).
 6. **The fixtures cannot be regenerated** after the old code is deleted; the generating script and the commit go into the step 1 page.
 
 ### Not verified
 
 - Only the grid and mosaic layouts were run, with `morph=False`; `morph=True` (not bit-deterministic) and the centroid, flow and packing layouts with curved symbols were not (their symbol unit polygons were compared for the 15 presets).
-- The wrapper prototype keeps dense adjacency; the sparse adaptation of `grid/_placement.py` and the mosaic was not written.
+- The wrapper prototype keeps dense adjacency and does not implement `rotation` about the center, `offset` or the string adjacency types; the sparse adaptation of `grid/_placement.py` and the mosaic was not written.
 - One run per layout case; the position experiment has 6 positions for 3 tilings and one metric; the quality of a layout was not judged beyond the figures and that metric.
 - Python 3.12 only (numpy 2.5.4, scipy 1.18.1, shapely 2.2.0); 3.10, 3.11, 3.13 and the minimum versions were not run. numpy 2.5 removed 2-D `np.cross`, which `mapping_evidence.py` of the earlier page uses; not a carto-flow code path.
 - `TilingResult.rotate` on a result that has a `tile_set` was not designed in detail (the field is dropped).
@@ -633,15 +665,19 @@ The alternative, releasing isotile 0.1.0 before step 1, gives carto-flow a relea
 - `cover` was checked for holes on 300 random triangles and 300 random quadrilaterals at two positions and on the 19 cases; elongated shapes beyond the random draws were not.
 - The GUI was read, not run.
 
-### Open decisions
+### Decisions
 
-1. **Which release carries the breaking changes?** 2.0.0 is released (tags `2.0.0`, `2.0.0-rc1`, `2.0.0-rc2`), so the proposal's "taken in 2.0" no longer applies. Recommendation: 3.0.0, because the sparse fields, the boundary rule and the raised errors break semantic versioning; put them all in one release with a migration page.
-2. **Dependency during development:** a git pin until isotile 0.1.0 is released (section 8.3), or release isotile 0.1.0 before step 1? Recommendation: git pin.
-3. **Keep the `IsohedralTiling` delegates** (`type_info`, `describe`, `find_types`, `available_types`, `from_preset`, `list_presets`, `to_dict`, `from_dict`, `save`, `load`, `plot_prototile`) in carto-flow, or remove them and point to isotile? Recommendation: keep, as one-line delegates documented as isotile's, because docs and users call them; revisit in the next major release.
-4. **Lattice position:** the region center (recommended), or reproduce the current anchors? Reproducing them needs per-class code and keeps the origin dependence of the triangle and quadrilateral tilings.
-5. **Rotation of the grid layout about the region center** in step 3. Recommendation: yes, with `TilingResult.rotate` kept.
-6. **The isotile changes I-1, I-2, I-3.** Recommendation: approve; I-1 restores the shapes of the 15 names, the others fix a quadratic access pattern and a precision limit that the adoption exposed.
-7. **Tile index order is not a contract,** and the golden tests do not compare indices. Recommendation: yes. The alternative, sorting the tiles spatially in the adapter, reproduces the old order only for squares and hexagons.
-8. **`generate_grid` and `compute_grid_symbol_size`:** untouched here. They duplicate the square and hexagon tilings, no layout uses them, and 57 tests cover them. Deprecate in a later PR, or keep? Recommendation: keep for now; not part of the adoption.
-9. **`TilingResult.tile_set`** as a new optional public field (aspect coloring, access to cells and aspects). Recommendation: yes; the alternatives are no field or a private one.
-10. **Mosaic repair cost (risk 3).** Investigate before step 1 merges, or accept and report in the PR page? Recommendation: measure on three more inputs during step 1 and report; the extra time is not in the tiling code.
+All twelve decisions are settled. Breaking changes are acceptable; the goal is a principled, clean implementation.
+
+1. **Release 3.0.0.** 2.0.0 is released (tags `2.0.0`, `2.0.0-rc1`, `2.0.0-rc2`), so the proposal's "taken in 2.0" no longer applies. The sparse fields, the boundary rule, the raised errors and the removed names break semantic versioning; they go into one release with a migration page.
+2. **Dependency during development.** isotile is a git pin during steps 1 to 3 (section 8.3); isotile 0.1.0 is released before the carto-flow release.
+3. **The `IsohedralTiling` delegates stay** (`type_info`, `describe`, `find_types`, `available_types`, `from_preset`, `list_presets`, `to_dict`, `from_dict`, `save`, `load`, `plot_prototile`) as one-line delegates documented as isotile's, because docs and users call them; revisit in the next major release.
+4. **Lattice anchored at the region center,** not the current anchors (which need per-class code and keep the origin dependence of the triangle and quadrilateral tilings).
+5. **Grid rotation about the region center** (section 4.10), with `TilingResult.rotate` kept.
+6. **The isotile changes I-1, I-2 and I-3 are approved.** Step 0 is started (page [isotile-step-0-pr](../isotile-step-0-pr/index.html)).
+7. **Tile index order is not a contract.** The golden tests do not compare indices; the adapter does not sort tiles spatially.
+8. **`generate_grid` and `compute_grid_symbol_size` are deleted in step 1,** with `_generate_square_grid`, `_generate_hexagon_grid`, their exports in `symbol_cartogram/__init__.py`, the 57 tests of `tests/test_grid.py` and the docs mentions. Nothing in `src` calls them, and the `fsquare` and `hexagon` tilings with `fill_region` replace them.
+9. **`TilingResult.tile_set`** is a new optional public field (aspect coloring, access to cells and aspects).
+10. **Mosaic repair cost:** investigate during step 1 on three more inputs and report on the step 1 page. The measurement so far (3.7 s against 8.4 s on the districts) places the extra time in the repair loop.
+11. **`TileAdjacencyType` is removed.** `generate` and the layouts take isotile's `AdjacencyKind` strings (`"edge"`, `"vertex"`, `"vertex-only"`); the enum values were already `"edge"` and `"vertex"`, and `"vertex-only"` becomes available (section 4.13).
+12. **Layout options `rotation` and `offset`** are shared by the grid and mosaic layouts (section 4.10): `rotation` in degrees about the region center, `offset` the lattice phase as a fraction of the tile size, `(0..1, 0..1)`, default `(0, 0)`. Today the grid layout has only `rotation`, about the origin (a defect), and the mosaic layout has neither. Implemented in step 3 with `Tiling.rotated` and a frame offset before `fill_region`. A helper that scans phases and rotations and reports the best by the layout's score is not in scope; it is a possible follow-up.

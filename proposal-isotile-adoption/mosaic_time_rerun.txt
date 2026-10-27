@@ -1,0 +1,13 @@
+# Rerun of mosaic_time.py (districts, mosaic hexagon, morph=False) after disabling the energy-saving setting that made the machine about 2x slower.
+# Figures as reported from the run; the profile lines are the ones listed (cumulative seconds), not the full cProfile output.
+current code: districts, mosaic hexagon, morph=False: 3.7 s, 1178 lattice tiles
+  cumulative   3.25 s  mosaic/__init__.py  _compute
+  cumulative   1.49 s  mosaic/_assignment.py  hungarian_morphed_assignment
+  cumulative   0.78 s  mosaic/_calibration.py  calibrate_tiling
+  _chain_swap_repair: not among the 14 largest cumulative entries, so under about 0.5 s
+wrapper prototype: districts, mosaic hexagon, morph=False: 8.4 s, 1163 lattice tiles
+  cumulative   7.95 s  mosaic/__init__.py  _compute
+  cumulative   4.39 s  mosaic/__init__.py  _chain_swap_repair
+  cumulative   1.28 s  mosaic/_assignment.py  hungarian_morphed_assignment
+  cumulative   1.13 s  mosaic/_calibration.py  calibrate_tiling
+  cumulative   0.78 s  mosaic/_calibration.py  _build
