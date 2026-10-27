@@ -310,3 +310,42 @@ Still open for the maintainer:
 7. **Public frame.** `IsohedralTiling(..., frame=...)` as public API (as in the prototype), or only through the named constructors.
 8. **Parameter ranges.** The tactile data has none, and the library validates only that the prototile is a simple polygon. Whether to ship recommended ranges for editors (the UI needs them) and how to derive them.
 9. **Creating the repository** `bright-fakl/isotile` and starting phase 1.
+
+## 11. Review of 2026-10-27: names, what stays in carto-flow, recommendations
+
+### Names for the lattice quantities
+
+tactile calls the two translation vectors `t1` and `t2` and the tile coordinates `(t1, t2, aspect)`. A cell is the parallelogram spanned by the two translation vectors; it holds `n_aspects` tiles (the copies of the fundamental domain), so a tile is identified by its cell and its aspect. Proposed names:
+
+| tactile / prototype | Library | Meaning |
+|---|---|---|
+| `t1`, `t2` (vectors) | `translation_u`, `translation_v` on the type and the tiling; `translations` as an (2, 2) array, row k is vector k | the two lattice translation vectors |
+| `(t1, t2, aspect)` as an (n, 3) array `lattice` | `TileSet.cell` (n, 2) int, columns `u` and `v`, and `TileSet.aspect` (n,) int | the cell of a tile and its aspect within the cell |
+| `d_t1`, `d_t2` in the adjacency table | `d_cell_u`, `d_cell_v`, `neighbor_aspect` | offset of the neighbor's cell |
+| `fill`, `cover`, `tiles(lattice)` | `fill`, `cover`, `tiles(cell, aspect)` | unchanged except for the arguments |
+
+`u` and `v` are used instead of `x` and `y` because the lattice is oblique. The wording "aspect" is the established term (Grünbaum and Shephard, Kaplan) and stays. The rename is done in phase 1, before the first release, with a note in the migration guide for tactile users.
+
+### What stays in carto-flow, and what the GUI needs
+
+The GUI (`isohedral-tiling-ui`) uses these carto-flow pieces today: `IsohedralTiling.generate(bounds, n_tiles, margin, compute_adjacency=False)` for every preview (`preview_strip.py` 311, 491, 526, 572), the polygons of its result, `_ih.vertices`, `_ih.shapes` and `_ih.parameters` (private tactile access), and the text of a Python snippet that calls carto-flow (`preview_strip.py` 431 to 446). It does not use `TilingResult.plot`, `plot_tile`, `canonical_symbol`, `tile_size_for_symbol_size`, `from_polygon`, `rotate` or `resolve_tiling`.
+
+Consequences for the list in 8.1 "Stays in carto-flow":
+
+- **Moves into the library (the GUI needs it):** generation from a tile count, a bounding box and a margin (`_resolve_generate_args`, `_apply_margin`, the rule `tile_size = sqrt(area / n_tiles)`, the scaling by the native area of the straight prototile). Proposed API: `IsohedralTiling.fill_region(bounds, *, n_tiles=None, tile_size=None, margin=0.0) -> TileSet`, with the frame computed inside. The unit-area normalization of the prototile (`canonical_tile` at unit area) and the inscribed radius of a tile are properties of the tiling and move with it (`prototile(normalized=True)`, `inscribed_radius`). `from_polygon` of the four families (the triangle and quadrilateral fit) and `rotate` are constructors and frame operations of the library.
+- **Stays in carto-flow (not needed by the GUI):** the symbols (`canonical_symbol`, `tile_size_for_symbol_size`, `symbol_size_for_tile_size`, `IsohedralTileSymbol`), `TilingResult` (including `plot`, `plot_tile`, the PlotStyle use), `TileTransform` (center, rotation in degrees, flip as the symbol layouts use them), `TileAdjacencyType` replaced by the library's adjacency kinds, and the registry `resolve_tiling` (string names for the layouts).
+- **The GUI stops depending on carto-flow for tiling:** previews call `fill_region` and `TileSet.polygons`; the Python snippet it generates is documentation text and needs no import. The dependency on `carto-flow` can be dropped or become optional.
+
+### Recommendations for the open decisions (no workarounds)
+
+The principle is that the library defines each concept once, exactly, and carto-flow and the GUI use it; behavior that exists only to reproduce a quirk of the old code is not carried over. The plan already allows breaking the old tiling classes (issue 159), and carto-flow 2.0 is the release that carries it.
+
+1. **Tile selection: one rule, `cover`.** A tile belongs to the tiling of a region if it meets the region. The wrappers do not reproduce each class's centroid-based boundary filter. `n_tiles` keeps its meaning (the target count sets the tile size from the region's area), and the number of boundary tiles changes by up to 29 percent. Changelog entry.
+2. **Holes in triangle and quadrilateral tilings: nothing separate to decide.** They come from the old per-class selection, and `cover` has none by construction.
+3. **`pointy_top=False`: flat-top tiles.** The flag has one evident meaning. The library constructor takes the orientation as a rotation of the frame.
+4. **Invalid prototile: the constructor raises `ValueError`, and a pure function `check_prototile(...)` reports the problem.** A self-intersecting prototile is not a tiling (tiles overlap), and repairing it with `make_valid` changes the neighbors in 77 percent of the trials, so no silent repair. An editor that must draw a state in progress calls the check function (it returns the offending edges) and does not construct a tiling. This is the same rule the prototype already applies to parameters (reject, keep the previous state).
+5. **Symmetry: define it exactly, make enforcement the idempotent projection onto it, and parametrize by index, not by x.** S: the curve is invariant under the point reflection through (0.5, 0) with reversed order; U: under the mirror x -> 1 - x with reversed order. `enforce_symmetry` keeps the first half by position along the curve (a curve is not a function of x) and generates the second half, and applying it twice gives the same result. This is the UI's rule; "keep an already symmetric curve" then holds for all inputs and needs no special case. carto-flow's two symmetry tests are rewritten against the definition, with property tests (symmetry, idempotence, endpoints). `edge_curve_modes` is part of the serialized data (format version bump); the number of spline points is a rendering parameter (`max(100, 10 n)` by default), not data.
+6. **Adjacency in `TilingResult`: sparse.** A dense matrix of 10,000 tiles is 100 MB and carries no information the sparse form lacks; densifying at the boundary only postpones the change. The two public fields change type (a breaking change, taken in 2.0); the layouts that use them (mosaic, grid) are adapted to scipy.sparse, which graph algorithms use natively.
+7. **Frame: public.** It is the single mechanism for scale, rotation and position that the named constructors, `fill_region` and the GUI all need; hiding it forces carto-flow onto private API.
+8. **Parameter ranges: the library provides an exact validity predicate and build-time safe intervals.** The valid parameter set of a type is the set where the prototile is a simple polygon; `check_prototile` is its exact test. For slider ranges, `_build_data.py` computes, per type and parameter, the maximal interval around the default that stays valid with the other parameters at their defaults, stores it in the data file and documents it as a one-parameter slice (not the full region). The editor combines both: slider limits from the slices, live validity from the predicate.
+9. **Repository: done (`bright-fakl/isotile`).** Phase 1 starts with the renames above.

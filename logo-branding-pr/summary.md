@@ -11,7 +11,7 @@ branch: feat/logo-branding
 related: exploration-logo-concepts
 date: 2026-10-26 23:50
 before: main @ 408284b
-after: feat/logo-branding @ d54d527
+after: feat/logo-branding @ 6f6b309
 inputs: Generator scripts/make_logo_assets.py (cairosvg, pillow, fonttools); contrast by WCAG relative luminance against the docs surfaces. Design from exploration-logo-concepts (outline t1, gaps rotated +10 and -8 degrees, amber on the two right-hand regions).
 ---
 
@@ -54,3 +54,7 @@ All 8 CI checks pass. `mkdocs build -s` passes and the built site links `assets/
 ## Open questions
 
 Keep the dark social preview or use a light one; keep the unrequested hero-size marks.
+
+## Fix after review (2026-10-27)
+
+Two defects found in the local docs build: the home page header showed two logos, and the branding page showed empty rectangles instead of the wordmarks. Causes: Material sets `display: block` on `.md-header__button.md-logo img` (specificity 0,2,1), which overrode the color-scheme rule (0,2,0), so both header images were visible; and the SVG files had only a `viewBox`, no `width` and `height`, so images with Material's `max-width: 100%` inside a shrink-to-fit flex item collapsed to zero width. Fix in `6f6b309`: selectors with `.md-logo` (0,3,0) and an intrinsic `width` and `height` on every SVG, written by the generator. Checked with headless Chromium on a minimal site with the same theme settings (light scheme only): one header logo at wide window width, both wordmarks visible. The dark scheme (selector for `slate`) and the full docs site were not re-checked.
