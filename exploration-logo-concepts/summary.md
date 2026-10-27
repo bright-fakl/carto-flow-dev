@@ -1,7 +1,7 @@
 ---
 issue: 84
 title: Logo concepts for carto-flow (warped grid, choropleth grid, streamlines, circles, hexagons, morph)
-description: Seven mark concepts (three first, four cartogram and flow variants added after the warped grid was chosen as the best of the first three) drawn as SVG from the library's own light and dark style colors, shown at 128, 64, 32 and 16 px on the light and dark surfaces of the docs and in one color. The warped grid reads best at small sizes and says "flow cartogram"; the hexagon cluster covers the symbol and tile cartograms; the morph concept is the weakest.
+description: Nine mark concepts, the last two a country-like blob cut into four regions by wavy gaps (seven before that; three first, four cartogram and flow variants after the warped grid was chosen) drawn as SVG from the library's own light and dark style colors, shown at 128, 64, 32 and 16 px on the light and dark surfaces of the docs and in one color. The warped grid reads best at small sizes and says "flow cartogram"; the hexagon cluster covers the symbol and tile cartograms; the morph concept is the weakest.
 kind: exploration
 topic: infra
 status: open
@@ -12,7 +12,7 @@ inputs: Palette from PlotStyle light (series #2c6e9e, highlight #d98200) and dar
 
 `marks.py <out_dir>` writes `<concept>-light.svg` and `<concept>-dark.svg` for each concept (committed in `svg/`); `fig.py` draws the legibility figure. The marks are plain geometry, so they carry no licensing constraint from fonts or third-party artwork (original work, covered by the project's MIT license).
 
-figure: fig1_marks.png — Rows: warped grid (reference), filled warped grid, half regular and half warped grid, streamlines around a region, Dorling circles (the first-round hexagon and morph marks are in svg/ but left out of the figure). Left half light surface, right half dark surface. Columns: 128, 64, 32 and 16 px, then 32 px in one color (the amber part drawn in the blue). Renders are 1:1, the figure is enlarged 2x with nearest-neighbor so the pixels stay visible.
+figure: fig1_marks.png — Rows: filled warped grid (reference), blob with four tinted regions, blob with stronger waves and one blue. The other concepts are in svg/ and in the earlier version of this page's figure, now left out. Left half light surface, right half dark surface. Columns: 128, 64, 32 and 16 px, then 32 px in one color (the amber part drawn in the blue). Renders are 1:1, the figure is enlarged 2x with nearest-neighbor so the pixels stay visible.
 
 ## Concepts
 
@@ -24,12 +24,15 @@ figure: fig1_marks.png — Rows: warped grid (reference), filled warped grid, ha
 | Half regular, half warped | The grid regular on the left and warped on the right, a grown amber cell on the right | Amber cell is a few pixels, the idea is lost | Works | The morph in one frame; weaker as a mark |
 | Streamlines | Horizontal lines of the flow field parting around an amber region | Lines blur into a texture | Works at 32 px | The flow field of the algorithm; no grid, so less recognizable as a cartogram |
 | Dorling circles | Five touching circles of different size, one amber | Holds well | Works | Dorling and symbol cartograms; the most generic of the four |
+| Blob, four regions (`blob`) | A country-like blob (radial harmonics, no real country) cut by one wavy vertical and one wavy horizontal gap in the background color (the gaps are real gaps, so the mark works on any surface); three blue tints and one amber region | Four regions still separate; gaps close to about one pixel | Works with tints dropped | Flow cartogram on a country, regions of unequal size |
+| Blob, stronger waves (`blob_wavy`) | Same with larger waves and a single blue | Same | Works | Same; simpler |
 | Morph | Three nested outlines going from a rounded square to an amber circle | The circle holds; outlines vanish | Works | Morphing in general; no direct link to maps or areas |
 
 ## Observations
 
 - The warped grid is the most specific to the library (a regular grid distorted to rebalance areas) and keeps its structure down to 16 px because the frame is the outer shape.
 - Of the four added concepts the filled warped grid is the strongest: it keeps the frame of the plain grid, adds the idea of data (tints) and holds at 16 px. The streamlines are the most distinctive and tie to the flow algorithm, but they need a larger minimum size. The half-and-half grid does not read, and the circles are generic.
+- The blob reads immediately as regions of a country and the unequal pieces suggest rebalanced areas, which the grid marks only imply. It is less abstract than the grid, so it is more recognizable at 64 px and above. Its weak point is 16 px, where the gaps are one pixel wide and the shape is a lump; the favicon would need thicker gaps and fewer wiggles. Whether the blob looks like a specific territory is a matter of taste (the current outline is a roundish shape with three harmonics).
 - The hexagon mark is attractive at large sizes but at 16 px reads as a flower; it is a candidate for a secondary mark (symbol cartogram docs section) rather than the project logo.
 - The morph mark is generic and its stacked offsets look off-centre at small sizes; not recommended.
 - No wordmark is drawn yet. The 16 px favicon should be a simplified variant (frame plus centre cell, two interior lines), not the 128 px mark scaled down.

@@ -181,6 +181,50 @@ def mark_dorling(pal):
 MARKS.update({"filled": mark_filled, "halfway": mark_halfway, "streams": mark_streams, "dorling": mark_dorling})
 
 
+def _blob(cx=48.0, cy=48.0, r=36.0, m=240):
+    from shapely.geometry import Polygon
+    t = np.linspace(0, 2 * math.pi, m, endpoint=False)
+    rad = 1 + 0.07 * np.cos(2 * t + 0.5) + 0.07 * np.cos(3 * t + 1.3) + 0.035 * np.cos(5 * t + 0.2)
+    return Polygon(list(zip(cx + 1.0 * r * rad * np.cos(t), cy + 0.9 * r * rad * np.sin(t))))
+
+
+def _split(amp, gap, cut_x=44.0, cut_y=50.0):
+    """Blob minus one wavy vertical and one wavy horizontal line of width gap: four regions."""
+    from shapely.geometry import LineString
+    from shapely.ops import unary_union
+    ys = np.linspace(0, 96, 120)
+    xs = np.linspace(0, 96, 120)
+    v = LineString([(cut_x + amp * math.sin(y / 11.0 + 0.4), y) for y in ys])
+    h = LineString([(x, cut_y + amp * math.sin(x / 9.0 + 1.2)) for x in xs])
+    cut = unary_union([v, h]).buffer(gap / 2, cap_style=2)
+    pieces = _blob().difference(cut)
+    return sorted(pieces.geoms, key=lambda g: (-g.centroid.y, g.centroid.x))
+
+
+def _blob_mark(pal, amp, gap, tints, amber_idx):
+    out = ""
+    for k, g in enumerate(_split(amp, gap)):
+        pts = list(g.exterior.coords)
+        if k == amber_idx:
+            out += f'<path d="{path(pts, True)}" fill="{pal["amber"]}"/>'
+        else:
+            out += f'<path d="{path(pts, True)}" fill="{pal["blue"]}" fill-opacity="{tints[k]}"/>'
+    return out
+
+
+def mark_blob(pal):
+    """A country-like blob cut into four regions by wavy gaps (background shows through); tints vary."""
+    return _blob_mark(pal, 4.0, 5.0, [0.55, 1.0, 0.8, 0.0], 3)
+
+
+def mark_blob_wavy(pal):
+    """Same, stronger waves and one blue for all non-amber regions."""
+    return _blob_mark(pal, 7.0, 5.0, [1.0, 1.0, 1.0, 0.0], 3)
+
+
+MARKS.update({"blob": mark_blob, "blob_wavy": mark_blob_wavy})
+
+
 def svg(body, bg=None):
     rect = f'<rect width="96" height="96" fill="{bg}"/>' if bg else ""
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">{rect}{body}</svg>'
