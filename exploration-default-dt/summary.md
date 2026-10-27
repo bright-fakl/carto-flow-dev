@@ -12,6 +12,7 @@ kind: exploration
 topic: flow
 status: led-to
 related: exploration-overview
+closed: 2026-10-12 00:31
 ---
 
 An investigation, not a change. Only `dt` (and in a few blocks `refresh_on_rise`, `recompute_every`, the tolerances and the grid) is swept; the library code is the base commit, plus a scratch commit that edits two preset values. Scripts are in `scripts/` (`run_all.sh <group>` for `run_sweep.py`, `run_extra.sh <pipeline|presets|landmarks|landmarks2>` for `run_extra.py`, `shape_compare.py`, `timing.py`, `analyze.py`; they import the library, so check out the branch); results are in `data/*.jsonl` (one run per line with the full score trace), `data/shape.json`, `data/timing.json`; `data/tables.md` has every table (about 40, including refresh_on_rise 0.2 and off, the grid 512 and 1024 blocks and the fine dt sweep at 0.1, 0.15, 0.25, 0.35, 0.45, 0.55, 0.7, 1.0). The runs are deterministic, so neighboring dt values act as the replicates: a result that jumps between 0.30, 0.35 and 0.40 is chaotic in dt, not noise.

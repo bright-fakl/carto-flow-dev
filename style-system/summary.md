@@ -3,10 +3,12 @@ title: Style system and presets for plots and animations
 description: Proposal for issue 99. PlotStyle is a frozen dataclass that builds on matplotlib: an rcParams dict for text and surface settings (loadable from a matplotlib stylesheet), plus library-specific fields (the appearance of each visual channel when it is not data-driven and its palettes or range when it is, color scale, colorbar, reference layer) and a defaults mapping for the remaining parameters. The plot functions first get one consistent parameter vocabulary, so that every channel has the same parameter names in every function; the style addresses channels, not function-specific names. The call says which data drives a channel; the style supplies the default look of everything else, and an explicit argument wins. Presets default (new look of all library plots), dark and classic (today's output), a registry for custom styles, a per-call style argument, a style_context manager and a session-level set_style. Animation timing is a separate morph_timeline helper. The first PR covers the flow plots and animations; symbol, Voronoi and proportional plots follow.
 issue: 99
 kind: proposal
+date: 2026-10-15 01:45
 topic: flow, infra
 status: led-to
 related: plot-vocabulary-flow, plot-vocabulary-symbol, plot-vocabulary-voronoi, plot-vocabulary-proportional, resolve-fill, flow-animation-names, plot-style-core, plot-style-voronoi-proportional, plot-style-symbol, plot-style-overlays, plot-style-magnitude-scales
 inputs: ANIMATION-STYLE.md, reference_implementation.py and style.py of the GeoDC talk bundle; the plot and animation signatures of the four cartogram types (survey below).
+closed: 2026-10-16 11:17
 ---
 
 A design proposal. Nothing is implemented. Issue 82 (talk visuals in the docs) depends on it.

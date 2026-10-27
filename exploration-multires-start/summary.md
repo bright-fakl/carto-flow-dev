@@ -10,6 +10,7 @@ date: 2026-10-12 02:25
 before: main @ b5a37be
 after: the same checkout; start grid, finest grid, tolerance per level and values varied
 inputs: 49 states and 432 congressional districts (bundled), 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled). MorphOptions defaults except mean_tol / max_tol (5 % / 10 % default, 1 % / 3 % tight, 0.5 % / 1 % very tight, 10 % / 30 % loose); grids from build_multilevel_grids (margin 0.5, square); NUMBA_NUM_THREADS=8. True error is the output area against the target share of the total output area.
+closed: 2026-10-12 22:30
 ---
 
 `start_resolution.py` and `relaxed_coarse.py` run the cases and write JSON to `data/`; `make_tables.py` turns it into `data/tables.md` (every table below). Counties are not bundled; `start_resolution.py` reads the prepared set from `COUNTIES_PARQUET`. `relaxed_coarse.py` uses its own level loop: `morph_multiresolution` ends at the first converged level, so with relaxed coarse levels it would never refine.

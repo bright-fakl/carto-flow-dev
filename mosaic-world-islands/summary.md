@@ -11,6 +11,7 @@ kind: exploration
 topic: symbol
 status: led-to
 related: pr44-contiguity-reachability-precheck, pr46-mosaic-component-pool-overlap, pr47-mosaic-min-one-tile, pr48-mosaic-honest-hungarian-defaults
+closed: 2026-10-10 17:35
 ---
 
 figure: fig_africa_b150.png — africa, the clean control: no region loses a tile at either morph setting

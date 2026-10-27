@@ -9,6 +9,7 @@ kind: exploration
 topic: symbol
 status: led-to
 related: mosaic-inert-verify, pr48-mosaic-honest-hungarian-defaults, pr56-mosaic-option-behavior-docs
+closed: 2026-10-10 17:12
 ---
 
 figure: knob_outside_penalty.png — outside_penalty, all five inputs, both morph settings

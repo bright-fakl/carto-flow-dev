@@ -10,6 +10,7 @@ date: 2026-10-19 21:00
 before: main @ 08f3edf
 after: the same checkout; scripts only, no library change
 inputs: 3,108 bundled counties (population), ladder with grid auto, n_iter 1000, square grid margin 0.5, NUMBA_NUM_THREADS=8. Pilot: the same ladder on the 5 km bundled geometry, per-segment length at the end of every level.
+closed: 2026-10-26 02:02
 ---
 
 **Outcome (2026-10-26).** Superseded by the validity methods `validity="repair-crossings"` and `validity="repair-quadtree"` (PR 180 and PR 181, merged); the vertex-density warning and the `max_segment_length` option of the loaders remain the way to prepare coarse input.

@@ -10,6 +10,7 @@ date: 2026-10-20 12:00
 before: main @ 06d4ff0
 after: scratch worktree /home/fakl/cf-validity with hooks in algorithm.py; not a PR
 inputs: counties (1 km), districts, raw coarse counties (43 k vertices), mid2000 and mid3000 (see exploration-quadtree-optimized), ladder with min_resolution and levels auto, area_scale 1e-6, n_iter 1000 or 3000, perturbations over dt 0.16 to 0.24 and max_segment_length 800 to 1200. Mostly single runs; the accuracy at the 1,000-iteration budget is chaotic (two quadtree runs without any inversion gave 5.84 % and 10.79 %).
+closed: 2026-10-26 02:02
 ---
 
 **Outcome (2026-10-26).** The inversion fix (kernel centroid, rebuild after a fix, limiter) and the rebuild rule without a window parameter are in `validity="repair-quadtree"` (PR 181); the check interval of `validity="repair-crossings"` stays a fixed number of windows (`validity_repair_every`, default 10) with the memory budget `validity_memory_mb` as the hard bound (PR 180).

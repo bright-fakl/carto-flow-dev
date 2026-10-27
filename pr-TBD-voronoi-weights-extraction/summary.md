@@ -12,6 +12,7 @@ kind: exploration
 topic: voronoi
 status: superseded
 related: pr111-voronoi-power-weights
+closed: 2026-10-10 17:12
 ---
 
 ## What changed

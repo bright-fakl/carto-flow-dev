@@ -10,6 +10,7 @@ date: 2026-10-20 12:00
 before: main @ 06d4ff0
 after: scratch worktree /home/fakl/cf-validity with hooks in algorithm.py (algorithm_hooks_vw.patch); not a PR
 inputs: 3,108 counties (population) at max_segment_length 1000, 432 congressional districts, the raw coarse county input (simplify_coverage tolerance 4000, 43,084 vertices), and two mid-density inputs (tolerance 1000, densified to 2000 m: 394,665 vertices; to 3000 m: 280,377 vertices); ladder with min_resolution and levels auto, area_scale 1e-6; timings on an otherwise idle machine, 3 repeats.
+closed: 2026-10-26 02:02
 ---
 
 **Outcome (2026-10-26).** The optimized implementation is the basis of `validity="repair-quadtree"` (PR 181, merged), with the inversion fix of exploration-adaptive-windows.

@@ -10,6 +10,7 @@ date: 2026-10-18 18:00
 before: main @ 06d4ff0
 after: scratch worktree with a hook in algorithm.py (algorithm_hooks.patch); not a PR
 inputs: 3,108 counties (population) at max_segment_length 1000, ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, single run per row (the dynamics are chaotic: rows differ by more than their settings suggest).
+closed: 2026-10-26 02:02
 ---
 
 **Outcome (2026-10-26).** The method is in the library as `validity="repair-quadtree"` (PR 181, merged); the prototype of this page is the first version, see exploration-quadtree-optimized and exploration-adaptive-windows for the optimized and corrected one.

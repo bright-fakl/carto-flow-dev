@@ -84,6 +84,7 @@
 <dt>Referenced by</dt><dd><a href="../flow-convergence-synthesis/index.html">Flow cartogram convergence: what is settled and what is open</a> <span class="meta">(exploration)</span><br><a href="../pr132-ladder-iteration-pool/index.html">n_iter is the total number of iterations of a ladder of resolutions</a> <span class="meta">(pr)</span></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/93">#93</a>, <a href="https://github.com/bright-fakl/carto-flow/issues/109">#109</a></dd>
 <dt>Created</dt><dd>2026-10-12 23:30</dd>
+<dt>Closed</dt><dd>2026-10-12 23:30</dd>
 <dt>Before</dt><dd>main @ 5a4a5a2</dd>
 <dt>After</dt><dd>the same checkout; stall parameters of the coarse levels and the iteration budget varied through a per-level loop</dd>
 <dt>Inputs</dt><dd>states (49) and districts (432), bundled, with population, area-like, inverse-area, smooth (sigma 2) and lognormal (sigma 2) values; 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled). Tolerances 1 % / 3 %, n_iter 500 per level, adaptive_dt on, NUMBA_NUM_THREADS=8. Cost is iterations plus recomputes times the cost of one recompute at the grid of the last level (preset-review table; the 2048 value is extrapolated, so compare wall seconds for counties). True error is the output area against the target share of the total output area.</dd>

@@ -10,6 +10,7 @@ date: 2026-10-26 23:00
 before: feat/unresolved-regions @ f30c2b4
 after: feat/stall-lagging-regions (library runs of each candidate on an experimental option)
 inputs: 3,108 bundled counties (1 km input, auto ladder), validity="repair-crossings" and "check", n_iter 1000 and 3000 (the total budget of the ladder), default tolerances. Districts (1 km input) and states, n_iter 500 and 1000. Strip scenes of the test suite (seeds 3, 7, 11, 19, 23, 31; grid 64, n_iter 400, mean_tol 2 %, max_tol 5 %). Single runs; several runs shared the machine, so the times are indicative only (iterations are the cost measure). Errors of the valid polygons against targets normalized on the valid polygons.
+closed: 2026-10-26 23:00
 ---
 
 **Outcome (2026-10-27).** The lagging error is in the library as `wait_for_lagging_regions` (PR 186, merged, default True), applied on the finest ladder level only; the best iterate is chosen by the same measure.

@@ -131,7 +131,7 @@ class TestMetadata:
     def test_pr_and_url_are_optional(self, mod, tmp_path):
         """Investigation workspaces belong to no PR; requiring them produced a
         warning per directory on every build."""
-        pr_dir = mod.scan_pr_dir(_write(tmp_path, "inv", title="t", description="d"))
+        pr_dir = mod.scan_pr_dir(_write(tmp_path, "inv", title="t", description="d", date="2026-10-01 09:00"))
 
         assert pr_dir.warnings == []
         assert pr_dir.pr is None
@@ -409,7 +409,7 @@ class TestKindTopicAndStatus:
     def test_no_action_needs_an_outcome(self, mod, tmp_path):
         bare = mod.scan_pr_dir(_write(tmp_path, "a", title="t", description="d", status="no-action"))
         explained = mod.scan_pr_dir(
-            _write(tmp_path, "b", title="t", description="d", status="no-action", outcome="negative result")
+            _write(tmp_path, "b", title="t", description="d", date="2026-10-01 09:00", status="no-action", outcome="negative result")
         )
         mod.resolve_status(bare, {})
         mod.resolve_status(explained, {})
@@ -736,3 +736,49 @@ class TestProjectFilter:
     def test_page_lists_the_project(self, mod, tmp_path):
         page = mod.scan_pr_dir(_write(tmp_path, "a", pr=2, url=_url(ISOTILE, 2), title="a", description="d"))
         assert "<dt>Project</dt><dd>isotile</dd>" in mod.build_pr_page(page, "merged")
+
+
+class TestClosedForExplorations:
+    def test_closing_status_writes_closed_and_reopening_removes_it(self, mod, tmp_path):
+        d = _write(tmp_path, "e", title="t", description="d", date="2026-10-01 09:00")
+        for status in ("led-to", "superseded", "no-action"):
+            mod.set_status(d, status)
+            text = (d / "summary.md").read_text()
+            assert len(re.findall(r"^closed: \d{4}-\d\d-\d\d \d\d:\d\d$", text, re.M)) == 1
+        for status in ("open", "on-hold"):
+            mod.set_status(d, "led-to")
+            mod.set_status(d, status)
+            assert "closed:" not in (d / "summary.md").read_text()
+
+    def test_set_status_leaves_a_pr_page_without_closed(self, mod, tmp_path):
+        d = _write(tmp_path, "p", pr=1, title="t", description="d", date="2026-10-01 09:00")
+        mod.set_status(d, "superseded")
+        assert "closed:" not in (d / "summary.md").read_text()
+
+    def test_closed_column_page_and_activity(self, mod, tmp_path):
+        d = _write(tmp_path, "e", title="e", description="d", date="2026-10-01 09:00", status="led-to",
+                   closed="2026-10-05 12:00", related="x")
+        page = mod.scan_pr_dir(d)
+        assert "<dt>Closed</dt><dd>2026-10-05 12:00</dd>" in mod.build_pr_page(page, "led-to", mod.closed_time(page, {}))
+        index = mod.build_index_page([page], {page.path: "led-to"})
+        assert "<td>2026-10-05 12:00</td>" in index
+        assert 'data-active="2026-10-05 12:00"' in index
+
+    def test_closed_on_a_pr_page_is_ignored_with_a_warning(self, mod, tmp_path):
+        page = mod.scan_pr_dir(
+            _write(tmp_path, "p", pr=1, title="p", description="d", date="2026-10-01 09:00", closed="2026-10-09 09:00")
+        )
+        assert any("closed" in w for w in page.warnings)
+        assert mod.closed_time(page, {(REPO, 1): "2026-10-03 11:00"}) == "2026-10-03 11:00"
+        assert mod.closed_time(page, {}) == ""
+
+    def test_active_order_uses_the_closed_time(self, mod, tmp_path):
+        a = mod.scan_pr_dir(_write(tmp_path, "a", title="a", description="d", date="2026-10-01 09:00", closed="2026-10-09 09:00"))
+        b = mod.scan_pr_dir(_write(tmp_path, "b", title="b", description="d", date="2026-10-05 09:00"))
+        assert mod._latest_activity(a, {}) > mod._latest_activity(b, {})
+
+    def test_missing_date_warns(self, mod, tmp_path):
+        page = mod.scan_pr_dir(_write(tmp_path, "n", title="t", description="d"))
+        assert any("'date'" in w for w in page.warnings)
+        dated = mod.scan_pr_dir(_write(tmp_path, "m", title="t", description="d", date="2026-10-01 09:00"))
+        assert dated.warnings == []

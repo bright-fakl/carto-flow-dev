@@ -12,6 +12,7 @@ kind: exploration
 topic: voronoi
 status: led-to
 related: pr111-voronoi-power-weights, pr112-voronoi-premorph
+closed: 2026-10-12 00:31
 ---
 
 An investigation; nothing in the library was changed. 209 runs (S 78, L 65, U 38, D 28; 20 of them pairs). Repeated base runs gave identical metrics (3 repeats on S, 2 for P on L and D, 2 for E on U), so differences against a base are effects, not noise; changes below 0.05 R, 0.02 in adjacency kept and 0.01 in compactness are treated as negligible because single trajectories on F and E are sensitive to small changes. Reproduce: `NUMBA_NUM_THREADS=8 uv run python run_experiments.py S,U,L,D` from a checkout of `feat/voronoi-premorph` (about 40 minutes; resumes from `data/runs.jsonl`), then `uv run python make_figures.py > data/tables.md`.

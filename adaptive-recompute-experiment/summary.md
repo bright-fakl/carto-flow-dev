@@ -12,6 +12,7 @@ kind: exploration
 topic: flow
 status: led-to
 related: pr110-stall-detection
+closed: 2026-10-10 17:12
 ---
 
 An investigation, not a change: the prototype lives on the branch above (new `MorphOptions` fields `adaptive_tol_rise`, `adaptive_min_interval`, `step_control`, `step_rollback`, `step_dt_floor`, `step_dt_restore`; defaults reproduce current behavior). Scripts are in `scripts/` (they import the prototype from its worktree path, so check out commit 2650f6a to rerun them). One run per cell, on a machine with load average 0.1 to 5, so wall times are fairly reliable, but the cost model below is the primary metric.

@@ -9,6 +9,7 @@ date: 2026-10-11 12:30
 before: main @ 4ae2ea1 (PRs 110 to 112 merged)
 after: the same checkout; options varied one at a time
 inputs: S = 49 contiguous states with population; A = 50 states and DC including Alaska and Hawaii (contiguous_only=False) with population; D = 432 congressional districts with population, group_by "State Name". RasterBackend(resolution=256), VoronoiOptions(n_iter=300, area_cv_tol=0.05); bases F = fixed union outline, E = ElasticBoundary(0.05), P = premorph=True. Single runs.
+closed: 2026-10-12 00:31
 ---
 
 Run script `run_followup.py` (on the helpers of the audit) writes `data/runs.jsonl`; `make_figures.py` writes the figures and `data/tables.md` from it. Metrics are those of the audit page: area error is the cell area against the weight share of the total cell area, adjacency kept is the share of the input's adjacent pairs that are still adjacent, compactness is the mean 4 pi A / perimeter squared. For the groups (state) study, two kinds of metric are used:

@@ -83,6 +83,7 @@
 <dt>Related</dt><dd><a href="../quadtree-windows-pr/index.html">Quadtree windows keep the flow cartogram output polygons valid</a> <span class="meta">(pr)</span><br><a href="../exploration-adaptive-windows/index.html">Inverted triangles of the quadtree mesh and an adaptive interval for the validity checks</a> <span class="meta">(exploration)</span></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/179">#179</a></dd>
 <dt>Created</dt><dd>2026-10-25 18:00</dd>
+<dt>Closed</dt><dd>2026-10-26 02:02</dd>
 <dt>Before</dt><dd>feat/quadtree-windows @ 233ad80</dd>
 <dt>After</dt><dd>the same branch; script only</dd>
 <dt>Inputs</dt><dd>counties (1 km input), congressional districts (1 km) and raw coarse counties (43,084 vertices), morph_multiresolution with auto ladder, area_scale 1e-6, n_iter 1000, dt as stated, validity=&quot;repair-quadtree&quot;, QuadtreeSettings(area_ratio=...) swept. One run per row (a second run of the counties at dt 0.2 reproduced every row exactly). The errors are of the valid polygons against targets normalized on the valid polygons.</dd>

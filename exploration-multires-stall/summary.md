@@ -10,6 +10,7 @@ date: 2026-10-12 23:30
 before: main @ 5a4a5a2
 after: the same checkout; stall parameters of the coarse levels and the iteration budget varied through a per-level loop
 inputs: states (49) and districts (432), bundled, with population, area-like, inverse-area, smooth (sigma 2) and lognormal (sigma 2) values; 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled). Tolerances 1 % / 3 %, n_iter 500 per level, adaptive_dt on, NUMBA_NUM_THREADS=8. Cost is iterations plus recomputes times the cost of one recompute at the grid of the last level (preset-review table; the 2048 value is extrapolated, so compare wall seconds for counties). True error is the output area against the target share of the total output area.
+closed: 2026-10-12 23:30
 ---
 
 `stall_levels.py` runs the cases (levels in a loop, so each level has its own stall parameters; the stall window is patched through `alg.cycle_length`), `make_tables.py` writes `data/tables.md`. Counties are read from `COUNTIES_PARQUET`.

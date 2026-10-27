@@ -10,6 +10,7 @@ date: 2026-10-26 17:00
 before: main @ 4271a3b
 after: the same checkout; scripts only, no library change
 inputs: 3,108 bundled counties (population), max_segment_length 1000, auto ladder, n_iter 1000, area_scale 1e-6, grid 2048 for the continuation. Errors of valid polygons against targets normalized on the valid polygons. Single runs; NUMBA default threads.
+closed: 2026-10-26 20:32
 ---
 
 **Outcome (2026-10-27).** Led to the issue 177 work: PR 185 (`area_tol_cells`, `n_unresolved`, stall warning with the continuation call) and PR 186 (`wait_for_lagging_regions`). Both merged.

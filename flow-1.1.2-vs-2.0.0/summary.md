@@ -9,6 +9,7 @@ kind: exploration
 topic: flow
 status: no-action
 outcome: the speedups were recorded in the 2.0.0 changelog (#61); nothing else follows
+closed: 2026-10-10 17:12
 ---
 
 No figures: the output geometry is unchanged, so before and after images would

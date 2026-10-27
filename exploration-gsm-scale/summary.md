@@ -13,6 +13,7 @@ kind: exploration
 topic: flow
 status: superseded
 related: exploration-overview
+closed: 2026-10-11 00:06
 ---
 
 An investigation, not a change. The prototype adds four `MorphOptions` fields (`step_scale_mode`, `step_scale_floor`, `step_scale_precompute`, `step_scale_max_cells`) and a module `step_scale.py`; the default (constant) mode reproduces the stored baseline trace for states 256 (113 iterations). One run per cell; load average 0.3 to 1.6; wall times are indicative and the cost model (iterations plus recomputes times the ratio) is the primary metric. `tables.md` has every variant; the patch is in `code/gsm_scale.patch`.

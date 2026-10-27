@@ -12,6 +12,7 @@ kind: exploration
 topic: flow
 status: led-to
 related: exact-density-coverage, flow-convergence-synthesis
+closed: 2026-10-11 00:21
 ---
 
 An investigation, not a change. The prototype is on `investigate/area-coverage` (from `fix/stall-detection`, local commit 3284c33). Unless a row says "off", results use `refresh_on_rise=0.01` (the setting of 8441681); "off" is the setting of b0657b5. Full tables are in `tables_all.md`; scripts and per-run data are in `scripts/` and `data/`.

@@ -10,6 +10,7 @@ date: 2026-10-26 20:00
 before: main @ 6921aca
 after: feat/unresolved-regions (area_tol_cells)
 inputs: 3,108 bundled counties (population), max_segment_length 1000, morph_multiresolution with min_resolution and levels auto (grids 512, 1024, 2048), area_scale 1e-6, n_iter 1000, validity="repair-crossings", default tolerances (mean_tol 5 %, max_tol 10 %). Controls: 432 congressional districts (max_segment_length 1000) and the 49 states, n_iter 300. Single runs. Errors are the relative errors of the returned geometries.
+closed: 2026-10-26 20:32
 ---
 
 **Outcome (2026-10-27).** Merged as `area_tol_cells` (default 0, an early-stopping option for small regions), `Cartogram.n_unresolved` and a stall warning that names the continuation (PR 185). The measurement did not support a non-zero default.

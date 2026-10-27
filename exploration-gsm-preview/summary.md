@@ -12,6 +12,7 @@ kind: exploration
 topic: flow
 status: superseded
 related: exploration-overview
+closed: 2026-10-11 00:06
 ---
 
 A preview, not a solver: one run per cell, one machine, load average 0.2 to 7 (listed per row in `tables.md`; the districts, counties and anisotropy rows ran at load 1 to 3). Wall times are indicative; the cost model is the primary metric. Regenerate figures and `tables.md` with `uv run python make_figures.py`; the runs come from `scripts/run_case.py` (committed on the branch under `experiments/gsm_preview/`).

@@ -10,6 +10,7 @@ date: 2026-10-19 15:00
 before: main @ 06d4ff0
 after: the same checkout; script only, no library change
 inputs: 3,108 bundled counties (population), max_segment_length 1000, auto ladder, n_iter 1000, area_scale 1e-6; then `w.morph(grid=2048, n_iter=1500, stall_patience=None, snapshot_every=50)` continued from the stalled finest level. Single run.
+closed: 2026-10-26 20:32
 ---
 
 **Outcome (2026-10-27).** Superseded by the follow-up measurements: with valid polygons the gain from continuing is smaller than measured here (see exploration-stall-after-validity). The stall rule now follows the lagging regions (PR 186).

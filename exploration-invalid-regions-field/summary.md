@@ -11,6 +11,7 @@ date: 2026-10-19 20:00
 before: main @ 06d4ff0
 after: scratch worktree with hooks in algorithm.py (algorithm_hooks.patch); not a PR
 inputs: 3,108 bundled counties (population) with max_segment_length 1000, auto ladder, n_iter 1000, area_scale 1e-6, default options. Errors are of the valid output polygons against targets normalized on the valid polygons only; neighbors are valid regions that intersect an invalid one. Runs are deterministic (repeating a run gives identical numbers).
+closed: 2026-10-26 02:02
 ---
 
 ## Why

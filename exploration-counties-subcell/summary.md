@@ -10,6 +10,7 @@ date: 2026-10-11 23:36
 before: main @ 2a03f40
 after: the same checkout; grid, multiresolution and stall rule varied
 inputs: 3,108 counties (prepared set, ESRI:102008, total_votes, area_scale 1e-6, not bundled); MorphOptions defaults (adaptive_dt on, exact rasterization, error floor 1e-3) except where stated; n_iter 300; NUMBA_NUM_THREADS=8. True error is the output area against the vote share of the total output area.
+closed: 2026-10-16 11:17
 ---
 
 `counties_check.py` regenerates `data/tables.md` (every table below). The counties are not bundled; the script reads the prepared set from `COUNTIES_PARQUET`.

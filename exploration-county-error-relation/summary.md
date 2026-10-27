@@ -10,6 +10,7 @@ date: 2026-10-19 12:00
 before: main @ 06d4ff0
 after: the same checkout; script only, no library change
 inputs: 3,108 bundled counties (population) with max_segment_length 1000, ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, default options. Error is the output area against the population share of the total output area; the cell is that of the finest level (4.26 km, 18.1 km2). Single run.
+closed: 2026-10-26 20:32
 ---
 
 **Outcome (2026-10-27).** The remaining tail of sub-cell and few-cell counties is handled by `area_tol_cells` as an early stop (PR 185) and by `wait_for_lagging_regions` (PR 186); issue 177 is closed.

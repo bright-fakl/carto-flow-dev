@@ -10,6 +10,7 @@ date: 2026-10-13 01:30
 before: main @ e78c5a9
 after: the same checkout; dots, tracers and the remap run after the morph
 inputs: 49 states (bundled) with poverty counts, dot density with n_dots = round(max / 25000), normalization "maximum" (about 1,480 dots per seed), MorphOptions defaults with area_scale 1e-6 and n_iter 400 unless stated; the two-region case is two unit squares with values 1 and 4 and 20,000 uniform dots each, tolerances 0.5 % / 1 %. NUMBA_NUM_THREADS=8.
+closed: 2026-10-16 11:17
 ---
 
 `border_band.py`, `resolution_scan.py`, `two_regions.py`, `where_are_the_dots.py`, `distance_remap.py` (writes a cache that the following scripts read), `sector_remap.py`, `toy_remap.py` and `landmark_warp.py`, `velocity_profile.py`, `jacobian_path.py`, `inplace_proxy.py`, `cost.py`, `sections.py` and `jitter.py` produce the data in `data/`; `make_tables.py` writes `data/tables.md` (every table below) and `make_figures.py` the figures. The cache `data/states_morph.pkl` is not committed. The border-band z-score counts the dots inside a band (6 % of `sqrt(area)` wide) along the border of their own region and compares it with the number expected for uniform dots, as a binomial z-score summed over regions; its standard deviation over seeds for a uniform sample is about 1.

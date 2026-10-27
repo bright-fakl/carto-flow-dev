@@ -24,7 +24,10 @@ start with a fenced metadata block, parsed as simple ``key: value`` lines
 naming the directory and falls back to the directory name. All other keys are
 optional and, when present, are rendered in the page's definition list: ``pr``,
 ``issue``, ``url``, ``kind``, ``project``, ``topic``, ``status``, ``outcome``, ``related``,
-``branch``, ``base``, ``date``, ``updated``, ``before``, ``after`` and ``inputs``.
+``branch``, ``base``, ``date``, ``updated``, ``closed``, ``before``, ``after`` and ``inputs``.
+A page without ``date`` prints a warning.  ``closed`` applies to explorations and
+proposals only: ``--set-status`` writes it (see below).  On a ``pr`` page it is
+ignored with a warning; the closed time comes from GitHub.
 
 ``project`` names the project a page belongs to (a free-text name such as
 ``isotile``). Without it, the project is the repository name taken from the
@@ -51,7 +54,9 @@ exploration or synthesis page) and ``no-action`` (concluded, nothing follows;
 ``outcome:`` must say why).  A closed ``led-to`` or ``superseded`` page needs
 a ``related`` link to its successor.  The generated pages are static, so there
 is no control to click - use ``--set-status DIR STATUS`` to change one and
-``--list-status`` to print them all.
+``--list-status`` to print them all.  Setting ``led-to``, ``superseded`` or
+``no-action`` on an exploration or proposal also writes ``closed: <now>``; setting
+``open`` or ``on-hold`` removes it.
 
 ``related`` lists the directory names of other pages, comma-separated; the reverse link
 ("Referenced by") is derived, so each link is written once.
@@ -210,7 +215,8 @@ on pages without a `url` that belong to another project. The index filters on it
 when there is more than one project, shows it next to each title.
 
 The status of a `pr` page comes from the PR on GitHub (see below). An exploration or
-proposal has no GitHub state, so its `status` is set by hand:
+proposal has no GitHub state, so its `status` is set by hand with
+`--set-status <directory> <status>`:
 
 | status | meaning |
 |---|---|
@@ -219,6 +225,11 @@ proposal has no GitHub state, so its `status` is set by hand:
 | `led-to` | closed; followed by a proposal or PR |
 | `superseded` | closed; replaced by a newer exploration or a synthesis page |
 | `no-action` | closed; concluded and nothing follows. Requires `outcome:` saying why, for example a negative result, reference data only, or a rejected proposal |
+
+`--set-status` writes `closed: <now>` (`YYYY-MM-DD HH:MM`, local time) when an exploration or
+proposal becomes `led-to`, `superseded` or `no-action`, and removes it when the status becomes
+`open` or `on-hold`. The closed time of a `pr` page always comes from GitHub; a `closed:` header
+on a `pr` page is ignored with a warning.
 
 Link pages with `related: <directory>, <directory>`. Write each link once; the page
 at the other end shows it as "Referenced by". A `led-to` or `superseded` page needs
@@ -294,15 +305,16 @@ investigation workspace is easy to miss.
    ---
    ```
 
-   `title` and `description` are required; `pr`, `issue` (the GitHub issue the
+   `title` and `description` are required, and `date` is expected (a page without it warns); `pr`, `issue` (the GitHub issue the
    change addresses, e.g. `74` or `74, 75`), `url`, `kind`, `project`, `topic`, `status`, `outcome`,
-   `related`, `branch`, `base`, `date`, `updated`, `before`, `after`, and `inputs` are optional and rendered
+   `related`, `branch`, `base`, `date`, `updated`, `closed`, `before`, `after`, and `inputs` are optional and rendered
    in a definition list on the page.  Pages are listed newest first, by `date`
    where given and by directory mtime otherwise.  Write `date`
    (the creation time) and `updated` (the last time the figures were
    regenerated) as `YYYY-MM-DD HH:MM`, local time: without the time, pages from
-   the same day sort by PR number. The closed time is not written by hand; it
-   is the merge or close time of the PR on GitHub.
+   the same day sort by PR number. `closed` is written by `--set-status` for explorations and
+   proposals; for a `pr` page it is the merge or close time of the PR on GitHub and is not
+   written by hand.
 
    The status of a `pr` page is taken from the PR's GitHub state unless `status:` says
    otherwise. The repository is read from `url` (`https://github.com/<owner>/<repo>/pull/<n>`),
@@ -765,6 +777,9 @@ OUTSTANDING_STATUSES = {"needs review", "open"}
 PARKED_STATUSES = {"deferred", "on-hold"}
 DONE_STATUSES = {"reviewed", "merged", "closed", "superseded", "led-to", "no-action"}
 KNOWN_STATUSES = OUTSTANDING_STATUSES | PARKED_STATUSES | DONE_STATUSES
+# --set-status writes `closed:` for these on an exploration or proposal, and removes it for the others.
+CLOSING_STATUSES = {"led-to", "superseded", "no-action"}
+REOPENING_STATUSES = {"open", "on-hold"}
 
 KINDS = ("pr", "exploration", "proposal")
 TOPICS = ("flow", "voronoi", "symbol", "proportional", "noncontiguous", "data", "infra")
@@ -1014,6 +1029,11 @@ def scan_pr_dir(directory: Path, default_repo: str = DEFAULT_REPO) -> PrDir:
     elif kind != "pr" and pr_number is not None:
         warnings.append(f"{directory.name}: kind {kind!r} with a 'pr' number; convert it with --convert")
 
+    if not (meta.get("date") or "").strip():
+        warnings.append(f"{directory.name}: missing 'date' (creation time, YYYY-MM-DD HH:MM) in summary.md")
+    if kind == "pr" and (meta.get("closed") or "").strip():
+        warnings.append(f"{directory.name}: 'closed' is ignored on a pr page; the closed time comes from GitHub")
+
     topics = _split_list(meta.get("topic", ""))
     for topic in topics:
         if topic not in TOPICS:
@@ -1081,6 +1101,17 @@ def link_graph(pr_dirs: list[PrDir]) -> dict[str, list[str]]:
             pr.warnings.append(f"{pr.path.name}: closed with a successor but no 'related' link either way")
             print(f"WARNING: {pr.warnings[-1]}", file=sys.stderr)
     return incoming
+
+
+def closed_time(pr: PrDir, closed: dict[tuple[str, int], str]) -> str:
+    """Closed time of a page as ``YYYY-MM-DD HH:MM`` (empty if none).
+
+    A ``pr`` page takes it from GitHub (``closed``); an exploration or proposal
+    from its ``closed:`` header, which ``--set-status`` writes.
+    """
+    if pr.kind == "pr":
+        return closed.get(pr.key, "") if pr.key else ""
+    return (pr.meta.get("closed") or "").strip()
 
 
 def build_pr_page(
@@ -1183,7 +1214,7 @@ def build_index_page(
             title_cell += f' <span class="meta">({html.escape(pr.project)})</span>'
         desc_cell = html.escape(pr.description)
         date_cell = html.escape(pr.meta.get("date", ""))
-        closed_cell = html.escape(closed.get(pr.key, "") if pr.key else "")
+        closed_cell = html.escape(closed_time(pr, closed))
         rows.append(
             f'<tr{row_class} data-ord="{len(rows)}" data-kind="{pr.kind}" data-project="{html.escape(pr.project)}" data-topics=" {" ".join(pr.topics)} " '
             f'data-status="{html.escape(status)}" data-class="{cls}" data-active="{html.escape(_latest_activity(pr, closed))}">'
@@ -1216,7 +1247,7 @@ def build_index_page(
 
 def _latest_activity(pr: PrDir, closed: dict[tuple[str, int], str]) -> str:
     """Latest of the created, updated and closed times, as ``YYYY-MM-DD HH:MM`` (empty if none)."""
-    times = [pr.meta.get("date", ""), pr.meta.get("updated", ""), closed.get(pr.key, "") if pr.key else ""]
+    times = [pr.meta.get("date", ""), pr.meta.get("updated", ""), closed_time(pr, closed)]
     return max((t.strip() + " 00:00")[:16] if len(t.strip()) == 10 else t.strip() for t in times)
 
 
@@ -1254,6 +1285,13 @@ def _sort_key(pr: PrDir) -> tuple[float, int]:
     return (-_entry_time(pr), -(pr.pr or 0))
 
 
+def _set_header_field(header: str, key: str, value: str) -> str:
+    """Replace ``key:`` in a metadata header, or append it."""
+    if re.search(rf"^{key}:.*$", header, re.M):
+        return re.sub(rf"^{key}:.*$", f"{key}: {value}", header, count=1, flags=re.M)
+    return f"{header}\n{key}: {value}"
+
+
 def set_status(directory: Path, status: str) -> None:
     """Write ``status:`` into a directory's summary.md, replacing any existing one.
 
@@ -1277,6 +1315,13 @@ def set_status(directory: Path, status: str) -> None:
         header = re.sub(r"^status:.*$", f"status: {status}", header, count=1, flags=re.M)
     else:
         header = f"{header}\nstatus: {status}"
+    is_pr_page = bool(re.search(r"^(kind:\s*pr\s*|pr:\s*\d+\s*)$", header, re.M))
+    if is_pr_page:
+        pass  # the closed time of a PR page comes from GitHub
+    elif status in CLOSING_STATUSES:
+        header = _set_header_field(header, "closed", datetime.now(display_timezone()).strftime("%Y-%m-%d %H:%M"))
+    elif status in REOPENING_STATUSES:
+        header = re.sub(r"^closed:.*\n?", "", header, flags=re.M).rstrip("\n")
     summary.write_text(text[: match.start(2)] + header + text[match.end(2) :], encoding="utf-8")
     print(f"{directory.name}: status set to {status}")
 
@@ -1378,7 +1423,7 @@ def main() -> None:
     incoming = link_graph(pr_dirs)
     pages = {pr.path.name: pr for pr in pr_dirs}
     for pr in pr_dirs:
-        closed = pr_closed.get(pr.key) if pr.key else None
+        closed = closed_time(pr, pr_closed)
         (pr.path / "index.html").write_text(
             build_pr_page(pr, statuses[pr.path], closed, pages, incoming), encoding="utf-8"
         )

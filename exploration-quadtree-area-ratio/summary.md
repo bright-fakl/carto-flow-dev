@@ -10,6 +10,7 @@ date: 2026-10-25 18:00
 before: feat/quadtree-windows @ 233ad80
 after: the same branch; script only
 inputs: counties (1 km input), congressional districts (1 km) and raw coarse counties (43,084 vertices), morph_multiresolution with auto ladder, area_scale 1e-6, n_iter 1000, dt as stated, validity="repair-quadtree", QuadtreeSettings(area_ratio=...) swept. One run per row (a second run of the counties at dt 0.2 reproduced every row exactly). The errors are of the valid polygons against targets normalized on the valid polygons.
+closed: 2026-10-26 02:02
 ---
 
 **Outcome (2026-10-26).** The area ratio stays 0.001 in `validity="repair-quadtree"` (PR 181, merged); the rule did not trigger in any tested run at 0.001 and below.

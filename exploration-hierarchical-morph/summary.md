@@ -10,6 +10,7 @@ date: 2026-10-12 05:10
 before: main @ c080423
 after: the same checkout; no morph is run
 inputs: 3,108 counties (prepared set, ESRI:102008, total_votes, GEOID, not bundled); the target area of a county is its vote share of the total area; a group grid is the square grid with margin 0.5 on the bounding box of the state's original geometry.
+closed: 2026-10-27 15:00
 ---
 
 `group_subcell.py` regenerates `data/tables.md` (the tables below); it reads the counties from `COUNTIES_PARQUET` and runs no morph. It assumes each state ends with the sum of its counties' targets as area, which holds when the state stage has converged.

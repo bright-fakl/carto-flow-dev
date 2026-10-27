@@ -10,6 +10,7 @@ date: 2026-10-19 18:00
 before: main @ 06d4ff0
 after: scratch worktree /home/fakl/cf-validity with hooks in algorithm.py (algorithm_hooks_vw.patch, includes the quadtree hook); not a PR
 inputs: 3,108 counties (population) at max_segment_length 1000, congressional districts (432) at 1000, and the coarse county input (simplify_coverage tolerance 4000, 43 k vertices); ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, one run per row unless stated (the dynamics are chaotic and numba parallel kernels add run-to-run noise).
+closed: 2026-10-26 02:02
 ---
 
 **Outcome (2026-10-26).** Validated windows were implemented as `validity="repair-crossings"` (PR 180, merged) and the quadtree windows as `validity="repair-quadtree"` (PR 181, merged). In this page the values are called `windows` and `quadtree` (the names of the prototypes). The density-field repair was dropped (issue 176 closed); the raw coarse input is handled by densifying the input first or by `"repair-quadtree"`.

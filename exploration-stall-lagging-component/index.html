@@ -83,6 +83,7 @@
 <dt>Related</dt><dd><a href="../exploration-stall-after-validity/index.html">Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</a> <span class="meta">(exploration)</span><br><a href="../exploration-unresolved-regions/index.html">Absolute area tolerance as an early stop, and sub-cell exclusion, for regions of a few cells (counties)</a> <span class="meta">(exploration)</span><br><a href="../stall-lagging-pr/index.html">The stall rule waits for the lagging regions (wait_for_lagging_regions)</a> <span class="meta">(pr)</span></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/177">#177</a></dd>
 <dt>Created</dt><dd>2026-10-26 23:00</dd>
+<dt>Closed</dt><dd>2026-10-26 23:00</dd>
 <dt>Before</dt><dd>feat/unresolved-regions @ f30c2b4</dd>
 <dt>After</dt><dd>feat/stall-lagging-regions (library runs of each candidate on an experimental option)</dd>
 <dt>Inputs</dt><dd>3,108 bundled counties (1 km input, auto ladder), validity=&quot;repair-crossings&quot; and &quot;check&quot;, n_iter 1000 and 3000 (the total budget of the ladder), default tolerances. Districts (1 km input) and states, n_iter 500 and 1000. Strip scenes of the test suite (seeds 3, 7, 11, 19, 23, 31; grid 64, n_iter 400, mean_tol 2 %, max_tol 5 %). Single runs; several runs shared the machine, so the times are indicative only (iterations are the cost measure). Errors of the valid polygons against targets normalized on the valid polygons.</dd>

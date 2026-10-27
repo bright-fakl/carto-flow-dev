@@ -10,6 +10,7 @@ date: 2026-10-18 12:00
 before: main @ 06d4ff0
 after: the same checkout; script only, no library change
 inputs: 3,108 bundled counties (population) densified to 1 km with load_us_census(max_segment_length=1000), CartogramWorkflow(coords=...).morph_multiresolution with min_resolution and levels auto, n_iter 1000, area_scale 1e-6. The carried points are densify_coverage(counties, s) for s in 500, 250 and 125 m (shared boundaries get identical points), all vertices carried including the original ones.
+closed: 2026-10-26 02:02
 ---
 
 **Outcome (2026-10-26).** Superseded by the validity methods `validity="repair-crossings"` and `validity="repair-quadtree"` (PR 180 and PR 181, merged): carrying subdivision points through the flow leaves invalid polygons and costs more per vertex than validated windows.

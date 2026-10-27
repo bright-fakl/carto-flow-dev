@@ -25,7 +25,8 @@ on pages without a `url` that belong to another project. The index filters on it
 when there is more than one project, shows it next to each title.
 
 The status of a `pr` page comes from the PR on GitHub (see below). An exploration or
-proposal has no GitHub state, so its `status` is set by hand:
+proposal has no GitHub state, so its `status` is set by hand with
+`--set-status <directory> <status>`:
 
 | status | meaning |
 |---|---|
@@ -34,6 +35,11 @@ proposal has no GitHub state, so its `status` is set by hand:
 | `led-to` | closed; followed by a proposal or PR |
 | `superseded` | closed; replaced by a newer exploration or a synthesis page |
 | `no-action` | closed; concluded and nothing follows. Requires `outcome:` saying why, for example a negative result, reference data only, or a rejected proposal |
+
+`--set-status` writes `closed: <now>` (`YYYY-MM-DD HH:MM`, local time) when an exploration or
+proposal becomes `led-to`, `superseded` or `no-action`, and removes it when the status becomes
+`open` or `on-hold`. The closed time of a `pr` page always comes from GitHub; a `closed:` header
+on a `pr` page is ignored with a warning.
 
 Link pages with `related: <directory>, <directory>`. Write each link once; the page
 at the other end shows it as "Referenced by". A `led-to` or `superseded` page needs
@@ -109,15 +115,16 @@ investigation workspace is easy to miss.
    ---
    ```
 
-   `title` and `description` are required; `pr`, `issue` (the GitHub issue the
+   `title` and `description` are required, and `date` is expected (a page without it warns); `pr`, `issue` (the GitHub issue the
    change addresses, e.g. `74` or `74, 75`), `url`, `kind`, `project`, `topic`, `status`, `outcome`,
-   `related`, `branch`, `base`, `date`, `updated`, `before`, `after`, and `inputs` are optional and rendered
+   `related`, `branch`, `base`, `date`, `updated`, `closed`, `before`, `after`, and `inputs` are optional and rendered
    in a definition list on the page.  Pages are listed newest first, by `date`
    where given and by directory mtime otherwise.  Write `date`
    (the creation time) and `updated` (the last time the figures were
    regenerated) as `YYYY-MM-DD HH:MM`, local time: without the time, pages from
-   the same day sort by PR number. The closed time is not written by hand; it
-   is the merge or close time of the PR on GitHub.
+   the same day sort by PR number. `closed` is written by `--set-status` for explorations and
+   proposals; for a `pr` page it is the merge or close time of the PR on GitHub and is not
+   written by hand.
 
    The status of a `pr` page is taken from the PR's GitHub state unless `status:` says
    otherwise. The repository is read from `url` (`https://github.com/<owner>/<repo>/pull/<n>`),

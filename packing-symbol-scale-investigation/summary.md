@@ -7,6 +7,7 @@ kind: exploration
 topic: symbol
 status: led-to
 related: pr42-size-normalization-total
+closed: 2026-10-10 17:12
 ---
 
 figure: packing_scale_panels.png — Four packings of US states by Population. Top left is the default. Top right is the same run with size_normalization="total". Bottom left removes the neighbour tangency force. Bottom right is stage 1 only (overlap resolution, before any contraction).
