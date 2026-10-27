@@ -262,6 +262,66 @@ MARKS.update({"blob": mark_blob, "blob_wavy": mark_blob_wavy, "blob_small": mark
               "blob_tilt": mark_blob_tilt, "blob_small_tilt": mark_blob_small_tilt})
 
 
+def mark_cmono(pal):
+    """A 'c' of three wavy concentric streamlines, open to the right, with an amber region in the opening."""
+    out = ""
+    for R, w in ((33, 5.5), (23, 5.5), (13, 5.5)):
+        t = np.radians(np.linspace(42, 318, 80))
+        rr = R + 1.6 * np.sin(5 * t + R)
+        pts = [(48 + r * math.cos(a), 48 - r * math.sin(a)) for r, a in zip(rr, t)]
+        out += f'<path d="{path(pts)}" fill="none" stroke="{pal["blue"]}" stroke-width="{w}" stroke-linecap="round"/>'
+    out += f'<circle cx="68" cy="48" r="9" fill="{pal["amber"]}"/>'
+    return out
+
+
+def mark_twist(pal):
+    """A 3 x 3 grid twisted around its centre; the centre cell is amber."""
+    n, pad, size = 3, 12.0, 72.0
+    c = np.array([48.0, 48.0])
+    def tw(q):
+        v = q - c
+        r = math.hypot(*v)
+        a = 1.15 * math.exp(-(r / 30.0) ** 2)
+        ca, sa = math.cos(a), math.sin(a)
+        return c + np.array([ca * v[0] - sa * v[1], sa * v[0] + ca * v[1]])
+    s_ = np.linspace(0, 1, 40)
+    out = ""
+    cell = [tw(pad + np.array(p) * size) for p in
+            [(1 / n + (1 / n) * t, 1 / n) for t in np.linspace(0, 1, 12)] + [(2 / n, 1 / n + (1 / n) * t) for t in np.linspace(0, 1, 12)]
+            + [(2 / n - (1 / n) * t, 2 / n) for t in np.linspace(0, 1, 12)] + [(1 / n, 2 / n - (1 / n) * t) for t in np.linspace(0, 1, 12)]]
+    out += f'<path d="{path([tuple(p) for p in cell], True)}" fill="{pal["amber"]}"/>'
+    for i in range(n + 1):
+        u = i / n
+        for ln in ([tw(pad + np.array([u, t]) * size) for t in s_], [tw(pad + np.array([t, u]) * size) for t in s_]):
+            out += f'<path d="{path([tuple(p) for p in ln])}" fill="none" stroke="{pal["blue"]}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>'
+    return out
+
+
+def mark_rings(pal):
+    """Nested wobbly isolines of a density field around an amber core, centres drifting like a hill."""
+    out = ""
+    t = np.linspace(0, 2 * math.pi, 120, endpoint=False)
+    for k, (R, dx, dy) in enumerate([(36, 0, 0), (27, 2, -1.5), (18, 4, -3)]):
+        rr = R * (1 + 0.07 * np.cos(2 * t + 0.4 + k) + 0.05 * np.cos(3 * t + 1.1 * k))
+        pts = [(48 + dx + r * math.cos(a), 48 + dy + r * math.sin(a)) for r, a in zip(rr, t)]
+        out += f'<path d="{path(pts, True)}" fill="none" stroke="{pal["blue"]}" stroke-width="5" stroke-linejoin="round"/>'
+    t2 = t
+    rr = 9 * (1 + 0.06 * np.cos(2 * t2 + 1))
+    out += f'<path d="{path([(52 + r * math.cos(a), 45 + r * math.sin(a)) for r, a in zip(rr, t2)], True)}" fill="{pal["amber"]}"/>'
+    return out
+
+
+MARKS.update({"cmono": mark_cmono, "twist": mark_twist, "rings": mark_rings})
+
+
+def wordmark(pal, text_color):
+    """Wordmark as live SVG text with a blue hyphen and an amber 'o' in flow (exploration only; the final
+    wordmark needs outlined letters)."""
+    return (f'<text x="2" y="62" font-family="Poppins, Nunito, Helvetica, Arial, sans-serif" font-size="44" '
+            f'font-weight="600" fill="{text_color}">carto<tspan fill="{pal["blue"]}">-</tspan>fl'
+            f'<tspan fill="{pal["amber"]}">o</tspan>w</text>')
+
+
 def svg(body, bg=None):
     rect = f'<rect width="96" height="96" fill="{bg}"/>' if bg else ""
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">{rect}{body}</svg>'
@@ -273,3 +333,7 @@ if __name__ == "__main__":
     for name, fn in MARKS.items():
         for variant, pal in PALETTES.items():
             (out / f"{name}-{variant}.svg").write_text(svg(fn(pal)))
+    for variant, pal in PALETTES.items():
+        tc = "#1b1f24" if variant == "light" else "#e8edf2"
+        (out / f"wordmark-{variant}.svg").write_text(
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 96">{wordmark(pal, tc)}</svg>')

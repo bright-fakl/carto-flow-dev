@@ -68,3 +68,12 @@ This is a design judgment, not a trademark opinion; if the logo will be used wid
 - `s1` (wide) fails: the cut leaves a thin wedge in the lower left that vanishes below 32 px.
 - `s0` and `s2` hold at 16 px. `s2` has the most country-like outline (a bay on the right, a bulge at the top).
 - Two amber regions give a two-color mark whose halves read as a country split in two, with the gaps as a cross; amber on the left or right changes the weight of the mark (the right pair is larger in `s0` and `s2`, so amber on the right is the heavier choice). With two colors the Windows resemblance is, if anything, a little closer than with one amber region, because the four parts now read as two color groups; this is the thing to judge.
+
+## Four different directions (2026-10-26)
+
+Rendered in `fig1_marks.png` (rows `cmono`, `twist`, `rings`) and `fig2_wordmark.png` (wordmark at 400, 200 and 120 px wide). All four avoid the cross of four regions.
+
+- `cmono` (a "c" of wavy concentric streamlines with an amber dot in the opening): does not work. The wobble reads as a hand-drawn pentagon and the "c" is only legible at large size; at 32 px it is a knot.
+- `twist` (a 3 x 3 grid twisted around an amber centre cell): distinctive and holds its structure at 16 px, but it reads as a camera shutter or aperture, not a cartogram. A fixable reading, but a different association from the one wanted.
+- `rings` (nested wobbly isolines around an amber core): the best of the four. It reads as a density field or contour map (the quantity the algorithm moves), holds at 32 px, and the one-color version is clean. Weak points: at 16 px the rings merge into a target, and the top left shows two rings touching, which should be separated.
+- Wordmark (first draft, `carto-flow` in a rounded sans with a blue hyphen and an amber "o" in flow): the first draft had a wavy hyphen and a drawn "o"; the wavy hyphen collided with the "o" of carto and the spacing depended on fonts, so it was replaced by colored letters in live text. Fonts are not embedded, so the figure shows the fallback sans. A final wordmark needs a chosen, license-checked typeface with the letters converted to outlines.
