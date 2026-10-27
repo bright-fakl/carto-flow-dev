@@ -349,3 +349,7 @@ The principle is that the library defines each concept once, exactly, and carto-
 7. **Frame: public.** It is the single mechanism for scale, rotation and position that the named constructors, `fill_region` and the GUI all need; hiding it forces carto-flow onto private API.
 8. **Parameter ranges: the library provides an exact validity predicate and build-time safe intervals.** The valid parameter set of a type is the set where the prototile is a simple polygon; `check_prototile` is its exact test. For slider ranges, `_build_data.py` computes, per type and parameter, the maximal interval around the default that stays valid with the other parameters at their defaults, stores it in the data file and documents it as a one-parameter slice (not the full region). The editor combines both: slider limits from the slices, live validity from the predicate.
 9. **Repository: done (`bright-fakl/isotile`).** Phase 1 starts with the renames above.
+
+## 12. Status (2026-10-27)
+
+Phase 1 is merged (`bright-fakl/isotile` main @ 39c5778, report `isotile-phase-1-pr`). Decisions taken during review: exact positive-overlap `cover` (touching tiles are not included), `IsohedralTiling.info()` describes the instance, `safe_ranges` stores infinity at unbounded ends (138 of 256 ends), the data file stays uncompressed. Next: phase 1.5 (documentation skeleton with API reference, strict docs build in CI, deployment to GitHub Pages from `main` through GitHub Actions, logo assets), then phase 2 (edge-curve layer). Still open: the validity rule for edge curves (phase 2).
