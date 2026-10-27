@@ -1,8 +1,8 @@
 # Visual checks
 
 Review pages for PRs, explorations and proposals, built by
-`scripts/build_visual_checks_index.py` in the carto-flow repository. This
-repository holds the pages and is published with GitHub Pages at
+`scripts/build_visual_checks_index.py` in this repository. This
+repository holds the pages and the builder and is published with GitHub Pages at
 https://bright-fakl.github.io/carto-flow-dev/. Pages are plain static files,
 so a local clone can be opened directly in a browser without a server.
 
@@ -42,7 +42,7 @@ metadata and change during a page's life.
   as it is, set it to `led-to`, and write the proposal or PR as a new page that
   lists it under `related`.
 - A proposal that becomes one PR is converted in place:
-  `build_visual_checks_index.py --convert <directory> <PR number>` sets `kind: pr`,
+  `python3 scripts/build_visual_checks_index.py --convert <directory> <PR number>` sets `kind: pr`,
   `pr` and `url` and removes `status`. Add a short "as proposed / as built" section.
   A proposal that splits into several PRs stays a proposal, set to `led-to`, with
   one `related` entry per PR.
@@ -132,10 +132,13 @@ investigation workspace is easy to miss.
 ## Rebuilding
 
 ```
-uv run python scripts/build_visual_checks_index.py --root /path/to/carto-flow-dev
+python3 scripts/build_visual_checks_index.py
 ```
 
-Regenerates `index.html` and every `<subdir>/index.html`, plus this file.
+Run it from the root of this repository. It regenerates `index.html` and every
+`<subdir>/index.html`, plus this file. `--root <directory>` (or `VISUAL_CHECKS_ROOT`)
+builds another directory of pages instead. The builder is stdlib-only; its tests run
+with `python3 -m pytest tests`.
 
 Close times from GitHub are shown in the zone named by `VISUAL_CHECKS_TZ` (an IANA name, for
 example `America/New_York`), else the system zone. Set it wherever pages are rebuilt on a machine

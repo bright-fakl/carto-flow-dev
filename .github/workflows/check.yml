@@ -12,24 +12,24 @@ jobs:
       - name: Check out this repository
         uses: actions/checkout@v6
 
-      - name: Check out the builder script
-        uses: actions/checkout@v6
-        with:
-          repository: bright-fakl/carto-flow
-          path: carto-flow
-          sparse-checkout: scripts
-
       - name: Build the index in a scratch copy
         env:
           GH_TOKEN: ${{ github.token }}
           VISUAL_CHECKS_TZ: America/New_York
         run: |
-          rsync -a --exclude=.git --exclude=carto-flow ./ "$RUNNER_TEMP/site/"
-          python3 carto-flow/scripts/build_visual_checks_index.py --root "$RUNNER_TEMP/site" | tee build.log
-          if grep -q "warning(s)" build.log; then
+          rsync -a --exclude=.git ./ "$RUNNER_TEMP/site/"
+          python3 scripts/build_visual_checks_index.py --root "$RUNNER_TEMP/site" | tee "$RUNNER_TEMP/build.log"
+          if grep -q "warning(s)" "$RUNNER_TEMP/build.log"; then
             echo "The builder reported warnings (missing title or description, unknown status)."
             exit 1
           fi
+
+      - name: Test the builder
+        run: |
+          python3 -m pip install pytest
+          python3 -m pytest tests -q -p no:cacheprovider
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
 
       - name: Check file sizes
         run: |

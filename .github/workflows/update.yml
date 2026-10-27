@@ -1,6 +1,6 @@
 name: Update
 
-# Review status comes from the state of each PR in bright-fakl/carto-flow, so
+# Review status comes from the state of each PR on GitHub, so
 # the index goes stale when a PR is merged or closed. Rebuild it on a schedule,
 # on request, and when carto-flow sends a `pr-closed` dispatch event.
 on:
@@ -25,21 +25,12 @@ jobs:
       - name: Check out this repository
         uses: actions/checkout@v6
 
-      - name: Check out the builder script
-        uses: actions/checkout@v6
-        with:
-          repository: bright-fakl/carto-flow
-          path: carto-flow
-          sparse-checkout: scripts
-
       - name: Rebuild the index
         env:
           GH_TOKEN: ${{ github.token }}
           VISUAL_CHECKS_TZ: America/New_York
         run: |
-          cp carto-flow/scripts/build_visual_checks_index.py "$RUNNER_TEMP/build.py"
-          rm -rf carto-flow
-          python3 "$RUNNER_TEMP/build.py" --root .
+          python3 scripts/build_visual_checks_index.py --root .
 
       - name: Commit and publish if anything changed
         env:
