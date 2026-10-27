@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR bright-fakl/isotile#5: &quot;isotile step 0: preset amplitude, neighbor_lists, cover precision&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR bright-fakl/isotile#5: &quot;isotile step 0: preset amplitude, neighbor_lists, cover precision&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>isotile</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../proposal-isotile-adoption/index.html">carto-flow adopts isotile (phase 3 design)</a> <span class="meta">(proposal)</span><br><a href="../isotile-phase-2-pr/index.html">&quot;isotile phase 2: edge-curve layer&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isotile/pull/5">https://github.com/bright-fakl/isotile/pull/5</a></dd>
+<dt>Branch</dt><dd>step0-carto-flow-adoption</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-27 17:30</dd>
+<dt>Before</dt><dd>bright-fakl/isotile main at a66ed7a</dd>
+<dt>After</dt><dd>step0-carto-flow-adoption @ 819d151 (4,522 passed, 186 skipped locally on Python 3.10)</dd>
+<dt>Inputs</dt><dd>Python 3.10, numpy, scipy, shapely (tests); single runs; carto-flow 2.0.0 for the preset fixture</dd>
+</dl>
+<p class="desc">Three small changes in isotile that the carto-flow adoption needs, plus a documentation note. The wavy_triangle preset has the amplitude 0.15 of carto-flow again, TileSet.neighbor_lists returns the neighbors of all tiles from one adjacency matrix (10,300 tiles in 14 ms), cover measures overlap areas relative to the region center (no holes in the triangle tilings at distance 1e6, 144 instead of 146 square tiles at 1e3), and fill_region states that the lattice is anchored at the region center. Nothing to compare visually; the page gives the written evidence.</p>
+<p>Items I-1 to I-3 and the documentation note of section 2.4 of <a href="../proposal-isotile-adoption/index.html">the adoption proposal</a>. There is nothing to show in figures; each change has a test that fails before it.</p>
+<h2>What changed</h2>
+<table>
+<tr><th>Item</th><th>Change</th><th>Test (fails before)</th></tr>
+<tr><td>I-1</td><td><code>wavy_triangle</code> has the curves <code>[(0,0), (0.25,0.15), (0.5,0), (0.75,-0.15), (1,0)]</code> on all three shape ids (0.12 before). <code>wavy_square</code> keeps 0.12, as in carto-flow.</td><td><code>test_preset_matches_carto_flow</code> for each of the 15 presets against <code>tests/data/carto_flow_presets.json</code> (type, parameters, curves, modes). Only <code>wavy_triangle</code> failed before; the other 14 are equal to carto-flow&#x27;s data.</td></tr>
+<tr><td>I-2</td><td><code>TileSet.neighbor_lists(kind=&quot;edge&quot;) -&gt; list[IntArray]</code>: sorted neighbors of every tile from one adjacency matrix; <code>[]</code> for an empty set. <code>neighbors(i)</code> is unchanged: a cache on the mutable <code>TileSet</code> dataclass is not a clean change. Its docstring and the Adjacency page point to the new method.</td><td>equal to <code>neighbors(i)</code> for 3 types and 3 kinds, default kind, empty and single-tile sets, 10,300 tiles in under 0.1 s</td></tr>
+<tr><td>I-3</td><td><code>cover</code> subtracts the region center from the tile vertices and the bounds before the overlap areas are computed.</td><td>the two experiments of <code>cover_precision.py</code>: 100 random triangle tilings at distance 1e6 have no sampled hole; the square tiling with the boundary on tile edges returns 144 tiles at distances 0, 1e3, 1e5 and 1e6</td></tr>
+<tr><td>note</td><td>The <code>fill_region</code> docstring and the Concepts page state that the lattice is anchored at the region center, so a region expanded by the same amount on all sides keeps the lattice.</td><td>every tile of a region is a tile of its symmetric expansion, for the square, the hexagon and IH1, IH7, IH10, IH28, IH41, IH84 (passes before the change as well: it records the property)</td></tr>
+</table>
+<p>The CHANGELOG has entries under Fixed, Added and Documentation.</p>
+<h2>Evidence</h2>
+<p>Timings of I-2 (<code>IH7</code> over [-1, 1]^2, <code>n_tiles=10000</code>, 10,300 tiles, one machine, single run):</p>
+<table>
+<tr><th></th><th>before</th><th>after</th></tr>
+<tr><td>one <code>neighbors(i)</code> call</td><td>25 ms first call, 3.0 ms mean of the next 200</td><td>unchanged</td></tr>
+<tr><td>neighbors of all tiles</td><td>31 s (200 calls extrapolated to 10,300; the proposal page estimated 5 minutes from 30 ms per call)</td><td><code>neighbor_lists()</code>: 14 ms</td></tr>
+<tr><td><code>adjacency(&quot;edge&quot;)</code></td><td>2.8 ms</td><td>unchanged</td></tr>
+</table>
+<p>Precision of I-3, before the change (<code>cover_precision.txt</code> of the proposal page): 16 of 100 triangle tilings with a sampled hole of at most 5e-5 of the area at distance 1e6; 146 square tiles instead of 144 at distance 1e3. After: the tests above pass.</p>
+<p>Checks run locally: <code>ruff check</code>, <code>ruff format</code>, <code>mypy</code> (strict, on <code>src</code>), the full test suite (4,522 passed, 186 skipped), <code>scripts/make_doc_figures.py --check</code> (figure files are up to date) and the strict docs build. The fixture generator is <code>scripts/make_carto_flow_presets_fixture.py</code>; it needs carto-flow 2.0.0 (<code>uv run --with &quot;carto-flow==2.0.0&quot; python scripts/make_carto_flow_presets_fixture.py</code>) and its output is the committed file byte for byte (9 KB with the repository&#x27;s JSON formatting; the hook <code>pretty-format-json</code> fixes the indentation).</p>
+<h2>Deviations</h2>
+<ul><li>The fixture is 9 KB, not 4 KB: the repository&#x27;s pre-commit hook writes JSON with an indent of 2.</li><li>The sampled-hole test uses 20,000 sample points per tiling (the experiment used 40,000) to keep the test under a few seconds.</li><li><code>neighbors(i)</code> does not reuse a cached matrix.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
