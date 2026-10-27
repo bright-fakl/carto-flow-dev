@@ -4,7 +4,7 @@ For each convenience class and constructor, carto-flow's ``generate`` output is 
 prototype's named constructor (``isotile_proto.families``): tile polygons, adjacency matrices, tile transforms and
 coverage of the region. Then random triangles and simple quadrilaterals test that every shape is expressible.
 
-Run: ``PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python mapping_evidence.py``
+Run: ``PYTHONPATH=/home/fakl/isotile uv run --project /home/fakl/carto-flow python mapping_evidence.py``
 """
 
 from __future__ import annotations

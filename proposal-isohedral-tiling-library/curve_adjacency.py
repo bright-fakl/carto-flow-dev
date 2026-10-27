@@ -11,7 +11,7 @@ prototile self-intersects and carto-flow applies ``make_valid`` and keeps the la
 (amplitude 1.5 times the edge length).
 Two geometric tolerances: carto-flow's (0.01 * tile_size) and a tight one (1e-7 * tile_size).
 
-Run: ``PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python curve_adjacency.py``
+Run: ``PYTHONPATH=/home/fakl/isotile uv run --project /home/fakl/carto-flow python curve_adjacency.py``
 """
 
 from __future__ import annotations

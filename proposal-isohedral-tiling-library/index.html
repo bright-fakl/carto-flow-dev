@@ -90,16 +90,17 @@
 <table>
 <tr><th>File</th><th>Content</th></tr>
 <tr><td><a href="spike.py">spike.py</a>, <a href="spike2.py">spike2.py</a></td><td>first spike: adjacency table independent of parameters, timing</td></tr>
-<tr><td><a href="prototype/">prototype/</a></td><td>package <code>isotile_proto</code> (core), <code>tests/</code>, <code>bench.py</code>, <a href="prototype/bench_output.txt">bench_output.txt</a></td></tr>
+<tr><td><a href="https://github.com/bright-fakl/isotile/tree/097ae26">bright-fakl/isotile @ 097ae26</a></td><td>package <code>isotile_proto</code> (core), <code>tests/</code>, <code>bench.py</code>; the prototype now lives in this repository, local clone <code>/home/fakl/isotile</code></td></tr>
+<tr><td><a href="bench_output.txt">bench_output.txt</a></td><td>output of <code>bench.py</code></td></tr>
 <tr><td><a href="mapping_evidence.py">mapping_evidence.py</a>, <a href="mapping_evidence.txt">mapping_evidence.txt</a></td><td>carto-flow&#x27;s four tiling families against the prototype (section 3)</td></tr>
 <tr><td><a href="curve_adjacency.py">curve_adjacency.py</a>, <a href="curve_adjacency.txt">curve_adjacency.txt</a></td><td>custom edge curves and validity repair against the lattice table, 81 types (section 4)</td></tr>
 <tr><td><a href="symmetry_compare.py">symmetry_compare.py</a>, <a href="symmetry_compare.txt">symmetry_compare.txt</a></td><td>carto-flow&#x27;s and the UI&#x27;s symmetry and spline code compared (section 8.1)</td></tr>
 </table>
 <p>Commands (run from this directory; the package needs only numpy and scipy, the tests also tactile, the evidence scripts carto-flow):</p>
-<pre><code>uv run --project /home/fakl/carto-flow python -m pytest prototype
-PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python mapping_evidence.py
-PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python curve_adjacency.py
-PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python prototype/bench.py 1000 10000</code></pre>
+<pre><code>cd /home/fakl/isotile &amp;&amp; uv run --project /home/fakl/carto-flow python -m pytest
+PYTHONPATH=/home/fakl/isotile uv run --project /home/fakl/carto-flow python mapping_evidence.py
+PYTHONPATH=/home/fakl/isotile uv run --project /home/fakl/carto-flow python curve_adjacency.py
+PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python /home/fakl/isotile/bench.py 1000 10000</code></pre>
 <h2>1. Results in short</h2>
 <table>
 <tr><th>Question</th><th>Result</th></tr>
@@ -126,7 +127,7 @@ PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python prototype/ben
 <p>Consequences:</p>
 <ul><li>Adjacency of a tiling is computed from <code>(t1, t2, aspect)</code> alone with a table that is part of the type data. It does not depend on the parameters, the scale or the position of the tiling.</li><li>Tiles must carry their lattice coordinates through the generation. The current carto-flow tiling drops them (<code>TileTransform</code> has center, rotation and flip only), which is why adjacency is found geometrically today.</li><li>The tactile data has no valid parameter ranges. The prototype accepts any finite parameters for which the prototile is a simple polygon (non-zero edge lengths, non-zero area, no crossing or touching non-adjacent edges) and rejects the rest with <code>ValueError</code>, keeping the previous state.</li></ul>
 <h2>3. Square, hexagon, triangle and quadrilateral tilings as isohedral types</h2>
-<p>Evidence: <a href="mapping_evidence.txt">mapping_evidence.txt</a>. The named constructors are in <code>prototype/isotile_proto/families.py</code>. For each carto-flow case, <code>generate(bounds=(-1, -1, 1, 1), tile_size=s, margin=0.1)</code> was compared with the library tiling that has the same prototile: tile polygons (largest vertex distance of matched tiles, relative to the tile size), edge and vertex-only adjacency over the matched tiles, rotation and flip of each tile, tile counts and coverage of the region. Overlay operations of shapely were avoided for polygon comparison because GEOS 3.13.1 returns a wrong intersection area for two polygons whose shared vertex differs by 1e-17 (seen in a first version of this script).</p>
+<p>Evidence: <a href="mapping_evidence.txt">mapping_evidence.txt</a>. The named constructors are in <code>isotile_proto/families.py</code> in the repository. For each carto-flow case, <code>generate(bounds=(-1, -1, 1, 1), tile_size=s, margin=0.1)</code> was compared with the library tiling that has the same prototile: tile polygons (largest vertex distance of matched tiles, relative to the tile size), edge and vertex-only adjacency over the matched tiles, rotation and flip of each tile, tile counts and coverage of the region. Overlay operations of shapely were avoided for polygon comparison because GEOS 3.13.1 returns a wrong intersection area for two polygons whose shared vertex differs by 1e-17 (seen in a first version of this script).</p>
 <h3>Mapping</h3>
 <table>
 <tr><th>carto-flow</th><th>Type</th><th>Parameters</th><th>Frame (affine map applied to the type&#x27;s native geometry)</th></tr>
@@ -165,7 +166,7 @@ PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python prototype/ben
 <p>Conclusion: the lattice table is correct for every tiling whose prototile is simple, with or without curves. For a self-intersecting prototile there is no tiling in the geometric sense; the library should detect this (<code>prototile_is_valid</code>), and the policy (warn and repair as now, or raise) is a decision (section 10).</p>
 <p>Not tested: the <code>linear</code> curve mode (control points used without interpolation), curves with more than 4 control points, amplitudes other than the stepwise search above, more than 3 trials per type and regime, parameters further than 0.08 from the defaults, and the effect of the false edge pairs on the results of the layouts.</p>
 <h2>5. Prototype of the core</h2>
-<p>Directory <a href="prototype/">prototype/</a>: about 700 lines of code in <code>isotile_proto/</code> and 235 in <code>tests/</code>. The package imports only numpy and scipy; ruff with carto-flow&#x27;s rule set passes.</p>
+<p>Repository <a href="https://github.com/bright-fakl/isotile/tree/097ae26">bright-fakl/isotile</a> (commit 097ae26): about 700 lines of code in <code>isotile_proto/</code> and 235 in <code>tests/</code>. The package imports only numpy and scipy; ruff with carto-flow&#x27;s rule set passes.</p>
 <table>
 <tr><th>File</th><th>Content</th></tr>
 <tr><td><code>isotile_proto/types.py</code></td><td><code>TilingType</code> (frozen dataclass of arrays), <code>get_type</code>, <code>tiling_types</code>, loader of <code>data/types.npz</code></td></tr>
@@ -192,7 +193,7 @@ PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python prototype/ben
 </table>
 <p>Result: 1,143 passed, 78 skipped, 0 failed in 20 s.</p>
 <h2>6. Benchmark</h2>
-<p><code>prototype/bench.py</code>, output in <a href="prototype/bench_output.txt">bench_output.txt</a>: tiles of one type (IH7 hexagon, IH46 quadrilateral, IH84 triangle) in a square region of about 1,000 and 10,000 tiles. Library times are the best of 3 runs (2 for the geometric method), carto-flow times one run. &quot;carto-flow generate&quot; is <code>IsohedralTiling.generate(compute_adjacency=False)</code> (shapely polygons and the pairwise deduplication); &quot;carto-flow geometric adjacency&quot; is <code>_compute_adjacency_matrices</code> on its polygons. carto-flow&#x27;s <code>n_tiles</code> yields 6 to 30 percent more tiles than the library&#x27;s region, so the speedups are per tile.</p>
+<p><code>bench.py</code> in the repository, output in <a href="bench_output.txt">bench_output.txt</a>: tiles of one type (IH7 hexagon, IH46 quadrilateral, IH84 triangle) in a square region of about 1,000 and 10,000 tiles. Library times are the best of 3 runs (2 for the geometric method), carto-flow times one run. &quot;carto-flow generate&quot; is <code>IsohedralTiling.generate(compute_adjacency=False)</code> (shapely polygons and the pairwise deduplication); &quot;carto-flow geometric adjacency&quot; is <code>_compute_adjacency_matrices</code> on its polygons. carto-flow&#x27;s <code>n_tiles</code> yields 6 to 30 percent more tiles than the library&#x27;s region, so the speedups are per tile.</p>
 <table>
 <tr><th>Type</th><th>Tiles (library)</th><th>Tiles (carto-flow)</th><th>Library: tiles and vertex arrays</th><th>Library: lattice adjacency</th><th>Library: geometric adjacency</th><th>carto-flow: <code>generate</code></th><th>carto-flow: geometric adjacency</th><th>Speedup per tile: lattice</th><th>Speedup per tile: library geometric</th></tr>
 <tr><td>IH7</td><td>1,068</td><td>1,290</td><td>0.0054 s</td><td>0.0015 s</td><td>0.0087 s</td><td>4.7 s</td><td>0.31 s</td><td>171x</td><td>30x</td></tr>
@@ -254,7 +255,7 @@ PYTHONPATH=prototype uv run --project /home/fakl/carto-flow python prototype/ben
 <p>The earlier estimate was ten weeks. The prototype covers the core of phases 1 and 2 of that plan (data, vectorized geometry, fill, adjacency, equivalence and adjacency tests), and the four families are a few lines each. The estimates are working days for one developer and were not measured:</p>
 <table>
 <tr><th>Phase</th><th>Content</th><th>Days</th></tr>
-<tr><td>0 (done)</td><td>prototype of the core, mapping, curve test (this page)</td><td></td></tr>
+<tr><td>0 (done)</td><td>prototype of the core (imported into <code>bright-fakl/isotile</code>), mapping, curve test (this page)</td><td></td></tr>
 <tr><td>1</td><td>create the repository, move the prototype, packaging and CI, NOTICE, <code>info()</code>, <code>find_types</code>, public frame and named constructors, typing</td><td>3</td></tr>
 <tr><td>2</td><td>edge-curve layer: <code>edges</code>, <code>curves</code>, prototile outline, validity and repair, presets, serialization, plotting; tests moved from carto-flow</td><td>4</td></tr>
 <tr><td>3</td><td>carto-flow adoption: wrappers, <code>TilingResult</code> adapter, golden comparison, tactile removal, changelog</td><td>5</td></tr>
