@@ -284,3 +284,5 @@ Metrics come from `visual_checks/grid-vs-mosaic-similarity/metrics.py`, imported
 Superseded, kept for comparison and clearly labelled by commit:
 `results-2bae205-old-world-dataset.jsonl`, `scramble_check-2bae205-old-world-dataset.json`,
 `old-2bae205-norm_*.png`.
+
+Decision (2026-10-27): the maintainer keeps this parked; no change is planned.

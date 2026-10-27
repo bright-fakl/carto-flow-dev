@@ -4,7 +4,7 @@ title: Hierarchical flow morph: sub-cell regions with a grid fitted to each grou
 description: Counties on a grid fitted to each state have 10.8 % of the counties below one cell at 128, 2.3 % at 256, 0.2 % at 512 and none at 1024, against 88.9 %, 67.3 %, 27.4 % and 5.3 % on one global grid. Only Texas (254 counties) has any at 512. This is the first feasibility check of morphing the groups first and the members on group-fitted grids; the stable outline of a group is not tested.
 kind: exploration
 topic: flow
-status: open
+status: superseded
 related: exploration-multires-start, exploration-counties-subcell
 date: 2026-10-12 05:10
 before: main @ c080423

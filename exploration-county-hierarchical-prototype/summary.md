@@ -4,7 +4,7 @@ title: County flow cartograms: global morph, ladder, and hierarchical prototype
 description: A resolution ladder from grid 256 to 2048 with the default options reaches a county mean error of 2.1 % (median 0.11 %) in 12 s; starts at 128 or 64 tangle the counties, and the dt schedule and the stall threshold change little. A single global morph of the 3,108 counties reaches a mean error of 1.0 % and a median of 0.01 % at grid 2048 (126 s) and 2.2 % / 0.13 % at grid 1024 (23 s) once the stall rule is off; with only stall_min_improvement lowered to 0.002 the default stack reaches 5.4 % mean at 1024 in 8 s. The earlier county failures were the stall rule ending slow progress after 50 iterations, not sub-cell regions alone. The hierarchical prototype (states first, then counties per state) fixes the county areas but leaves the state outlines free, so the states overlap by 11.6 %; it is not needed to get a county cartogram. A plain Arizona (15 counties) converges at every grid once the stall rule is off.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-hierarchical-morph, exploration-multires-start, exploration-counties-subcell
 date: 2026-10-18 21:00
 before: main @ cf7d1bb
@@ -22,14 +22,13 @@ inputs: 3,108 contiguous counties from cb_2020_us_county_500k with the 2020 Cens
 - About 130 to 700 output polygons are invalid (self-intersections), mostly counties that are within 5 % of their target. `Cartogram.get_geometry(repair=True)` and `to_geodataframe(repair=True)` (#85) already repair them as an opt-in; the repair adds vertices, so it must not be used on geometries that are animated.
 - The hierarchical idea (states first, then counties on state-fitted grids) fixes the county areas but leaves the state outlines free, so states overlap by 11.6 %. It is not needed for a county cartogram.
 
-## Recommended next steps
+## Remaining next steps
 
-- Ladder robustness, not a retuned start rule (issue #167). Changing the `"auto"` start rule to give 256 here would fit it to the cases tested. Instead find out what goes wrong at a coarse level with many sub-cell regions (tangled counties that finer levels do not repair) and whether the ladder can be made robust to it, then judge the result on a wider set of inputs: states, districts, counties, other value distributions and a second county dataset.
-- Stall rule independent of the grid (issue #166). Test a required improvement that scales with the cell size, or a progress measure per distance moved, on Arizona, districts at 1024 and counties at 1024 and 2048. Issue candidate; ladders are affected little.
-- Other county data. Rerun with a second value set (votes or another census variable) so the numbers compare with the earlier reports and with other value distributions, and add counties to the benchmarks (#113).
-- Invalid output polygons. The opt-in `repair=True` exists (#85) and changes the vertices, so animations cannot use it. Measure only whether the number falls with the finest grid or a longer final level (single grid 2048: 127 invalid; ladder: 689).
-- #129 is retitled; the hierarchical idea is a later speed and sub-cell follow-up. If pursued, start from option 2 (global flow from the state level plus a local part from each member's deviation from the state mean density).
-- Docs (optional). Add a county example once the ladder behavior is settled.
+- Other county data. Rerun with a second value set (votes or another census variable) so the numbers compare with the earlier reports and with other value distributions, and add counties to the benchmarks (#113, open).
+
+## Outcome (2026-10-27)
+
+The ladder works for counties and the hierarchical idea is not needed. The follow-ups merged: the stall rule scales with the grid (PR #171, issue #166), a gallery example of a county flow cartogram (PR #172), a warning when the input segments are too long for the expected stretch of their regions (PR #173, issue #167), and the validity options `repair-crossings` (PR #180) and `repair-quadtree` (PR #181) that keep the output polygons valid. Issue #129 was closed as not planned on 2026-10-26. Issue #113 stays open, for the benchmarks only. The other next steps written on 2026-10-18 (ladder robustness, the stall rule, the hierarchical follow-up, invalid output polygons, a county example) are done or dropped. See [stall-rule-grid-scaling](../stall-rule-grid-scaling/index.html), [county-gallery-example](../county-gallery-example/index.html), [segment-density-warning](../segment-density-warning/index.html), [validated-windows-pr](../validated-windows-pr/index.html) and [quadtree-windows-pr](../quadtree-windows-pr/index.html).
 
 ## Global morph without the stall rule
 
