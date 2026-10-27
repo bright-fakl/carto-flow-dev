@@ -77,3 +77,16 @@ Rendered in `fig1_marks.png` (rows `cmono`, `twist`, `rings`) and `fig2_wordmark
 - `twist` (a 3 x 3 grid twisted around an amber centre cell): distinctive and holds its structure at 16 px, but it reads as a camera shutter or aperture, not a cartogram. A fixable reading, but a different association from the one wanted.
 - `rings` (nested wobbly isolines around an amber core): the best of the four. It reads as a density field or contour map (the quantity the algorithm moves), holds at 32 px, and the one-color version is clean. Weak points: at 16 px the rings merge into a target, and the top left shows two rings touching, which should be separated.
 - Wordmark (first draft, `carto-flow` in a rounded sans with a blue hyphen and an amber "o" in flow): the first draft had a wavy hyphen and a drawn "o"; the wavy hyphen collided with the "o" of carto and the spacing depended on fonts, so it was replaced by colored letters in live text. Fonts are not embedded, so the figure shows the fallback sans. A final wordmark needs a chosen, license-checked typeface with the letters converted to outlines.
+
+## Rings, cf, velocity field, compared with s0 (2026-10-26)
+
+`fig1_marks.png` rows: `rings2` (three rings), `rings_small` (two rings, stroke 7.5), `s0_right`, `cf` (streamline letters), `cf_solid`, `velocity` (radial arrows). `fig3_velocity.png`: `velocity2` (4 x 4 larger arrows from a source) and `velocity3` (uniform stream past an amber disc).
+
+figure: fig3_velocity.png — The two larger-arrow velocity-field variants, at the same sizes.
+
+- **Rings.** The rings no longer touch (the code asserts that no two stroked rings intersect). `rings_small` holds at 16 px as a bullseye with an amber core. The drawback that the refinement exposed: with the rings clean and nearly concentric, the mark reads as a target or an eye, not a density field. More drift between the ring centers (a hill with a steep side) would bring back the contour reading.
+- **s0 (right pair amber).** Still the strongest at 16 px and the most recognizably cartographic, and the only one that shows regions. It keeps the flag and window association discussed before; the rings do not.
+- **cf.** The streamline version (three parallel lines per stroke) is distinctive at 128 px but the offset curves of the hook and the crossbar collide with the stem and it turns to noise at 32 px. `cf_solid` is clean down to 16 px, with the crossbar of the f as the amber region; it reads as a rounded monogram, not as flow.
+- **Velocity field.** Arrows only read at 64 px and above: at 32 px the heads vanish and at 16 px they are dots. The radial field (`velocity`, `velocity2`) reads as a burst or a sun. The stream past a disc (`velocity3`) reads as a flow, but the deflection is hardly visible with a 4 x 4 grid. Better suited as a large graphic (social preview, README header) than as the logo mark.
+
+Ranking for the logo mark at all sizes: `s0_right`, `rings_small`, `cf_solid`; for large graphics: the velocity field.

@@ -314,6 +314,131 @@ def mark_rings(pal):
 MARKS.update({"cmono": mark_cmono, "twist": mark_twist, "rings": mark_rings})
 
 
+def _rings(pal, radii, width, core, drift=(1.2, -1.0), wob=0.035):
+    """Nested isolines that never cross: spacing exceeds wobble plus drift plus stroke width."""
+    from shapely.geometry import LinearRing
+    out = ""
+    t = np.linspace(0, 2 * math.pi, 160, endpoint=False)
+    rings = []
+    for k, R in enumerate(radii):
+        rr = R * (1 + wob * np.cos(2 * t + 0.4 + 0.5 * k) + 0.6 * wob * np.cos(3 * t + 1.1 * k))
+        pts = [(48 + drift[0] * k + r * math.cos(a), 49 + drift[1] * k + r * math.sin(a)) for r, a in zip(rr, t)]
+        rings.append(LinearRing(pts).buffer(width / 2))
+        out += f'<path d="{path(pts, True)}" fill="none" stroke="{pal["blue"]}" stroke-width="{width}" stroke-linejoin="round"/>'
+    for a, b in zip(rings, rings[1:]):
+        assert not a.intersects(b), "rings touch"
+    rr = core * (1 + 0.05 * np.cos(2 * t + 1))
+    cx, cy = 48 + drift[0] * len(radii), 49 + drift[1] * len(radii)
+    out += f'<path d="{path([(cx + r * math.cos(a), cy + r * math.sin(a)) for r, a in zip(rr, t)], True)}" fill="{pal["amber"]}"/>'
+    return out
+
+
+def mark_rings2(pal):
+    return _rings(pal, (36, 25.5, 15), 5.0, 6.5)
+
+
+def mark_rings_small(pal):
+    """Favicon: two rings and a core, thicker strokes."""
+    return _rings(pal, (35, 21), 7.5, 8.0, drift=(1.5, -1.2))
+
+
+def _stripes(line, offsets, width, color):
+    from shapely.geometry import LineString
+    out = ""
+    for o in offsets:
+        ln = line if o == 0 else line.offset_curve(o)
+        out += f'<path d="{path(list(ln.coords))}" fill="none" stroke="{color}" stroke-width="{width}" stroke-linecap="round" stroke-linejoin="round"/>'
+    return out
+
+
+def _cf_lines():
+    from shapely.geometry import LineString
+    t = np.radians(np.linspace(38, 322, 60))
+    c = LineString([(29 + 19 * math.cos(a), 54 - 19 * math.sin(a)) for a in t])
+    u = np.linspace(0, 1, 30)
+    stem = [(66, 86 - 50 * x) for x in u]
+    hook = [(66 + 15 * (1 - math.cos(math.pi / 2 * x)) * 1.0, 36 - 12 * math.sin(math.pi / 2 * x)) for x in np.linspace(0, 1, 15)]
+    f = LineString(stem + hook)
+    bar = LineString([(52, 54), (82, 54)])
+    return c, f, bar
+
+
+def mark_cf(pal):
+    """'cf' drawn as three parallel streamlines per stroke; the crossbar of the f is the amber region."""
+    c, f, bar = _cf_lines()
+    return (_stripes(c, (-4.5, 0, 4.5), 2.8, pal["blue"]) + _stripes(f, (-4.5, 0, 4.5), 2.8, pal["blue"])
+            + _stripes(bar, (-3.0, 0, 3.0), 2.8, pal["amber"]))
+
+
+def mark_cf_solid(pal):
+    c, f, bar = _cf_lines()
+    return (_stripes(c, (0,), 9.0, pal["blue"]) + _stripes(f, (0,), 9.0, pal["blue"]) + _stripes(bar, (0,), 9.0, pal["amber"]))
+
+
+def _arrow(x, y, dx, dy, w, color):
+    L = math.hypot(dx, dy)
+    ux, uy = dx / L, dy / L
+    hx, hy = x + dx, y + dy
+    nx, ny = -uy, ux
+    hl = min(7.0, 0.55 * L)
+    head = [(hx, hy), (hx - hl * ux + 0.55 * hl * nx, hy - hl * uy + 0.55 * hl * ny), (hx - hl * ux - 0.55 * hl * nx, hy - hl * uy - 0.55 * hl * ny)]
+    return (f'<path d="{path([(x, y), (hx - 0.6 * hl * ux, hy - 0.6 * hl * uy)])}" stroke="{color}" stroke-width="{w}" stroke-linecap="round"/>'
+            f'<path d="{path(head, True)}" fill="{color}"/>')
+
+
+def mark_velocity(pal):
+    """Velocity field of a growing region: arrows pointing away from the amber source, longer near it."""
+    out = ""
+    cx = cy = 48.0
+    pts = [(x, y) for x in (14, 31, 48, 65, 82) for y in (14, 31, 48, 65, 82) if (x, y) != (48, 48)]
+    for x, y in pts:
+        dx, dy = x - cx, y - cy
+        r = math.hypot(dx, dy)
+        L = 4 + 150 / (r + 12)  # shorter further out
+        out += _arrow(x - dx / r * L / 2, y - dy / r * L / 2, dx / r * L, dy / r * L, 3.6, pal["blue"])
+    out += f'<circle cx="48" cy="48" r="9" fill="{pal["amber"]}"/>'
+    return out
+
+
+MARKS.update({"rings2": mark_rings2, "rings_small": mark_rings_small, "cf": mark_cf, "cf_solid": mark_cf_solid, "velocity": mark_velocity})
+
+
+def mark_velocity2(pal):
+    """Fewer, larger arrows pointing away from the amber source (4 x 4 grid, source at the centre)."""
+    out = ""
+    for x in (20, 40, 60, 80):
+        for y in (20, 40, 60, 80):
+            dx, dy = x - 50, y - 50
+            r = math.hypot(dx, dy)
+            L = 16.0 if r < 30 else 12.0
+            out += _arrow(x - dx / r * L / 2, y - dy / r * L / 2, dx / r * L, dy / r * L, 4.6, pal["blue"])
+    out += f'<circle cx="50" cy="50" r="9" fill="{pal["amber"]}"/>'
+    return out
+
+
+def mark_velocity3(pal):
+    """A uniform stream deflected around an amber region: arrows follow the potential flow past a disc."""
+    out = ""
+    R = 12.0
+    for x in (16, 36, 56, 76):
+        for y in (18, 38, 58, 78):
+            px, py = x - 48.0, y - 48.0
+            r2 = px * px + py * py
+            if r2 < (R + 9) ** 2:
+                continue
+            # potential flow past a cylinder, U = 1
+            vx = 1 - R * R * (px * px - py * py) / (r2 * r2)
+            vy = -2 * R * R * px * py / (r2 * r2)
+            n = math.hypot(vx, vy)
+            L = 15.0
+            out += _arrow(x - vx / n * L / 2, y - vy / n * L / 2, vx / n * L, vy / n * L, 4.6, pal["blue"])
+    out += f'<circle cx="48" cy="48" r="{R}" fill="{pal["amber"]}"/>'
+    return out
+
+
+MARKS.update({"velocity2": mark_velocity2, "velocity3": mark_velocity3})
+
+
 def wordmark(pal, text_color):
     """Wordmark as live SVG text with a blue hyphen and an amber 'o' in flow (exploration only; the final
     wordmark needs outlined letters)."""
