@@ -60,3 +60,11 @@ This is a design judgment, not a trademark opinion; if the logo will be used wid
 - Rotating the cross removes the horizontal and vertical gaps, so the mark no longer reads as a window pane at any size. The cost is that the lower-left region becomes a narrow wedge.
 - `blob_small_tilt` is the best favicon so far: gaps 8 wide, visibly curved at 16 px, four regions separate, one amber. `blob_small` (untilted) is the one closest to the Windows layout and should not be used.
 - Not yet done: choosing the final tilt angle (13 degrees was a first guess; 8 to 20 are worth comparing), fixing which region is amber, and drawing the wordmark.
+
+## Blob shapes and two amber regions (2026-10-26)
+
+`blob_small` (untilted, gaps 8, periods 16 and 20) is the preferred favicon base. `marks.py` now builds it for three outlines (`SHAPES`: `s0` the current one, `s1` wide and flat, `s2` rounder with a bay) with the left pair or the right pair of regions amber (`s0_left`, `s0_right`, ...). The figure rows are `s0_left`, `s0_right`, `s1_left`, `s1_right`, `s2_left`, `s2_right`.
+
+- `s1` (wide) fails: the cut leaves a thin wedge in the lower left that vanishes below 32 px.
+- `s0` and `s2` hold at 16 px. `s2` has the most country-like outline (a bay on the right, a bulge at the top).
+- Two amber regions give a two-color mark whose halves read as a country split in two, with the gaps as a cross; amber on the left or right changes the weight of the mark (the right pair is larger in `s0` and `s2`, so amber on the right is the heavier choice). With two colors the Windows resemblance is, if anything, a little closer than with one amber region, because the four parts now read as two color groups; this is the thing to judge.

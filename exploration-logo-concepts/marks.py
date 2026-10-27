@@ -181,14 +181,23 @@ def mark_dorling(pal):
 MARKS.update({"filled": mark_filled, "halfway": mark_halfway, "streams": mark_streams, "dorling": mark_dorling})
 
 
-def _blob(cx=48.0, cy=48.0, r=36.0, m=240):
+SHAPES = {
+    "s0": dict(h=[(2, 0.07, 0.5), (3, 0.07, 1.3), (5, 0.035, 0.2)], sx=1.0, sy=0.9, r=36.0),
+    "s1": dict(h=[(2, 0.12, 0.0), (3, 0.06, 2.0), (4, 0.04, 0.7)], sx=1.1, sy=0.78, r=33.0),
+    "s2": dict(h=[(2, 0.04, 1.0), (3, 0.10, 0.3), (6, 0.03, 1.5)], sx=1.0, sy=0.95, r=35.0),
+}
+
+
+def _blob(cx=48.0, cy=48.0, r=36.0, m=240, shape=None):
     from shapely.geometry import Polygon
     t = np.linspace(0, 2 * math.pi, m, endpoint=False)
-    rad = 1 + 0.07 * np.cos(2 * t + 0.5) + 0.07 * np.cos(3 * t + 1.3) + 0.035 * np.cos(5 * t + 0.2)
-    return Polygon(list(zip(cx + 1.0 * r * rad * np.cos(t), cy + 0.9 * r * rad * np.sin(t))))
+    sh = SHAPES[shape or 's0']
+    r = sh['r']
+    rad = 1 + sum(a * np.cos(k * t + ph) for k, a, ph in sh['h'])
+    return Polygon(list(zip(cx + sh['sx'] * r * rad * np.cos(t), cy + sh['sy'] * r * rad * np.sin(t))))
 
 
-def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0, tilt=0.0):
+def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0, tilt=0.0, shape=None):
     """Blob minus one wavy vertical and one wavy horizontal line of width gap: four regions."""
     from shapely.geometry import LineString
     from shapely.ops import unary_union
@@ -200,15 +209,16 @@ def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0, tilt=0.0):
     if tilt:
         from shapely.affinity import rotate
         cut = rotate(cut, tilt, origin=(48, 48))
-    pieces = _blob().difference(cut)
+    pieces = _blob(shape=shape).difference(cut)
     return sorted(pieces.geoms, key=lambda g: (-g.centroid.y, g.centroid.x))
 
 
 def _blob_mark(pal, amp, gap, tints, amber_idx, **kw):
     out = ""
+    amber_idx = amber_idx if isinstance(amber_idx, (set, tuple, list)) else (amber_idx,)
     for k, g in enumerate(_split(amp, gap, **kw)):
         pts = list(g.exterior.coords)
-        if k == amber_idx:
+        if k in amber_idx:
             out += f'<path d="{path(pts, True)}" fill="{pal["amber"]}"/>'
         else:
             out += f'<path d="{path(pts, True)}" fill="{pal["blue"]}" fill-opacity="{tints[k]}"/>'
@@ -238,6 +248,15 @@ def mark_blob_small_tilt(pal):
     """Favicon: thick gaps, curvier waves (periods 12 and 15, amplitude 6), cross tilted."""
     return _blob_mark(pal, 6.0, 8.0, [1.0, 1.0, 1.0, 0.0], 3, fv=12.0, fh=15.0, tilt=-13.0)
 
+
+def _variant(shape, amber):
+    # region order: 0 bottom-left, 1 bottom-right, 2 top-left, 3 top-right
+    return lambda pal: _blob_mark(pal, 5.0, 8.0, [1.0] * 4, amber, fv=16.0, fh=20.0, shape=shape)
+
+
+for _sh in SHAPES:
+    MARKS[f"{_sh}_left"] = _variant(_sh, (0, 2))
+    MARKS[f"{_sh}_right"] = _variant(_sh, (1, 3))
 
 MARKS.update({"blob": mark_blob, "blob_wavy": mark_blob_wavy, "blob_small": mark_blob_small,
               "blob_tilt": mark_blob_tilt, "blob_small_tilt": mark_blob_small_tilt})
