@@ -1,21 +1,21 @@
 case              type  valid  check_prototile  check_curves
-typical           IH28   True          3.66 ms       1.29 ms
-near collision    IH28   True         17.08 ms      14.89 ms
-just invalid      IH28  False         17.03 ms      14.86 ms
-invalid           IH28  False         45.51 ms      43.53 ms
-typical            IH4   True          4.53 ms       1.36 ms
-near collision     IH4   True         20.99 ms      17.62 ms
-just invalid       IH4  False         20.33 ms      17.08 ms
-invalid            IH4  False         49.82 ms      46.38 ms
-typical           IH41   True          2.86 ms       1.27 ms
-near collision    IH41   True         17.34 ms      15.20 ms
-just invalid      IH41  False         14.52 ms      12.80 ms
-invalid           IH41  False         28.38 ms      26.93 ms
-typical           IH66   True          2.86 ms       1.33 ms
-near collision    IH66   True         17.21 ms      15.62 ms
-just invalid      IH66  False         17.27 ms      15.53 ms
-invalid           IH66  False         30.59 ms      28.92 ms
-typical           IH13   True          3.47 ms       1.42 ms
-near collision    IH13   True         18.03 ms      15.58 ms
-just invalid      IH13  False         15.61 ms      13.53 ms
-invalid           IH13  False         31.23 ms      28.93 ms
+typical           IH28   True          3.58 ms       1.33 ms
+near collision    IH28   True         20.47 ms      18.83 ms
+just invalid      IH28  False         20.46 ms      17.85 ms
+invalid           IH28  False         52.08 ms      49.78 ms
+typical            IH4   True          4.81 ms       1.41 ms
+near collision     IH4   True         24.68 ms      21.31 ms
+just invalid       IH4  False         23.95 ms      20.77 ms
+invalid            IH4  False         57.16 ms      53.25 ms
+typical           IH41   True          3.00 ms       1.27 ms
+near collision    IH41   True         19.46 ms      17.92 ms
+just invalid      IH41  False         17.72 ms      16.13 ms
+invalid           IH41  False         33.31 ms      31.43 ms
+typical           IH66   True          3.00 ms       1.31 ms
+near collision    IH66   True         21.06 ms      19.19 ms
+just invalid      IH66  False         21.15 ms      19.00 ms
+invalid           IH66  False         36.04 ms      34.13 ms
+typical           IH13   True          3.63 ms       1.46 ms
+near collision    IH13   True         21.37 ms      19.61 ms
+just invalid      IH13  False         18.80 ms      16.70 ms
+invalid           IH13  False         35.42 ms      33.57 ms
