@@ -10,7 +10,7 @@ branch: docs-skeleton
 related: exploration-isotile-logo, isotile-docs-skeleton-pr
 date: 2026-10-27 20:00
 before: bright-fakl/isotile docs-skeleton at ffef968 (no logo, Material default icon)
-after: bright-fakl/isotile docs-skeleton at b55a11d (logo assets, not merged)
+after: bright-fakl/isotile main at 75f3ae7 (PR 2, merged; this page: logo assets at branch head b55a11d)
 inputs: Geometry code of marks.py in exploration-isotile-logo (a_patch, a_patch_fav) reused unchanged; DejaVu Sans Bold and DejaVu Sans from the system fonts; cairosvg, Pillow and fontTools through uv --with; mkdocs 1.6.1 with mkdocs-material 9.7.7; headless Chromium (dark palette shown by setting data-md-color-scheme="slate" and data-md-color-primary="black" on a copy of the build; README header shown with preferredColorScheme set per run on a local page with relative image paths)
 ---
 

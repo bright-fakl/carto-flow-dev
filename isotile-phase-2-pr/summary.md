@@ -10,7 +10,7 @@ branch: phase-2-edge-curves
 related: proposal-isohedral-tiling-library, isotile-phase-1-pr
 date: 2026-10-27 13:00
 before: bright-fakl/isotile main at 75f3ae7 (2,844 tests passed, 78 skipped)
-after: branch head 8bd0010 (4,484 passed, 186 skipped; not merged)
+after: bright-fakl/isotile main at e13ff84 (PR 3, merged; last branch head 8bd0010, 4,484 passed, 186 skipped)
 inputs: tactile 0.1.0, Python 3.10.18 locally, numpy 2.2.6, scipy 1.15.3, shapely 2.1.2 (test only), matplotlib (docs group and tests); CI on Linux (3.10 to 3.13), macOS and Windows. Random draws seeded; single runs.
 ---
 

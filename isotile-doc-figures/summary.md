@@ -10,7 +10,7 @@ branch: docs-skeleton
 related: isotile-logo-assets, isotile-docs-skeleton-pr
 date: 2026-10-27 21:30
 before: bright-fakl/isotile docs-skeleton at b55a11d (no figures)
-after: bright-fakl/isotile docs-skeleton at 9ffe3af (figures, not merged)
+after: bright-fakl/isotile main at 75f3ae7 (PR 2, merged; this page: figures at branch head 9ffe3af)
 inputs: isotile tiles (cover, fill_region, tiles, neighbors, adjacency) and the logo palette; matplotlib 3.10.9 (docs group); mkdocs 1.6.1 with mkdocs-material 9.7.7; headless Chromium (dark scheme shown by setting data-md-color-scheme="slate" and data-md-color-primary="black" on a copy of the build)
 ---
 

@@ -10,7 +10,7 @@ branch: docs-skeleton
 related: proposal-isohedral-tiling-library
 date: 2026-10-27 18:00
 before: bright-fakl/isotile main at 39c5778 (phase 1)
-after: bright-fakl/isotile docs-skeleton at ffef968 (PR 2, CI green, not merged)
+after: bright-fakl/isotile main at 75f3ae7 (PR 2, merged; this page: branch head ffef968, CI green)
 inputs: uv 0.8.17, Python 3.10 locally, mkdocs 1.6.1, mkdocs-material 9.7.7, mkdocstrings 1.0.6 with mkdocstrings-python 2.0.9, pymdown-extensions 11.0.2, headless Chromium for screenshots (dark palette shown by setting data-md-color-scheme="slate" on a copy of the build, because the headless color-scheme flag did not switch the palette)
 ---
 
