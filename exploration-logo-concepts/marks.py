@@ -188,22 +188,22 @@ def _blob(cx=48.0, cy=48.0, r=36.0, m=240):
     return Polygon(list(zip(cx + 1.0 * r * rad * np.cos(t), cy + 0.9 * r * rad * np.sin(t))))
 
 
-def _split(amp, gap, cut_x=44.0, cut_y=50.0):
+def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0):
     """Blob minus one wavy vertical and one wavy horizontal line of width gap: four regions."""
     from shapely.geometry import LineString
     from shapely.ops import unary_union
     ys = np.linspace(0, 96, 120)
     xs = np.linspace(0, 96, 120)
-    v = LineString([(cut_x + amp * math.sin(y / 11.0 + 0.4), y) for y in ys])
-    h = LineString([(x, cut_y + amp * math.sin(x / 9.0 + 1.2)) for x in xs])
+    v = LineString([(cut_x + amp * math.sin(y / fv + 0.4), y) for y in ys])
+    h = LineString([(x, cut_y + amp * math.sin(x / fh + 1.2)) for x in xs])
     cut = unary_union([v, h]).buffer(gap / 2, cap_style=2)
     pieces = _blob().difference(cut)
     return sorted(pieces.geoms, key=lambda g: (-g.centroid.y, g.centroid.x))
 
 
-def _blob_mark(pal, amp, gap, tints, amber_idx):
+def _blob_mark(pal, amp, gap, tints, amber_idx, **kw):
     out = ""
-    for k, g in enumerate(_split(amp, gap)):
+    for k, g in enumerate(_split(amp, gap, **kw)):
         pts = list(g.exterior.coords)
         if k == amber_idx:
             out += f'<path d="{path(pts, True)}" fill="{pal["amber"]}"/>'
@@ -222,7 +222,12 @@ def mark_blob_wavy(pal):
     return _blob_mark(pal, 7.0, 5.0, [1.0, 1.0, 1.0, 0.0], 3)
 
 
-MARKS.update({"blob": mark_blob, "blob_wavy": mark_blob_wavy})
+def mark_blob_small(pal):
+    """Favicon variant: thicker gaps, gentler waves."""
+    return _blob_mark(pal, 5.0, 8.0, [1.0, 1.0, 1.0, 0.0], 3, fv=16.0, fh=20.0)
+
+
+MARKS.update({"blob": mark_blob, "blob_wavy": mark_blob_wavy, "blob_small": mark_blob_small})
 
 
 def svg(body, bg=None):

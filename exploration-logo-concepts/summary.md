@@ -12,7 +12,7 @@ inputs: Palette from PlotStyle light (series #2c6e9e, highlight #d98200) and dar
 
 `marks.py <out_dir>` writes `<concept>-light.svg` and `<concept>-dark.svg` for each concept (committed in `svg/`); `fig.py` draws the legibility figure. The marks are plain geometry, so they carry no licensing constraint from fonts or third-party artwork (original work, covered by the project's MIT license).
 
-figure: fig1_marks.png — Rows: filled warped grid (reference), blob with four tinted regions, blob with stronger waves and one blue. The other concepts are in svg/ and in the earlier version of this page's figure, now left out. Left half light surface, right half dark surface. Columns: 128, 64, 32 and 16 px, then 32 px in one color (the amber part drawn in the blue). Renders are 1:1, the figure is enlarged 2x with nearest-neighbor so the pixels stay visible.
+figure: fig1_marks.png — Rows: `blob_wavy` after the review (horizontal gap with a lower spatial frequency, wave period 14 instead of 9; cut moved to x 42, y 52), and `blob_small`, a favicon variant with gaps 8 wide instead of 5 and gentler waves (periods 16 and 20). The other concepts are in svg/ and in the earlier version of this page's figure, now left out. Left half light surface, right half dark surface. Columns: 128, 64, 32 and 16 px, then 32 px in one color (the amber part drawn in the blue). Renders are 1:1, the figure is enlarged 2x with nearest-neighbor so the pixels stay visible.
 
 ## Concepts
 
@@ -40,3 +40,15 @@ figure: fig1_marks.png — Rows: filled warped grid (reference), blob with four 
 ## Not done yet (acceptance criteria of the issue)
 
 Wordmark with the name `carto-flow`, favicon set (SVG, 32 px and 180 px PNG), 1280 x 640 social preview, usage note in `docs/`, `theme.logo` and `theme.favicon` in `mkdocs.yml`, the README header with a `<picture>` dark-mode variant, a WCAG contrast check of both variants against the docs surfaces, and the PyPI metadata.
+
+## Review of the blob (2026-10-26)
+
+`blob_wavy` is the preferred design. The horizontal gap has a lower spatial frequency, and `blob_small` is the favicon variant with thicker gaps.
+
+**Resemblance to the Windows logo.** The Windows mark is four equal, axis-aligned squares in four colors, separated by a straight cross of gaps. The blob shares the idea of four parts separated by a cross, and that is the risk. It is smaller when the following hold, and larger when they do not:
+
+- The outline is an irregular blob, not a square, so the silhouette differs.
+- The regions are unequal and the gaps wavy and off-center. `blob_small` is the weak case: at 16 px its gentle waves are nearly straight, and a small blob with a straight cross looks like a window pane. It should keep visibly curved gaps even at the cost of a little legibility, or use only one gap of 8 px plus one thinner.
+- One accent region and a single blue, not four colors. The four-color variants of the first round should not be used.
+
+This is a design judgment, not a trademark opinion; if the logo will be used widely, a check by someone qualified is worth doing before adoption. A cheap further separation is to tilt the cross by about 10 to 15 degrees so the gaps are not horizontal and vertical.
