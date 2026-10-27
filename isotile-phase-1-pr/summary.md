@@ -12,7 +12,6 @@ date: 2026-10-27 12:00
 before: bright-fakl/isotile main at 097ae26 (prototype isotile_proto, 1,143 tests passed and 78 skipped)
 after: bright-fakl/isotile main at 39c5778 (merged; last branch head 3ca20ff)
 inputs: tactile 0.1.0, carto-flow main at 408284b (expected lists and info generated once with its tactile-based find_types, type_info and describe), Python 3.10.18 locally, numpy 2.2.6, scipy 1.15.3, shapely 2.1.2, mypy 2.4.0, ruff 0.17.3, pytest 9.1.1; CI on GitHub-hosted runners (Linux, macOS, Windows); minimum-versions job at numpy 1.26.0, scipy 1.11.1, shapely 2.0.0, pytest 7.2.0. Single runs; benchmark timings on a 16-core WSL2 machine, best of 3 (2 for the geometric method).
-status: merged
 ---
 
 `fig.py <output dir>` draws the figures from an installed isotile (run with `uv run --project <carto-flow> --with <isotile checkout> python fig.py .`). They were made at commit cef8334; the later `cover` change does not alter them.

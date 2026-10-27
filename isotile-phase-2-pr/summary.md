@@ -12,7 +12,6 @@ date: 2026-10-27 13:00
 before: bright-fakl/isotile main at 75f3ae7 (2,844 tests passed, 78 skipped)
 after: branch head 8bd0010 (4,484 passed, 186 skipped; not merged)
 inputs: tactile 0.1.0, Python 3.10.18 locally, numpy 2.2.6, scipy 1.15.3, shapely 2.1.2 (test only), matplotlib (docs group and tests); CI on Linux (3.10 to 3.13), macOS and Windows. Random draws seeded; single runs.
-status: merged
 ---
 
 `fig.py <output dir>` draws figures 1 to 3. `evidence_fit.py` (validity against tiling, 5 amplitudes x 81 types x 3 draws) and `evidence_checker.py` (the polyline test against GEOS `is_valid`) are the exploration runs behind the numbers; run them from this directory with `uv run --project /home/fakl/isotile-phase2 python evidence_fit.py 0`.

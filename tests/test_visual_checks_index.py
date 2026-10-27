@@ -8,12 +8,16 @@ listed in, and which of them count as still needing review.
 from __future__ import annotations
 
 import importlib.util
+import json
+import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "build_visual_checks_index.py"
+REPO = "bright-fakl/carto-flow"
+ISOTILE = "bright-fakl/isotile"
 
 
 @pytest.fixture(scope="module")
@@ -89,7 +93,7 @@ class TestStatus:
         directory = _write(tmp_path, "d", pr=7, title="t", description="d", status="needs review")
         pr_dir = mod.scan_pr_dir(directory)
 
-        assert mod.resolve_status(pr_dir, {7: "MERGED"}) == "needs review"
+        assert mod.resolve_status(pr_dir, {(REPO, 7): "MERGED"}) == "needs review"
 
     @pytest.mark.parametrize(
         ("state", "expected"),
@@ -99,7 +103,7 @@ class TestStatus:
         directory = _write(tmp_path, f"d-{state}", pr=7, title="t", description="d")
         pr_dir = mod.scan_pr_dir(directory)
 
-        assert mod.resolve_status(pr_dir, {7: state}) == expected
+        assert mod.resolve_status(pr_dir, {(REPO, 7): state}) == expected
 
     def test_exploration_is_open(self, mod, tmp_path):
         """An exploration is outstanding until someone says otherwise."""
@@ -326,10 +330,10 @@ class TestClosedAndUpdatedDates:
             {"number": 3, "state": "OPEN", "mergedAt": None, "closedAt": None},
         ]
         closed = mod.pr_closed_from_rows(rows)
-        assert set(closed) == {1, 2}
-        assert len(closed[1]) == len("2026-10-08 15:05")
-        assert closed[1] < closed[1][:11] + "99:99"  # parseable, local time
-        assert mod.pr_states_from_rows(rows) == {1: "MERGED", 2: "CLOSED", 3: "OPEN"}
+        assert set(closed) == {(REPO, 1), (REPO, 2)}
+        assert len(closed[REPO, 1]) == len("2026-10-08 15:05")
+        assert closed[REPO, 1] < closed[REPO, 1][:11] + "99:99"  # parseable, local time
+        assert mod.pr_states_from_rows(rows) == {(REPO, 1): "MERGED", (REPO, 2): "CLOSED", (REPO, 3): "OPEN"}
 
     def test_page_shows_created_updated_and_closed(self, mod, tmp_path):
         d = _write(tmp_path, "a", pr=1, title="a", description="d", date="2026-10-01 09:00", updated="2026-10-02 10:00")
@@ -344,7 +348,7 @@ class TestClosedAndUpdatedDates:
     def test_index_has_closed_column(self, mod, tmp_path):
         d = _write(tmp_path, "a", pr=1, title="a", description="d", date="2026-10-01 09:00")
         pr = mod.scan_pr_dir(d)
-        page = mod.build_index_page([pr], {pr.path: "merged"}, {1: "2026-10-03 11:00"})
+        page = mod.build_index_page([pr], {pr.path: "merged"}, {(REPO, 1): "2026-10-03 11:00"})
         assert '<th data-col="7" title="Sort by Closed">Closed</th>' in page
         assert "<td>2026-10-03 11:00</td>" in page
 
@@ -353,9 +357,9 @@ class TestDisplayTimezone:
     def test_closed_time_follows_the_configured_zone(self, mod, monkeypatch):
         rows = [{"number": 1, "state": "MERGED", "mergedAt": "2026-10-08T19:26:00Z", "closedAt": None}]
         monkeypatch.setenv("VISUAL_CHECKS_TZ", "America/New_York")
-        assert mod.pr_closed_from_rows(rows) == {1: "2026-10-08 15:26"}
+        assert mod.pr_closed_from_rows(rows) == {(REPO, 1): "2026-10-08 15:26"}
         monkeypatch.setenv("VISUAL_CHECKS_TZ", "UTC")
-        assert mod.pr_closed_from_rows(rows) == {1: "2026-10-08 19:26"}
+        assert mod.pr_closed_from_rows(rows) == {(REPO, 1): "2026-10-08 19:26"}
 
     def test_unknown_zone_falls_back(self, mod, monkeypatch, capsys):
         monkeypatch.setenv("VISUAL_CHECKS_TZ", "Not/AZone")
@@ -488,7 +492,7 @@ class TestIndexFilters:
         d = _write(tmp_path, "a", pr=1, title="a", description="d", date="2026-10-01 09:00", updated="2026-10-05")
         page = mod.scan_pr_dir(d)
 
-        html = mod.build_index_page([page], {d: "merged"}, {1: "2026-10-03 11:00"})
+        html = mod.build_index_page([page], {d: "merged"}, {(REPO, 1): "2026-10-03 11:00"})
 
         assert 'id="filter-reset"' in html and 'id="filter-time"' in html
         assert 'data-active="2026-10-05 00:00"' in html
@@ -496,7 +500,7 @@ class TestIndexFilters:
     def test_latest_activity_takes_the_newest_time(self, mod, tmp_path):
         page = mod.scan_pr_dir(_write(tmp_path, "a", pr=1, title="a", description="d", date="2026-10-01 09:00"))
 
-        assert mod._latest_activity(page, {1: "2026-10-03 11:00"}) == "2026-10-03 11:00"
+        assert mod._latest_activity(page, {(REPO, 1): "2026-10-03 11:00"}) == "2026-10-03 11:00"
         assert mod._latest_activity(mod.scan_pr_dir(_write(tmp_path, "b", title="b", description="d")), {}) == ""
 
 
@@ -557,3 +561,140 @@ class TestMarkdownBlocks:
         assert "<pre><code>x = 1 &lt; 2\n- not a list\n**not bold**</code></pre>" in page
         assert "<ul>" not in page and "<strong>" not in page
         assert page.startswith("<p>before</p>") and page.endswith("<p>after</p>")
+
+
+def _url(repo: str, number: int) -> str:
+    return f"https://github.com/{repo}/pull/{number}"
+
+
+def _fake_gh(monkeypatch, mod, rows_by_repo: dict, calls: list | None = None):
+    """Replace `gh pr list --repo R ...` by the rows in ``rows_by_repo``; a repo missing there fails."""
+
+    def run(cmd, **kwargs):
+        repo = cmd[cmd.index("--repo") + 1]
+        if calls is not None:
+            calls.append(cmd)
+        if repo not in rows_by_repo:
+            return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="HTTP 404")
+        return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(rows_by_repo[repo]), stderr="")
+
+    monkeypatch.setattr(mod.subprocess, "run", run)
+
+
+class TestMultipleRepositories:
+    def test_repo_comes_from_the_url(self, mod, tmp_path):
+        page = mod.scan_pr_dir(_write(tmp_path, "a", pr=2, url=_url(ISOTILE, 2), title="t", description="d"))
+        assert page.repo == ISOTILE and page.key == (ISOTILE, 2)
+
+    def test_page_without_url_uses_the_default_repo(self, mod, tmp_path):
+        page = mod.scan_pr_dir(_write(tmp_path, "a", pr=2, title="t", description="d"))
+        assert page.repo == REPO
+        other = mod.scan_pr_dir(_write(tmp_path, "b", pr=2, title="t", description="d"), "me/other")
+        assert other.repo == "me/other"
+
+    def test_url_that_is_not_a_pull_request_falls_back(self, mod):
+        assert mod.repo_from_url("https://example.com/x/y/pull/1") == REPO
+        assert mod.repo_from_url("https://github.com/a/b/issues/1") == REPO
+        assert mod.repo_from_url(None) == REPO
+        assert mod.repo_from_url("https://github.com/a/b.c/pull/12#issuecomment-1") == "a/b.c"
+
+    def test_same_number_in_two_repos_keeps_both_states(self, mod, tmp_path, monkeypatch):
+        flow = mod.scan_pr_dir(_write(tmp_path, "flow", pr=2, url=_url(REPO, 2), title="t", description="d"))
+        tile = mod.scan_pr_dir(_write(tmp_path, "tile", pr=2, url=_url(ISOTILE, 2), title="t", description="d"))
+        rows = {
+            REPO: [{"number": 2, "state": "OPEN", "mergedAt": None, "closedAt": None}],
+            ISOTILE: [{"number": 2, "state": "MERGED", "mergedAt": "2026-10-08T19:26:00Z", "closedAt": None}],
+        }
+        calls: list = []
+        _fake_gh(monkeypatch, mod, rows, calls)
+
+        states, closed, unreachable = mod.fetch_all_pr_info([REPO, ISOTILE])
+
+        assert unreachable == [] and len(calls) == 2
+        assert mod.resolve_status(flow, states) == "needs review"
+        assert mod.resolve_status(tile, states) == "merged"
+        assert set(closed) == {(ISOTILE, 2)}
+        assert "10000" in calls[0]
+
+    def test_one_unreachable_repo_degrades_only_its_pages(self, mod, tmp_path, monkeypatch):
+        flow = mod.scan_pr_dir(_write(tmp_path, "flow", pr=2, title="t", description="d"))
+        tile = mod.scan_pr_dir(_write(tmp_path, "tile", pr=2, url=_url(ISOTILE, 2), title="t", description="d"))
+        declared = mod.scan_pr_dir(
+            _write(tmp_path, "decl", pr=3, url=_url(ISOTILE, 3), status="deferred", title="t", description="d")
+        )
+        _fake_gh(monkeypatch, mod, {REPO: [{"number": 2, "state": "MERGED"}]})
+
+        states, closed, unreachable = mod.fetch_all_pr_info([REPO, ISOTILE])
+
+        assert unreachable == [ISOTILE]
+        assert mod.resolve_status(flow, states) == "merged"
+        assert mod.resolve_status(tile, states) == "unknown"
+        assert mod.resolve_status(declared, states) == "deferred"
+
+    def test_missing_gh_does_not_break_the_build(self, mod, tmp_path, monkeypatch, capsys):
+        _write(tmp_path, "tile", pr=2, url=_url(ISOTILE, 2), title="t", description="d")
+
+        def no_gh(cmd, **kwargs):
+            raise FileNotFoundError("gh")
+
+        monkeypatch.setattr(mod.subprocess, "run", no_gh)
+        monkeypatch.setattr(sys, "argv", ["prog", "--root", str(tmp_path)])
+        mod.main()
+
+        assert f"could not read PR state of {ISOTILE}" in capsys.readouterr().err
+        assert "unknown" in (tmp_path / "index.html").read_text(encoding="utf-8")
+
+    def test_main_asks_each_repo_once(self, mod, tmp_path, monkeypatch):
+        _write(tmp_path, "a", pr=1, title="t", description="d")
+        _write(tmp_path, "b", pr=2, url=_url(REPO, 2), title="t", description="d")
+        _write(tmp_path, "c", pr=2, url=_url(ISOTILE, 2), title="t", description="d")
+        _write(tmp_path, "e", title="t", description="d")
+        calls: list = []
+        _fake_gh(monkeypatch, mod, {REPO: [], ISOTILE: []}, calls)
+        monkeypatch.setattr(sys, "argv", ["prog", "--root", str(tmp_path)])
+
+        mod.main()
+
+        assert sorted(c[c.index("--repo") + 1] for c in calls) == [REPO, ISOTILE]
+
+    def test_labels_name_the_repo_only_when_it_is_not_the_default(self, mod, tmp_path):
+        flow = mod.scan_pr_dir(_write(tmp_path, "flow", pr=2, url=_url(REPO, 2), title="f", description="d"))
+        tile = mod.scan_pr_dir(_write(tmp_path, "tile", pr=2, url=_url(ISOTILE, 2), title="i", description="d"))
+        assert (flow.pr_label, tile.pr_label) == ("#2", f"{ISOTILE}#2")
+
+        index = mod.build_index_page([flow, tile], {flow.path: "merged", tile.path: "merged"})
+        assert f'>{ISOTILE}#2</a>' in index and ">#2</a>" in index
+        assert f"PR {ISOTILE}#2: i" in mod.build_pr_page(tile, "merged")
+        assert "PR #2: f" in mod.build_pr_page(flow, "merged")
+
+    def test_list_status_shows_the_repo(self, mod, tmp_path, capsys):
+        tile = mod.scan_pr_dir(_write(tmp_path, "tile", pr=2, url=_url(ISOTILE, 2), title="i", description="d"))
+        mod.list_status([tile], {tile.path: "merged"})
+        assert f"{ISOTILE}#2  tile" in capsys.readouterr().out
+
+    def test_closed_time_is_looked_up_by_repo(self, mod, tmp_path):
+        flow = mod.scan_pr_dir(_write(tmp_path, "flow", pr=2, url=_url(REPO, 2), title="f", description="d"))
+        tile = mod.scan_pr_dir(_write(tmp_path, "tile", pr=2, url=_url(ISOTILE, 2), title="i", description="d"))
+        closed = {(ISOTILE, 2): "2026-10-03 11:00"}
+        index = mod.build_index_page([flow, tile], {flow.path: "needs review", tile.path: "merged"}, closed)
+        assert index.count("<td>2026-10-03 11:00</td>") == 1
+        assert mod._latest_activity(flow, closed) == "" and mod._latest_activity(tile, closed) == "2026-10-03 11:00"
+
+    def test_sort_reads_the_number_of_a_labelled_pr(self, mod):
+        assert r"/(\d+)$/.exec(text)" in mod.SORT_SCRIPT
+
+    def test_issue_link_follows_the_repo(self, mod, tmp_path):
+        d = _write(tmp_path, "a", pr=3, url=_url(ISOTILE, 3), title="a", description="d", issue="5")
+        assert f"https://github.com/{ISOTILE}/issues/5" in mod.build_pr_page(mod.scan_pr_dir(d), "merged")
+
+    def test_convert_writes_the_url_of_the_given_repo(self, mod, tmp_path):
+        directory = _write(tmp_path, "idea", kind="proposal", title="t", description="d", status="open")
+        mod.convert_to_pr(directory, 7, ISOTILE)
+        page = mod.scan_pr_dir(directory)
+        assert page.url == _url(ISOTILE, 7) and page.repo == ISOTILE and page.pr == 7
+
+    def test_convert_option_takes_repo(self, mod, tmp_path, monkeypatch):
+        _write(tmp_path, "idea", kind="proposal", title="t", description="d", status="open")
+        monkeypatch.setattr(sys, "argv", ["prog", "--root", str(tmp_path), "--offline", "--convert", "idea", "7", "--repo", ISOTILE])
+        mod.main()
+        assert _url(ISOTILE, 7) in (tmp_path / "idea" / "summary.md").read_text(encoding="utf-8")

@@ -31,8 +31,11 @@ optional and, when present, are rendered in the page's definition list: ``pr``,
 ``proposal`` (a change not yet in a PR).  ``topic`` is a comma-separated list
 from ``flow``, ``voronoi``, ``symbol``, ``proportional``, ``noncontiguous``, ``data``, ``infra``.
 
-Status of a ``pr`` page comes from the PR's GitHub state via one ``gh`` call -
-merged or closed is done, open needs review - and an explicit ``status:``
+Status of a ``pr`` page comes from the PR's GitHub state, read with one ``gh``
+call per repository - merged or closed is done, open needs review. The
+repository is taken from the page's ``url`` (``https://github.com/<owner>/<repo>/pull/<n>``);
+a page without a ``url`` uses ``--repo``. Pages of other repositories show their
+PR as ``owner/repo#N``. An explicit ``status:``
 always wins, so a merged PR can still be flagged for follow-up.  Its values are
 ``needs review`` (outstanding), ``deferred`` (a deliberate park), and
 ``reviewed`` / ``merged`` / ``closed`` / ``superseded`` (done).  An exploration
@@ -85,8 +88,8 @@ and the repository that contains this script.  Close times from GitHub are
 shown in the zone named by ``VISUAL_CHECKS_TZ`` (an IANA name such as
 ``America/New_York``), else the system zone; set it wherever pages are rebuilt
 on a machine in another zone.  Directories whose names start
-with ``.``, and the ``scripts`` and ``tests`` directories, are not pages.  PR states are read from ``--repo`` (default
-``bright-fakl/carto-flow``).
+with ``.``, and the ``scripts`` and ``tests`` directories, are not pages.  ``--repo`` (default
+``bright-fakl/carto-flow``) is the repository of pages without a ``url``.
 
 Usage:
     python3 scripts/build_visual_checks_index.py
@@ -220,7 +223,7 @@ metadata and change during a page's life.
   lists it under `related`.
 - A proposal that becomes one PR is converted in place:
   `python3 scripts/build_visual_checks_index.py --convert <directory> <PR number>` sets `kind: pr`,
-  `pr` and `url` and removes `status`. Add a short "as proposed / as built" section.
+  `pr` and `url` (add `--repo owner/repo` for a PR of another repository) and removes `status`. Add a short "as proposed / as built" section.
   A proposal that splits into several PRs stays a proposal, set to `led-to`, with
   one `related` entry per PR.
 
@@ -290,7 +293,10 @@ investigation workspace is easy to miss.
    is the merge or close time of the PR on GitHub.
 
    The status of a `pr` page is taken from the PR's GitHub state unless `status:` says
-   otherwise. Values for a `pr` page: `needs review`, `deferred`, `reviewed`, `merged`,
+   otherwise. The repository is read from `url` (`https://github.com/<owner>/<repo>/pull/<n>`),
+   so pages can belong to other repositories than carto-flow; a page without a `url`
+   uses `--repo` (default `bright-fakl/carto-flow`). PRs of other repositories are shown as
+   `owner/repo#N`. Values for a `pr` page: `needs review`, `deferred`, `reviewed`, `merged`,
    `closed`, `superseded`; for other kinds see the table above. Change one with
    `--set-status <dir> <status>`; list them all with `--list-status`.
 
@@ -360,7 +366,7 @@ SORT_SCRIPT = r"""
       var rank = STATUS_RANK[text.toLowerCase()];
       return rank === undefined ? -1 : rank;                        // unknown first
     }
-    if (i === 3) return parseInt(text.replace("#", ""), 10) || -1;  // PR
+    if (i === 3) { var m = /(\d+)$/.exec(text); return m ? +m[1] : -1; }  // PR
     if (i === 8) return parseInt(text, 10) || 0;                    // Figures
     return text.toLowerCase();
   }
@@ -817,7 +823,7 @@ def fetch_pr_rows(repo: str = DEFAULT_REPO, timeout: float = 20.0) -> list[dict]
                 "--state",
                 "all",
                 "--limit",
-                "500",
+                "10000",
                 "--json",
                 "number,state,closedAt,mergedAt",
             ],
@@ -837,13 +843,13 @@ def fetch_pr_rows(repo: str = DEFAULT_REPO, timeout: float = 20.0) -> list[dict]
     return [row for row in rows if isinstance(row, dict) and "number" in row]
 
 
-def pr_states_from_rows(rows: list[dict]) -> dict[int, str]:
-    """Map PR number -> GitHub state."""
-    return {int(row["number"]): str(row.get("state", "")) for row in rows}
+def pr_states_from_rows(rows: list[dict], repo: str = DEFAULT_REPO) -> dict[tuple[str, int], str]:
+    """Map ``(repo, PR number)`` -> GitHub state."""
+    return {(repo, int(row["number"])): str(row.get("state", "")) for row in rows}
 
 
-def pr_closed_from_rows(rows: list[dict]) -> dict[int, str]:
-    """Map PR number -> merge or close time as local ``YYYY-MM-DD HH:MM``, for closed PRs."""
+def pr_closed_from_rows(rows: list[dict], repo: str = DEFAULT_REPO) -> dict[tuple[str, int], str]:
+    """Map ``(repo, PR number)`` -> merge or close time as local ``YYYY-MM-DD HH:MM``, for closed PRs."""
     closed = {}
     for row in rows:
         raw = row.get("mergedAt") or row.get("closedAt")
@@ -853,16 +859,37 @@ def pr_closed_from_rows(rows: list[dict]) -> dict[int, str]:
             moment = datetime.fromisoformat(str(raw).replace("Z", "+00:00")).astimezone(display_timezone())
         except ValueError:
             continue
-        closed[int(row["number"])] = moment.strftime("%Y-%m-%d %H:%M")
+        closed[(repo, int(row["number"]))] = moment.strftime("%Y-%m-%d %H:%M")
     return closed
 
 
-def fetch_pr_states(repo: str = DEFAULT_REPO, timeout: float = 20.0) -> dict[int, str]:
-    """Map PR number -> GitHub state of ``repo``."""
-    return pr_states_from_rows(fetch_pr_rows(repo, timeout))
+def fetch_pr_states(repo: str = DEFAULT_REPO, timeout: float = 20.0) -> dict[tuple[str, int], str]:
+    """Map ``(repo, PR number)`` -> GitHub state of ``repo``."""
+    return pr_states_from_rows(fetch_pr_rows(repo, timeout), repo)
 
 
-def resolve_status(pr: PrDir, pr_states: dict[int, str]) -> str:
+def fetch_all_pr_info(
+    repos: list[str], timeout: float = 20.0
+) -> tuple[dict[tuple[str, int], str], dict[tuple[str, int], str], list[str]]:
+    """PR states and closed times of every repo in ``repos``, one `gh` call per repo.
+
+    Returns ``(states, closed, unreachable)``; ``unreachable`` names the repos that
+    returned nothing (a missing `gh`, no access, offline), whose pages then have no
+    GitHub state.  One repo failing does not affect the others.
+    """
+    states: dict[tuple[str, int], str] = {}
+    closed: dict[tuple[str, int], str] = {}
+    unreachable: list[str] = []
+    for repo in repos:
+        rows = fetch_pr_rows(repo, timeout)
+        if not rows:
+            unreachable.append(repo)
+        states.update(pr_states_from_rows(rows, repo))
+        closed.update(pr_closed_from_rows(rows, repo))
+    return states, closed, unreachable
+
+
+def resolve_status(pr: PrDir, pr_states: dict[tuple[str, int], str]) -> str:
     """Status for one directory.
 
     An explicit ``status:`` in ``summary.md`` always wins, so a merged PR can
@@ -889,8 +916,8 @@ def resolve_status(pr: PrDir, pr_states: dict[int, str]) -> str:
         return declared
     if pr.kind != "pr":
         return "open"
-    if pr.pr is not None and pr.pr in pr_states:
-        return _PR_STATE_STATUS.get(pr_states[pr.pr], "needs review")
+    if pr.key is not None and pr.key in pr_states:
+        return _PR_STATE_STATUS.get(pr_states[pr.key], "needs review")
     if pr.pr is not None:
         return "unknown"
     return "needs review"
@@ -913,12 +940,35 @@ class PrDir:
     figure_count: int
     mtime: float
     kind: str = "exploration"
+    repo: str = DEFAULT_REPO
+    default_repo: str = DEFAULT_REPO
     topics: list[str] = field(default_factory=list)
     related: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
+    @property
+    def key(self) -> tuple[str, int] | None:
+        """``(repo, number)`` of the PR, or None for a page without one."""
+        return (self.repo, self.pr) if self.pr is not None else None
 
-def scan_pr_dir(directory: Path) -> PrDir:
+    @property
+    def pr_label(self) -> str:
+        """``#N``, or ``owner/repo#N`` when the PR belongs to another repository than the default."""
+        if self.pr is None:
+            return "-"
+        return f"#{self.pr}" if self.repo == self.default_repo else f"{self.repo}#{self.pr}"
+
+
+_PR_URL = re.compile(r"^https?://github\.com/([\w.-]+/[\w.-]+)/pull/(\d+)(?:[/?#]|$)")
+
+
+def repo_from_url(url: str | None, default: str = DEFAULT_REPO) -> str:
+    """``owner/repo`` of a ``https://github.com/<owner>/<repo>/pull/<n>`` url; ``default`` for anything else."""
+    match = _PR_URL.match((url or "").strip())
+    return match.group(1) if match else default
+
+
+def scan_pr_dir(directory: Path, default_repo: str = DEFAULT_REPO) -> PrDir:
     summary_path = directory / "summary.md"
     summary_text = summary_path.read_text(encoding="utf-8") if summary_path.exists() else ""
     meta, body_text = _split_metadata_block(summary_text)
@@ -971,6 +1021,8 @@ def scan_pr_dir(directory: Path) -> PrDir:
         figure_count=figure_count,
         mtime=_dir_mtime(directory),
         kind=kind,
+        repo=repo_from_url(url, default_repo),
+        default_repo=default_repo,
         topics=topics,
         related=_split_list(meta.get("related", ""), lower=False),
         warnings=warnings,
@@ -1048,7 +1100,7 @@ def build_pr_page(
         dl_items.append(("URL", "(missing)"))
     issues = _issue_numbers(pr.meta.get("issue", ""))
     if issues:
-        links = ", ".join(f'<a href="https://github.com/{DEFAULT_REPO}/issues/{n}">#{n}</a>' for n in issues)
+        links = ", ".join(f'<a href="https://github.com/{pr.repo}/issues/{n}">#{n}</a>' for n in issues)
         dl_items.append(("Issue", links))
     for key in ("branch", "base", "date", "updated", "closed", "before", "after", "inputs"):
         value = closed if key == "closed" else pr.meta.get(key)
@@ -1074,7 +1126,7 @@ def build_pr_page(
             f"</div>"
         )
 
-    heading = f"PR #{pr.pr}: {pr.title}" if pr.pr is not None and pr.kind == "pr" else pr.title
+    heading = f"PR {pr.pr_label}: {pr.title}" if pr.pr is not None and pr.kind == "pr" else pr.title
     back_link = '<a class="back" href="../index.html">&larr; back to index</a>'
 
     body = (
@@ -1090,7 +1142,7 @@ def build_pr_page(
 
 
 def build_index_page(
-    pr_dirs: list[PrDir], statuses: dict[Path, str] | None = None, closed: dict[int, str] | None = None
+    pr_dirs: list[PrDir], statuses: dict[Path, str] | None = None, closed: dict[tuple[str, int], str] | None = None
 ) -> str:
     statuses = statuses or {}
     closed = closed or {}
@@ -1101,14 +1153,14 @@ def build_index_page(
         row_class = "" if cls == "done" else f' class="{cls}"'
         status_cell = f'<span class="status {cls}">{html.escape(status)}</span>'
         pr_cell = (
-            f'<a href="{html.escape(pr.url)}">#{pr.pr}</a>'
+            f'<a href="{html.escape(pr.url)}">{html.escape(pr.pr_label)}</a>'
             if pr.url and pr.pr is not None
-            else (str(pr.pr) if pr.pr is not None else "-")
+            else (pr.pr_label.lstrip("#"))
         )
         title_cell = f'<a href="{html.escape(pr.path.name)}/index.html">{html.escape(pr.title)}</a>'
         desc_cell = html.escape(pr.description)
         date_cell = html.escape(pr.meta.get("date", ""))
-        closed_cell = html.escape(closed.get(pr.pr, "") if pr.pr is not None else "")
+        closed_cell = html.escape(closed.get(pr.key, "") if pr.key else "")
         rows.append(
             f'<tr{row_class} data-ord="{len(rows)}" data-kind="{pr.kind}" data-topics=" {" ".join(pr.topics)} " '
             f'data-status="{html.escape(status)}" data-class="{cls}" data-active="{html.escape(_latest_activity(pr, closed))}">'
@@ -1139,9 +1191,9 @@ def build_index_page(
     return _page_shell("Visual checks", body)
 
 
-def _latest_activity(pr: PrDir, closed: dict[int, str]) -> str:
+def _latest_activity(pr: PrDir, closed: dict[tuple[str, int], str]) -> str:
     """Latest of the created, updated and closed times, as ``YYYY-MM-DD HH:MM`` (empty if none)."""
-    times = [pr.meta.get("date", ""), pr.meta.get("updated", ""), closed.get(pr.pr, "") if pr.pr is not None else ""]
+    times = [pr.meta.get("date", ""), pr.meta.get("updated", ""), closed.get(pr.key, "") if pr.key else ""]
     return max((t.strip() + " 00:00")[:16] if len(t.strip()) == 10 else t.strip() for t in times)
 
 
@@ -1230,8 +1282,7 @@ def list_status(pr_dirs: list[PrDir], statuses: dict[Path, str]) -> None:
     """Print each directory and its status, outstanding first."""
     order = {"todo": 0, "parked": 1, "done": 2}
     for pr in sorted(pr_dirs, key=lambda d: (order[status_class(statuses[d.path])], -_entry_time(d))):
-        pr_label = f"#{pr.pr}" if pr.pr is not None else "-"
-        print(f"{statuses[pr.path]:<13} {pr_label:>5}  {pr.path.name}")
+        print(f"{statuses[pr.path]:<13} {pr.pr_label:>5}  {pr.path.name}")
 
 
 def main() -> None:
@@ -1244,7 +1295,7 @@ def main() -> None:
     parser.add_argument(
         "--repo",
         default=DEFAULT_REPO,
-        help=f"GitHub repository whose PR states set the review status (default: {DEFAULT_REPO}).",
+        help=f"Repository of pages whose url does not name one, and of --convert (default: {DEFAULT_REPO}).",
     )
     parser.add_argument(
         "--set-status",
@@ -1282,16 +1333,18 @@ def main() -> None:
         name, number = args.convert
         convert_to_pr(root / name, int(number), args.repo)
 
-    pr_dirs = [scan_pr_dir(p) for p in sorted(root.iterdir()) if is_page_directory(p)]
+    pr_dirs = [scan_pr_dir(p, args.repo) for p in sorted(root.iterdir()) if is_page_directory(p)]
 
     pr_dirs.sort(key=_sort_key)
 
-    pr_rows = [] if args.offline else fetch_pr_rows(args.repo)
-    pr_states = pr_states_from_rows(pr_rows)
-    pr_closed = pr_closed_from_rows(pr_rows)
+    repos = sorted({pr.repo for pr in pr_dirs if pr.pr is not None})
+    if args.offline:
+        pr_states, pr_closed, unreachable = {}, {}, []
+    else:
+        pr_states, pr_closed, unreachable = fetch_all_pr_info(repos)
     statuses = {pr.path: resolve_status(pr, pr_states) for pr in pr_dirs}
-    if not pr_states and not args.offline and any(pr.pr is not None for pr in pr_dirs):
-        print("note: could not read PR state from gh; using declared status only", file=sys.stderr)
+    for repo in unreachable:
+        print(f"note: could not read PR state of {repo} from gh; using declared status only", file=sys.stderr)
 
     if args.list_status:
         list_status(pr_dirs, statuses)
@@ -1300,7 +1353,7 @@ def main() -> None:
     incoming = link_graph(pr_dirs)
     pages = {pr.path.name: pr for pr in pr_dirs}
     for pr in pr_dirs:
-        closed = pr_closed.get(pr.pr) if pr.pr is not None else None
+        closed = pr_closed.get(pr.key) if pr.key else None
         (pr.path / "index.html").write_text(
             build_pr_page(pr, statuses[pr.path], closed, pages, incoming), encoding="utf-8"
         )

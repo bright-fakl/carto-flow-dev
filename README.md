@@ -43,7 +43,7 @@ metadata and change during a page's life.
   lists it under `related`.
 - A proposal that becomes one PR is converted in place:
   `python3 scripts/build_visual_checks_index.py --convert <directory> <PR number>` sets `kind: pr`,
-  `pr` and `url` and removes `status`. Add a short "as proposed / as built" section.
+  `pr` and `url` (add `--repo owner/repo` for a PR of another repository) and removes `status`. Add a short "as proposed / as built" section.
   A proposal that splits into several PRs stays a proposal, set to `led-to`, with
   one `related` entry per PR.
 
@@ -113,7 +113,10 @@ investigation workspace is easy to miss.
    is the merge or close time of the PR on GitHub.
 
    The status of a `pr` page is taken from the PR's GitHub state unless `status:` says
-   otherwise. Values for a `pr` page: `needs review`, `deferred`, `reviewed`, `merged`,
+   otherwise. The repository is read from `url` (`https://github.com/<owner>/<repo>/pull/<n>`),
+   so pages can belong to other repositories than carto-flow; a page without a `url`
+   uses `--repo` (default `bright-fakl/carto-flow`). PRs of other repositories are shown as
+   `owner/repo#N`. Values for a `pr` page: `needs review`, `deferred`, `reviewed`, `merged`,
    `closed`, `superseded`; for other kinds see the table above. Change one with
    `--set-status <dir> <status>`; list them all with `--list-status`.
 
