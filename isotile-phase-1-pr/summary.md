@@ -14,6 +14,17 @@ after: bright-fakl/isotile phase-1-package at a75c9bf
 inputs: tactile 0.1.0, carto-flow main at 408284b (expected lists and info generated once with its tactile-based find_types, type_info and describe), Python 3.10.18 locally, numpy 2.2.6, scipy 1.15.3, shapely 2.1.2, mypy 2.4.0, ruff 0.17.3, pytest 9.1.1; CI on GitHub-hosted runners (Linux, macOS, Windows); minimum-versions job at numpy 1.26.0, scipy 1.11.1, shapely 2.0.0, pytest 7.2.0. Single runs; benchmark timings on a 16-core WSL2 machine, best of 3 (2 for the geometric method).
 ---
 
+`fig.py <output dir>` draws the figures from an installed isotile (run with `uv run --project <carto-flow> --with <isotile checkout> python fig.py .`). They were made at commit a75c9bf; the exact `cover` test and the infinite safe-range ends added later do not change figures 1 and 2.
+
+figure: fig1_tilings.png — Seven families and types in one region with `fill_region(n_tiles=36)`: `square()`, `hexagon()` pointy-top and flat-top, an irregular triangle and an irregular quadrilateral (constructors from polygons), type 7 and type 46 at their defaults, and type 77 (12 aspects). Colors are the tile coloring of the type.
+
+figure: fig2_adjacency.png — Top: one tile (amber) with its edge neighbors (blue) and vertex-only neighbors (green) for the hexagon (6, 0), square (4, 4), irregular triangle (3, 9) and type 7 (6, 0). Middle: the graph of edge adjacency (links between tile centroids). Bottom: the sparse adjacency matrix with tiles ordered by cell, edge entries blue and vertex-only entries green.
+
+figure: fig3_fill_region.png — `fill_region` for a hexagon tiling with `n_tiles=40` without and with `margin=0.15`, and type 46 with `tile_size=0.3`; the amber dashed rectangle is the requested bounds. The tile count is the number of tiles that cover the expanded region (59, 59 and 80 tiles): `n_tiles` sets the tile size from the expanded area, so the margin enlarges the tiles and the count stays the same.
+
+figure: fig4_safe_ranges.png — The prototile of type 7 (parameter 1) and type 12 (parameters 0 and 1) at the default, just inside a finite limit of `safe_ranges` and just beyond it. Beyond the limit the outline crosses itself and `check_prototile` returns the crossing edges (red).
+
+
 ## What changed
 
 - **Package.** `src/isotile/`, hatchling, `py.typed`, version `0.1.0.dev0`, `requires-python >=3.10,<4.0`, runtime dependencies numpy>=1.26 and scipy>=1.11, extras `shapely`, `plot` (empty) and `all`, dependency groups `dev` and `tactile` (installed together by default; the CI matrix leaves tactile out). `LICENSE` (MIT), `NOTICE` (Kaplan's BSD 3-Clause text), `data/LICENSE-tactile` and `data/types.npz` are in the wheel and the sdist. Ruff with carto-flow's rule set (line length 120), `mypy --strict` on `src/` without exclusions, pre-commit hooks as in carto-flow.
