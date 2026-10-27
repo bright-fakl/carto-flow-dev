@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #2: &quot;isotile logo assets and branding page&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #2: &quot;isotile logo assets and branding page&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">unknown</span></dd>
+<dt>Related</dt><dd><a href="../exploration-isotile-logo/index.html">Logo concepts for isotile</a> <span class="meta">(exploration)</span><br><a href="../isotile-docs-skeleton-pr/index.html">&quot;isotile docs skeleton and GitHub Pages deployment&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isotile/pull/2">https://github.com/bright-fakl/isotile/pull/2</a></dd>
+<dt>Branch</dt><dd>docs-skeleton</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-27 20:00</dd>
+<dt>Before</dt><dd>bright-fakl/isotile docs-skeleton at ffef968 (no logo, Material default icon)</dd>
+<dt>After</dt><dd>bright-fakl/isotile docs-skeleton at b55a11d (logo assets, not merged)</dd>
+<dt>Inputs</dt><dd>Geometry code of marks.py in exploration-isotile-logo (a_patch, a_patch_fav) reused unchanged; DejaVu Sans Bold and DejaVu Sans from the system fonts; cairosvg, Pillow and fontTools through uv --with; mkdocs 1.6.1 with mkdocs-material 9.7.7; headless Chromium (dark palette shown by setting data-md-color-scheme=&quot;slate&quot; and data-md-color-primary=&quot;black&quot; on a copy of the build; README header shown with preferredColorScheme set per run on a local page with relative image paths)</dd>
+</dl>
+<p class="desc">Final logo asset set for isotile (the pentagon patch a_patch with the pinwheel favicon a_patch_fav) generated by scripts/make_logo_assets.py, wired into the docs (header logo per color scheme, favicon, Branding page) and the README header on the docs-skeleton branch of PR 2. One logo shows in the header in each scheme; CI is green.</p>
+<h2>What changed</h2>
+<ul><li><code>scripts/make_logo_assets.py</code> (deterministic, no network) writes <code>docs/assets/logo/</code>: <code>mark-light.svg</code>, <code>mark-dark.svg</code>, <code>mark-mono.svg</code>, <code>lockup-light.svg</code>, <code>lockup-dark.svg</code>, <code>favicon.svg</code>, <code>favicon-32.png</code>, <code>apple-touch-icon.png</code> (180 px, white background) and <code>social-preview.png</code>. <code>--check</code> regenerates the SVG files in memory and fails if they differ from the stored files; the PNG files are not compared.</li><li>The mark is <code>a_patch</code>: seven tiles of type 28 around a four-valent vertex, one amber, six blue in three tints. <code>favicon.svg</code> and <code>favicon-32.png</code> use <code>a_patch_fav</code> (four tiles, gap 4.4). <code>favicon.svg</code> switches colors with <code>prefers-color-scheme</code>.</li><li>The name in the lockups and the tagline in the social preview are outlined paths of DejaVu Sans Bold and DejaVu Sans, so the files have no live text and need no font. DejaVu fonts (based on Bitstream Vera) allow embedding and redistribution; the font and license are recorded in <code>docs/branding.md</code>.</li><li>Docs: <code>theme.logo</code>, <code>theme.favicon</code>, <code>custom_dir: docs/overrides</code> with <code>partials/logo.html</code> (one <code>&lt;img&gt;</code> per scheme, classes <code>it-logo--light</code> and <code>it-logo--dark</code>), <code>docs/stylesheets/logo.css</code> (<code>[data-md-color-scheme=&quot;default&quot;] .md-logo .it-logo--dark</code> and the slate counterpart set <code>display: none</code>; the selector includes <code>.md-logo</code> because Material sets <code>display: block</code> on <code>.md-logo img</code>), and the Branding page in the nav (usage, colors with contrast ratios, clear space, minimum sizes, do and do not, font and license, regeneration).</li><li>All SVG files carry explicit <code>width</code> and <code>height</code>, so they have an intrinsic size in the header and on the Branding page.</li><li>README header: a <code>&lt;picture&gt;</code> element with absolute <code>raw.githubusercontent.com/bright-fakl/isotile/main/docs/assets/logo/</code> URLs for <code>lockup-light.svg</code> and <code>lockup-dark.svg</code>. They resolve after the merge to <code>main</code>; the render above uses relative paths.</li><li>CHANGELOG entry and a &quot;Logo&quot; section in the PR description.</li></ul>
+<h2>Checks</h2>
+<table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td>Logos visible in the header (computed <code>display</code> and natural size of the <code>.md-header .md-logo</code> images)</td><td>light scheme: <code>it-logo--light</code> only; dark scheme: <code>it-logo--dark</code> only; both 96 x 96</td></tr>
+<tr><td>Branding page</td><td>lockups, mark, one-color mark, 32 px favicon, touch icon and social preview render; no blank rectangles</td></tr>
+<tr><td><code>mkdocs build --strict</code></td><td>no warnings</td></tr>
+<tr><td>pytest</td><td>2,843 passed, 78 skipped (includes <code>tests/test_docs_examples.py</code>)</td></tr>
+<tr><td>ruff, ruff format, mypy --strict, <code>uv lock --check</code>, pre-commit hooks</td><td>clean</td></tr>
+<tr><td><code>make_logo_assets.py --check</code></td><td>up to date</td></tr>
+<tr><td>CI at b55a11d</td><td>all jobs green (lint, typecheck, tests on Linux 3.10 to 3.13, macOS, Windows, tactile-equivalence, data-check, minimum-versions, wheel-smoke-test, check-docs, deploy-docs build); the deploy job is skipped on the PR by design</td></tr>
+</table>
+<p>Contrast of the colors on the docs surfaces (computed by the script): light blue 5.48 and light amber 3.63 on white; dark blue 7.61 (9.85) and dark amber 10.63 (13.76) on <code>#1e2029</code> (<code>#000000</code>).</p>
+<h2>Could not be verified</h2>
+<ul><li>The README header on GitHub itself: the absolute URLs point to <code>main</code>, where the files do not exist before the merge.</li><li>The favicon in the browser tab and the touch icon on a device; the 16 and 32 px figure is a rasterization with cairosvg.</li><li>The dark scheme was shown by editing attributes on a copy of the build, not by the theme toggle.</li></ul>
+<h2>Open questions</h2>
+<ul><li>At 16 px the favicon is four shapes with one amber shape, as in the exploration; it is generic at that size.</li><li><code>favicon.svg</code> follows the operating system scheme, not the docs toggle, so on a dark system with the light docs scheme the tab icon is the dark variant.</li></ul>
+<div class="figure">
+<img src="branding-dark.png" alt="Branding page, dark scheme.">
+<p class="caption">Branding page, dark scheme.</p>
+</div><div class="figure">
+<img src="branding-light.png" alt="Branding page, light scheme, with the lockups, the file table and the asset previews.">
+<p class="caption">Branding page, light scheme, with the lockups, the file table and the asset previews.</p>
+</div><div class="figure">
+<img src="favicon-16-32.png" alt="Favicon (`a_patch_fav`) at 16 and 32 px, enlarged 8x with nearest-neighbor next to the actual size, on white (top) and on `#1b1f24` (bottom).">
+<p class="caption">Favicon (<code>a_patch_fav</code>) at 16 and 32 px, enlarged 8x with nearest-neighbor next to the actual size, on white (top) and on <code>#1b1f24</code> (bottom).</p>
+</div><div class="figure">
+<img src="home-dark.png" alt="Home page, dark scheme; the header shows the dark mark.">
+<p class="caption">Home page, dark scheme; the header shows the dark mark.</p>
+</div><div class="figure">
+<img src="home-light.png" alt="Home page, light scheme; the header shows the light mark.">
+<p class="caption">Home page, light scheme; the header shows the light mark.</p>
+</div><div class="figure">
+<img src="readme-dark.png" alt="README header with a dark page (GitHub dark surface `#0d1117`).">
+<p class="caption">README header with a dark page (GitHub dark surface <code>#0d1117</code>).</p>
+</div><div class="figure">
+<img src="readme-light.png" alt="README header (`&lt;picture&gt;` element) with a light page.">
+<p class="caption">README header (<code>&lt;picture&gt;</code> element) with a light page.</p>
+</div><div class="figure">
+<img src="social-preview.png" alt="Social preview, 1280 x 640 px.">
+<p class="caption">Social preview, 1280 x 640 px.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
