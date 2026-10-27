@@ -99,6 +99,88 @@ def mark_morph(pal):
 MARKS = {"grid": mark_grid, "hex": mark_hex, "morph": mark_morph}
 
 
+def _cell(pad, size, n, c, k, sigma, i, j, m=10):
+    """Polygon of grid cell (i, j) (column i, row j) of an n x n grid after the warp."""
+    def pt(u, v):
+        return warp(pad + np.array([u, v]) * size, c, k, sigma)
+    a, b = i / n, (i + 1) / n
+    e, f = j / n, (j + 1) / n
+    ts = np.linspace(0, 1, m)
+    return ([pt(a + (b - a) * t, e) for t in ts] + [pt(b, e + (f - e) * t) for t in ts]
+            + [pt(b - (b - a) * t, f) for t in ts] + [pt(a, f - (f - e) * t) for t in ts])
+
+
+def mark_filled(pal):
+    """Warped grid as a choropleth: filled cells in three tints, centre cell amber and grown."""
+    n, pad, size = 3, 10.0, 76.0
+    c = np.array([48.0, 48.0])
+    tints = [[0.35, 0.7, 0.45], [0.7, 1.0, 0.35], [0.45, 0.7, 0.55]]
+    out = ""
+    for j in range(n):
+        for i in range(n):
+            poly = _cell(pad, size, n, c, 0.6, 22.0, i, j)
+            poly = [tuple(p) for p in poly]
+            if (i, j) == (1, 1):
+                out += f'<path d="{path(poly, True)}" fill="{pal["amber"]}" stroke="{pal["amber"]}" stroke-width="2" stroke-linejoin="round"/>'
+            else:
+                out += f'<path d="{path(poly, True)}" fill="{pal["blue"]}" fill-opacity="{tints[j][i]}" stroke="{pal["blue"]}" stroke-opacity="{tints[j][i]}" stroke-width="2" stroke-linejoin="round"/>'
+    return out
+
+
+def mark_halfway(pal):
+    """The grid before and after: regular on the left, warped on the right (the morph in one frame)."""
+    n, pad, size = 3, 10.0, 76.0
+    c = np.array([48.0, 48.0])
+    out = ""
+    s = np.linspace(0, 1, 30)
+    def k_of(x):  # warp strength grows left to right
+        return 0.7 * min(1.0, max(0.0, (x - 20) / 50.0))
+    def wp(q):
+        return warp(q, c, k_of(q[0]), 22.0)
+    for idx in range(n + 1):
+        u = idx / n
+        v = [wp(pad + np.array([u, t]) * size) for t in s]
+        h = [wp(pad + np.array([t, u]) * size) for t in s]
+        for ln in (v, h):
+            out += f'<path d="{path(ln)}" fill="none" stroke="{pal["blue"]}" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>'
+    # grown amber cell on the right column, middle row
+    ts = np.linspace(0, 1, 10)
+    a, b, e, f = 2 / n, 3 / n, 1 / n, 2 / n
+    P = lambda u, v: wp(pad + np.array([u, v]) * size)
+    poly = [tuple(x) for x in ([P(a + (b - a) * t, e) for t in ts] + [P(b, e + (f - e) * t) for t in ts] + [P(b - (b - a) * t, f) for t in ts] + [P(a, f - (f - e) * t) for t in ts])]
+    out += f'<path d="{path(poly, True)}" fill="{pal["amber"]}"/>'
+    return out
+
+
+def mark_streams(pal):
+    """Streamlines of the flow field parting around a growing amber region."""
+    c = np.array([48.0, 48.0])
+    out = ""
+    xs = np.linspace(10, 86, 40)
+    for y0 in (16, 28, 40, 56, 68, 80):
+        pts = []
+        for x in xs:
+            dy = (y0 - 48.0)
+            push = 17.0 * math.exp(-((x - 48.0) ** 2) / 260.0) * math.copysign(1, dy) * math.exp(-abs(dy) / 22.0)
+            pts.append((x, y0 + push))
+        out += f'<path d="{path(pts)}" fill="none" stroke="{pal["blue"]}" stroke-width="5" stroke-linecap="round"/>'
+    out += f'<ellipse cx="48" cy="48" rx="15" ry="9.5" fill="{pal["amber"]}"/>'
+    return out
+
+
+def mark_dorling(pal):
+    """Dorling circles: area follows data, circles touch where regions were neighbors."""
+    circles = [(34, 40, 21), (66, 34, 13), (70, 62, 17), (40, 72, 13), (22, 68, 9)]
+    out = ""
+    for k, (x, y, r) in enumerate(circles):
+        col = pal["amber"] if k == 0 else pal["blue"]
+        out += f'<circle cx="{x}" cy="{y}" r="{r}" fill="{col}"/>'
+    return out
+
+
+MARKS.update({"filled": mark_filled, "halfway": mark_halfway, "streams": mark_streams, "dorling": mark_dorling})
+
+
 def svg(body, bg=None):
     rect = f'<rect width="96" height="96" fill="{bg}"/>' if bg else ""
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">{rect}{body}</svg>'

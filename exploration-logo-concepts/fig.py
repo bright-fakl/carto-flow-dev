@@ -15,13 +15,14 @@ GAP = 24
 cols = SIZES + [32]  # last column: one-colour (blue only, no amber) at 32 px
 cell_w = [s + GAP for s in cols]
 W = sum(cell_w) + GAP
+SHOW = [n for n in MARKS if n not in ('hex', 'morph')]
 row_h = 128 + GAP
-H = row_h * len(MARKS) + GAP
+H = row_h * len(SHOW) + GAP
 canvas = Image.new("RGB", (W * 2 + 40, H), "#888888")
 for half, variant in enumerate(("light", "dark")):
     pal = PALETTES[variant]
     panel = Image.new("RGB", (W, H), SURF[variant])
-    for r, (name, fn) in enumerate(MARKS.items()):
+    for r, (name, fn) in enumerate((n, MARKS[n]) for n in SHOW):
         x = GAP
         for c, s in enumerate(cols):
             body = fn(pal) if c < 4 else fn({"blue": pal["blue"], "amber": pal["blue"]})

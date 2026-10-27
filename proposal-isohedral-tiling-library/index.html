@@ -79,7 +79,7 @@
 <dt>Kind</dt><dd>proposal</dd>
 <dt>Topic</dt><dd>symbol</dd>
 <dt>Status</dt><dd><span class="status todo">open</span></dd>
-<dt>Referenced by</dt><dd><a href="../exploration-logo-concepts/index.html">Logo concepts for carto-flow (warped grid, hexagon tiles, morph)</a> <span class="meta">(exploration)</span></dd>
+<dt>Referenced by</dt><dd><a href="../exploration-logo-concepts/index.html">Logo concepts for carto-flow (warped grid, choropleth grid, streamlines, circles, hexagons, morph)</a> <span class="meta">(exploration)</span></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/159">#159</a></dd>
 <dt>Created</dt><dd>2026-10-26 22:00</dd>
 <dt>Inputs</dt><dd>tactile 0.1.0 (BSD 3-Clause, Craig S. Kaplan), the 81 types of tactile&#x27;s tiling_types, straight-edge prototiles, 9x9 to 71x71 lattice patches, parameters perturbed by up to ±0.15 (4 draws per type). Single runs.</dd>
@@ -178,8 +178,13 @@ tiling.to_dict(); IsohedralTiling.from_dict(d)</code></pre>
 <tr><td>6</td><td>Docs, benchmark page, first PyPI release</td><td>release</td></tr>
 </table>
 <p>carto-flow&#x27;s public <code>IsohedralTiling</code>, <code>TilingResult</code>, presets, <code>plot_tile</code> and <code>plot_prototile</code> are public API. If their shape changes, the release that ships it is a major version; the plan keeps the names and moves the implementation, so phase 4 can be a minor release if <code>TilingResult</code> and the class names stay.</p>
-<h2>9. Decisions needed</h2>
-<ol><li><strong>Name</strong> of the package (working name <code>isotile</code>).</li><li><strong>Repository</strong> location (<code>bright-fakl/isotile</code>, or a subdirectory/workspace member of carto-flow until the first release).</li><li><strong>Dense or sparse</strong> adjacency in <code>TilingResult</code> (sparse in the library; carto-flow can densify at the boundary).</li><li><strong>License text</strong>: MIT for new code and a <code>NOTICE</code> carrying Kaplan&#x27;s BSD 3-Clause for the data. Confirm that the maintainer accepts this combination.</li><li><strong>Square, hexagon, triangle and quadrilateral tilings</strong>: keep them in carto-flow (proposed), or express them as isohedral types in the library and drop the hand-written classes later.</li></ol>
+<h2>9. Decisions</h2>
+<p>Decided on 2026-10-26: the name is <code>isotile</code> (no project of that name on PyPI; GitHub has unrelated repositories named <code>Isotile</code>, <code>isotiler</code> and <code>isotile-contracts</code>, none a tiling library; recheck before the first release), the repository is <code>bright-fakl/isotile</code> (separate), the license combination is MIT code plus a <code>NOTICE</code> with Kaplan&#x27;s BSD 3-Clause.</p>
+<h3>Square, hexagon, triangle and quadrilateral tilings</h3>
+<p>These are isohedral tilings (every tiling by one of the four is a member of the 81 types; checked in tactile&#x27;s data: types 41 to 76 include regular quadrilaterals with 0 to 4 parameters, types 1 to 20 regular hexagons, types 83 to 93 regular triangles; the 3-gon and 4-gon types number 16 and 37). The carto-flow classes were written for speed and for symbol-specific behavior. Speed is no longer a reason once adjacency comes from the lattice table. What remains is carto-flow-specific: <code>canonical_symbol</code>, <code>tile_size_for_symbol_size</code>, <code>from_polygon</code> and the pointy/flat orientation.</p>
+<p>Proposal: one implementation in the library, and the four families become named constructors of <code>IsohedralTiling</code> (<code>IsohedralTiling.square()</code>, <code>.hexagon(pointy_top=True)</code>, <code>.triangle(...)</code>, <code>.quadrilateral(...)</code>) that choose a type and parameters, and carto-flow keeps its four classes as thin subclasses or wrappers adding the symbol behavior. Before the hand-written generators are removed, phase 4 tests that the library output matches them (tile polygons, centers, adjacency) for the presets in use, and checks that every shape the classes accept (any triangle, any simple quadrilateral) maps to a type with enough parameters; the mapping from <code>from_polygon</code> input to type and parameters is the part to verify, not assume.</p>
+<h3>Still open</h3>
+<ol><li><strong>Dense or sparse</strong> adjacency in <code>TilingResult</code> (sparse in the library; carto-flow can densify at the boundary).</li><li><strong>Creating the repository</strong> <code>bright-fakl/isotile</code> and starting phase 1.</li></ol>
 
 <a class="back" href="../index.html">&larr; back to index</a>
 

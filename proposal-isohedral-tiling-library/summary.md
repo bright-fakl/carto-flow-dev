@@ -152,10 +152,17 @@ The earlier draft estimated ten weeks. The work is smaller because the adjacency
 
 carto-flow's public `IsohedralTiling`, `TilingResult`, presets, `plot_tile` and `plot_prototile` are public API. If their shape changes, the release that ships it is a major version; the plan keeps the names and moves the implementation, so phase 4 can be a minor release if `TilingResult` and the class names stay.
 
-## 9. Decisions needed
+## 9. Decisions
 
-1. **Name** of the package (working name `isotile`).
-2. **Repository** location (`bright-fakl/isotile`, or a subdirectory/workspace member of carto-flow until the first release).
-3. **Dense or sparse** adjacency in `TilingResult` (sparse in the library; carto-flow can densify at the boundary).
-4. **License text**: MIT for new code and a `NOTICE` carrying Kaplan's BSD 3-Clause for the data. Confirm that the maintainer accepts this combination.
-5. **Square, hexagon, triangle and quadrilateral tilings**: keep them in carto-flow (proposed), or express them as isohedral types in the library and drop the hand-written classes later.
+Decided on 2026-10-26: the name is `isotile` (no project of that name on PyPI; GitHub has unrelated repositories named `Isotile`, `isotiler` and `isotile-contracts`, none a tiling library; recheck before the first release), the repository is `bright-fakl/isotile` (separate), the license combination is MIT code plus a `NOTICE` with Kaplan's BSD 3-Clause.
+
+### Square, hexagon, triangle and quadrilateral tilings
+
+These are isohedral tilings (every tiling by one of the four is a member of the 81 types; checked in tactile's data: types 41 to 76 include regular quadrilaterals with 0 to 4 parameters, types 1 to 20 regular hexagons, types 83 to 93 regular triangles; the 3-gon and 4-gon types number 16 and 37). The carto-flow classes were written for speed and for symbol-specific behavior. Speed is no longer a reason once adjacency comes from the lattice table. What remains is carto-flow-specific: `canonical_symbol`, `tile_size_for_symbol_size`, `from_polygon` and the pointy/flat orientation.
+
+Proposal: one implementation in the library, and the four families become named constructors of `IsohedralTiling` (`IsohedralTiling.square()`, `.hexagon(pointy_top=True)`, `.triangle(...)`, `.quadrilateral(...)`) that choose a type and parameters, and carto-flow keeps its four classes as thin subclasses or wrappers adding the symbol behavior. Before the hand-written generators are removed, phase 4 tests that the library output matches them (tile polygons, centers, adjacency) for the presets in use, and checks that every shape the classes accept (any triangle, any simple quadrilateral) maps to a type with enough parameters; the mapping from `from_polygon` input to type and parameters is the part to verify, not assume.
+
+### Still open
+
+1. **Dense or sparse** adjacency in `TilingResult` (sparse in the library; carto-flow can densify at the boundary).
+2. **Creating the repository** `bright-fakl/isotile` and starting phase 1.
