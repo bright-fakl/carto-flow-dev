@@ -273,25 +273,37 @@ for _sh in [k for k in SHAPES if k.startswith("s")]:
 def _best_cut(shape, tv, th):
     """Cut position (x, y) with four pieces, the smallest as large as possible, largest/smallest >= 1.6."""
     best = None
-    for cx in range(34, 60, 2):
-        for cy in range(38, 62, 2):
-            try:
-                pcs = _split(5.0, 8.0, cut_x=cx, cut_y=cy, fv=16.0, fh=20.0, shape=shape, tilt_v=tv, tilt_h=th)
-            except AssertionError:
-                continue
-            a = sorted(g.area for g in pcs)
-            if a[-1] / a[0] >= 1.6 and (best is None or a[0] > best[0]):
-                best = (a[0], cx, cy)
+    for cx in range(30, 64, 2):
+      for cy in range(34, 66, 2):
+          try:
+              pcs = _split(5.0, 8.0, cut_x=cx, cut_y=cy, fv=16.0, fh=20.0, shape=shape, tilt_v=tv, tilt_h=th)
+          except AssertionError:
+              continue
+          a = sorted(g.area for g in pcs)
+          if a[-1] / a[0] >= 1.4 and (best is None or a[0] > best[0]):
+              best = (a[0], cx, cy)
+    if best is None:
+        raise ValueError(f'no four-piece cut for {shape} {tv} {th}')
     return best[1], best[2]
 
 
-def _variant2(shape, tv, th, amber='right'):
+def _variant2(shape, tv, th, amber='right', gap=8.0):
     cx, cy = _best_cut(shape, tv, th)
-    return lambda pal: _blob_mark(pal, 5.0, 8.0, [1.0] * 4, amber, fv=16.0, fh=20.0, shape=shape, tilt_v=tv, tilt_h=th, cut_x=cx, cut_y=cy)
+    return lambda pal: _blob_mark(pal, 5.0, gap, [1.0] * 4, amber, fv=16.0, fh=20.0, shape=shape, tilt_v=tv, tilt_h=th, cut_x=cx, cut_y=cy)
 
 
 for _sh, _tv, _th in [("t0", 8, -10), ("t0", -10, 8), ("t1", 10, -8), ("t1", -8, 12), ("t2", 7, -9)]:
     MARKS[f"{_sh}_v{_tv}_h{_th}"] = _variant2(_sh, _tv, _th)
+
+for _ang in (90, 80, 72, 65, 58):
+    _d = (90 - _ang) / 2.0
+    try:
+        MARKS[f"t1_x{_ang}"] = _variant2("t1", _d + 1.0, -_d + 1.0)
+    except ValueError as _e:
+        print("skipped", _ang, _e)
+
+for _g in (6.0, 8.0, 10.0, 12.0):
+    MARKS[f"t1_x72_g{int(_g)}"] = _variant2("t1", 10.0, -8.0, gap=_g)
 
 MARKS.update({"blob": mark_blob, "blob_wavy": mark_blob_wavy, "blob_small": mark_blob_small,
               "blob_tilt": mark_blob_tilt, "blob_small_tilt": mark_blob_small_tilt})

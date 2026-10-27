@@ -98,3 +98,13 @@ Ranking for the logo mark at all sizes: `s0_right`, `rings_small`, `cf_solid`; f
 - The two rows with a visible tilt difference (`t0_v8_h-10`, `t1_v10_h-8`) no longer read as a flag: the gaps are neither axis-aligned nor perpendicular, the pieces differ in shape, and the silhouette is a tall blob. `t1_v10_h-8` is the most blob-like and still shows four regions at 16 px.
 - `t0_v-10_h8` and `t1_v-8_h12` end up nearly perpendicular (the two rotations partly cancel) and look like the earlier marks.
 - `t2_v7_h-9` (the boxiest outline) has pointed lower-left and upper-left pieces that are a little aggressive at 32 px.
+
+## Refining t1: crossing angle, gap width, contrast (2026-10-26)
+
+figure: fig5_angles.png — `t1` outline with the gaps crossing at 90 (both rotated 1 degree), 80, 72 and 65 degrees (rows, top to bottom). The 58 degree crossing has no valid four-piece cut. Sizes 128, 64, 32 and 16 px, light and dark, one-color last.
+
+figure: fig4_gaps.png — `t1` with the 72 degree crossing (vertical gap rotated 10 degrees, horizontal gap -8 degrees) and gap widths 6, 8, 10 and 12 (rows, top to bottom; units of the 96 x 96 viewBox).
+
+- **Angle.** At 90 degrees the mark is still a cross; 80 degrees is close to it. 72 and 65 degrees read as a tall blob cut by two lines that meet at an angle. At 65 degrees the lower pieces become too unequal (a small lower-left piece), so 72 degrees is the choice: it is the least cross-like without losing a balanced set of pieces.
+- **Gap width.** 6 is thin at 32 px and closes at 16 px. 8 holds down to 16 px. 10 keeps four separate regions at 16 px with more margin; at 12 the gaps start to eat the amber piece. Use 10 for the favicon and 8 for the mark at 32 px and above (6 for a hero-size version).
+- **Contrast of the two colors.** Blue on the white surface 5.5:1, amber on white 2.9:1 (below the 3:1 of WCAG 1.4.11 for graphical objects), blue on the dark surface 7.8:1, amber on dark 10.9:1. Blue against amber, adjacent: 1.9:1 (light) and 1.4:1 (dark). The regions are separated by gaps, so the mark does not depend on that ratio, but the amber on white is slightly under 3:1; a darker amber for the light variant (for example #c27400) is worth testing.
