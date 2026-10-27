@@ -4,13 +4,15 @@ title: Do the lagging counties still make progress when the stall rule stops the
 description: The stall rule judges progress by the mean and the maximum error over all regions. At the stall of the finest county level, the lagging counties continue to improve for another 1,400 iterations (the 72 above 10 % have a median error that falls from 23 % to 1.2 %), and the valid polygons converge (mean 1.3 % to 0.11 %, 60 to 6 above 10 %), while the mean over all counties first falls and then rises above 4 %. The rise comes from the invalid polygons (57 to 100, mostly Virginia), whose areas explode and shift the targets of all regions.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: stall-rule-grid-scaling, exploration-county-error-relation, exploration-quadtree-windows
 date: 2026-10-19 15:00
 before: main @ 06d4ff0
 after: the same checkout; script only, no library change
 inputs: 3,108 bundled counties (population), max_segment_length 1000, auto ladder, n_iter 1000, area_scale 1e-6; then `w.morph(grid=2048, n_iter=1500, stall_patience=None, snapshot_every=50)` continued from the stalled finest level. Single run.
 ---
+
+**Outcome (2026-10-27).** Superseded by the follow-up measurements: with valid polygons the gain from continuing is smaller than measured here (see exploration-stall-after-validity). The stall rule now follows the lagging regions (PR 186).
 
 ## The question
 

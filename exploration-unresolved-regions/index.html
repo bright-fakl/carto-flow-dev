@@ -78,7 +78,7 @@
 <dl class="meta-list">
 <dt>Kind</dt><dd>exploration</dd>
 <dt>Topic</dt><dd>flow</dd>
-<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Status</dt><dd><span class="status done">led-to</span></dd>
 <dt>Related</dt><dd><a href="../exploration-stall-after-validity/index.html">Does the stall rule still lose progress now that validity=&quot;repair-crossings&quot; exists?</a> <span class="meta">(exploration)</span><br><a href="../exploration-stall-lagging-regions/index.html">Do the lagging counties still make progress when the stall rule stops the run?</a> <span class="meta">(exploration)</span><br><a href="../exploration-county-error-relation/index.html">Area error of the county flow cartogram against original and target area</a> <span class="meta">(exploration)</span><br><a href="../unresolved-regions-pr/index.html">area_tol_cells (early stop), n_unresolved and a stall warning that names the continuation</a> <span class="meta">(pr)</span></dd>
 <dt>Referenced by</dt><dd><a href="../exploration-stall-lagging-component/index.html">Which stall-rule component follows the lagging regions? Candidates on real county, district, state and scene runs</a> <span class="meta">(exploration)</span></dd>
 <dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/177">#177</a></dd>
@@ -88,6 +88,7 @@
 <dt>Inputs</dt><dd>3,108 bundled counties (population), max_segment_length 1000, morph_multiresolution with min_resolution and levels auto (grids 512, 1024, 2048), area_scale 1e-6, n_iter 1000, validity=&quot;repair-crossings&quot;, default tolerances (mean_tol 5 %, max_tol 10 %). Controls: 432 congressional districts (max_segment_length 1000) and the 49 states, n_iter 300. Single runs. Errors are the relative errors of the returned geometries.</dd>
 </dl>
 <p class="desc">area_tol_cells is an early-stopping option, not an accuracy option: users who accept a small absolute size for small regions let the convergence test pass earlier. On the county ladder the finest level ends CONVERGED from 4 finest-grid cells, after 15 iterations and with a less accurate result than the stalled run (mean 1.28 % against 0.94 %, 103 counties above 10 % against 46); at 1 to 2 cells it only reports (34 and 59 counties unresolved). Excluding regions with a target below k cells does not converge the finest level up to 8 cells. Districts and states are unchanged. The option is off by default.</p>
+<p><strong>Outcome (2026-10-27).</strong> Merged as <code>area_tol_cells</code> (default 0, an early-stopping option for small regions), <code>Cartogram.n_unresolved</code> and a stall warning that names the continuation (PR 185). The measurement did not support a non-zero default.</p>
 <p><code>measure.py &lt;dir&gt;</code> runs the ladders with <code>area_tol_cells</code> (the library branch), <code>analyze.py &lt;dir&gt;</code> computes what each rule excuses on the baseline levels and draws the figure. <code>measure_per_level.json</code> is the first measurement, in which k counted cells of the grid of each level.</p>
 <h2>1. What each rule excuses (offline, baseline levels, k in cells of the level&#x27;s own grid)</h2>
 <p>Counties above 10 % in the baseline: 762 (grid 512), 413 (1024), 46 (2048).</p>

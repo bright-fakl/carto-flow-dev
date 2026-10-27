@@ -4,13 +4,15 @@ title: Does the stall rule still lose progress now that validity="repair-crossin
 description: With validity="repair-crossings" the county ladder has no invalid polygons and its mean error falls from 1.37 to 1.08 %, but every level still ends STALLED and 45 valid counties stay above 10 %. Continued for 1,000 iterations they fall to 8 (mean 1.0 to 0.68 %). The earlier gain (mean 1.3 to 0.11 %) came from the normalization on invalid polygons; the real gain of continuing is smaller, and the unresolved tail is sub-cell counties.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-stall-lagging-regions, exploration-county-error-relation, validated-windows-pr
 date: 2026-10-26 17:00
 before: main @ 4271a3b
 after: the same checkout; scripts only, no library change
 inputs: 3,108 bundled counties (population), max_segment_length 1000, auto ladder, n_iter 1000, area_scale 1e-6, grid 2048 for the continuation. Errors of valid polygons against targets normalized on the valid polygons. Single runs; NUMBA default threads.
 ---
+
+**Outcome (2026-10-27).** Led to the issue 177 work: PR 185 (`area_tol_cells`, `n_unresolved`, stall warning with the continuation call) and PR 186 (`wait_for_lagging_regions`). Both merged.
 
 `ladder_modes.py <dir>` runs the ladder per validity mode, `continue_valid.py <dir>` continues the finest level of the `"repair-crossings"` run with the stall rule off and snapshots every 20 iterations, `analyze.py` replays candidate progress measures on those snapshots, `fig.py` draws the figure.
 

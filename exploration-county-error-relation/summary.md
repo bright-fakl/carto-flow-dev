@@ -4,13 +4,15 @@ title: Area error of the county flow cartogram against original and target area
 description: 72 of 3,108 counties end above 10 % area error. The error depends on the shrink factor (target over original area) and on the target size in grid cells together. No county that shrinks by less than 10 times, and almost none with a target of 16 cells or more, is above 10 %. The failing counties are thin strips along the Great Plains and a cluster in Virginia.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-counties-subcell, exploration-quadtree-windows
 date: 2026-10-19 12:00
 before: main @ 06d4ff0
 after: the same checkout; script only, no library change
 inputs: 3,108 bundled counties (population) with max_segment_length 1000, ladder with min_resolution and levels auto, n_iter 1000, area_scale 1e-6, default options. Error is the output area against the population share of the total output area; the cell is that of the finest level (4.26 km, 18.1 km2). Single run.
 ---
+
+**Outcome (2026-10-27).** The remaining tail of sub-cell and few-cell counties is handled by `area_tol_cells` as an early stop (PR 185) and by `wait_for_lagging_regions` (PR 186); issue 177 is closed.
 
 `relation.py <output dir>` runs the morph and draws the four figures. The run ends stalled with a mean error of 1.52 %, a median of 0.25 % and a maximum of 523 %.
 

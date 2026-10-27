@@ -4,13 +4,15 @@ title: Absolute area tolerance as an early stop, and sub-cell exclusion, for reg
 description: area_tol_cells is an early-stopping option, not an accuracy option: users who accept a small absolute size for small regions let the convergence test pass earlier. On the county ladder the finest level ends CONVERGED from 4 finest-grid cells, after 15 iterations and with a less accurate result than the stalled run (mean 1.28 % against 0.94 %, 103 counties above 10 % against 46); at 1 to 2 cells it only reports (34 and 59 counties unresolved). Excluding regions with a target below k cells does not converge the finest level up to 8 cells. Districts and states are unchanged. The option is off by default.
 kind: exploration
 topic: flow
-status: open
+status: led-to
 related: exploration-stall-after-validity, exploration-stall-lagging-regions, exploration-county-error-relation, unresolved-regions-pr
 date: 2026-10-26 20:00
 before: main @ 6921aca
 after: feat/unresolved-regions (area_tol_cells)
 inputs: 3,108 bundled counties (population), max_segment_length 1000, morph_multiresolution with min_resolution and levels auto (grids 512, 1024, 2048), area_scale 1e-6, n_iter 1000, validity="repair-crossings", default tolerances (mean_tol 5 %, max_tol 10 %). Controls: 432 congressional districts (max_segment_length 1000) and the 49 states, n_iter 300. Single runs. Errors are the relative errors of the returned geometries.
 ---
+
+**Outcome (2026-10-27).** Merged as `area_tol_cells` (default 0, an early-stopping option for small regions), `Cartogram.n_unresolved` and a stall warning that names the continuation (PR 185). The measurement did not support a non-zero default.
 
 `measure.py <dir>` runs the ladders with `area_tol_cells` (the library branch), `analyze.py <dir>` computes what each rule excuses on the baseline levels and draws the figure. `measure_per_level.json` is the first measurement, in which k counted cells of the grid of each level.
 

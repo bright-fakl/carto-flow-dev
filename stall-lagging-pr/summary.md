@@ -10,8 +10,8 @@ base: feat/unresolved-regions
 branch: feat/stall-lagging-regions
 related: exploration-stall-lagging-component, unresolved-regions-pr, exploration-stall-after-validity
 date: 2026-10-26 23:30
-before: feat/unresolved-regions @ f30c2b4
-after: feat/stall-lagging-regions @ 595ba18
+before: main @ b1da1a5
+after: main @ 408284b (merged)
 inputs: see exploration-stall-lagging-component (counties with 1 km input, districts, states and strip scenes).
 ---
 
