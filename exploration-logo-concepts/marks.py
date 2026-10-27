@@ -182,6 +182,9 @@ MARKS.update({"filled": mark_filled, "halfway": mark_halfway, "streams": mark_st
 
 
 SHAPES = {
+    "t0": dict(h=[(2, 0.10, 0.5), (3, 0.10, 1.3), (4, 0.05, 0.2), (5, 0.04, 0.9)], sx=0.82, sy=1.0, r=40.0),
+    "t1": dict(h=[(2, 0.09, 2.2), (3, 0.12, 0.4), (5, 0.05, 1.7)], sx=0.85, sy=1.0, r=40.0),
+    "t2": dict(h=[(2, 0.12, 1.0), (3, 0.08, 2.6), (4, 0.06, 0.5), (6, 0.03, 0.3)], sx=0.78, sy=1.0, r=40.0),
     "s0": dict(h=[(2, 0.07, 0.5), (3, 0.07, 1.3), (5, 0.035, 0.2)], sx=1.0, sy=0.9, r=36.0),
     "s1": dict(h=[(2, 0.12, 0.0), (3, 0.06, 2.0), (4, 0.04, 0.7)], sx=1.1, sy=0.78, r=33.0),
     "s2": dict(h=[(2, 0.04, 1.0), (3, 0.10, 0.3), (6, 0.03, 1.5)], sx=1.0, sy=0.95, r=35.0),
@@ -197,7 +200,7 @@ def _blob(cx=48.0, cy=48.0, r=36.0, m=240, shape=None):
     return Polygon(list(zip(cx + sh['sx'] * r * rad * np.cos(t), cy + sh['sy'] * r * rad * np.sin(t))))
 
 
-def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0, tilt=0.0, shape=None):
+def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0, tilt=0.0, shape=None, tilt_v=0.0, tilt_h=0.0):
     """Blob minus one wavy vertical and one wavy horizontal line of width gap: four regions."""
     from shapely.geometry import LineString
     from shapely.ops import unary_union
@@ -205,18 +208,27 @@ def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0, tilt=0.0, shape=N
     xs = np.linspace(0, 96, 120)
     v = LineString([(cut_x + amp * math.sin(y / fv + 0.4), y) for y in ys])
     h = LineString([(x, cut_y + amp * math.sin(x / fh + 1.2)) for x in xs])
+    if tilt_v or tilt_h:
+        from shapely.affinity import rotate as _rot
+        v = _rot(v, tilt_v, origin=(48, 48))
+        h = _rot(h, tilt_h, origin=(48, 48))
     cut = unary_union([v, h]).buffer(gap / 2, cap_style=2)
     if tilt:
         from shapely.affinity import rotate
         cut = rotate(cut, tilt, origin=(48, 48))
     pieces = _blob(shape=shape).difference(cut)
+    tot = _blob(shape=shape).area
+    assert not (shape or '').startswith('t') or len(pieces.geoms) == 4 and min(g.area for g in pieces.geoms) > 0.08 * tot, (shape, tilt_v, tilt_h, [round(g.area / tot, 2) for g in pieces.geoms])
     return sorted(pieces.geoms, key=lambda g: (-g.centroid.y, g.centroid.x))
 
 
 def _blob_mark(pal, amp, gap, tints, amber_idx, **kw):
     out = ""
-    amber_idx = amber_idx if isinstance(amber_idx, (set, tuple, list)) else (amber_idx,)
-    for k, g in enumerate(_split(amp, gap, **kw)):
+    amber_idx = amber_idx if isinstance(amber_idx, (set, tuple, list, str)) else (amber_idx,)
+    pieces = _split(amp, gap, **kw)
+    if amber_idx == 'right':  # the two pieces with the largest centroid x
+        amber_idx = tuple(sorted(range(4), key=lambda i: -pieces[i].centroid.x)[:2])
+    for k, g in enumerate(pieces):
         pts = list(g.exterior.coords)
         if k in amber_idx:
             out += f'<path d="{path(pts, True)}" fill="{pal["amber"]}"/>'
@@ -254,9 +266,32 @@ def _variant(shape, amber):
     return lambda pal: _blob_mark(pal, 5.0, 8.0, [1.0] * 4, amber, fv=16.0, fh=20.0, shape=shape)
 
 
-for _sh in SHAPES:
+for _sh in [k for k in SHAPES if k.startswith("s")]:
     MARKS[f"{_sh}_left"] = _variant(_sh, (0, 2))
     MARKS[f"{_sh}_right"] = _variant(_sh, (1, 3))
+
+def _best_cut(shape, tv, th):
+    """Cut position (x, y) with four pieces, the smallest as large as possible, largest/smallest >= 1.6."""
+    best = None
+    for cx in range(34, 60, 2):
+        for cy in range(38, 62, 2):
+            try:
+                pcs = _split(5.0, 8.0, cut_x=cx, cut_y=cy, fv=16.0, fh=20.0, shape=shape, tilt_v=tv, tilt_h=th)
+            except AssertionError:
+                continue
+            a = sorted(g.area for g in pcs)
+            if a[-1] / a[0] >= 1.6 and (best is None or a[0] > best[0]):
+                best = (a[0], cx, cy)
+    return best[1], best[2]
+
+
+def _variant2(shape, tv, th, amber='right'):
+    cx, cy = _best_cut(shape, tv, th)
+    return lambda pal: _blob_mark(pal, 5.0, 8.0, [1.0] * 4, amber, fv=16.0, fh=20.0, shape=shape, tilt_v=tv, tilt_h=th, cut_x=cx, cut_y=cy)
+
+
+for _sh, _tv, _th in [("t0", 8, -10), ("t0", -10, 8), ("t1", 10, -8), ("t1", -8, 12), ("t2", 7, -9)]:
+    MARKS[f"{_sh}_v{_tv}_h{_th}"] = _variant2(_sh, _tv, _th)
 
 MARKS.update({"blob": mark_blob, "blob_wavy": mark_blob_wavy, "blob_small": mark_blob_small,
               "blob_tilt": mark_blob_tilt, "blob_small_tilt": mark_blob_small_tilt})

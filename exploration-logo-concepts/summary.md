@@ -90,3 +90,11 @@ figure: fig3_velocity.png — The two larger-arrow velocity-field variants, at t
 - **Velocity field.** Arrows only read at 64 px and above: at 32 px the heads vanish and at 16 px they are dots. The radial field (`velocity`, `velocity2`) reads as a burst or a sun. The stream past a disc (`velocity3`) reads as a flow, but the deflection is hardly visible with a 4 x 4 grid. Better suited as a large graphic (social preview, README header) than as the logo mark.
 
 Ranking for the logo mark at all sizes: `s0_right`, `rings_small`, `cf_solid`; for large graphics: the velocity field.
+
+## Taller, blobbier outlines with non-perpendicular gaps (2026-10-26)
+
+`fig1_marks.png` now shows, from the top: `s0_right` (reference), `t0_v8_h-10`, `t0_v-10_h8`, `t1_v10_h-8`, `t1_v-8_h12`, `t2_v7_h-9`. The outlines `t0` to `t2` are taller than wide (width 0.78 to 0.85 of the height) with larger harmonics (amplitudes up to 0.12, plus a fifth or sixth harmonic). `vN_hM` rotates the vertical gap by N degrees and the horizontal gap by M degrees about the blob center, independently. For each combination `_best_cut` searches the crossing position for four pieces with the smallest piece as large as possible and a largest-to-smallest ratio of at least 1.6; amber is the two pieces with the largest centroid x.
+
+- The two rows with a visible tilt difference (`t0_v8_h-10`, `t1_v10_h-8`) no longer read as a flag: the gaps are neither axis-aligned nor perpendicular, the pieces differ in shape, and the silhouette is a tall blob. `t1_v10_h-8` is the most blob-like and still shows four regions at 16 px.
+- `t0_v-10_h8` and `t1_v-8_h12` end up nearly perpendicular (the two rotations partly cancel) and look like the earlier marks.
+- `t2_v7_h-9` (the boxiest outline) has pointed lower-left and upper-left pieces that are a little aggressive at 32 px.
