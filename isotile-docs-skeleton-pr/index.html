@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #2: &quot;isotile docs skeleton and GitHub Pages deployment&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #2: &quot;isotile docs skeleton and GitHub Pages deployment&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">unknown</span></dd>
+<dt>Related</dt><dd><a href="../proposal-isohedral-tiling-library/index.html">Design of the standalone isohedral tiling library (replacing tactile)</a> <span class="meta">(proposal)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isotile/pull/2">https://github.com/bright-fakl/isotile/pull/2</a></dd>
+<dt>Branch</dt><dd>docs-skeleton</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-27 18:00</dd>
+<dt>Before</dt><dd>bright-fakl/isotile main at 39c5778 (phase 1)</dd>
+<dt>After</dt><dd>bright-fakl/isotile docs-skeleton at ffef968 (PR 2, CI green, not merged)</dd>
+<dt>Inputs</dt><dd>uv 0.8.17, Python 3.10 locally, mkdocs 1.6.1, mkdocs-material 9.7.7, mkdocstrings 1.0.6 with mkdocstrings-python 2.0.9, pymdown-extensions 11.0.2, headless Chromium for screenshots (dark palette shown by setting data-md-color-scheme=&quot;slate&quot; on a copy of the build, because the headless color-scheme flag did not switch the palette)</dd>
+</dl>
+<p class="desc">Adds the mkdocs-material documentation site (home, quickstart, concepts, adjacency, API reference from docstrings, development, changelog), tests that run the page code and check that the API reference lists every public name, a strict docs build job in CI and a Pages deployment workflow for main.</p>
+<h2>What changed</h2>
+<ul><li>Dependency group <code>docs</code> (<code>mkdocs&lt;2</code>, mkdocs-material, mkdocstrings[python], <code>pymdown-extensions&gt;=10.12,&lt;12</code>); <code>uv.lock</code> updated; default <code>uv sync</code> unchanged. The pins are commented in <code>pyproject.toml</code>: mkdocstrings 1.0.x crashed with pymdown-extensions 12.3 (<code>Highlight.__init__</code> missing <code>md</code>), and Material warns about MkDocs 2.0.</li><li><code>mkdocs.yml</code>: material theme with carto-flow&#x27;s light and dark palettes and navigation features, code copy, search, permalinks, strict; logo and favicon unset (Material shows its default book icon until the logo PR).</li><li>Pages: <code>index</code>, <code>quickstart</code>, <code>concepts</code>, <code>adjacency</code>, <code>development</code>, <code>changelog</code> (pymdownx.snippets include of <code>CHANGELOG.md</code>, which also works on Windows), and the API reference <code>api/index</code>, <code>api/tiling</code>, <code>api/types</code>, <code>api/prototile</code>, <code>api/adjacency</code>.</li><li>Docstrings: numpy style completed (Parameters, Returns, Attributes, property docstrings); Sphinx roles replaced by mkdocstrings cross-references. No behavior change.</li><li><code>tests/test_docs_examples.py</code>: runs the python blocks of index, quickstart, concepts, adjacency and development (shared namespace per page, temporary directory, Agg backend if matplotlib is mentioned); fails if any other docs page has a python block; checks that the <code>::: isotile.X</code> entries in <code>docs/api/*.md</code> equal <code>isotile.__all__</code> exactly and that all <code>__all__</code> names import. Skips when <code>docs/</code> is absent (sdist).</li><li>CI: a <code>check-docs</code> job in <code>main.yml</code> (<code>--group docs --no-group tactile</code>); <code>deploy-docs.yml</code> with a build job on push, pull request (paths limited) and dispatch, and a deploy job only on push to <code>main</code> and dispatch (pages permissions, concurrency group <code>pages</code>, <code>github-pages</code> environment, <code>upload-pages-artifact@v3</code>, <code>deploy-pages@v4</code>).</li><li>README docs link and a static docs badge; CHANGELOG Unreleased entry.</li></ul>
+<h2>Checks</h2>
+<table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td><code>mkdocs build -s</code></td><td>no warnings; an unresolvable <code>::: isotile.Nope</code> fails the build (verified)</td></tr>
+<tr><td>pytest</td><td>2,843 passed, 78 skipped</td></tr>
+<tr><td>ruff, ruff format, mypy --strict, <code>uv lock --check</code>, <code>_build_data --check</code></td><td>clean</td></tr>
+<tr><td>CI at ffef968</td><td>all jobs green (lint, typecheck, tests on Linux 3.10 to 3.13, macOS 3.12, Windows 3.12, tactile-equivalence, data-check, minimum-versions, wheel-smoke-test, check-docs, deploy-docs build); the deploy job is skipped on the PR by design</td></tr>
+<tr><td>Visual</td><td>light and dark checked for six pages; tables, code with copy buttons, API signatures, table of contents and class and method summaries render; long code comments scroll horizontally inside code blocks</td></tr>
+<tr><td>Claims in the docs</td><td>checked by running the code (tile counts, neighbor counts, <code>safe_ranges</code> of type 7, <code>find_types</code>, table symmetry for all 81 types, lattice against geometric adjacency, tile order of <code>cover</code>)</td></tr>
+</table>
+<h2>Could not be verified</h2>
+<ul><li>The deployment itself: the <code>github-pages</code> environment only allows <code>main</code>, so the live site at https://bright-fakl.github.io/isotile/ can only be checked after the merge.</li><li>The docs build on Windows and macOS (the docs job runs on Linux).</li><li>A griffe DeprecationWarning (invalid escape) surfaced once and was fixed; strict mode would not have failed on it, so the build output should be watched.</li></ul>
+<h2>Open questions</h2>
+<p>Logo and favicon (next PR); whether the static badge becomes the Pages deployment badge once the site is live.</p>
+<div class="figure">
+<img src="adjacency-dark.png" alt="Adjacency page, dark palette.">
+<p class="caption">Adjacency page, dark palette.</p>
+</div><div class="figure">
+<img src="adjacency-light.png" alt="Adjacency page, light palette.">
+<p class="caption">Adjacency page, light palette.</p>
+</div><div class="figure">
+<img src="api-tiling-dark.png" alt="API reference of the tiling module, dark palette.">
+<p class="caption">API reference of the tiling module, dark palette.</p>
+</div><div class="figure">
+<img src="api-tiling-light.png" alt="API reference of the tiling module, light palette.">
+<p class="caption">API reference of the tiling module, light palette.</p>
+</div><div class="figure">
+<img src="api-types-light.png" alt="API reference of the types module, light palette.">
+<p class="caption">API reference of the types module, light palette.</p>
+</div><div class="figure">
+<img src="concepts-light.png" alt="Concepts page, light palette.">
+<p class="caption">Concepts page, light palette.</p>
+</div><div class="figure">
+<img src="home-dark.png" alt="Home page, dark palette.">
+<p class="caption">Home page, dark palette.</p>
+</div><div class="figure">
+<img src="home-light.png" alt="Home page, light palette.">
+<p class="caption">Home page, light palette.</p>
+</div><div class="figure">
+<img src="quickstart-dark.png" alt="Quickstart page, dark palette.">
+<p class="caption">Quickstart page, dark palette.</p>
+</div><div class="figure">
+<img src="quickstart-light.png" alt="Quickstart page, light palette.">
+<p class="caption">Quickstart page, light palette.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
