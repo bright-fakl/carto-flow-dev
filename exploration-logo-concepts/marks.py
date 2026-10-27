@@ -188,7 +188,7 @@ def _blob(cx=48.0, cy=48.0, r=36.0, m=240):
     return Polygon(list(zip(cx + 1.0 * r * rad * np.cos(t), cy + 0.9 * r * rad * np.sin(t))))
 
 
-def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0):
+def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0, tilt=0.0):
     """Blob minus one wavy vertical and one wavy horizontal line of width gap: four regions."""
     from shapely.geometry import LineString
     from shapely.ops import unary_union
@@ -197,6 +197,9 @@ def _split(amp, gap, cut_x=42.0, cut_y=52.0, fv=11.0, fh=14.0):
     v = LineString([(cut_x + amp * math.sin(y / fv + 0.4), y) for y in ys])
     h = LineString([(x, cut_y + amp * math.sin(x / fh + 1.2)) for x in xs])
     cut = unary_union([v, h]).buffer(gap / 2, cap_style=2)
+    if tilt:
+        from shapely.affinity import rotate
+        cut = rotate(cut, tilt, origin=(48, 48))
     pieces = _blob().difference(cut)
     return sorted(pieces.geoms, key=lambda g: (-g.centroid.y, g.centroid.x))
 
@@ -227,7 +230,17 @@ def mark_blob_small(pal):
     return _blob_mark(pal, 5.0, 8.0, [1.0, 1.0, 1.0, 0.0], 3, fv=16.0, fh=20.0)
 
 
-MARKS.update({"blob": mark_blob, "blob_wavy": mark_blob_wavy, "blob_small": mark_blob_small})
+def mark_blob_tilt(pal):
+    return _blob_mark(pal, 7.0, 5.0, [1.0, 1.0, 1.0, 0.0], 3, tilt=-13.0)
+
+
+def mark_blob_small_tilt(pal):
+    """Favicon: thick gaps, curvier waves (periods 12 and 15, amplitude 6), cross tilted."""
+    return _blob_mark(pal, 6.0, 8.0, [1.0, 1.0, 1.0, 0.0], 3, fv=12.0, fh=15.0, tilt=-13.0)
+
+
+MARKS.update({"blob": mark_blob, "blob_wavy": mark_blob_wavy, "blob_small": mark_blob_small,
+              "blob_tilt": mark_blob_tilt, "blob_small_tilt": mark_blob_small_tilt})
 
 
 def svg(body, bg=None):

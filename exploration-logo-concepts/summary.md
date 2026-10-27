@@ -12,7 +12,7 @@ inputs: Palette from PlotStyle light (series #2c6e9e, highlight #d98200) and dar
 
 `marks.py <out_dir>` writes `<concept>-light.svg` and `<concept>-dark.svg` for each concept (committed in `svg/`); `fig.py` draws the legibility figure. The marks are plain geometry, so they carry no licensing constraint from fonts or third-party artwork (original work, covered by the project's MIT license).
 
-figure: fig1_marks.png — Rows: `blob_wavy` after the review (horizontal gap with a lower spatial frequency, wave period 14 instead of 9; cut moved to x 42, y 52), and `blob_small`, a favicon variant with gaps 8 wide instead of 5 and gentler waves (periods 16 and 20). The other concepts are in svg/ and in the earlier version of this page's figure, now left out. Left half light surface, right half dark surface. Columns: 128, 64, 32 and 16 px, then 32 px in one color (the amber part drawn in the blue). Renders are 1:1, the figure is enlarged 2x with nearest-neighbor so the pixels stay visible.
+figure: fig1_marks.png — Rows from the top: `blob_wavy`, `blob_tilt` (same, cross rotated by 13 degrees), `blob_small`, `blob_small_tilt` (gaps 8 wide, periods 12 and 15, amplitude 6, rotated 13 degrees). Earlier caption of the first two rows: `blob_wavy` after the review (horizontal gap with a lower spatial frequency, wave period 14 instead of 9; cut moved to x 42, y 52), and `blob_small`, a favicon variant with gaps 8 wide instead of 5 and gentler waves (periods 16 and 20). The other concepts are in svg/ and in the earlier version of this page's figure, now left out. Left half light surface, right half dark surface. Columns: 128, 64, 32 and 16 px, then 32 px in one color (the amber part drawn in the blue). Renders are 1:1, the figure is enlarged 2x with nearest-neighbor so the pixels stay visible.
 
 ## Concepts
 
@@ -52,3 +52,11 @@ Wordmark with the name `carto-flow`, favicon set (SVG, 32 px and 180 px PNG), 12
 - One accent region and a single blue, not four colors. The four-color variants of the first round should not be used.
 
 This is a design judgment, not a trademark opinion; if the logo will be used widely, a check by someone qualified is worth doing before adoption. A cheap further separation is to tilt the cross by about 10 to 15 degrees so the gaps are not horizontal and vertical.
+
+## Tilted cross and curvier favicon (2026-10-26)
+
+`marks.py` now has `blob_tilt` and `blob_small_tilt` (the cut is rotated by 13 degrees about the blob center).
+
+- Rotating the cross removes the horizontal and vertical gaps, so the mark no longer reads as a window pane at any size. The cost is that the lower-left region becomes a narrow wedge.
+- `blob_small_tilt` is the best favicon so far: gaps 8 wide, visibly curved at 16 px, four regions separate, one amber. `blob_small` (untilted) is the one closest to the Windows layout and should not be used.
+- Not yet done: choosing the final tilt angle (13 degrees was a first guess; 8 to 20 are worth comparing), fixing which region is amber, and drawing the wordmark.
