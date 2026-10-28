@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #190: &quot;isotile adoption step 1: tilings over isotile, tactile and the grid generator removed&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #190: &quot;isotile adoption step 1: tilings over isotile, tactile and the grid generator removed&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../proposal-isotile-adoption/index.html">carto-flow adopts isotile (phase 3 design)</a> <span class="meta">(proposal)</span><br><a href="../isotile-step-0-pr/index.html">&quot;isotile step 0: preset amplitude, neighbor_lists, cover precision&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/190">https://github.com/bright-fakl/carto-flow/pull/190</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/159">#159</a></dd>
+<dt>Branch</dt><dd>isotile-adoption-step-1</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-27 23:50</dd>
+<dt>Before</dt><dd>main at a9b4b7f (tactile-based tilings; 610 tests in the 13 relevant files, 1,595 passed with the prototype before the test migration)</dd>
+<dt>After</dt><dd>isotile-adoption-step-1 @ 78f62f0 (1,806 passed, 2 skipped, 4 xfailed locally on Python 3.12)</dd>
+<dt>Inputs</dt><dd>carto-flow a9b4b7f against 78f62f0; isotile main at 392484c (step 0 merged); Python 3.12.3, numpy 2.3.3, scipy 1.16.2, shapely 2.1; bundled census data (49 states, 432 districts, Texas counties); 16-core WSL2 machine. Timings of the repair measurement are best of 3, old and new run one after the other with nothing else running; every other timing is a single run and not comparable.</dd>
+</dl>
+<p class="desc">The five tilings of symbol_cartogram/tiling.py become thin wrappers over isotile (about 1,350 lines instead of 2,855), tactile is replaced by an isotile dependency pinned to a commit, TileAdjacencyType, generate_grid and compute_grid_symbol_size are removed, and the lattice is anchored at the region center. Every grid and mosaic layout changes with the lattice position; the figures and the metrics show states and districts with hexagon, square, triangle and curved tilings, and the mosaic repair cost is measured on five inputs. The districts with hexagons take 7.2 s instead of 3.5 s, in the contiguity repair; the other inputs are not slower.</p>
+<p>This is step 1 of <a href="../proposal-isotile-adoption/index.html">proposal-isotile-adoption</a> (sections 8.1 and 8.2). Rotation and offset options (step 3) and sparse adjacency (step 2) are not in this PR.</p>
+<h2>What changed</h2>
+<ul><li><code>symbol_cartogram/tiling.py</code>: <code>_IsotileTiling</code> holds an <code>isotile.IsohedralTiling</code> whose frame gives the orientation; <code>generate</code> is one <code>fill_region</code> call, the polygons, transforms (center, rotation, flip), dense adjacency matrices and the new optional field <code>tile_set</code> come from the <code>TileSet</code>. <code>SquareTiling</code>, <code>HexagonTiling</code>, <code>TriangleTiling</code>, <code>QuadrilateralTiling</code> and <code>IsohedralTiling</code> keep their constructors and convenience classmethods; the <code>IsohedralTiling</code> methods for types, presets and serialization are one-line delegates to isotile.</li><li>Removed: tactile and its mypy override, <code>TileAdjacencyType</code> (the <code>adjacency_type</code> argument takes <code>&quot;edge&quot;</code>, <code>&quot;vertex&quot;</code>, <code>&quot;vertex-only&quot;</code>), <code>grid.py</code> (<code>generate_grid</code>, <code>compute_grid_symbol_size</code>) with <code>tests/test_grid.py</code> (57 tests), the adjacency helpers and the old <code>IsohedralTiling.generate</code> machinery.</li><li><code>pyproject.toml</code>: <code>isotile&gt;=0.1.0.dev0</code> in <code>dependencies</code> and <code>isotile = { git = ..., rev = &quot;392484c254d44af317a24dcea69bd8dcf44a83fc&quot; }</code> in <code>[tool.uv.sources]</code>. <code>uv lock --locked</code> and <code>uv sync --frozen</code> work, and the CI jobs install isotile from GitHub. The lock file was edited by hand (isotile added, tactile removed) because uv 0.8.17 rewrites the whole file to lock revision 3 (4,400 changed lines).</li><li>Docs: <code>docs/explanations/tiling-system.md</code> rewritten, CHANGELOG breaking-changes block (next release 3.0.0). The migration page <code>docs/migrating-to-3.0.md</code> is step 4.</li></ul>
+<h2>Tests</h2>
+<table>
+<tr><th></th><th>Count</th></tr>
+<tr><td>Full suite</td><td>1,806 passed, 2 skipped, 4 xfailed</td></tr>
+<tr><td><code>tests/test_tilings.py</code></td><td>178 (was 124): 100 stay unchanged, rewrites per section 7, new tests of coverage (far from the origin up to 1e6, random triangles and quadrilaterals, symmetric expansion), adjacency kinds, <code>tile_set</code>, serialization, flat-top hexagons</td></tr>
+<tr><td>golden tilings (<code>tests/test_tilings_golden.py</code>)</td><td>19 named + 15 presets + 81 types, 15 symbols, 2 saved-cartogram tests, 1 count test: all pass</td></tr>
+<tr><td>golden layouts (<code>tests/test_tiling_layouts_golden.py</code>)</td><td>10 cases (states: all 9 grid and mosaic cases; districts: mosaic hexagon): all pass</td></tr>
+<tr><td>removed</td><td><code>tests/test_grid.py</code> 57; 13 tests of the deleted lattice-adjacency helpers; 7 type-info tests and 6 <code>find_types</code> tests and 4 preset tests, which isotile has (<code>test_types.py</code>, <code>test_presets.py</code>, <code>test_edges.py</code>)</td></tr>
+</table>
+<p>The three lattice-dependent mosaic tests are restated: <code>test_repair_loop_assignment_is_pinned</code> pins the footprints (sorted tile centers of each region) instead of tile indices; <code>test_us_states_needs_more_than_8_hops[False]</code> runs at 350 tiles, where 8 hops strand a region on the new lattice (at 250 and 300 tiles both reaches leave one region split; 16 hops are never worse than 8 at 250, 300 and 350); <code>test_plot_tiling[True]</code> asserts that the core collection exists exactly when core tiles are unassigned, and runs for hexagon and triangle.</p>
+<p><code>ruff check</code>, <code>ruff format</code>, <code>mypy</code> and <code>deptry src</code> pass. The docs build (<code>mkdocs build -s</code>) executes all gallery examples without error and then stops in mkdocs-gallery (<code>OverflowError</code> in <code>_sec_to_readable</code>); the same happens with the sources of main in this environment.</p>
+<h2>Golden fixtures</h2>
+<p>Generated from the tactile-based code before it was deleted: base commit a9b4b7f of main, script <a href="golden_tilings.py">golden_tilings.py</a> (<code>PYTHONPATH=&lt;checkout of a9b4b7f&gt;/src python golden_tilings.py tests/data</code>), <a href="layout_cases.py">layout_cases.py</a> and <a href="layouts_fixture.py">layouts_fixture.py</a> for <code>layouts.json</code>. The fixtures cannot be regenerated after this PR.</p>
+<table>
+<tr><th>File</th><th>Size</th><th>Content</th></tr>
+<tr><td><code>tests/data/tilings.npz</code></td><td>384 KB</td><td>per case the old tiles that overlap the region (center, rotation, flip), the canonical tile, edge and vertex-only pairs; the script checks that each old polygon is the canonical tile placed by its transform</td></tr>
+<tr><td><code>tests/data/symbols.npz</code></td><td>49 KB</td><td>unit polygon, bounding and inscribed radius of the 15 preset symbols</td></tr>
+<tr><td><code>tests/data/saved_cartogram.json</code></td><td>41 KB</td><td>a 3 x 3 hexagon grid cartogram written by <code>SymbolCartogram.save</code></td></tr>
+<tr><td><code>tests/data/layouts.json</code></td><td>3 KB</td><td>placement metrics of the old layouts and the range of the mean distance over six lattice shifts</td></tr>
+</table>
+<p>Results of the comparison (tolerances of section 5.1): all old tiles that overlap the region have a tile at the same center in 19 of 19 named cases and 81 of 81 types; vertex gap at most 1e-9 of the tile size; rotation and flip equal; edge and vertex-only pairs equal. Exceptions, all expected: <code>wavy_square</code> and <code>scalloped_quad</code> (old edge contacts that are vertex-only), <code>puzzle_piece</code> (110 instead of 100 spline samples, gap 1.5e-2), and tiles of the 9 curved presets that the old class returned because a curve reaches into the region while the straight outline does not (isotile selects by the straight outline; see open questions). 409 of the 3,673 old tiles of the named cases do not overlap the region (3,264 are compared).</p>
+<h2>Metrics</h2>
+<p>Mean distance between the centroid of a region and the centroid of its tiles, in tile sizes (grid: one tile per region; mosaic: the region&#x27;s tiles). The tolerance is the larger of 25 percent of the old value and, for the grid layouts on the states, the range of the same metric over six lattice shifts (hexagon 1.196 to 1.493, square 0.711 to 0.956, triangle 0.757 to 0.961; old and new code together). Mosaic runs use <code>morph=False</code>. Every case is within the tolerance. The seconds of these runs are not given: they ran with other jobs on the machine (the table below the figures has the timings).</p>
+<table>
+<tr><th>case</th><th>lattice tiles old / new</th><th>assigned</th><th>split old / new</th><th>mean distance old / new</th><th>change</th><th>tolerance</th><th>within</th><th>largest distance old / new</th></tr>
+<tr><td>states grid hexagon</td><td>149 / 149</td><td>49</td><td>0 / 0</td><td>1.350 / 1.262</td><td>-6 %</td><td>0.337</td><td>yes</td><td>3.53 / 3.10</td></tr>
+<tr><td>states grid square</td><td>150 / 160</td><td>49</td><td>0 / 0</td><td>0.787 / 0.956</td><td>+22 %</td><td>0.245</td><td>yes</td><td>2.56 / 2.42</td></tr>
+<tr><td>states grid triangle</td><td>190 / 168</td><td>49</td><td>0 / 0</td><td>0.757 / 0.937</td><td>+24 %</td><td>0.204</td><td>yes</td><td>2.00 / 2.08</td></tr>
+<tr><td>states grid quadrilateral</td><td>180 / 180</td><td>49</td><td>0 / 0</td><td>0.961 / 0.997</td><td>+4 %</td><td>0.240</td><td>yes</td><td>3.17 / 2.49</td></tr>
+<tr><td>states grid scalloped_hexagon</td><td>208 / 179</td><td>49</td><td>0 / 0</td><td>0.834 / 0.735</td><td>-12 %</td><td>0.208</td><td>yes</td><td>2.13 / 2.17</td></tr>
+<tr><td>states mosaic hexagon</td><td>470 / 447</td><td>154</td><td>0 / 0</td><td>3.918 / 3.375</td><td>-14 %</td><td>0.980</td><td>yes</td><td>7.89 / 6.33</td></tr>
+<tr><td>states mosaic square</td><td>475 / 520</td><td>154</td><td>0 / 0</td><td>2.298 / 2.551</td><td>+11 %</td><td>0.575</td><td>yes</td><td>4.28 / 5.85</td></tr>
+<tr><td>states mosaic triangle</td><td>543 / 490</td><td>154</td><td>1 / 3</td><td>2.399 / 2.281</td><td>-5 %</td><td>0.600</td><td>yes</td><td>6.28 / 4.44</td></tr>
+<tr><td>states mosaic scalloped_hexagon</td><td>546 / 533</td><td>154</td><td>0 / 0</td><td>2.351 / 2.331</td><td>-1 %</td><td>0.588</td><td>yes</td><td>4.67 / 4.67</td></tr>
+<tr><td>districts grid hexagon</td><td>1125 / 1159</td><td>432</td><td>0 / 0</td><td>4.318 / 4.457</td><td>+3 %</td><td>1.080</td><td>yes</td><td>10.20 / 9.64</td></tr>
+<tr><td>districts grid square</td><td>1290 / 1320</td><td>432</td><td>0 / 0</td><td>2.625 / 2.655</td><td>+1 %</td><td>0.656</td><td>yes</td><td>6.02 / 10.23</td></tr>
+<tr><td>districts mosaic hexagon</td><td>1178 / 1163</td><td>432</td><td>0 / 0</td><td>7.297 / 6.908</td><td>-5 %</td><td>1.824</td><td>yes</td><td>15.79 / 17.40</td></tr>
+<tr><td>districts mosaic square</td><td>1230 / 1260</td><td>432</td><td>0 / 0</td><td>4.737 / 4.673</td><td>-1 %</td><td>1.184</td><td>yes</td><td>9.91 / 10.51</td></tr>
+<tr><td>districts mosaic triangle</td><td>1316 / 1316</td><td>432</td><td>0 / 0</td><td>4.667 / 4.698</td><td>+1 %</td><td>1.167</td><td>yes</td><td>10.88 / 9.44</td></tr>
+<tr><td>districts mosaic scalloped_hexagon</td><td>1358 / 1283</td><td>432</td><td>0 / 0</td><td>4.591 / 4.632</td><td>+1 %</td><td>1.148</td><td>yes</td><td>9.45 / 10.26</td></tr>
+</table>
+<table>
+<tr><th>case</th><th>lattice tiles old / new</th><th>assigned</th><th>split old / new</th><th>mean distance old / new</th><th>change</th><th>tolerance</th><th>within</th><th>largest distance old / new</th></tr>
+<tr><td>states grid hexagon</td><td>149 / 149</td><td>49</td><td>0 / 0</td><td>1.350 / 1.262</td><td>-6 %</td><td>0.337</td><td>yes</td><td>3.53 / 3.10</td></tr>
+<tr><td>states grid square</td><td>150 / 160</td><td>49</td><td>0 / 0</td><td>0.787 / 0.956</td><td>+22 %</td><td>0.245</td><td>yes</td><td>2.56 / 2.42</td></tr>
+<tr><td>states grid triangle</td><td>190 / 168</td><td>49</td><td>0 / 0</td><td>0.757 / 0.937</td><td>+24 %</td><td>0.204</td><td>yes</td><td>2.00 / 2.08</td></tr>
+<tr><td>states grid quadrilateral</td><td>180 / 180</td><td>49</td><td>0 / 0</td><td>0.961 / 0.997</td><td>+4 %</td><td>0.240</td><td>yes</td><td>3.17 / 2.49</td></tr>
+<tr><td>states grid scalloped_hexagon</td><td>208 / 179</td><td>49</td><td>0 / 0</td><td>0.834 / 0.735</td><td>-12 %</td><td>0.208</td><td>yes</td><td>2.13 / 2.17</td></tr>
+<tr><td>states mosaic hexagon</td><td>470 / 447</td><td>154</td><td>0 / 0</td><td>3.918 / 3.375</td><td>-14 %</td><td>0.980</td><td>yes</td><td>7.89 / 6.33</td></tr>
+<tr><td>states mosaic square</td><td>475 / 520</td><td>154</td><td>0 / 0</td><td>2.298 / 2.551</td><td>+11 %</td><td>0.575</td><td>yes</td><td>4.28 / 5.85</td></tr>
+<tr><td>states mosaic triangle</td><td>543 / 490</td><td>154</td><td>1 / 3</td><td>2.399 / 2.281</td><td>-5 %</td><td>0.600</td><td>yes</td><td>6.28 / 4.44</td></tr>
+<tr><td>states mosaic scalloped_hexagon</td><td>546 / 533</td><td>154</td><td>0 / 0</td><td>2.351 / 2.331</td><td>-1 %</td><td>0.588</td><td>yes</td><td>4.67 / 4.67</td></tr>
+<tr><td>districts grid hexagon</td><td>1125 / 1159</td><td>432</td><td>0 / 0</td><td>4.318 / 4.457</td><td>+3 %</td><td>1.080</td><td>yes</td><td>10.20 / 9.64</td></tr>
+<tr><td>districts grid square</td><td>1290 / 1320</td><td>432</td><td>0 / 0</td><td>2.625 / 2.655</td><td>+1 %</td><td>0.656</td><td>yes</td><td>6.02 / 10.23</td></tr>
+<tr><td>districts mosaic hexagon</td><td>1178 / 1163</td><td>432</td><td>0 / 0</td><td>7.297 / 6.908</td><td>-5 %</td><td>1.824</td><td>yes</td><td>15.79 / 17.40</td></tr>
+<tr><td>districts mosaic square</td><td>1230 / 1260</td><td>432</td><td>0 / 0</td><td>4.737 / 4.673</td><td>-1 %</td><td>1.184</td><td>yes</td><td>9.91 / 10.51</td></tr>
+<tr><td>districts mosaic triangle</td><td>1316 / 1316</td><td>432</td><td>0 / 0</td><td>4.667 / 4.698</td><td>+1 %</td><td>1.167</td><td>yes</td><td>10.88 / 9.44</td></tr>
+<tr><td>districts mosaic scalloped_hexagon</td><td>1358 / 1283</td><td>432</td><td>0 / 0</td><td>4.591 / 4.632</td><td>+1 %</td><td>1.148</td><td>yes</td><td>9.45 / 10.26</td></tr>
+</table>
+<h2>Figures</h2>
+<p><a href="make_figures.py">make_figures.py</a> draws the layouts of <code>layout_cases.py</code> (run once with the sources of a9b4b7f and once with this branch); <a href="make_tiling_figure.py">make_tiling_figure.py</a> draws the tilings. Tiles are colored by region, the same color before and after; the black outlines are the input regions.</p>
+<h2>Mosaic repair cost (decision 10, risk 3)</h2>
+<p><a href="repair_cost.py">repair_cost.py</a> times the stages of <code>MosaicLayout</code> (<code>morph=False</code>) with wrappers on <code>Tiling.generate</code>, <code>calibrate_tiling</code>, <code>hungarian_morphed_assignment</code> (it contains the connectivity repair loop), <code>_relocate_ring_tiles</code>, <code>_chain_swap_repair</code> (it contains <code>repair_contiguity</code>) and <code>_count_split_units</code>, best of 3. A second, untimed run counts the work from the progress output. Old (a9b4b7f) and new code ran one after the other in one session with nothing else running (<a href="repair_old.json">repair_old.json</a>, <a href="repair_new.json">repair_new.json</a>, tables by <a href="repair_table.py">repair_table.py</a>). Inputs: <code>districts</code> (432 districts, one tile count per district, grouped by state), <code>states</code> (49 states, 150 tiles), <code>texas</code> (254 counties, about 400 tiles), <code>districts-division</code> (the districts grouped by Census division), <code>grid-10x10</code> (100 unit squares with 2 to 6 tiles; a rectangular, symmetric union). Hexagon and square tilings. Each cell: old / new.</p>
+<table>
+<tr><th>input</th><th>tiling</th><th>wall old / new (s)</th><th>calibrate old / new</th><th>hungarian old / new</th><th>ring relocation old / new</th><th>chain swap old / new</th><th>_count_split_units calls old / new</th></tr>
+<tr><td>grid-10x10</td><td>hexagon</td><td>1.06 / 0.58</td><td>0.63 / 0.29</td><td>0.18 / 0.17</td><td>0.15 / 0.02</td><td>0.00 / 0.00</td><td>244 / 37</td></tr>
+<tr><td>grid-10x10</td><td>square</td><td>0.67 / 0.51</td><td>0.41 / 0.22</td><td>0.16 / 0.21</td><td>0.01 / 0.00</td><td>0.00 / 0.00</td><td>22 / 4</td></tr>
+<tr><td>districts</td><td>hexagon</td><td>3.49 / 7.21</td><td>0.71 / 0.84</td><td>1.40 / 1.29</td><td>0.06 / 0.19</td><td>0.12 / 3.64</td><td>120 / 438</td></tr>
+<tr><td>districts</td><td>square</td><td>5.69 / 5.00</td><td>2.71 / 2.34</td><td>1.25 / 1.24</td><td>0.07 / 0.03</td><td>0.51 / 0.30</td><td>166 / 68</td></tr>
+<tr><td>states</td><td>hexagon</td><td>1.08 / 1.88</td><td>0.30 / 1.11</td><td>0.33 / 0.31</td><td>0.01 / 0.04</td><td>0.02 / 0.00</td><td>47 / 163</td></tr>
+<tr><td>states</td><td>square</td><td>0.95 / 0.92</td><td>0.29 / 0.27</td><td>0.27 / 0.28</td><td>0.03 / 0.01</td><td>0.01 / 0.00</td><td>104 / 28</td></tr>
+<tr><td>texas</td><td>hexagon</td><td>2.36 / 1.06</td><td>1.52 / 0.20</td><td>0.48 / 0.49</td><td>0.06 / 0.08</td><td>0.00 / 0.00</td><td>45 / 76</td></tr>
+<tr><td>texas</td><td>square</td><td>1.12 / 0.98</td><td>0.22 / 0.17</td><td>0.54 / 0.49</td><td>0.06 / 0.04</td><td>0.00 / 0.01</td><td>50 / 29</td></tr>
+<tr><td>districts-division</td><td>hexagon</td><td>3.29 / 3.44</td><td>0.70 / 0.72</td><td>1.28 / 1.41</td><td>0.03 / 0.04</td><td>0.00 / 0.00</td><td>52 / 58</td></tr>
+<tr><td>districts-division</td><td>square</td><td>5.31 / 4.90</td><td>2.79 / 2.35</td><td>1.36 / 1.33</td><td>0.05 / 0.07</td><td>0.00 / 0.01</td><td>96 / 150</td></tr>
+</table>
+<table>
+<tr><th>input</th><th>tiling</th><th>lattice tiles</th><th>hungarian passes</th><th>ring tiles relocated</th><th>contiguity passes / swaps</th><th>chain swap before -&gt; after</th><th>noncontiguous regions</th><th>split groups</th><th>unassigned core</th><th>enclosed</th></tr>
+<tr><td>grid-10x10</td><td>hexagon</td><td>740 / 739</td><td>2 / 2</td><td>24 / 32</td><td>2/3 / 1/4</td><td>[0, 2]-&gt;[0, 0] accepted / [0, 4]-&gt;[0, 0] accepted</td><td>0 / 0</td><td>0 / 0</td><td>0 / 24</td><td>0 / 0</td></tr>
+<tr><td>grid-10x10</td><td>square</td><td>784 / 784</td><td>2 / 3</td><td>14 / 0</td><td>2/14 / 1/12</td><td>[0, 5]-&gt;[0, 0] accepted / [0, 4]-&gt;[0, 0] accepted</td><td>0 / 0</td><td>0 / 0</td><td>26 / 0</td><td>0 / 0</td></tr>
+<tr><td>districts</td><td>hexagon</td><td>1178 / 1163</td><td>4 / 3</td><td>24 / 18</td><td>6/51 / 10/93</td><td>[12, 0]-&gt;[0, 0] accepted / [9, 0]-&gt;[1, 0] accepted</td><td>0 / 0</td><td>0 / 1</td><td>14 / 13</td><td>0 / 0</td></tr>
+<tr><td>districts</td><td>square</td><td>1230 / 1260</td><td>3 / 3</td><td>25 / 27</td><td>10/247 / 10/210</td><td>[21, 0]-&gt;[1, 0] accepted / [16, 0]-&gt;[2, 0] accepted</td><td>0 / 0</td><td>1 / 2</td><td>4 / 6</td><td>0 / 0</td></tr>
+<tr><td>states</td><td>hexagon</td><td>470 / 447</td><td>4 / 2</td><td>9 / 10</td><td>4/29 / 1/7</td><td>[0, 5]-&gt;[0, 0] accepted / [0, 4]-&gt;[0, 0] accepted</td><td>0 / 0</td><td>0 / 0</td><td>3 / 10</td><td>0 / 0</td></tr>
+<tr><td>states</td><td>square</td><td>475 / 520</td><td>2 / 2</td><td>12 / 11</td><td>3/31 / 1/14</td><td>[0, 6]-&gt;[0, 0] accepted / [0, 6]-&gt;[0, 0] accepted</td><td>0 / 0</td><td>0 / 0</td><td>2 / 1</td><td>0 / 0</td></tr>
+<tr><td>texas</td><td>hexagon</td><td>1872 / 1809</td><td>2 / 2</td><td>22 / 24</td><td>1/4 / 2/13</td><td>[0, 2]-&gt;[0, 0] accepted / [0, 7]-&gt;[0, 0] accepted</td><td>0 / 0</td><td>0 / 0</td><td>6 / 9</td><td>0 / 0</td></tr>
+<tr><td>texas</td><td>square</td><td>1935 / 2024</td><td>2 / 2</td><td>24 / 24</td><td>1/22 / 1/22</td><td>[0, 12]-&gt;[0, 2] accepted / [0, 10]-&gt;[0, 2] accepted</td><td>2 / 2</td><td>0 / 0</td><td>11 / 13</td><td>0 / 0</td></tr>
+<tr><td>districts-division</td><td>hexagon</td><td>1178 / 1163</td><td>3 / 4</td><td>22 / 18</td><td>1/2 / 0/0</td><td>[1, 0]-&gt;[0, 0] accepted / -</td><td>0 / 0</td><td>0 / 0</td><td>16 / 13</td><td>0 / 0</td></tr>
+<tr><td>districts-division</td><td>square</td><td>1230 / 1260</td><td>3 / 3</td><td>25 / 27</td><td>2/5 / 0/0</td><td>[3, 0]-&gt;[1, 0] accepted / [1, 0]-&gt;[1, 0] rejected</td><td>0 / 0</td><td>1 / 1</td><td>4 / 6</td><td>0 / 0</td></tr>
+</table>
+<p>Findings:</p>
+<ul><li>The slowdown of the districts with hexagons is real and is in the contiguity repair, not in tile generation: <code>_chain_swap_repair</code> takes 0.12 s now and 3.64 s on the new lattice (wall time 3.49 s and 7.21 s). The repair starts from a similar state (12 and 9 split regions) but needs 10 passes and 93 swaps against 6 passes and 51 swaps, calls <code>_count_split_units</code> 438 times against 120, and ends with one split group that the old lattice does not have. The time is in <code>repair_contiguity</code>: each pass enumerates candidate chains for every satellite, and a satellite that cannot be repaired is searched again in every pass (read from the code, not profiled per pass). The prototype of the page measured 3.7 s against 8.4 s; this measurement gives 3.5 s against 7.2 s.</li><li>On the other rows the repair is not slower: districts with squares 5.00 s against 5.69 s, Texas 1.06 s against 2.36 s, the districts by division 3.44 s and 3.29 s, the 10 x 10 grid 0.58 s against 1.06 s. The other difference is the calibration of the states with hexagons (0.30 s old, 1.11 s new; 23 trial builds against 4): where the calibration stops depends on where the lattice lies; Texas with hexagons shows the reverse (20 trial builds old, 5 new).</li><li>Non-contiguous regions: equal old and new on every input (0 everywhere, 2 for Texas with squares in both). Split groups: districts by state 0 old and 1 new with hexagons, 1 and 2 with squares; the districts by division 1 and 1 with squares.</li><li>A cheap fix was tried and does not work: <code>HungarianOptions(swap_repair_passes=...)</code> of 6, 4 and 2 gives 5.4 s, 4.0 s and 4.0 s and 2 split groups instead of 1 (default 10: 7.5 s and 1 split group). A fix would change <code>repair_contiguity</code> (for example, no new search for a satellite whose search failed and whose neighborhood did not change); it is not part of this PR.</li><li>Calibration on symmetric inputs: on the 10 x 10 grid with squares the old lattice left 26 core tiles unassigned and the new lattice 0; with hexagons 0 old and 24 new. The 3 x 3 grid of the test fixtures with squares leaves 20 core tiles unassigned on the new lattice (0 old). A lattice anchored at the center of a symmetric, rectangular region has a vertex or center on the symmetry axes, so the number of core tiles takes few values as the tile size changes and the calibration cannot always reach the tile budget. States and districts are not symmetric (1 to 16 unassigned core tiles old and new in the table above).</li></ul>
+<h2>Speed of tile generation</h2>
+<p><a href="perf_generate.py">perf_generate.py</a>, best of 3 (IH7 once), old <a href="perf_old.txt">perf_old.txt</a> and new <a href="perf_new.txt">perf_new.txt</a>, <code>generate</code> with adjacency: IH7 with 2,385 tiles 7.4 s before and 0.12 s now (2,123 tiles); 4,491 tiles 32 s before and 0.17 s now (4,106 tiles). With 5,000 tiles, before and now: square 0.17 s and 0.058 s, hexagon 0.22 s and 0.061 s, triangle 0.90 s and 0.043 s, quadrilateral 1.24 s and 0.050 s. The mosaic layout of the districts with <code>scalloped_hexagon</code> took 542 s before (with other jobs on the machine) and 5 s now.</p>
+<h2>Deviations from the page</h2>
+<ul><li>The layouts have no adjacency option, so <code>adjacency_type=&quot;vertex-only&quot;</code> is tested at <code>generate</code> only.</li><li><code>TilingResult.plot(color_by=&quot;aspect&quot;)</code> still colors by rotation; the use of <code>tile_set.aspect</code> is not implemented.</li><li>The fixtures store the old tiles as center, rotation, flip and canonical tile instead of vertex arrays (384 KB instead of the estimated 1.5 MB); the polygons are rebuilt and the script checks this against the old polygons.</li><li>The golden layout test runs 10 of the 15 layout cases (not the district grid layouts, which take minutes) and uses the phase ranges stored in <code>layouts.json</code>, which come from the old and the new code.</li><li><code>plot_prototile</code> draws with isotile&#x27;s plot; the edges are no longer colored by the categorical colors of the style.</li><li>The PR has more new tests than the page lists (see Tests).</li><li>The lock file is edited by hand (see above).</li><li>Not done here: the migration page <code>migrating-to-3.0.md</code> and the gallery regeneration (step 4).</li></ul>
+<h2>Open questions</h2>
+<ol><li><code>IsohedralTiling.cover</code> selects tiles by the straight outline. For curved tilings a curve can reach across the boundary of the region into a tile that is not returned, so the margin edge can have slivers that no returned tile covers (the old class returned these tiles). With the default margin of 0.1 this does not touch the data; with <code>margin=0</code> it can. The decision is isotile&#x27;s (a <code>curved</code> option of <code>cover</code>, or a larger candidate set).</li><li>The quantization of the mosaic calibration on symmetric regions (last finding above) follows from decision 4 (anchor at the region center). Options: leave it (real maps are not symmetric), or let the calibration shift the lattice by a fraction of a tile when the core count cannot reach the target (needs the <code>offset</code> of step 3).</li><li>The slower repair on the districts with hexagons (3.6 s): fix <code>repair_contiguity</code> in a separate PR, or accept.</li><li>The dependency <code>isotile&gt;=0.1.0.dev0</code> cannot be resolved from PyPI until isotile 0.1.0 is released; the git pin works for development and CI only (decision 2).</li></ol>
+<div class="figure">
+<img src="fig_districts_grid.png" alt="Grid layout of the 432 districts, hexagon and square. The largest distance of a region from its tile with squares is 10.2 tile sizes now and 6.0 before; the mean is 2.66 and 2.63.">
+<p class="caption">Grid layout of the 432 districts, hexagon and square. The largest distance of a region from its tile with squares is 10.2 tile sizes now and 6.0 before; the mean is 2.66 and 2.63.</p>
+</div><div class="figure">
+<img src="fig_districts_mosaic.png" alt="Mosaic layout of the 432 districts grouped by state, hexagon, square, triangle and `scalloped_hexagon`.">
+<p class="caption">Mosaic layout of the 432 districts grouped by state, hexagon, square, triangle and <code>scalloped_hexagon</code>.</p>
+</div><div class="figure">
+<img src="fig_states_grid.png" alt="Grid layout of the 49 states, hexagon, square, triangle and `scalloped_hexagon` (curved), old left and new right.">
+<p class="caption">Grid layout of the 49 states, hexagon, square, triangle and <code>scalloped_hexagon</code> (curved), old left and new right.</p>
+</div><div class="figure">
+<img src="fig_states_mosaic.png" alt="Mosaic layout of the states (154 tiles, `morph=False`), same four tilings. With triangles 3 regions are split in the new layout (1 in the old).">
+<p class="caption">Mosaic layout of the states (154 tiles, <code>morph=False</code>), same four tilings. With triangles 3 regions are split in the new layout (1 in the old).</p>
+</div><div class="figure">
+<img src="fig_tilings.png" alt="Tilings of the region (-1, -1, 1, 1) with margin 0.1 (red), old left, new right: hexagon, a right triangle (aspect 0.3), a scalene triangle with the region at (3, 3) (the old class returns 15 tiles, none inside the region), an elongated quadrilateral, and the curved presets `wavy_square` and `flowers`.">
+<p class="caption">Tilings of the region (-1, -1, 1, 1) with margin 0.1 (red), old left, new right: hexagon, a right triangle (aspect 0.3), a scalene triangle with the region at (3, 3) (the old class returns 15 tiles, none inside the region), an elongated quadrilateral, and the curved presets <code>wavy_square</code> and <code>flowers</code>.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

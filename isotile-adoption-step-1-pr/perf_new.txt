@@ -1,0 +1,6 @@
+new IH7 n_tiles=2000: 0.118 s, 2123 tiles
+new IH7 n_tiles=4000: 0.168 s, 4106 tiles
+new square n_tiles=5000: no adjacency 0.055 s, adjacency 0.058 s, 5184 tiles
+new hexagon n_tiles=5000: no adjacency 0.063 s, adjacency 0.061 s, 5121 tiles
+new triangle n_tiles=5000: no adjacency 0.036 s, adjacency 0.043 s, 5130 tiles
+new quadrilateral n_tiles=5000: no adjacency 0.047 s, adjacency 0.050 s, 5092 tiles

@@ -1,0 +1,746 @@
+[
+ {
+  "input": "grid-10x10",
+  "tiling": "hexagon",
+  "best": {
+   "wall": 0.5760341570130549,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.1859685659292154,
+     "calls": 23
+    },
+    "calibrate_tiling": {
+     "seconds": 0.2933941670344211,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 0.17296318500302732,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.013169801968615502,
+     "calls": 37
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.02457498700823635,
+     "calls": 1
+    },
+    "repair_contiguity": {
+     "seconds": 0.0015893809613771737,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 0.003051560022868216,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   0.7047557730111293,
+   0.5760341570130549,
+   0.6628877079929225
+  ],
+  "work": {
+   "ring_relocated": [
+    32
+   ],
+   "ring_tiles_left": [
+    0
+   ],
+   "unassigned_core_after_ring": [
+    24
+   ],
+   "chain_swap": [
+    {
+     "before": [
+      0,
+      4
+     ],
+     "after": [
+      0,
+      0
+     ],
+     "result": "accepted"
+    }
+   ],
+   "contiguity_passes": 1,
+   "contiguity_swaps": 4,
+   "hungarian_repair_passes": 2,
+   "noncontiguous_regions": 0,
+   "split_groups": 0,
+   "regions_correct": "100/100",
+   "unassigned_core_tiles": 24,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 739,
+   "assigned_tiles": 421
+  }
+ },
+ {
+  "input": "grid-10x10",
+  "tiling": "square",
+  "best": {
+   "wall": 0.5108311619842425,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.12722068699076772,
+     "calls": 23
+    },
+    "calibrate_tiling": {
+     "seconds": 0.21952006500214338,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 0.21134770300704986,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.001601621974259615,
+     "calls": 4
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.000834405014757067,
+     "calls": 1
+    },
+    "repair_contiguity": {
+     "seconds": 0.0015528789954259992,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 0.002679422963410616,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   0.5689682610100135,
+   0.5127519250381738,
+   0.5108311619842425
+  ],
+  "work": {
+   "ring_relocated": [
+    0
+   ],
+   "ring_tiles_left": [
+    21
+   ],
+   "unassigned_core_after_ring": [
+    0
+   ],
+   "chain_swap": [
+    {
+     "before": [
+      0,
+      4
+     ],
+     "after": [
+      0,
+      0
+     ],
+     "result": "accepted"
+    }
+   ],
+   "contiguity_passes": 1,
+   "contiguity_swaps": 12,
+   "hungarian_repair_passes": 3,
+   "noncontiguous_regions": 0,
+   "split_groups": 0,
+   "regions_correct": "100/100",
+   "unassigned_core_tiles": 0,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 784,
+   "assigned_tiles": 421
+  }
+ },
+ {
+  "input": "districts",
+  "tiling": "hexagon",
+  "best": {
+   "wall": 7.212613541982137,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.15616771898930892,
+     "calls": 5
+    },
+    "calibrate_tiling": {
+     "seconds": 0.8390159370028414,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 1.2915077729849145,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.10760919307358563,
+     "calls": 438
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.19167847896460444,
+     "calls": 1
+    },
+    "repair_contiguity": {
+     "seconds": 3.6375178919988684,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 3.6397676739725284,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   7.212613541982137,
+   7.291257809032686,
+   7.526503269968089
+  ],
+  "work": {
+   "ring_relocated": [
+    18
+   ],
+   "ring_tiles_left": [
+    14
+   ],
+   "unassigned_core_after_ring": [
+    13
+   ],
+   "chain_swap": [
+    {
+     "before": [
+      9,
+      0
+     ],
+     "after": [
+      1,
+      0
+     ],
+     "result": "accepted"
+    }
+   ],
+   "contiguity_passes": 10,
+   "contiguity_swaps": 93,
+   "hungarian_repair_passes": 3,
+   "noncontiguous_regions": 0,
+   "split_groups": 1,
+   "regions_correct": "432/432",
+   "unassigned_core_tiles": 13,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 1163,
+   "assigned_tiles": 432
+  }
+ },
+ {
+  "input": "districts",
+  "tiling": "square",
+  "best": {
+   "wall": 4.998096238996368,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.25844667304772884,
+     "calls": 23
+    },
+    "calibrate_tiling": {
+     "seconds": 2.3418286999803968,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 1.2447571060038172,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.014319339010398835,
+     "calls": 68
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.03279085404938087,
+     "calls": 1
+    },
+    "repair_contiguity": {
+     "seconds": 0.2957666699658148,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 0.29741990502225235,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   4.998096238996368,
+   5.070960370998364,
+   5.3118046739837155
+  ],
+  "work": {
+   "ring_relocated": [
+    27
+   ],
+   "ring_tiles_left": [
+    4
+   ],
+   "unassigned_core_after_ring": [
+    6
+   ],
+   "chain_swap": [
+    {
+     "before": [
+      16,
+      0
+     ],
+     "after": [
+      2,
+      0
+     ],
+     "result": "accepted"
+    }
+   ],
+   "contiguity_passes": 10,
+   "contiguity_swaps": 210,
+   "hungarian_repair_passes": 3,
+   "noncontiguous_regions": 0,
+   "split_groups": 2,
+   "regions_correct": "432/432",
+   "unassigned_core_tiles": 6,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 1260,
+   "assigned_tiles": 432
+  }
+ },
+ {
+  "input": "states",
+  "tiling": "hexagon",
+  "best": {
+   "wall": 1.8832054159720428,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.12595788895851,
+     "calls": 23
+    },
+    "calibrate_tiling": {
+     "seconds": 1.1113741879817098,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 0.31015950796427205,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.018609960097819567,
+     "calls": 163
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.04300766304368153,
+     "calls": 1
+    },
+    "repair_contiguity": {
+     "seconds": 0.0007420830079354346,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 0.0012870670179836452,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   1.8832054159720428,
+   1.90656382299494,
+   1.9044869460049085
+  ],
+  "work": {
+   "ring_relocated": [
+    10
+   ],
+   "ring_tiles_left": [
+    6
+   ],
+   "unassigned_core_after_ring": [
+    10
+   ],
+   "chain_swap": [
+    {
+     "before": [
+      0,
+      4
+     ],
+     "after": [
+      0,
+      0
+     ],
+     "result": "accepted"
+    }
+   ],
+   "contiguity_passes": 1,
+   "contiguity_swaps": 7,
+   "hungarian_repair_passes": 2,
+   "noncontiguous_regions": 0,
+   "split_groups": 0,
+   "regions_correct": "49/49",
+   "unassigned_core_tiles": 10,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 447,
+   "assigned_tiles": 154
+  }
+ },
+ {
+  "input": "states",
+  "tiling": "square",
+  "best": {
+   "wall": 0.9152463880018331,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.02005063387332484,
+     "calls": 5
+    },
+    "calibrate_tiling": {
+     "seconds": 0.26823331898776814,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 0.27617631101747975,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.0027893238002434373,
+     "calls": 28
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.008562876959331334,
+     "calls": 1
+    },
+    "repair_contiguity": {
+     "seconds": 0.0013006230001337826,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 0.0017447089776396751,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   0.9152463880018331,
+   0.9302555089816451,
+   0.9293076460016891
+  ],
+  "work": {
+   "ring_relocated": [
+    11
+   ],
+   "ring_tiles_left": [
+    4
+   ],
+   "unassigned_core_after_ring": [
+    1
+   ],
+   "chain_swap": [
+    {
+     "before": [
+      0,
+      6
+     ],
+     "after": [
+      0,
+      0
+     ],
+     "result": "accepted"
+    }
+   ],
+   "contiguity_passes": 1,
+   "contiguity_swaps": 14,
+   "hungarian_repair_passes": 2,
+   "noncontiguous_regions": 0,
+   "split_groups": 0,
+   "regions_correct": "49/49",
+   "unassigned_core_tiles": 1,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 520,
+   "assigned_tiles": 154
+  }
+ },
+ {
+  "input": "texas",
+  "tiling": "hexagon",
+  "best": {
+   "wall": 1.0617897979682311,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.0971246468834579,
+     "calls": 5
+    },
+    "calibrate_tiling": {
+     "seconds": 0.20036645198706537,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 0.492113308981061,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.026316357078030705,
+     "calls": 76
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.08183518098667264,
+     "calls": 1
+    },
+    "repair_contiguity": {
+     "seconds": 0.00230226299026981,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 0.004039011953864247,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   1.1538495870190673,
+   1.0617897979682311,
+   1.0673697399906814
+  ],
+  "work": {
+   "ring_relocated": [
+    24
+   ],
+   "ring_tiles_left": [
+    12
+   ],
+   "unassigned_core_after_ring": [
+    9
+   ],
+   "chain_swap": [
+    {
+     "before": [
+      0,
+      7
+     ],
+     "after": [
+      0,
+      0
+     ],
+     "result": "accepted"
+    }
+   ],
+   "contiguity_passes": 2,
+   "contiguity_swaps": 13,
+   "hungarian_repair_passes": 2,
+   "noncontiguous_regions": 0,
+   "split_groups": 0,
+   "regions_correct": "254/254",
+   "unassigned_core_tiles": 9,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 1809,
+   "assigned_tiles": 550
+  }
+ },
+ {
+  "input": "texas",
+  "tiling": "square",
+  "best": {
+   "wall": 0.9808387299999595,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.06662544299615547,
+     "calls": 5
+    },
+    "calibrate_tiling": {
+     "seconds": 0.16590261599048972,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 0.48864059103652835,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.008770322951022536,
+     "calls": 29
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.04037175502162427,
+     "calls": 1
+    },
+    "repair_contiguity": {
+     "seconds": 0.0047671840293332934,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 0.0061587810050696135,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   0.9808387299999595,
+   0.9839856430189684,
+   1.0016529079875909
+  ],
+  "work": {
+   "ring_relocated": [
+    24
+   ],
+   "ring_tiles_left": [
+    12
+   ],
+   "unassigned_core_after_ring": [
+    13
+   ],
+   "chain_swap": [
+    {
+     "before": [
+      0,
+      10
+     ],
+     "after": [
+      0,
+      2
+     ],
+     "result": "accepted"
+    }
+   ],
+   "contiguity_passes": 1,
+   "contiguity_swaps": 22,
+   "hungarian_repair_passes": 2,
+   "noncontiguous_regions": 2,
+   "split_groups": 0,
+   "regions_correct": "254/254",
+   "unassigned_core_tiles": 13,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 2024,
+   "assigned_tiles": 550
+  }
+ },
+ {
+  "input": "districts-division",
+  "tiling": "hexagon",
+  "best": {
+   "wall": 3.4416970899910666,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.05971000692807138,
+     "calls": 5
+    },
+    "calibrate_tiling": {
+     "seconds": 0.7234253349597566,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 1.4113222350133583,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.01769925787812099,
+     "calls": 58
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.036909324990119785,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 0.0014251740067265928,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   3.4416970899910666,
+   3.5250925040454604,
+   3.515891941031441
+  ],
+  "work": {
+   "ring_relocated": [
+    18
+   ],
+   "ring_tiles_left": [
+    14
+   ],
+   "unassigned_core_after_ring": [
+    13
+   ],
+   "chain_swap": [],
+   "contiguity_passes": 0,
+   "contiguity_swaps": 0,
+   "hungarian_repair_passes": 4,
+   "noncontiguous_regions": 0,
+   "split_groups": 0,
+   "regions_correct": "432/432",
+   "unassigned_core_tiles": 13,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 1163,
+   "assigned_tiles": 432
+  }
+ },
+ {
+  "input": "districts-division",
+  "tiling": "square",
+  "best": {
+   "wall": 4.897468465031125,
+   "stages": {
+    "tiling.generate": {
+     "seconds": 0.2163291039178148,
+     "calls": 23
+    },
+    "calibrate_tiling": {
+     "seconds": 2.3470898990053684,
+     "calls": 1
+    },
+    "hungarian_morphed_assignment": {
+     "seconds": 1.3278802900458686,
+     "calls": 1
+    },
+    "_count_split_units": {
+     "seconds": 0.034072227019350976,
+     "calls": 150
+    },
+    "_relocate_ring_tiles": {
+     "seconds": 0.07069035799941048,
+     "calls": 1
+    },
+    "repair_contiguity": {
+     "seconds": 0.005533105984795839,
+     "calls": 1
+    },
+    "_chain_swap_repair": {
+     "seconds": 0.007150611956603825,
+     "calls": 1
+    }
+   }
+  },
+  "all_wall": [
+   5.020996082981583,
+   4.897468465031125,
+   4.949303614965174
+  ],
+  "work": {
+   "ring_relocated": [
+    27
+   ],
+   "ring_tiles_left": [
+    4
+   ],
+   "unassigned_core_after_ring": [
+    6
+   ],
+   "chain_swap": [
+    {
+     "before": [
+      1,
+      0
+     ],
+     "after": [
+      1,
+      0
+     ],
+     "result": "rejected"
+    }
+   ],
+   "contiguity_passes": 0,
+   "contiguity_swaps": 0,
+   "hungarian_repair_passes": 3,
+   "noncontiguous_regions": 0,
+   "split_groups": 1,
+   "regions_correct": "432/432",
+   "unassigned_core_tiles": 6,
+   "enclosed_unassigned_tiles": 0,
+   "lattice_tiles": 1260,
+   "assigned_tiles": 432
+  }
+ }
+]
