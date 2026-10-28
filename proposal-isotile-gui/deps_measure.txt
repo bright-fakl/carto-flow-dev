@@ -1,0 +1,25 @@
+Using Python 3.12.3 environment at: old
+old: install .576320685 s, 52 packages, 920 MB
+Using Python 3.12.3 environment at: new
+new: install .484014036 s, 41 packages, 418 MB
+largest directories, old:
+172	old/lib/python3.12/site-packages/llvmlite
+162	old/lib/python3.12/site-packages/pyarrow
+81	old/lib/python3.12/site-packages/scipy
+80	old/lib/python3.12/site-packages/pyogrio.libs
+68	old/lib/python3.12/site-packages/panel
+45	old/lib/python3.12/site-packages/pandas
+largest directories, new:
+81	new/lib/python3.12/site-packages/scipy
+68	new/lib/python3.12/site-packages/panel
+45	new/lib/python3.12/site-packages/pandas
+30	new/lib/python3.12/site-packages/scipy.libs
+30	new/lib/python3.12/site-packages/numpy
+29	new/lib/python3.12/site-packages/bokeh
+pandas is required by:
+Using Python 3.12.3 environment at: new
+Required-by: panel
+only in old:
+Using Python 3.12.3 environment at: newUsing Python 3.12.3 environment at: old
+
+carto-flow cloudpickle geopandas isohedral-tiling-ui joblib llvmlite numba pyarrow pyfftw pyogrio pyproj tactile 

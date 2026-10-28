@@ -1,0 +1,26 @@
+== part 1: enforce_curve_symmetry (GUI) against enforce_symmetry (isotile) ==
+J midpoint=True : same curve in 500 of 500, largest difference 0
+U midpoint=True : same curve in 500 of 500, largest difference 0
+U midpoint=False: same curve in 0 of 500, largest difference inf
+S midpoint=True : same curve in 500 of 500, largest difference 0
+
+U curve whose midpoint was moved in x (the table lets x vary; the GUI fixes x = 0.5 only if it is already 0.5):
+  GUI     : [(0, 0), (0.2, 0.1), (0.55, 0.2), (0.8, 0.1), (1.0, 0)]
+  isotile : [(0.0, 0.0), (0.2, 0.1), (0.5, 0.2), (0.8, 0.1), (1.0, 0.0)]
+S curve with an even number of points (a node inserted on the curve without its pair):
+  GUI     : 7 points (adds the midpoint (0.5, 0))
+  isotile : 6 points (keeps the count, pairs by index)
+
+== part 2: editor operations, GUI code against editor_model ==
+add node J midpoint=True : same result in 400 of 400; points added: GUI [1], model [1]
+remove node J midpoint=True : same result in 400 of 400
+move node J midpoint=True : same result in 400 of 400
+add node U midpoint=True : same result in 0 of 400; points added: GUI [0], model [2]
+remove node U midpoint=True : same result in 291 of 400
+move node U midpoint=True : same result in 400 of 400
+add node U midpoint=False: same result in 0 of 400; points added: GUI [1], model [2]
+remove node U midpoint=False: same result in 0 of 400
+move node U midpoint=False: same result in 0 of 400
+add node S midpoint=True : same result in 235 of 400; points added: GUI [0, 2], model [2]
+remove node S midpoint=True : same result in 400 of 400
+move node S midpoint=True : same result in 400 of 400

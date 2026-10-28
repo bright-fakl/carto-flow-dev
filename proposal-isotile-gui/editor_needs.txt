@@ -1,0 +1,11 @@
+fill_region of the rotated tiling (30 degrees): 126 tiles against 128; first tile centroid [1.343, 0.463]
+offset by whole translations gives the same tile set: True; offset (0.25, 0.5) gives 124 tiles with 0 shared centroids
+hit test with shapely STRtree on 120 curved tiles: build 3.14 ms, 1000 point queries 10.76 ms, points in exactly one tile 1000 of 1000 (the others lie on a boundary)
+tile fields available for a highlight: cell [1, 1] aspect 0 color 0
+number of colors of the coloring: types with 1, 2, 3, 4, more colors: [0, 43, 38, 0], 0
+types where the 100-tile preview shows fewer colors than the type has: 0 of 81 (so a colormap normalized by the colors present changes with the window)
+repr: <isotile.tiling.IsohedralTiling object at 0x7fbd3eab0890>
+frame is the identity at construction: True
+setting .parameters changes the object in place (every holder of the object sees it): True
+== TileSet.polygons, outlines point counts ==
+outlines shape (120, 436, 2) ; with n_points=20: (120, 76, 2)

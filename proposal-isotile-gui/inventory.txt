@@ -1,0 +1,109 @@
+== lines per module ==
+431 state.py
+92 app.py
+57 __init__.py
+21 components/__init__.py
+1183 components/curve_editor.py
+103 components/gallery.py
+125 components/history_toolbar.py
+175 components/load_save.py
+619 components/preview_strip.py
+1223 components/prototile_editor.py
+165 components/type_selector.py
+8 utils/__init__.py
+73 utils/spline_cache.py
+242 utils/symmetry.py
+4517 total
+
+== carto_flow and tactile imports ==
+state.py:9:from carto_flow.symbol_cartogram.tiling import IsohedralTiling
+components/curve_editor.py:597:        from tactile import EdgeShape
+components/curve_editor.py:612:        from tactile import EdgeShape
+components/curve_editor.py:1158:        from tactile import EdgeShape
+components/gallery.py:21:        from carto_flow.symbol_cartogram.tiling import IsohedralTiling
+components/gallery.py:78:        from carto_flow.symbol_cartogram.tiling import IsohedralTiling
+components/load_save.py:97:            from carto_flow.symbol_cartogram.tiling import IsohedralTiling
+components/preview_strip.py:431:            "from carto_flow.symbol_cartogram.tiling import IsohedralTiling",
+components/prototile_editor.py:911:            from tactile import Point as _P
+components/prototile_editor.py:912:            from tactile import mul as _mul
+components/type_selector.py:28:        from carto_flow.symbol_cartogram.tiling import IsohedralTiling
+components/type_selector.py:131:        from carto_flow.symbol_cartogram.tiling import IsohedralTiling
+utils/symmetry.py:28:    from tactile import EdgeShape
+utils/symmetry.py:42:        The edge's symmetry type from tactile.
+utils/symmetry.py:49:    from tactile import EdgeShape
+
+== private attributes of the carto-flow tiling (_ih, _edge_curves, _edge_curve_modes, _unit_tile, _type) ==
+state.py:102:        self.tiling_type = tiling._type
+state.py:103:        self.parameters = list(tiling._ih.parameters)
+state.py:104:        self.edge_curves = dict(tiling._edge_curves) if tiling._edge_curves else {}
+state.py:105:        self.edge_curve_modes = dict(tiling._edge_curve_modes)
+state.py:115:        self._initial_parameters = list(tiling._ih.parameters)
+state.py:116:        self._initial_edge_curves = dict(tiling._edge_curves) if tiling._edge_curves else {}
+state.py:135:        type_changed = hasattr(self, "_tiling") and self.tiling_type != self._tiling._type
+state.py:182:            self._tiling._edge_curves = dict(self.edge_curves)
+state.py:203:            self._tiling._edge_curve_modes = dict(self.edge_curve_modes)
+state.py:249:        self._initial_parameters = list(tiling._ih.parameters)
+state.py:250:        self._initial_edge_curves = dict(tiling._edge_curves) if tiling._edge_curves else {}
+state.py:258:        verts = list(tiling._unit_tile.exterior.coords[:-1])
+state.py:285:            self.tiling_type = tiling._type
+state.py:286:            self.parameters = list(tiling._ih.parameters)
+state.py:287:            self.edge_curves = dict(tiling._edge_curves) if tiling._edge_curves else {}
+state.py:288:            self.edge_curve_modes = dict(tiling._edge_curve_modes)
+state.py:298:            self._initial_parameters = list(tiling._ih.parameters)
+state.py:299:            self._initial_edge_curves = dict(tiling._edge_curves) if tiling._edge_curves else {}
+components/gallery.py:29:            info = IsohedralTiling.type_info(tiling._type)
+components/gallery.py:81:        verts = list(tiling._unit_tile.exterior.coords[:-1])
+components/prototile_editor.py:573:        verts = [(v.x, v.y) for v in tiling._ih.vertices]
+components/prototile_editor.py:916:            shapes = list(tiling._ih.shapes)
+components/prototile_editor.py:1032:            verts = [(v.x, v.y) for v in tiling._ih.vertices]
+components/type_selector.py:140:            old_params = list(tiling._ih.parameters)
+
+== public carto-flow methods called (generate, type_info, from_preset, list_presets, find_types, IsohedralTiling( ) ==
+state.py:101:        tiling = IsohedralTiling.from_preset("regular_hexagon")
+state.py:107:        self._type_info = tiling.type_info()
+state.py:139:        info = IsohedralTiling.type_info(self.tiling_type)
+state.py:145:        self._tiling = IsohedralTiling(tiling_type=self.tiling_type, parameters=params, edge_curves=self.edge_curves)
+state.py:146:        new_type_info = self._tiling.type_info()
+state.py:189:            else [p["default"] for p in IsohedralTiling.type_info(self.tiling_type)["parameters"]],
+state.py:218:            else [p["default"] for p in IsohedralTiling.type_info(self.tiling_type)["parameters"]],
+state.py:233:                info = IsohedralTiling.type_info(self.tiling_type)
+state.py:269:        num_vertices = tiling.type_info().get("num_vertices")
+state.py:282:        tiling = IsohedralTiling.from_preset(preset_name)
+state.py:291:            info = tiling.type_info()
+components/gallery.py:23:        presets = sorted(IsohedralTiling.list_presets().items())
+components/gallery.py:27:            tiling = IsohedralTiling.from_preset(name)
+components/gallery.py:29:            info = IsohedralTiling.type_info(tiling._type)
+components/gallery.py:80:        tiling = IsohedralTiling.from_preset(preset_name)
+components/load_save.py:107:            tiling = IsohedralTiling(
+components/load_save.py:112:            info = tiling.type_info()
+components/preview_strip.py:311:        result = tiling.generate(bounds=(-1, -0.3, 1, 0.3), n_tiles=100, margin=0.25, compute_adjacency=False)
+components/preview_strip.py:433:            "tiling = IsohedralTiling(",
+components/preview_strip.py:446:            "result = tiling.generate(",
+components/preview_strip.py:491:        result = self.state._tiling.generate(bounds=bounds, n_tiles=n_tiles, compute_adjacency=False)
+components/preview_strip.py:526:        result = self.state._tiling.generate(bounds=bounds, n_tiles=n_tiles, compute_adjacency=False)
+components/preview_strip.py:572:        result = self.state._tiling.generate(bounds=bounds, n_tiles=n_tiles, compute_adjacency=False)
+components/type_selector.py:34:        types = IsohedralTiling.find_types(
+components/type_selector.py:46:            info = IsohedralTiling.type_info(t)
+components/type_selector.py:134:        tiling = IsohedralTiling(tiling_type)
+
+== tactile.mul and Point ==
+components/prototile_editor.py:911:            from tactile import Point as _P
+components/prototile_editor.py:951:                pts = [_mul(shape_info.T, _P(x, y)) for x, y in curve]
+
+== names defined and not used elsewhere ==
+_schedule_async_update: 1 occurrence(s)
+_do_async_update: 2 occurrence(s)
+_build_curve_mode_widget: 1 occurrence(s)
+_add_point: 2 occurrence(s)
+_remove_point: 4 occurrence(s)
+_solve_param_delta: 1 occurrence(s)
+interpolate_curve: 2 occurrence(s)
+_build_vertex_param_map: 2 occurrence(s)
+_build_settings_column: 1 occurrence(s)
+_build_export_column: 1 occurrence(s)
+
+== print( calls ==
+14
+== duplicated block in PrototileEditor._update_figure (draggable/fixed sources built twice) ==
+607:        self._draggable_source.data = {
+653:        self._draggable_source.data = {

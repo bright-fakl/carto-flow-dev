@@ -1,0 +1,30 @@
+cases: {'presets': 15, 'types_straight': 81, 'types_curved': 72}
+
+== isotile calls (ms) ==
+check_prototile(type, params, curves, modes)                    presets: med   1.054 max    7.079  types_straight: med   0.156 max    0.180  types_curved: med   1.578 max    4.465
+IsohedralTiling(type, params, curves, modes) constructor        presets: med   1.563 max    7.490  types_straight: med   0.341 max    0.501  types_curved: med   2.321 max    5.427
+t.with_edge_curves(curves, modes)                               presets: med   1.483 max    7.807  types_straight: med   0.339 max    0.466  types_curved: med   2.282 max    5.300
+t.parameters = p (setter, mutating)                             presets: med   1.238 max    7.129  types_straight: med   0.309 max    0.346  types_curved: med   1.701 max    4.536
+info()                                                          presets: med   0.030 max    0.063  types_straight: med   0.026 max    0.064  types_curved: med   0.029 max    0.063
+edge_outlines()                                                 presets: med   0.005 max    0.007  types_straight: med   0.004 max    0.006  types_curved: med   0.005 max    0.007
+prototile()                                                     presets: med   0.001 max    0.002  types_straight: med   0.000 max    0.000  types_curved: med   0.001 max    0.001
+fill_region preview (100 tiles, margin 0.25) + outlines         presets: med  42.834 max   94.283  types_straight: med   1.827 max    2.268  types_curved: med  93.623 max  157.653
+fill_region export 50 tiles, bounds (-2,-2,2,2) + outlines      presets: med  21.626 max   58.240  types_straight: med   1.437 max    1.663  types_curved: med  55.838 max   93.192
+fill_region export 100 tiles, bounds (-2,-2,2,2) + outlines     presets: med  31.205 max   79.975  types_straight: med   1.766 max    2.169  types_curved: med  95.342 max  155.860
+fill_region export 200 tiles, bounds (-2,-2,2,2) + outlines     presets: med  58.225 max  118.039  types_straight: med   2.395 max    3.226  types_curved: med 141.839 max  256.198
+fill_region preview, polygons() (shapely)                       presets: med  32.993 max   97.633  types_straight: med   1.930 max    2.534  types_curved: med  98.714 max  192.479
+fill_region preview + colors() + aspect                         presets: med  30.075 max   88.423  types_straight: med   1.776 max    2.382  types_curved: med  88.394 max  147.911
+
+== curve editing on one curve (ms, 5 and 21 control points) ==
+enforce_symmetry J m= 5: isotile 0.0025  GUI utils/symmetry.py 0.0005
+enforce_symmetry U m= 5: isotile 0.0050  GUI utils/symmetry.py 0.0019
+enforce_symmetry S m= 5: isotile 0.0061  GUI utils/symmetry.py 0.0020
+spline m= 5: isotile.interpolate 0.2376  GUI spline (cache miss) 0.3931  GUI spline (cache hit) 0.0004
+enforce_symmetry J m=11: isotile 0.0025  GUI utils/symmetry.py 0.0005
+enforce_symmetry U m=11: isotile 0.0052  GUI utils/symmetry.py 0.0026
+enforce_symmetry S m=11: isotile 0.0061  GUI utils/symmetry.py 0.0027
+spline m=11: isotile.interpolate 0.2378  GUI spline (cache miss) 0.3851  GUI spline (cache hit) 0.0007
+enforce_symmetry J m=21: isotile 0.0024  GUI utils/symmetry.py 0.0005
+enforce_symmetry U m=21: isotile 0.0052  GUI utils/symmetry.py 0.0037
+enforce_symmetry S m=21: isotile 0.0062  GUI utils/symmetry.py 0.0039
+spline m=21: isotile.interpolate 0.2364  GUI spline (cache miss) 0.3954  GUI spline (cache hit) 0.0010

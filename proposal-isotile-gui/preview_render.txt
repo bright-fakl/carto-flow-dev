@@ -1,0 +1,51 @@
+preset                 mode        shape old/new  differing px  max diff  t_old ms  t_new ms
+regular_hexagon        uniform         (69, 232)/(69, 232)         1.91%     0.071      63.4      14.0
+regular_hexagon        aspect          (69, 232)/(69, 232)         1.91%     0.071      47.2      12.3
+regular_hexagon        index/coloring  (69, 232)/(69, 232)        97.24%     0.745      53.3      14.5
+square                 uniform         (69, 232)/(69, 232)         0.00%     0.008      43.6       9.9
+square                 aspect          (69, 232)/(69, 232)         0.00%     0.008      49.5      11.1
+square                 index/coloring  (69, 232)/(69, 232)        99.56%     0.745      47.5      11.9
+equilateral_triangle   uniform         (69, 232)/(69, 232)         0.00%     0.020      55.8      10.8
+equilateral_triangle   aspect          (69, 232)/(69, 232)        50.73%     0.384      59.2      11.8
+equilateral_triangle   index/coloring  (69, 232)/(69, 232)        99.31%     0.702      59.9      12.4
+rhombus                uniform         (69, 232)/(69, 232)         0.00%     0.012      32.5      10.8
+rhombus                aspect          (69, 232)/(69, 232)         0.00%     0.012      37.2      11.4
+rhombus                index/coloring  (69, 232)/(69, 232)        98.71%     0.769      34.7      12.0
+cairo                  uniform         (69, 232)/(69, 232)         0.00%     0.000      60.5      11.3
+cairo                  aspect          (69, 232)/(69, 232)        53.14%     0.384      64.9      11.8
+cairo                  index/coloring  (69, 232)/(69, 232)        91.27%     0.745      66.4      12.6
+wide_parallelogram     uniform         (69, 232)/(69, 232)         0.00%     0.020      93.2      11.3
+wide_parallelogram     aspect          (69, 232)/(69, 232)        50.43%     0.384      99.1      12.6
+wide_parallelogram     index/coloring  (69, 232)/(69, 232)        99.83%     0.702      99.1      13.4
+scalloped_hexagon      uniform         (69, 232)/(69, 232)         1.81%     0.075     257.6     130.0
+scalloped_hexagon      aspect          (69, 232)/(69, 232)         1.81%     0.075     239.5     110.1
+scalloped_hexagon      index/coloring  (69, 232)/(69, 232)        97.20%     0.745     237.6     103.9
+wavy_square            uniform         (69, 232)/(69, 232)         0.00%     0.004     168.2      60.2
+wavy_square            aspect          (69, 232)/(69, 232)         0.00%     0.004     174.0      60.6
+wavy_square            index/coloring  (69, 232)/(69, 232)        99.41%     0.745     175.8      64.7
+puzzle_piece           uniform         (69, 232)/(69, 232)         0.00%     0.012     173.5      73.5
+puzzle_piece           aspect          (69, 232)/(69, 232)         0.00%     0.012     179.9      84.3
+puzzle_piece           index/coloring  (69, 232)/(69, 232)        99.33%     0.745     178.8      71.0
+arrow_quad             uniform         (69, 232)/(69, 232)         0.00%     0.012      65.5      12.4
+arrow_quad             aspect          (69, 232)/(69, 232)        51.24%     0.384      71.6      14.7
+arrow_quad             index/coloring  (69, 232)/(69, 232)        99.65%     0.745      73.0      14.7
+wavy_triangle          uniform         (69, 232)/(69, 232)         0.00%     0.012     150.9      83.0
+wavy_triangle          aspect          (69, 232)/(69, 232)        51.00%     0.384     152.8      82.9
+wavy_triangle          index/coloring  (69, 232)/(69, 232)        98.08%     0.745     152.6      81.4
+interlocking_hexagon   uniform         (69, 232)/(69, 232)         4.02%     0.075     235.9     137.5
+interlocking_hexagon   aspect          (69, 232)/(69, 232)         4.02%     0.075     241.9     148.2
+interlocking_hexagon   index/coloring  (69, 232)/(69, 232)        96.64%     0.745     241.6     128.4
+flowers                uniform         (69, 232)/(69, 232)         0.84%     0.082     325.7      94.9
+flowers                aspect          (69, 232)/(69, 232)        83.51%     0.612     324.1      86.9
+flowers                index/coloring  (69, 232)/(69, 232)        95.60%     0.702     328.9      88.3
+scalloped_quad         uniform         (69, 232)/(69, 232)         1.04%     0.102     191.4      83.6
+scalloped_quad         aspect          (69, 232)/(69, 232)        69.95%     0.600     195.5      81.5
+scalloped_quad         index/coloring  (69, 232)/(69, 232)        93.82%     0.745     194.0      79.0
+tree                   uniform         (69, 232)/(69, 232)         7.53%     0.749     290.2     120.7
+tree                   aspect          (69, 232)/(69, 232)        59.55%     0.749     300.8     104.5
+tree                   index/coloring  (69, 232)/(69, 232)        95.98%     0.804     304.8     105.3
+
+uniform         : pixels differing by more than 0.05 in intensity: median 0.00 %, max 7.53 %, images of different size: 0
+aspect          : pixels differing by more than 0.05 in intensity: median 50.43 %, max 83.51 %, images of different size: 0
+index/coloring  : pixels differing by more than 0.05 in intensity: median 98.08 %, max 99.83 %, images of different size: 0
+render time (uniform mode, generate/fill_region included): old median 150.9 ms, new median 60.2 ms, new with outline='straight' median 29.4 ms (max 100.4); image identical to the curved selection in 15 of 15 presets

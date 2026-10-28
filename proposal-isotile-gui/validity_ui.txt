@@ -1,0 +1,49 @@
+== A: slider sweeps, one parameter at a time, others at their defaults ==
+12928 slider positions of 128 parameters: 390 invalid (3.0 %); inside safe_range but invalid: 0
+
+== B: vertex drags from random valid states (Jacobian least squares as in _on_vertex_change, clamped to [0, 1]) ==
+displacement sigma 0.15: 5500 drags of one parameter from a random valid state, 16 end invalid (0.3 %)
+displacement sigma 0.5: 5500 drags of one parameter from a random valid state, 37 end invalid (0.7 %)
+
+== C: the 17 curve presets of the editor on every curvable shape id (default parameters) ==
+  straight               valid  139 of 139 (100.0 %)
+  scalloped              valid  139 of 139 (100.0 %)
+  scalloped_down         valid  139 of 139 (100.0 %)
+  scalloped_deep         valid  135 of 139 ( 97.1 %)
+  scalloped_deep_down    valid  134 of 139 ( 96.4 %)
+  s_curve                valid  135 of 139 ( 97.1 %)
+  s_curve_alt            valid  132 of 139 ( 95.0 %)
+  puzzle                 valid  139 of 139 (100.0 %)
+  puzzle_inverse         valid  139 of 139 (100.0 %)
+  arrow                  valid  139 of 139 (100.0 %)
+  arrow_down             valid  139 of 139 (100.0 %)
+  bulge                  valid  138 of 139 ( 99.3 %)
+  dent                   valid  137 of 139 ( 98.6 %)
+  hook_right             valid  139 of 139 (100.0 %)
+  hook_left              valid  139 of 139 (100.0 %)
+  ramp_up                valid  136 of 139 ( 97.8 %)
+  ramp_down              valid  138 of 139 ( 99.3 %)
+  all presets: valid 2336 of 2363
+
+== D: random node drags on the 15 presets ==
+1800 random single-node moves (sigma 0.12): 140 invalid (7.8 %); shape ids named by bad_edges: median 2.0, max 2
+
+== E: valid in one mode, invalid in the other ==
+  spline_ok_linear_bad: (46, 0, [[0.0, 0.0], [0.229, -0.227], [0.461, 0.168], [0.56, -0.147], [0.44, 0.147], [0.539, -0.168], [0.771, 0.227], [1.0, -0.0]])
+  linear_ok_spline_bad: (83, 0, [[0.0, 0.0], [0.324, -0.042], [0.333, 0.232], [0.418, -0.266], [1.0, 0.0]])
+
+== F: repair strategies for an invalid node move ==
+  revert (one check): median 7.16 ms
+  slide to the boundary (12 bisection steps, 414 invalid moves): median 91.2 ms, max 136.6 ms; a valid point other than the start found in 414 of 414
+
+== G: hairpin and fold-back (docs/curves.md) ==
+  hairpin, arms 0.1 apart (finger)                 spline valid=True  bad_edges=() valid
+  hairpin, arms 0.1 apart (finger)                 linear valid=True  bad_edges=() valid
+  hairpin, arms 0.001 apart                        spline valid=True  bad_edges=() valid
+  hairpin, arms 0.001 apart                        linear valid=True  bad_edges=() valid
+  arms 1e-7 apart (below the clearance)            spline valid=False bad_edges=(0, 2) edges cross, touch or are closer than the clearance: [0, 2]
+  arms 1e-7 apart (below the clearance)            linear valid=False bad_edges=(0, 2) edges cross, touch or are closer than the clearance: [0, 2]
+  fold-back at a join (180 degree turn on a line)  spline valid=False bad_edges=(0, 2) edges cross, touch or are closer than the clearance: [0, 2]
+  fold-back at a join (180 degree turn on a line)  linear valid=False bad_edges=(0, 2) the curve folds back (a turn of 180 degrees or more) at the joins of edges: [0, 2]; edges cross, touch or are closer than the clearance: [0, 2]
+  bow tie (crossing)                               spline valid=False bad_edges=(0, 2) edges cross, touch or are closer than the clearance: [0, 2]
+  bow tie (crossing)                               linear valid=False bad_edges=(0, 2) edges cross, touch or are closer than the clearance: [0, 2]

@@ -1,0 +1,55 @@
+== 1: the Python snippet ==
+from isotile import IsohedralTiling
+
+tiling = IsohedralTiling(
+    43,
+    parameters=[0.230769230769, 0.5],
+    edge_curves={
+        0: [[0.0, 0.0], [0.3, 0.0], [0.5, 0.15], [0.7, 0.0], [1.0, 0.0]],
+        1: [[0.0, 0.0], [0.3, 0.0], [0.5, -0.15], [0.7, 0.0], [1.0, 0.0]],
+    },
+    edge_curve_modes={0: 'linear', 1: 'linear'},
+)
+
+tiles = tiling.fill_region((-2, -2, 2, 2), n_tiles=100, margin=0.1)
+outlines = tiles.outlines()  # (n_tiles, n_points, 2) array of the tile outlines
+# polygons = tiles.polygons()  # shapely polygons; needs isotile[shapely]
+120 tiles
+snippet rebuilds the same prototile: True
+snippet executed and equal for all 15 presets
+
+== 2: files written by the old GUI, read by isotile ==
+396 designs x 2 file kinds = 792 files: read 751, rejected for invalid curves 41, other errors 0
+    2 x IH68: invalid prototile for parameters [0.105263157895]: edges cross, 
+    1 x IH15: invalid prototile for parameters [0.12239750492, 0.225335752741,
+    4 x IH38: invalid prototile for parameters []: edges cross, touch or are c
+    2 x IH53: invalid prototile for parameters [0.5, 0.102564102564, 0.1025641
+    1 x IH44: invalid prototile for parameters [0.5, 0.102564102564]: edges cr
+    4 x IH39: invalid prototile for parameters []: edges cross, touch or are c
+    2 x IH79: invalid prototile for parameters []: edges cross, touch or are c
+    2 x IH88: invalid prototile for parameters []: edges cross, touch or are c
+    3 x IH46: invalid prototile for parameters [0.5, 0.230769230769, 0.5, 0.5]
+    4 x IH81: invalid prototile for parameters []: edges cross, touch or are c
+    2 x IH33: invalid prototile for parameters []: edges cross, touch or are c
+    2 x IH85: invalid prototile for parameters [0.5, 0.196416770201]: edges cr
+    2 x IH83: invalid prototile for parameters [0.196416770201]: edges cross, 
+    2 x IH17: invalid prototile for parameters [0.12239750492, 0.225335752741]
+    2 x IH84: invalid prototile for parameters [0.5, 0.196416770201]: edges cr
+    1 x IH66: invalid prototile for parameters [0.230769230769]: edges cross, 
+    1 x IH71: invalid prototile for parameters []: edges cross, touch or are c
+    2 x IH55: invalid prototile for parameters []: edges cross, touch or are c
+    2 x IH78: invalid prototile for parameters [0.230769230769]: edges cross, 
+files from the export dialog that lose a 'linear' mode on reading: 199
+  types         : read 162, rejected 0
+  presets       : read 30, rejected 0
+  random curves : read 559, rejected 41
+curved prototile of the old GUI vs isotile prototile(), 292 curved designs read from the GUI save file: symmetric difference of the polygons, largest 0.000155 of the tile area, median 5.72e-18
+
+files the old GUI can write that isotile.from_dict rejects, and Draft.from_dict (editor_model) repairs:
+  mode for a shape id without a curve    isotile.from_dict: ValueError: IH41: edge_curve_modes for shape ids without a curve: [1];  Draft.from_dict + tiling(): read
+  parameters of the wrong length         isotile.from_dict: ValueError: IH41 takes 2 parameters, got shape (1,);  Draft.from_dict + tiling(): read
+  curve on a straight (I) edge           isotile.from_dict: ValueError: IH14: edge shape id 1 is a straight (I) edge and cannot be curved;  Draft.from_dict + tiling(): read
+
+== 3: SVG and GeoJSON ==
+GeoJSON tiles of the 15 presets at 50, 100 and 200 tiles (45 cases): every new tile that overlaps the square (-2,-2,2,2) has an old tile with the same centroid (1e-3 of a tile size) in 44 cases; largest polygon difference 1.55e-04 of a tile area
+example.svg 958 KiB, 140 tiles; example.geojson 2578 KiB

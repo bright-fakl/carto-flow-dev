@@ -1,0 +1,49 @@
+TileSet fields: ['cell', 'aspect', 'transforms']
+n tiles / aspects in set / n_aspects of IH28: (128, [0, 1, 2, 3], 4)
+colors() dtype/shape/values: (dtype('int64'), (128,), [0, 1, 2])
+edge_outlines: n edges, points per edge (straight): (5, [2, 2, 2, 2, 2])
+edge_outlines: points per edge (wavy_square): [100, 100, 100, 100]
+edges[i] fields: ['index', 'shape_id', 'shape', 'reversed', 'curve']
+edge_outlines vs the GUI's _update_edge_curves, 15 presets, largest coordinate difference: 2.22e-16
+vertices vs _ih.vertices, 81 types at defaults, largest difference: 2.22e-16
+info(): types whose carto-flow type_info has a key that isotile's info() lacks (of 81): 0
+info(): parameters whose affected_vertices differ (3 decimals): 0
+info() extra keys: ['parameter_values']
+find_types(num_vertices=4, has_customizable_edges=True) equal: True
+list_presets equal keys: True
+safe_ranges: ends / infinite ends / types with a parameter: (256, 138, 55)
+safe_ranges: finite ends min / max: (np.float64(-0.15384589743599997), np.float64(1.055555))
+parameters in 81 types / with [0, 1] inside safe_range: (128, 95)
+random parameters in [0,1]^k (200 per type, 55 types with parameters): invalid fraction: 0.065
+types with at least 50% invalid: 3
+types with 0% invalid: 32
+parameters whose safe_range cuts the slider [0, 1] / with a finite safe_range end beyond [0, 1]: (33, 72)
+with_parameters exists: False
+parameters setter exists (the tiling is mutable): True
+with_edge_curves returns a new object; the old keeps its curves: (True, True, [0])
+with_edge_curves(curves) without modes resets modes to spline: {0: 'spline'}
+modes kept when passed: {0: 'linear'}
+mode for an id without a curve raises: IH41: edge_curve_modes for shape ids without a curve: [1]
+IH41 shape ids of I edges: []
+types with an I edge shape (of 81): 33
+IH14 shape types: ('J', 'I')
+curve on an I edge raises: IH14: edge shape id 1 is a straight (I) edge and cannot be curved
+check_prototile with a curve on an I edge raises too: IH14: edge shape id 1 is a straight (I) edge and cannot be curved
+curve not starting at (0, 0) raises: an edge curve must run from (0, 0) to (1, 0), got [0.1, 0.0] to [1.0, 0.0]
+unknown shape id raises: IH41: 9 is not an edge shape id (0 to 1)
+bow in linear mode: (False, (0, 2), 'edges cross, touch or are closer than the clearance: [0, 2]')
+bow in spline mode: (False, (0, 2), 'edges cross, touch or are closer than the clearance: [0, 2]')
+narrow finger (hairpin) in spline mode: (False, (0, 2), 'edges cross, touch or are closer than the clearance: [0, 2]')
+straight edge curve valid: True
+to_dict keys: ['edge_curve_modes', 'edge_curves', 'parameters', 'tiling_type', 'version']
+version: 1.1
+GUI file 1.0 with modes, description and metadata loads; modes kept: {0: 'linear'}
+GUI file with parameters [] for a type without parameters: []
+wrong number of parameters raises: IH41 takes 2 parameters, got shape (1,)
+version 2.0 raises: unsupported tiling format version '2.0'
+round trip equal curves: True
+plot helpers draw into given axes (module isotile.plot, not exported in isotile.__all__): ('Axes', True)
+GUI interpolate_spline vs isotile.interpolate, 120 random curves of 3 to 21 control points, largest difference: 2.22e-16
+two control points: GUI / isotile: ([(0, 0), (1, 0)], [[0.0, 0.0], [1.0, 0.0]])
+parameter descriptions equal to carto-flow's type_info (of 128): 128
+edge descriptions equal (of 81 types): 81

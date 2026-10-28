@@ -1,0 +1,11 @@
+preset                  constructor  with_frame  fill straight    check_curves share of fill straight
+scalloped_hexagon            1.65 ms      1.62 ms         3.42 ms                                   28 %
+wavy_square                  5.83 ms      5.95 ms         7.08 ms                                   67 %
+puzzle_piece                 5.74 ms      5.88 ms         7.29 ms                                   68 %
+arrow_quad                   1.03 ms      1.02 ms         2.38 ms                                   27 %
+wavy_triangle                6.40 ms      6.42 ms         7.99 ms                                   63 %
+interlocking_hexagon         7.61 ms      7.67 ms         9.93 ms                                   73 %
+flowers                      2.71 ms      2.72 ms         4.60 ms                                   33 %
+scalloped_quad               5.10 ms      4.94 ms         6.32 ms                                   61 %
+tree                         7.49 ms      7.61 ms         9.46 ms                                   60 %
+median over 9 presets with curves: constructor 5.74 ms, with_frame 5.88 ms, fill_region(straight) 7.08 ms, check_curves share 61 %
