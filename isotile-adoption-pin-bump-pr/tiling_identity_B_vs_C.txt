@@ -1,0 +1,28 @@
+tiling                        cases  identical  different     tiles a -> b (total)
+square                          144        144          0       13497 -> 13497     
+hexagon                         144        144          0       10805 -> 10805     
+hexagon flat                    144        144          0       10848 -> 10848     
+triangle                        144        144          0       14206 -> 14206     
+triangle right                  144        144          0       14751 -> 14751     
+quadrilateral                   144        144          0       14071 -> 14071     
+trapezoid                       144        144          0       13979 -> 13979     
+preset regular_hexagon          144        144          0       13779 -> 13779     
+preset square                   144        144          0       13530 -> 13530     
+preset equilateral_triangle     144        144          0       14572 -> 14572     
+preset rhombus                  144        144          0       14102 -> 14102     
+preset cairo                    144        144          0       13977 -> 13977     
+preset wide_parallelogram       144        144          0       14452 -> 14452     
+preset scalloped_hexagon        144        144          0       13823 -> 13823     
+preset wavy_square              144        144          0       13981 -> 13981     
+preset puzzle_piece             144        144          0       14114 -> 14114     
+preset arrow_quad               144        144          0       13886 -> 13886     
+preset wavy_triangle            144        144          0       14753 -> 14753     
+preset interlocking_hexagon     144        144          0       14964 -> 14964     
+preset flowers                  144        144          0       13950 -> 13950     
+preset scalloped_quad           144        144          0       14419 -> 14419     
+preset tree                     144        144          0       14202 -> 14202     
+type 1                          144        144          0       13721 -> 13721     
+type 7                          144        144          0       13764 -> 13764     
+type 41                         144        144          0       13530 -> 13530     
+type 93                         144        144          0       14572 -> 14572     
+3744 cases, 0 differ

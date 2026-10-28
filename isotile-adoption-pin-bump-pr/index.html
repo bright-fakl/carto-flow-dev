@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #197: &quot;isotile pin a4625b7: offset in one pass, curved outline for curved tilings&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #197: &quot;isotile pin a4625b7: offset in one pass, curved outline for curved tilings&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../proposal-isotile-adoption/index.html">carto-flow adopts isotile (phase 3 design)</a> <span class="meta">(proposal)</span><br><a href="../isotile-offset-pr/index.html">&quot;isotile: fill_region offset&quot;</a> <span class="meta">(pr)</span><br><a href="../isotile-curved-cover-pr/index.html">&quot;isotile: outline option of cover and fill_region (curved by default for curved tilings)&quot;</a> <span class="meta">(pr)</span><br><a href="../isotile-adoption-step-3-pr/index.html">&quot;isotile adoption step 3: rotation and offset of the tile lattice&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/197">https://github.com/bright-fakl/carto-flow/pull/197</a></dd>
+<dt>Branch</dt><dd>isotile-pin-bump</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-28 15:10</dd>
+<dt>Before</dt><dd>main at 0ef643c with isotile 392484c</dd>
+<dt>After</dt><dd>isotile-pin-bump @ f5c3c10 with isotile a4625b7 (2,092 passed, 2 skipped, 4 xfailed locally)</dd>
+<dt>Inputs</dt><dd>carto-flow 0ef643c against f5c3c10; isotile 392484c (old pin) against a4625b7; Python 3.10.18, numpy 2.2.6, scipy 1.15.3; bundled census data (49 states, 432 districts, EPSG:102008) and the 10 x 10 grid of step 3; 16-core WSL2 machine. Layout runs are single runs one after the other, mosaic with morph=False. Timings of generate are the best of 7.</dd>
+</dl>
+<p class="desc">The isotile pin moves to a4625b7 (fill_region offset, outline for cover and fill_region). Tiling.with_offset passes the offset to fill_region (generate of 10,000 hexagons with an offset takes 0.14 s instead of 0.26 s, bit-identical results), and tilings with curved edges select tiles by the curved outline, which adds boundary tiles for some presets without changing any layout (31 layout cases, footprints identical).</p>
+<p>Follows <a href="../isotile-offset-pr/index.html">isotile-offset-pr</a> (isotile PR 8, <a href="https://github.com/bright-fakl/isotile/issues/7">isotile#7</a>) and <a href="../isotile-curved-cover-pr/index.html">isotile-curved-cover-pr</a> (isotile PR 9, <a href="https://github.com/bright-fakl/isotile/issues/6">isotile#6</a>) for the adoption in <a href="../proposal-isotile-adoption/index.html">proposal-isotile-adoption</a>. Both isotile changes are in <code>a4625b7</code>.</p>
+<h2>What changed</h2>
+<ul><li><code>pyproject.toml</code> and <code>uv.lock</code>: the rev of isotile (<code>uv.lock</code> edited by hand; <code>uv lock --locked</code> and <code>uv sync --frozen</code> pass). The wheel-smoke-test step reads the rev from <code>pyproject.toml</code> and is unchanged. No other file mentions the old rev.</li><li><code>Tiling.with_offset</code>: <code>_IsotileTiling.generate</code> calls <code>fill_region(..., offset=self._offset)</code>. The second pass (<code>with_frame</code> and a second <code>cover</code>) is deleted.</li><li>Tilings with curved edges: isotile&#x27;s <code>outline=None</code> now selects tiles by the curved outline for a tiling with at least one edge curve. carto-flow takes the default. The module docstring, <code>Tiling.generate</code>, <code>docs/explanations/tiling-system.md</code> and the changelog (breaking changes of 3.0.0) state it.</li><li>Tests: <code>tests/test_tilings_golden.py</code> no longer exempts the curved presets (every tile of the former implementation is returned for all 15 presets and 81 types, and every tile it did not return overlaps the region), <code>test_curved_presets_select_tiles_by_the_curved_outline</code> (9 presets) and <code>test_curved_outline_adds_tiles_at_the_boundary</code> (112 to 126 tiles); <code>tests/test_tiling_lattice_options.py</code> compares <code>generate</code> with an offset to <code>fill_region(offset=...)</code> (tile cells, aspects and transforms equal). The golden fixtures need no change: they hold the tiles of the former class that overlap the region, and the new tile sets contain all of them.</li></ul>
+<h2>Offset in one pass: identity and time</h2>
+<p><a href="tiling_identity.py">tiling_identity.py</a>: 26 tilings (square, hexagon pointy and flat, two triangles, two quadrilaterals, 15 presets, types 1, 7, 41, 93) x 2 regions (one at the origin, one 8e6 away) x 3 sizes (<code>n_tiles</code> 100 and 37, <code>tile_size</code>) x 2 margins x 2 rotations x 6 offsets = 3,744 cases. Per case the polygon coordinates, tile transforms, edge and vertex-only adjacency, tile size and inscribed radius are compared exactly. Runs: A = main with isotile 392484c, B = main with a4625b7, C = this branch with a4625b7.</p>
+<table>
+<tr><th>comparison</th><th>result</th><th>file</th></tr>
+<tr><td>B against C (the offset refactor alone)</td><td>3,744 of 3,744 identical</td><td><a href="tiling_identity_B_vs_C.txt">tiling_identity_B_vs_C.txt</a></td></tr>
+<tr><td>A against C, 17 non-curved tilings (square, hexagon, triangles, quadrilaterals, 6 straight presets, 4 types)</td><td>all 144 cases of each identical</td><td><a href="tiling_identity_A_vs_C.txt">tiling_identity_A_vs_C.txt</a></td></tr>
+<tr><td>A against C, 9 curved presets</td><td>30 to 129 of 144 cases differ per preset (more tiles at the boundary), see the next section</td><td>same file</td></tr>
+</table>
+<p>Layout level: <a href="offset_compare.py">offset_compare.py</a> on the offset cases of the <a href="../isotile-adoption-step-3-pr/experiments.py">step 3 experiments</a> (grid and mosaic of the states with hexagon and square, offsets (0, 0), (0.25, 0.25), (0.5, 0.5), and the mosaic with rotation 30 centered and moved): assignments, regions, tile polygons and tile size identical in all 14 cases, main with the old pin against the branch (<a href="offset_identity_output.txt">offset_identity_output.txt</a>). The tests of <code>tests/test_tiling_lattice_options.py</code> pass.</p>
+<p>Time of <code>generate</code>, 9,919 to 9,960 hexagons, region (0, 0, 100, 60), margin 0.1, best of 7, two rounds (<a href="time_generate.py">time_generate.py</a>, <a href="timing.txt">timing.txt</a>):</p>
+<table>
+<tr><th></th><th>no offset</th><th>offset (0.3, 0.6)</th></tr>
+<tr><td>main, isotile 392484c</td><td>0.138 and 0.144 s</td><td>0.252 and 0.260 s</td></tr>
+<tr><td>main, isotile a4625b7</td><td>0.142 and 0.146 s</td><td>0.256 and 0.280 s</td></tr>
+<tr><td>branch, isotile a4625b7</td><td>0.139 and 0.143 s</td><td>0.139 and 0.142 s</td></tr>
+</table>
+<p>The second pass cost 0.11 to 0.14 s; with the offset in <code>fill_region</code> the time equals the time without an offset.</p>
+<h2>Curved tilings: tile sets</h2>
+<p>Default outline now curved (isotile#6). For <code>fill_region((0, 0, 10, 6), n_tiles=100, margin=0.1)</code>, tiles before (straight outline) and now: <code>puzzle_piece</code> 112 and 126, <code>arrow_quad</code> 112 and 124, <code>wavy_triangle</code> 114 and 132, <code>flowers</code> 121 and 123.</p>
+<p>Across the 3,744 tiling cases the tile totals of A and C differ for 9 curved presets only (for example <code>interlocking_hexagon</code> 13,779 to 14,964, <code>puzzle_piece</code> 13,530 to 14,114, <code>wavy_triangle</code> 14,206 to 14,753); all other tilings have the same totals (<a href="tiling_identity_A_vs_C.txt">tiling_identity_A_vs_C.txt</a>).</p>
+<h2>Curved tilings: layouts</h2>
+<p><a href="layout_cases.py">layout_cases.py</a> (the script of step 1, extended): the 15 cases of the step 1 and step 3 pages and 16 new ones, <code>puzzle_piece</code>, <code>wavy_triangle</code>, <code>flowers</code>, <code>arrow_quad</code> on the states and the districts, grid and mosaic (districts grouped by state), <code>morph=False</code>, <a href="layouts_oldpin.log">layouts_oldpin.log</a> (main, 392484c), <a href="layouts_newpin.log">layouts_newpin.log</a> (main, a4625b7), <a href="layouts_branch.log">layouts_branch.log</a>. Acceptance rule of step 1: the mean distance may change by the larger of 25 percent of the old value and, for the states grid layouts, the range of the same metric over six lattice offsets of the same tiling (old and new pin together: <a href="phase_oldpin.log">phase_oldpin.log</a>, <a href="phase_newpin.log">phase_newpin.log</a>). Unassigned core tiles are given for the mosaic cases; the split regions column is the number of regions with more than one edge-connected block of tiles (mosaic: the layout&#x27;s own count of non-contiguous regions).</p>
+<p>Results:</p>
+<ul><li>Main with the new pin against the branch: assignments identical in all 31 cases (<a href="layout_B_vs_branch.md">layout_B_vs_branch.md</a>): the offset refactor changes nothing at layout level.</li><li>Main with the old pin against the branch (<a href="layout_table.md">layout_table.md</a>): the 15 cases of the earlier pages, including the <code>scalloped_hexagon</code> cases, have identical assignments. Of the 16 new cases 11 have identical assignments; 5 have more lattice tiles (states grid <code>puzzle_piece</code> 160 to 188, <code>flowers</code> 165 to 171, <code>arrow_quad</code> 160 to 174; states mosaic <code>wavy_triangle</code> 490 to 524; districts mosaic <code>wavy_triangle</code> 1,210 to 1,264) so that the tile indices differ. In all 31 cases every region gets the same tile polygons (<a href="footprints.py">footprints.py</a>, <a href="footprints_table.md">footprints_table.md</a>): the additional tiles lie in the margin band and no region uses them. The mean distance, split regions and unassigned core tiles are equal in every case (change 0 percent, all within the tolerance).</li><li>Wall times, single runs, the same within the noise of the machine (states mosaic 1.0 to 2.3 s, districts mosaic 3.5 to 7.0 s, grid 0.3 to 2.7 s); the largest differences are 1.1 s (districts <code>scalloped_hexagon</code>, 5.2 and 6.3 s) and 0.7 s (states mosaic <code>wavy_triangle</code>, 2.3 and 3.0 s).</li></ul>
+<p>Lattice-phase range of the states grid layouts with the curved presets (mean distance over six offsets, both pins): 0.73 to 1.16 for all presets, except <code>tree</code> at offset (0.9, 0.1): 1.68 with the new pin and 1.10 with the old pin (the tile set differs). This does not enter the layouts above, which use the default offset.</p>
+<p>No layout changes, so no side-by-side layout figures; the only visible change is the tile set of <code>generate</code> (figure above). <code>morph=True</code> layouts are not compared (flow morph has numba noise of 1e-16).</p>
+<p>Decision: the default is accepted. Passing <code>outline=&quot;straight&quot;</code> in the calls of carto-flow would keep <code>n_tiles</code> of <code>generate</code> equal to main for the curved presets (112 instead of 126 for <code>puzzle_piece</code>) and changes no layout either; it was not implemented because nothing needs it.</p>
+<h2>Checks</h2>
+<p>2,092 passed, 2 skipped, 4 xfailed (full suite); <code>ruff check</code>, <code>ruff format</code>, <code>mypy src</code>, <code>deptry src</code> pass.</p>
+<div class="figure">
+<img src="fig_curved_tilings.png" alt="The four presets, straight-outline tiles (left, the former selection) and curved-outline tiles (right); orange tiles are selected only by the curved outline, the red rectangle is the region with margin ([make_tiling_figure.py](make_tiling_figure.py)).">
+<p class="caption">The four presets, straight-outline tiles (left, the former selection) and curved-outline tiles (right); orange tiles are selected only by the curved outline, the red rectangle is the region with margin (<a href="make_tiling_figure.py">make_tiling_figure.py</a>).</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

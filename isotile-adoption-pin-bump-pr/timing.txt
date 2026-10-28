@@ -1,0 +1,12 @@
+main_oldpin: offset (0.0, 0.0): 9919 tiles, best 0.144 s, median 0.213 s
+main_oldpin: offset (0.3, 0.6): 9960 tiles, best 0.260 s, median 0.337 s
+main_newpin: offset (0.0, 0.0): 9919 tiles, best 0.142 s, median 0.209 s
+main_newpin: offset (0.3, 0.6): 9960 tiles, best 0.280 s, median 0.321 s
+branch_newpin: offset (0.0, 0.0): 9919 tiles, best 0.143 s, median 0.215 s
+branch_newpin: offset (0.3, 0.6): 9960 tiles, best 0.139 s, median 0.212 s
+main_oldpin: offset (0.0, 0.0): 9919 tiles, best 0.138 s, median 0.205 s
+main_oldpin: offset (0.3, 0.6): 9960 tiles, best 0.252 s, median 0.325 s
+main_newpin: offset (0.0, 0.0): 9919 tiles, best 0.146 s, median 0.221 s
+main_newpin: offset (0.3, 0.6): 9960 tiles, best 0.256 s, median 0.331 s
+branch_newpin: offset (0.0, 0.0): 9919 tiles, best 0.139 s, median 0.206 s
+branch_newpin: offset (0.3, 0.6): 9960 tiles, best 0.142 s, median 0.205 s

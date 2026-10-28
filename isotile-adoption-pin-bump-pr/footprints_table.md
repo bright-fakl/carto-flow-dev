@@ -1,0 +1,33 @@
+| case | lattice tiles old / new | footprints identical |
+|---|---|---|
+| states grid hexagon | 149 / 149 | yes |
+| states grid square | 160 / 160 | yes |
+| states grid triangle | 168 / 168 | yes |
+| states grid quadrilateral | 180 / 180 | yes |
+| states grid scalloped_hexagon | 179 / 179 | yes |
+| states mosaic hexagon | 447 / 447 | yes |
+| states mosaic square | 520 / 520 | yes |
+| states mosaic triangle | 490 / 490 | yes |
+| states mosaic scalloped_hexagon | 533 / 533 | yes |
+| districts grid hexagon | 1159 / 1159 | yes |
+| districts grid square | 1320 / 1320 | yes |
+| districts mosaic hexagon | 1163 / 1163 | yes |
+| districts mosaic square | 1260 / 1260 | yes |
+| districts mosaic triangle | 1316 / 1316 | yes |
+| districts mosaic scalloped_hexagon | 1283 / 1283 | yes |
+| states grid puzzle_piece | 160 / 188 | yes |
+| states grid wavy_triangle | 168 / 168 | yes |
+| states grid flowers | 165 / 171 | yes |
+| states grid arrow_quad | 160 / 174 | yes |
+| states mosaic puzzle_piece | 520 / 520 | yes |
+| states mosaic wavy_triangle | 490 / 524 | yes |
+| states mosaic flowers | 510 / 510 | yes |
+| states mosaic arrow_quad | 520 / 520 | yes |
+| districts grid puzzle_piece | 1320 / 1320 | yes |
+| districts grid wavy_triangle | 1368 / 1368 | yes |
+| districts grid flowers | 1325 / 1325 | yes |
+| districts grid arrow_quad | 1320 / 1320 | yes |
+| districts mosaic puzzle_piece | 1260 / 1260 | yes |
+| districts mosaic wavy_triangle | 1210 / 1264 | yes |
+| districts mosaic flowers | 1269 / 1269 | yes |
+| districts mosaic arrow_quad | 1260 / 1260 | yes |
