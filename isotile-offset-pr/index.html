@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR bright-fakl/isotile#8: &quot;isotile: fill_region offset&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR bright-fakl/isotile#8: &quot;isotile: fill_region offset&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>isotile</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../proposal-isotile-adoption/index.html">carto-flow adopts isotile (phase 3 design)</a> <span class="meta">(proposal)</span><br><a href="../isotile-step-0-pr/index.html">&quot;isotile step 0: preset amplitude, neighbor_lists, cover precision&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isotile/pull/8">https://github.com/bright-fakl/isotile/pull/8</a></dd>
+<dt>Branch</dt><dd>fill-region-offset</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-28 12:00</dd>
+<dt>Before</dt><dd>bright-fakl/isotile main at 392484c</dd>
+<dt>After</dt><dd>fill-region-offset (4,562 passed, 186 skipped locally on Python 3.10)</dd>
+<dt>Inputs</dt><dd>Python 3.10, numpy, shapely (tests); best of 15 runs for the timing</dd>
+</dl>
+<p class="desc">fill_region takes offset=(u, v), the lattice phase in multiples of the two translation vectors of the placed tiling, and selects the tiles in one cover pass. Needed by Tiling.with_offset of adoption step 3. Nothing to compare visually; the page gives the written evidence.</p>
+<p>Issue 7 of isotile. <code>IsohedralTiling.fill_region(..., offset=(u, v))</code> anchors the lattice at the region center plus <code>u * translation_u + v * translation_v</code> of the placed tiling. The default <code>(0.0, 0.0)</code> gives the previous output. Non-finite values and a wrong shape raise <code>ValueError</code>.</p>
+<h2>Tests</h2>
+<table>
+<tr><th>Test</th><th>Types</th></tr>
+<tr><td><code>(u+1, v)</code>, <code>(u, v+1)</code>, <code>(u+1, v+1)</code>, <code>(u-2, v+3)</code> give the same tiles (compared by vertices, since the cell indices shift)</td><td>square, hexagon, triangle, IH7, IH28, IH84</td></tr>
+<tr><td>equal to the two-step result: shift the frame of the placed tiling by <code>u * translation_u + v * translation_v</code>, call <code>cover</code></td><td>same six</td></tr>
+<tr><td>default and explicit <code>(0.0, 0.0)</code> give identical cells, vertices and frame</td><td>same six</td></tr>
+<tr><td>non-finite, wrong length, scalar, string, <code>None</code> raise <code>ValueError</code></td><td>square</td></tr>
+</table>
+<h2>Timing</h2>
+<p>Regular hexagon, 100 x 100 region, <code>n_tiles=10000</code> (10,152 tiles), best of 15, two sessions:</p>
+<table>
+<tr><th>Call</th><th>ms</th></tr>
+<tr><td><code>fill_region</code> (default)</td><td>141, 163</td></tr>
+<tr><td><code>fill_region(offset=(0.37, 0.21))</code>, one pass</td><td>204, 206</td></tr>
+<tr><td><code>fill_region</code>, shift the frame, <code>cover</code></td><td>315, 378</td></tr>
+</table>
+<p>The one-pass call costs about one <code>cover</code>; the two-step call costs about two. The machine is noisy (WSL2), so the ratio is the result, not the absolute numbers.</p>
+<h2>Documentation</h2>
+<p>Docstring, the lattice-anchor note in <code>docs/concepts.md</code> and the CHANGELOG. The strict docs build and <code>scripts/make_doc_figures.py --check</code> pass.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
