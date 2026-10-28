@@ -151,7 +151,7 @@ Findings:
 ## Deviations from the page
 
 - The layouts have no adjacency option, so `adjacency_type="vertex-only"` is tested at `generate` only.
-- `TilingResult.plot(color_by="aspect")` still colors by rotation; the use of `tile_set.aspect` is not implemented.
+- `TilingResult.plot(color_by="aspect")` colors by `tile_set.aspect` (commit c3ff55b, after the first version of this page) and raises `ValueError` without a tile set; `color_by="rotation"` is the former behavior.
 - The fixtures store the old tiles as center, rotation, flip and canonical tile instead of vertex arrays (384 KB instead of the estimated 1.5 MB); the polygons are rebuilt and the script checks this against the old polygons.
 - The golden layout test runs 10 of the 15 layout cases (not the district grid layouts, which take minutes) and uses the phase ranges stored in `layouts.json`, which come from the old and the new code.
 - `plot_prototile` draws with isotile's plot; the edges are no longer colored by the categorical colors of the style.
