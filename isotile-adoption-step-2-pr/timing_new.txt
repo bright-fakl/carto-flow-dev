@@ -1,0 +1,17 @@
+[step2-sparse] states grid hexagon: best 1.59s of 3, 49 items
+[step2-sparse] states grid square: best 1.67s of 3, 49 items
+[step2-sparse] states grid triangle: best 1.73s of 3, 49 items
+[step2-sparse] states grid quadrilateral: best 0.73s of 3, 49 items
+[step2-sparse] states grid scalloped_hexagon: best 1.86s of 3, 49 items
+[step2-sparse] states grid hexagon tile_count: best 4.14s of 3, 154 items
+[step2-sparse] states grid square tile_count: best 4.46s of 3, 154 items
+[step2-sparse] states mosaic hexagon: best 1.82s of 3, 154 items
+[step2-sparse] states mosaic square: best 0.91s of 3, 154 items
+[step2-sparse] states mosaic triangle: best 0.94s of 3, 154 items
+[step2-sparse] states mosaic scalloped_hexagon: best 1.38s of 3, 154 items
+[step2-sparse] districts grid hexagon: best 109.38s of 3, 432 items
+[step2-sparse] districts grid square: best 124.36s of 3, 432 items
+[step2-sparse] districts mosaic hexagon: best 6.56s of 3, 432 items
+[step2-sparse] districts mosaic square: best 5.11s of 3, 432 items
+[step2-sparse] districts mosaic triangle: best 3.20s of 3, 432 items
+[step2-sparse] districts mosaic scalloped_hexagon: best 4.90s of 3, 432 items

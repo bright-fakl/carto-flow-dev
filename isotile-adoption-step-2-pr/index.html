@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #193: &quot;isotile adoption step 2: sparse tile adjacency in TilingResult&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #193: &quot;isotile adoption step 2: sparse tile adjacency in TilingResult&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../proposal-isotile-adoption/index.html">carto-flow adopts isotile (phase 3 design)</a> <span class="meta">(proposal)</span><br><a href="../isotile-adoption-step-1-pr/index.html">&quot;isotile adoption step 1: tilings over isotile, tactile and the grid generator removed&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/193">https://github.com/bright-fakl/carto-flow/pull/193</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/159">#159</a></dd>
+<dt>Branch</dt><dd>isotile-adoption-step-2</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-28 11:02</dd>
+<dt>Before</dt><dd>main at 4140204 (step 1, dense adjacency)</dd>
+<dt>After</dt><dd>isotile-adoption-step-2 @ dee3dc7 (1,826 passed, 2 skipped, 4 xfailed locally)</dd>
+<dt>Inputs</dt><dd>carto-flow 4140204 against dee3dc7, same isotile pin (392484c); Python 3.10.18, numpy 2.2.6, scipy 1.15.3, bundled census data (49 states, 432 districts); 16-core WSL2 machine. Old and new ran one after the other with nothing else running, each case best of 3 (memory: one run per process). Mosaic runs use morph=False.</dd>
+</dl>
+<p class="desc">TilingResult.adjacency and vertex_adjacency become boolean scipy csr_array taken from isotile, and the grid placement and the mosaic calibration read neighbor index lists instead of rows of a dense matrix. The assignments of 17 grid and mosaic layout cases on the states and the districts equal those of step 1 exactly; the two matrices of 10,301 hexagon tiles take 0.67 MB instead of 212 MB; the layouts are not slower.</p>
+<p>Step 2 of <a href="../proposal-isotile-adoption/index.html">proposal-isotile-adoption</a> (sections 4.1, 7 and 8.2). The change does not alter results, so the page has no before and after figures; the evidence is the exact comparison of the assignments, the memory and the wall times.</p>
+<h2>What changed</h2>
+<ul><li><code>TilingResult.adjacency</code> and <code>vertex_adjacency</code> are <code>scipy.sparse.csr_array</code> of dtype bool, symmetric, with sorted column indices (<code>generate</code> calls <code>sort_indices</code>). They are <code>TileSet.adjacency(adjacency_type)</code> and <code>TileSet.adjacency(&quot;vertex-only&quot;)</code> without a conversion. <code>compute_adjacency=False</code> gives <code>csr_array((n, n), dtype=bool)</code>. <code>rotate</code> passes the matrices on.</li><li>Serialization: <code>SymbolCartogram.save</code> never wrote the adjacency, and <code>load</code> created a dense all-<code>False</code> matrix. <code>load</code> now creates an empty <code>csr_array</code>; <code>vertex_adjacency</code> stays <code>None</code>. The format does not change, so files written by step 1 and by earlier versions load (the golden file <code>saved_cartogram.json</code> is one of them). No format bump is needed.</li><li><code>layouts/mosaic/_calibration.py</code>: <code>adj_list</code> is built from <code>indptr</code> and <code>indices</code> (<code>indices.tolist()</code> sliced per row). The elements are Python <code>int</code>; they were <code>numpy.int64</code>. <code>_assignment.py</code> and <code>mosaic/__init__.py</code> use them in <code>nb in valid_set</code>, <code>tile_to_local[nb]</code>, set comprehensions and <code>for nb in adj_list[t]</code>; ints and numpy integers hash and compare equal, so nothing there changes.</li><li><code>layouts/grid/_placement.py</code>: <code>_canonical</code> copies a matrix (accepts a sparse or a dense matrix, drops stored zeros, sorts the indices) and <code>_lists</code> turns it into one list of neighbor indices per row. Each helper builds the lists once per call: <code>fill_internal_holes</code> (flood fill, hole components, shift-chain BFS, mean neighbor distance, neighbor counts from <code>np.diff(indptr)</code>), <code>_fix_island_assignments</code>, <code>_bfs_distance_matrix</code>, <code>bfs_expand_assignments</code> and <code>assign_to_grid_hungarian</code> (column lists of the CSC form for the penalty masks, row lists for the reverse penalty). Two element-wise lookups in <code>_fix_island_assignments</code>, <code>tile_adjacency[it, mt]</code> over all pairs of island tiles and main-cluster tiles, became membership tests of neighbor lists in the main cluster (same truth value; a pair scan over a sparse matrix would be slow). <code>GridBasedLayout</code> (<code>layouts/grid/__init__.py</code>) only passes the fields on and needed no change. The region adjacency (<code>LayoutData.adjacency</code>, <code>compute_adjacency</code> of <code>symbol_cartogram.adjacency</code>) is a different matrix; it stays dense and <code>compute_adjacency</code> keeps its semantics.</li><li>Other consumers searched with <code>grep</code> over <code>src</code>, <code>tests</code>, <code>docs</code>, <code>benchmarks</code>: no other use of the tile matrices in the flow, centroid and packing layouts or in plotting. The notebook <code>docs/how-to/choose-grid-or-mosaic-layout.ipynb</code> read the matrix with <code>np.flatnonzero(adjacency[i])</code> and <code>np.ix_</code>; both now use the index slice and <code>adjacency[a][:, b].nnz</code>.</li><li>Docs: <code>docs/explanations/tiling-system.md</code> (field types, row slice, empty matrices, loaded results), docstrings of <code>TilingResult</code>, <code>generate</code> and the placement helpers, and a <code>CHANGELOG.md</code> entry under the 3.0.0 breaking changes that lists the operations that stop working (<code>adjacency.any()</code>, <code>len</code>, <code>numpy.where(adjacency[t])</code>, <code>numpy.array_equal</code>, a column as boolean mask).</li></ul>
+<h2>Tests</h2>
+<table>
+<tr><th></th><th>Count</th></tr>
+<tr><td>Full suite</td><td>1,826 passed, 2 skipped, 4 xfailed (1,806 passed before)</td></tr>
+<tr><td>migrated to sparse</td><td><code>TestFillInternalHoles</code> (both tests build a sparse matrix from a neighbor dict), <code>test_tilings.py</code> (neighbor counts from <code>indptr</code>, symmetry, <code>vertex_adjacency</code> equality, empty placeholders, direct <code>TilingResult</code> construction), <code>test_symbol_cartogram_mosaic.py</code> (enclosed cells, placeholder, <code>adj_list</code> against the matrix, which also asserts that the elements are Python ints), golden tests (the fields are no longer converted)</td></tr>
+<tr><td>new</td><td><code>TestSparseAdjacency</code> (type, dtype, shape, sorted indices and symmetry for square, hexagon, triangle, parallelogram and <code>scalloped_hexagon</code>; neighbors as row slice; empty matrices; <code>rotate</code>; storage proportional to the tile count), <code>TestSparsePlacementHelpers</code> (BFS distances and BFS expansion on a path graph with unsorted indices and stored zeros)</td></tr>
+</table>
+<p><code>ruff check</code>, <code>ruff format</code>, <code>mypy</code> and <code>deptry src</code> pass.</p>
+<h2>Identity of the layouts</h2>
+<p><a href="identity_check.py">identity_check.py</a> runs 17 cases with the sources of step 1 (an archive of the tree at 4140204 on <code>PYTHONPATH</code>) and with this branch, stores for every case the tile index of every item (<code>assignments</code>), the region of every item (<code>source_indices</code>) and the lattice size, and compares them with <code>np.array_equal</code> (no tolerance). Cases: the 9 grid and mosaic cases of the states of step 1 (hexagon, square, triangle, quadrilateral and <code>scalloped_hexagon</code> grid; hexagon, square, triangle and <code>scalloped_hexagon</code> mosaic), the states grid with a tile count column (hexagon, square: the <code>bfs_expand_assignments</code> path), the districts grid (hexagon, square) and the districts mosaic grouped by state (hexagon, square, triangle, <code>scalloped_hexagon</code>). The grid cases run with the defaults, so <code>fill_holes</code>, <code>fix_islands</code>, <code>neighbor_weight</code> and <code>topology_weight</code> are all active. <a href="identity_and_timing.txt">identity_and_timing.txt</a>: all 17 are identical, including the lattice sizes. An earlier single run of all cases gave the same result. <a href="run_measurements.sh">run_measurements.sh</a> is the timed run.</p>
+<h2>Memory at 10,000 tiles</h2>
+<p><a href="memory_check.py">memory_check.py</a>, one process per version and tiling, <a href="memory_output.txt">memory_output.txt</a>. <code>generate</code> with adjacency, region (0, 0, 100, 100), about 10,000 tiles:</p>
+<table>
+<tr><th>tiling</th><th>tiles</th><th><code>adjacency</code> + <code>vertex_adjacency</code> dense</th><th>sparse</th><th><code>tracemalloc</code> peak of <code>generate</code> dense / sparse</th><th>peak RSS growth of <code>generate</code> dense / sparse</th></tr>
+<tr><td>hexagon</td><td>10,301</td><td>212.2 MB</td><td>0.67 MB</td><td>216.8 / 91.1 MB</td><td>98.4 / 96.2 MB</td></tr>
+<tr><td>square</td><td>10,000</td><td>200.0 MB</td><td>0.87 MB</td><td>204.8 / 57.9 MB</td><td>96.6 / 63.4 MB</td></tr>
+</table>
+<p>The memory held by the result drops by a factor of 230 to 320. The peak RSS growth of the hexagon run is the same for both versions; it is set by other allocations of <code>generate</code> (the polygons and isotile&#x27;s intermediate arrays) and the cause of the equal value was not investigated further. The <code>tracemalloc</code> peak counts every allocation and shows the matrices.</p>
+<h2>Wall time</h2>
+<p>Best of 3, old and new one after the other with nothing else running (<a href="timing_old.txt">timing_old.txt</a>, <a href="timing_new.txt">timing_new.txt</a>, table from <a href="identity_and_timing.txt">identity_and_timing.txt</a>). All old runs came first and all new runs second, so a slow drift of the machine does not cancel; single runs of the same cases earlier in the session, with the test suite running, differed by up to 20 percent in both directions.</p>
+<table>
+<tr><th>case</th><th>items</th><th>lattice tiles</th><th>identical</th><th>old (s)</th><th>new (s)</th><th>new / old</th></tr>
+<tr><td>states grid hexagon</td><td>49</td><td>149</td><td>yes</td><td>1.64</td><td>1.59</td><td>0.97</td></tr>
+<tr><td>states grid square</td><td>49</td><td>160</td><td>yes</td><td>1.74</td><td>1.67</td><td>0.96</td></tr>
+<tr><td>states grid triangle</td><td>49</td><td>168</td><td>yes</td><td>1.84</td><td>1.73</td><td>0.94</td></tr>
+<tr><td>states grid quadrilateral</td><td>49</td><td>180</td><td>yes</td><td>0.79</td><td>0.73</td><td>0.92</td></tr>
+<tr><td>states grid scalloped_hexagon</td><td>49</td><td>179</td><td>yes</td><td>1.97</td><td>1.86</td><td>0.95</td></tr>
+<tr><td>states grid hexagon, tile count</td><td>154</td><td>427</td><td>yes</td><td>4.52</td><td>4.14</td><td>0.91</td></tr>
+<tr><td>states grid square, tile count</td><td>154</td><td>468</td><td>yes</td><td>4.93</td><td>4.46</td><td>0.90</td></tr>
+<tr><td>states mosaic hexagon</td><td>154</td><td>447</td><td>yes</td><td>1.86</td><td>1.82</td><td>0.98</td></tr>
+<tr><td>states mosaic square</td><td>154</td><td>520</td><td>yes</td><td>0.93</td><td>0.91</td><td>0.98</td></tr>
+<tr><td>states mosaic triangle</td><td>154</td><td>490</td><td>yes</td><td>0.96</td><td>0.94</td><td>0.98</td></tr>
+<tr><td>states mosaic scalloped_hexagon</td><td>154</td><td>533</td><td>yes</td><td>1.45</td><td>1.38</td><td>0.96</td></tr>
+<tr><td>districts grid hexagon</td><td>432</td><td>1159</td><td>yes</td><td>116.44</td><td>109.38</td><td>0.94</td></tr>
+<tr><td>districts grid square</td><td>432</td><td>1320</td><td>yes</td><td>128.31</td><td>124.36</td><td>0.97</td></tr>
+<tr><td>districts mosaic hexagon</td><td>432</td><td>1163</td><td>yes</td><td>6.64</td><td>6.56</td><td>0.99</td></tr>
+<tr><td>districts mosaic square</td><td>432</td><td>1260</td><td>yes</td><td>5.20</td><td>5.11</td><td>0.98</td></tr>
+<tr><td>districts mosaic triangle</td><td>432</td><td>1316</td><td>yes</td><td>3.17</td><td>3.20</td><td>1.01</td></tr>
+<tr><td>districts mosaic scalloped_hexagon</td><td>432</td><td>1283</td><td>yes</td><td>4.98</td><td>4.90</td><td>0.98</td></tr>
+</table>
+<p>No case is slower by more than 1 percent and most are 2 to 10 percent faster (the neighbor loops read Python lists instead of calling <code>np.where</code> on a row per node; not profiled per function). The districts grid takes about two minutes in both versions; the time is in the orientation cost of <code>assign_to_grid_hungarian</code> (a Python loop of n x n x m), not in the adjacency.</p>
+<h2>Deviations from the page</h2>
+<ul><li>Serialization needed no decision: the adjacency was never in the file.</li><li>The page expected about 60 changed lines in 3 files; the change in <code>src</code> is larger (about 100 lines in 4 files plus the notebook) because the placement helpers build neighbor lists once per call (<code>_canonical</code>, <code>_lists</code>) and accept stored zeros and unsorted indices.</li><li>The identity check has 17 cases: it adds the states grid with a tile count column and omits the districts grid with triangles (two minutes per run).</li><li>The Python in this environment is 3.10 (step 1 used 3.12); both versions of every comparison ran on it.</li></ul>
+<h2>Open questions</h2>
+<ol><li><code>compute_adjacency</code> keeps its signature; with sparse matrices the argument saves little (the lattice lookup costs milliseconds at 10,000 tiles). Deprecate it in 3.0.0, or keep it for the calibration trials only?</li><li>The placement helpers accept a dense matrix because <code>csr_array(dense)</code> converts it; the public type is sparse. Mention it on the migration page (step 4), or make the helpers reject dense input?</li></ol>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

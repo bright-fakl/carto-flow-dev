@@ -1,0 +1,4 @@
+[step1-dense] hexagon: 10301 tiles, type ndarray, adjacency 106.11 MB, vertex_adjacency 106.11 MB, tracemalloc peak of generate 216.8 MB, peak RSS growth 98.4 MB
+[step2-sparse] hexagon: 10301 tiles, type csr_array, adjacency 0.63 MB, vertex_adjacency 0.04 MB, tracemalloc peak of generate 91.1 MB, peak RSS growth 96.2 MB
+[step1-dense] square: 10000 tiles, type ndarray, adjacency 100.00 MB, vertex_adjacency 100.00 MB, tracemalloc peak of generate 204.8 MB, peak RSS growth 96.6 MB
+[step2-sparse] square: 10000 tiles, type csr_array, adjacency 0.44 MB, vertex_adjacency 0.43 MB, tracemalloc peak of generate 57.9 MB, peak RSS growth 63.4 MB
