@@ -1,0 +1,8 @@
+[old] ('rotation', 'hexagon', 'centered', 0.0): 1.61s, mean distance 1.262, max 3.10
+[old] ('rotation', 'hexagon', 'centered', 30.0): 1.61s, mean distance 1.270, max 3.48
+[old] ('rotation', 'hexagon', 'moved', 0.0): 1.61s, mean distance 1.262, max 3.10
+[old] ('rotation', 'hexagon', 'moved', 30.0): 1.62s, mean distance 12.057, max 16.37
+[old] ('rotation', 'square', 'centered', 0.0): 1.66s, mean distance 0.956, max 2.42
+[old] ('rotation', 'square', 'centered', 30.0): 1.67s, mean distance 0.886, max 1.81
+[old] ('rotation', 'square', 'moved', 0.0): 1.68s, mean distance 0.956, max 2.42
+[old] ('rotation', 'square', 'moved', 30.0): 1.70s, mean distance 7.388, max 9.95

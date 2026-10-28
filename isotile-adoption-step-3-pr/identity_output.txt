@@ -1,0 +1,19 @@
+case                                  items  lattice  identical   old (s)   new (s)  new/old
+states grid hexagon                      49      149       True      1.65      1.95     1.18
+states grid square                       49      160       True      1.66      2.11     1.27
+states grid triangle                     49      168       True      1.75      2.07     1.19
+states grid quadrilateral                49      180       True      0.73      0.78     1.07
+states grid scalloped_hexagon            49      179       True      1.87      2.34     1.25
+states grid hexagon tile_count          154      427       True      4.16      4.57     1.10
+states grid square tile_count           154      468       True      4.54      5.10     1.12
+states mosaic hexagon                   154      447       True      1.86      1.95     1.04
+states mosaic square                    154      520       True      1.00      1.00     1.01
+states mosaic triangle                  154      490       True      0.96      1.10     1.16
+states mosaic scalloped_hexagon         154      533       True      1.41      1.54     1.09
+districts grid hexagon                  432     1159       True    117.63    126.50     1.08
+districts grid square                   432     1320       True    160.04    130.09     0.81
+districts mosaic hexagon                432     1163       True     10.21      6.71     0.66
+districts mosaic square                 432     1260       True      5.86      5.16     0.88
+districts mosaic triangle               432     1316       True      5.78      3.22     0.56
+districts mosaic scalloped_hexagon      432     1283       True      8.30      5.03     0.61
+ALL IDENTICAL

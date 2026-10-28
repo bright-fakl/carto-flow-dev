@@ -1,0 +1,197 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #195: &quot;isotile adoption step 3: rotation and offset of the tile lattice&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #195: &quot;isotile adoption step 3: rotation and offset of the tile lattice&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../proposal-isotile-adoption/index.html">carto-flow adopts isotile (phase 3 design)</a> <span class="meta">(proposal)</span><br><a href="../isotile-adoption-step-1-pr/index.html">&quot;isotile adoption step 1: tilings over isotile, tactile and the grid generator removed&quot;</a> <span class="meta">(pr)</span><br><a href="../isotile-adoption-step-2-pr/index.html">&quot;isotile adoption step 2: sparse tile adjacency in TilingResult&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/195">https://github.com/bright-fakl/carto-flow/pull/195</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/159">#159</a></dd>
+<dt>Branch</dt><dd>isotile-adoption-step-3</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-28 11:50</dd>
+<dt>Before</dt><dd>main at 0365919 (step 2)</dd>
+<dt>After</dt><dd>isotile-adoption-step-3 @ f9a2133 (2,069 passed, 2 skipped, 4 xfailed locally)</dd>
+<dt>Inputs</dt><dd>carto-flow 0365919 against f9a2133, isotile pinned at 392484c; Python 3.10.18, numpy 2.2.6, scipy 1.15.3, shapely 2.1.2; bundled census data (49 states, 432 districts; EPSG:102008, meters) and a 10 x 10 grid of unit cells with 2 to 6 tiles per cell (seed 7, the input of the step 1 page); 16-core WSL2 machine. Mosaic runs use morph=False. Timings in the experiment tables are the fastest of 3 runs, taken one after the other with nothing else running; the wall times in identity_output.txt are single runs while a test suite and mypy ran, so only its equality column counts.</dd>
+</dl>
+<p class="desc">The grid and mosaic layouts get the options rotation (degrees, about the center of the covered region) and offset (lattice phase in multiples of the two translation vectors, periodic), applied through the new Tiling.rotated and Tiling.with_offset, and Tiling.generate loses compute_adjacency. With rotation 0 and offset (0, 0) the assignments of 17 grid and mosaic cases equal those of main exactly; the old grid rotation turned the finished tiles about the origin, which moved them 12 tile sizes away from data 8e6 m east of it and now gives 1.2.</p>
+<p>Step 3 of <a href="../proposal-isotile-adoption/index.html">proposal-isotile-adoption</a> (sections 3.2, 4.10, 7 and 8.2, decisions 5 and 12), after <a href="../isotile-adoption-step-1-pr/index.html">step 1</a> and <a href="../isotile-adoption-step-2-pr/index.html">step 2</a>. With rotation 0 and offset (0, 0) nothing changes; the result-changing part is the grid layout with <code>rotation</code> other than 0, shown below.</p>
+<p>Files: <a href="experiments.py">experiments.py</a> (the runs; stores tile polygons and assignments), <a href="make_figures.py">make_figures.py</a> (figures and <a href="tables.md">tables.md</a>), <a href="identity_check.py">identity_check.py</a> and <a href="identity_output.txt">identity_output.txt</a>, <a href="timing.txt">timing.txt</a>, <a href="experiments_old.txt">experiments_old.txt</a> and <a href="experiments_new.txt">experiments_new.txt</a> (raw output). Commands, from a carto-flow checkout with the environment of the project (the old tree is an archive of 0365919 on <code>PYTHONPATH</code>):</p>
+<pre><code>python identity_check.py run &lt;label&gt; &lt;out.pkl&gt; [--repeat N] [case ...]
+python identity_check.py compare old.pkl new.pkl
+python experiments.py &lt;label&gt; &lt;out.pkl&gt;          # the old tree runs only the rotation experiment
+PYTHONPATH=. python make_figures.py exp_old.pkl exp_new.pkl .</code></pre>
+<h2>What changed</h2>
+<ul><li><strong><code>compute_adjacency</code> removed</strong> from <code>Tiling.generate</code> (own commit, own changelog line). The sparse adjacency from the lattice table takes 0.7 ms at 1,300 tiles and 3 ms at 10,000 tiles, 2 to 3 percent of <code>generate</code> (146 ms for 10,300 hexagons). The mosaic calibration passed <code>compute_adjacency=False</code> for its trial builds; it now builds them with adjacency and no separate cheap path remains. The wall times of the layouts do not change (<a href="timing.txt">timing.txt</a>: districts mosaic hexagon 6.59 s before and 6.56 s after, states grid hexagon 1.59 s and 1.61 s).</li><li><strong><code>Tiling.rotated(angle)</code></strong> (degrees, counter-clockwise) returns a copy whose isotile frame is rotated. <code>fill_region</code> replaces the position of the frame by the center of the region and keeps its linear part, so the lattice turns about the region center and covers the region whatever the angle. <code>canonical_tile</code> stays the unrotated tile and the angle is added to the tile transforms (<code>TileTransform.rotation</code>), as <code>TilingResult.rotate</code> did; every polygon equals the canonical tile placed by its transform (tested at 0, 30 and -75 degrees). Rotations add up.</li><li><strong><code>Tiling.with_offset((u, v))</code></strong> shifts the placed lattice by <code>u * translation_u + v * translation_v</code>, the two translation vectors of the placed tiling (isotile <code>translation_u</code> and <code>translation_v</code>; they turn with <code>rotated</code>). Square tiling: the tile sides along x and y. Hexagon tiling: two vectors between neighboring centers, 60 degrees apart. Triangle, quadrilateral and the 81 isohedral types: the translations of the type. The option is periodic by construction: <code>(u + 1, v)</code> and <code>(u, v + 1)</code> give the same tile set for every tiling, which an offset in tile sizes along x and y would not do for a hexagon. <code>fill_region</code> anchors the lattice at the region center and cannot be given another anchor, so for an offset other than (0, 0) <code>generate</code> places the tiling with <code>fill_region</code>, moves its frame by the offset and calls <code>cover</code> on the same expanded region. That is one more <code>cover</code>: 244 ms instead of 146 ms for 10,300 hexagons.</li><li><strong>Layout options</strong> <code>rotation: float = 0.0</code> and <code>offset: tuple[float, float] = (0.0, 0.0)</code> on <code>GridBasedLayoutOptions</code> and <code>MosaicLayoutOptions</code>. <code>validate()</code> (called when a layout is constructed) raises <code>ValueError</code> for a non-finite or non-numeric rotation and for an offset that is not a pair of finite numbers. <code>_orient_tiling</code> (<code>layouts/base.py</code>) applies both to the resolved tiling; rotation 0 and offset (0, 0) return the tiling itself. The grid layout no longer rotates the result. The mosaic calibration receives the oriented tiling, so the reference build, every trial build and the final build on the expanded bounds share one lattice; the expansion is symmetric, so the shifted lattice keeps its tiles (tested: the layout&#x27;s tiles equal a direct build of the oriented tiling on the expanded bounds).</li><li><code>TilingResult.rotate</code> stays; its docstring says that it turns existing tiles about the origin and that the region is not covered afterwards.</li><li>Docs: a section in <code>tiling-system.md</code>, the two option tables, the option docstrings and the changelog (a breaking-changes entry for the grid rotation, an Added entry for the options and the two methods). No gallery example or notebook used <code>rotation</code>.</li></ul>
+<h2>Tests</h2>
+<p>2,069 passed, 2 skipped, 4 xfailed (1,826 passed before: 244 new tests, one test of the removed parameter replaced, the class <code>TestComputeAdjacencyFlag</code> removed). <code>ruff</code>, <code>mypy</code> and <code>deptry src</code> pass. New file <code>tests/test_tiling_lattice_options.py</code>:</p>
+<table>
+<tr><th>group</th><th>checks</th></tr>
+<tr><td><code>rotated</code> (square, hexagon, triangle, parallelogram, <code>scalloped_hexagon</code>)</td><td>angle 0 unchanged; returns a copy; rotations add up; the lattice covers the region at 30, 45, -17 and 90 degrees; the square lattice has a corner at the region center; transforms contain the angle and place the canonical tile on every polygon; tile size unchanged; non-finite angle rejected; data 8e6 m from the origin give the tile centers of centered data relative to the region center (1e-6)</td></tr>
+<tr><td><code>with_offset</code></td><td>(0, 0) bit-identical; one period in u, in v, in both and (-1, 2) gives the same centers (1e-9) for all five tilings, also from the default; the square offset moves the lattice by the given fractions of the tile side; the shift equals <code>u * translation_u + v * translation_v</code> of the rotated tiling; the shifted lattice covers the region; far from the origin as for rotation; rotation and offset commute; nine bad offsets rejected; list and array accepted</td></tr>
+<tr><td>options (both dataclasses)</td><td>defaults; round trip through <code>dataclasses.replace</code> and <code>asdict</code>; bad rotation and offset rejected by <code>validate</code>; other pairs accepted</td></tr>
+<tr><td>layouts</td><td>rejection at construction; unknown names still raise; default equals explicit defaults; grid rotation covers the region and turns the tiles; grid positions of data 8e6 m east equal those of centered data for square and hexagon with rotation, offset and both (1e-6); mosaic tiles equal a direct build of the oriented tiling on the expanded bounds; <code>calibrate_tiling</code> with a rotated and shifted tiling reaches the target and keeps the angle; mosaic rotation on data 8e6 m east</td></tr>
+</table>
+<h2>Identity at rotation 0 and offset (0, 0)</h2>
+<p><a href="identity_check.py">identity_check.py</a> is the script of the step 2 page: 17 cases (the 9 grid and mosaic cases of the states, the two states grid cases with a tile count column, the districts grid with hexagon and square, the districts mosaic grouped by state with four tilings) run with an archive of main at 0365919 and with this branch; assignments and source indices are compared with <code>np.array_equal</code>. <a href="identity_output.txt">identity_output.txt</a>: <strong>all 17 are identical</strong>, and the lattice sizes are equal. The wall times in that file are single runs while tests and mypy ran. <a href="timing.txt">timing.txt</a> repeats 7 of the cases, best of 3, old and new one after the other with nothing else running: new / old between 0.98 and 1.04.</p>
+<h2>Rotation: before and after</h2>
+<p>Grid layout of the 49 states (one tile per state), <code>rotation</code> 0 and 30. &quot;Moved&quot; is the same data 8e6 m east. Distance is between the centroid of a region and the centroid of its tile, in tile sizes. Before, <code>GridBasedLayout</code> generated the tiles on the region and then called <code>TilingResult.rotate</code>, which turns tile centers about (0, 0).</p>
+<table>
+<tr><th>tiling</th><th>position</th><th>rotation</th><th>version</th><th>mean distance</th><th>largest distance</th><th>lattice tiles</th><th>seconds</th></tr>
+<tr><td>hexagon</td><td>centered</td><td>0</td><td>main</td><td>1.262</td><td>3.10</td><td>149</td><td>1.61</td></tr>
+<tr><td>hexagon</td><td>centered</td><td>0</td><td>this PR</td><td>1.262</td><td>3.10</td><td>149</td><td>1.63</td></tr>
+<tr><td>hexagon</td><td>centered</td><td>30</td><td>main</td><td>1.270</td><td>3.48</td><td>149</td><td>1.61</td></tr>
+<tr><td>hexagon</td><td>centered</td><td>30</td><td>this PR</td><td>1.185</td><td>3.50</td><td>143</td><td>1.57</td></tr>
+<tr><td>hexagon</td><td>moved</td><td>0</td><td>main</td><td>1.262</td><td>3.10</td><td>149</td><td>1.61</td></tr>
+<tr><td>hexagon</td><td>moved</td><td>0</td><td>this PR</td><td>1.262</td><td>3.10</td><td>149</td><td>1.57</td></tr>
+<tr><td>hexagon</td><td>moved</td><td>30</td><td>main</td><td>12.057</td><td>16.37</td><td>149</td><td>1.62</td></tr>
+<tr><td>hexagon</td><td>moved</td><td>30</td><td>this PR</td><td>1.185</td><td>3.50</td><td>143</td><td>1.53</td></tr>
+<tr><td>square</td><td>centered</td><td>0</td><td>main</td><td>0.956</td><td>2.42</td><td>160</td><td>1.66</td></tr>
+<tr><td>square</td><td>centered</td><td>0</td><td>this PR</td><td>0.956</td><td>2.42</td><td>160</td><td>1.71</td></tr>
+<tr><td>square</td><td>centered</td><td>30</td><td>main</td><td>0.886</td><td>1.81</td><td>160</td><td>1.67</td></tr>
+<tr><td>square</td><td>centered</td><td>30</td><td>this PR</td><td>0.808</td><td>2.19</td><td>174</td><td>1.83</td></tr>
+<tr><td>square</td><td>moved</td><td>0</td><td>main</td><td>0.956</td><td>2.42</td><td>160</td><td>1.68</td></tr>
+<tr><td>square</td><td>moved</td><td>0</td><td>this PR</td><td>0.956</td><td>2.42</td><td>160</td><td>1.71</td></tr>
+<tr><td>square</td><td>moved</td><td>30</td><td>main</td><td>7.388</td><td>9.95</td><td>160</td><td>1.70</td></tr>
+<tr><td>square</td><td>moved</td><td>30</td><td>this PR</td><td>0.808</td><td>2.19</td><td>174</td><td>1.91</td></tr>
+</table>
+<ul><li>Rotation 0: identical before and after, centered or moved.</li><li>Rotation 30, centered data (the states lie within 2.2e6 m of the origin): the old rotation about the origin is nearly a rotation about the data, so the mean distance changes by -7 percent (hexagon 1.270 to 1.185) and -9 percent (square 0.886 to 0.808). The lattice has 143 and 174 tiles instead of 149 and 160: it is generated rotated and covers the padded region, where before the tiles of the unrotated cover were turned. The largest distance is 3.48 and 3.50 (hexagon) and 1.81 and 2.19 (square).</li><li>Rotation 30, moved data: before 12.06 (hexagon) and 7.39 (square) tile sizes, after 1.185 and 0.808, the same as centered. The old tiles lie far from the states (right column of the first figure). The result no longer depends on where the data lie: positions of moved data equal those of centered data plus the shift to 1e-6 m (test).</li><li>The wall time does not change beyond noise (1.5 to 1.9 s).</li></ul>
+<p>The mosaic layout had no rotation before. With this PR, hexagon, rotation 30, <code>morph=False</code>, 154 tiles:</p>
+<table>
+<tr><th>position</th><th>mean distance</th><th>largest distance</th><th>unassigned core</th><th>noncontiguous</th><th>seconds</th></tr>
+<tr><td>centered</td><td>3.544</td><td>6.81</td><td>6</td><td>0</td><td>1.76</td></tr>
+<tr><td>moved</td><td>3.544</td><td>6.81</td><td>6</td><td>0</td><td>1.75</td></tr>
+</table>
+<p>Both positions give the same metrics and the same number of unassigned core tiles (6 here, 10 at rotation 0), as the options act relative to the region.</p>
+<h2>Offset on the states</h2>
+<p>Offsets (0, 0), (0.25, 0.25) and (0.5, 0.5) on the states, grid and mosaic, hexagon and square. Red hatch in the figure: core tiles (at least 10 percent of the tile inside the union of the regions) that no region received.</p>
+<table>
+<tr><th>layout</th><th>tiling</th><th>offset</th><th>mean distance</th><th>largest distance</th><th>unassigned core</th><th>noncontiguous</th><th>seconds</th></tr>
+<tr><td>grid</td><td>hexagon</td><td>(0.0, 0.0)</td><td>1.262</td><td>3.10</td><td></td><td></td><td>1.71</td></tr>
+<tr><td>grid</td><td>hexagon</td><td>(0.25, 0.25)</td><td>1.415</td><td>3.34</td><td></td><td></td><td>1.70</td></tr>
+<tr><td>grid</td><td>hexagon</td><td>(0.5, 0.5)</td><td>1.330</td><td>3.14</td><td></td><td></td><td>1.06</td></tr>
+<tr><td>mosaic</td><td>hexagon</td><td>(0.0, 0.0)</td><td>3.375</td><td>6.33</td><td>10</td><td>0</td><td>1.81</td></tr>
+<tr><td>mosaic</td><td>hexagon</td><td>(0.25, 0.25)</td><td>3.558</td><td>6.45</td><td>4</td><td>0</td><td>1.12</td></tr>
+<tr><td>mosaic</td><td>hexagon</td><td>(0.5, 0.5)</td><td>3.602</td><td>7.47</td><td>5</td><td>0</td><td>1.05</td></tr>
+<tr><td>grid</td><td>square</td><td>(0.0, 0.0)</td><td>0.956</td><td>2.42</td><td></td><td></td><td>1.73</td></tr>
+<tr><td>grid</td><td>square</td><td>(0.25, 0.25)</td><td>0.956</td><td>2.38</td><td></td><td></td><td>1.71</td></tr>
+<tr><td>grid</td><td>square</td><td>(0.5, 0.5)</td><td>0.758</td><td>2.24</td><td></td><td></td><td>1.72</td></tr>
+<tr><td>mosaic</td><td>square</td><td>(0.0, 0.0)</td><td>2.551</td><td>5.85</td><td>1</td><td>0</td><td>0.90</td></tr>
+<tr><td>mosaic</td><td>square</td><td>(0.25, 0.25)</td><td>2.522</td><td>5.78</td><td>4</td><td>0</td><td>0.93</td></tr>
+<tr><td>mosaic</td><td>square</td><td>(0.5, 0.5)</td><td>2.248</td><td>4.87</td><td>5</td><td>0</td><td>0.93</td></tr>
+</table>
+<p>The offset moves the lattice relative to the data, so the metrics change by amounts of the order of the lattice-position noise measured on the step 1 page (hexagon grid 1.20 to 1.49, square grid 0.71 to 0.96 over six shifts): the grid hexagon goes from 1.262 to 1.415 and 1.330, the grid square from 0.956 to 0.956 and 0.758. The mosaic layout has no non-contiguous region at any of the six offsets. The unassigned core tiles of the mosaic layouts are 10, 4 and 5 (hexagon) and 1, 4 and 5 (square): the offset changes where the calibration stops, in no systematic direction.</p>
+<h2>Offset and rotation on the symmetric 10 x 10 grid (issue #192)</h2>
+<p>The mosaic layout of 100 unit cells with 2 to 6 tiles each (the input of the step 1 page), square and hexagon tilings. Unassigned core tiles at the default (0, 0): square 0, hexagon 24 (the numbers of the issue). The scan of the offset over a 5 x 5 grid, u and v in 0, 0.2, 0.4, 0.6, 0.8, is in <code>experiments.py</code> only; a library helper is not part of this PR.</p>
+<p>square: unassigned core tiles over the 5 x 5 scan: min 0, max 28, default 0, offset of the minimum (0.0, 0.0) hexagon: unassigned core tiles over the 5 x 5 scan: min 0, max 27, default 24, offset of the minimum (0.4, 0.2)</p>
+<p>Rotation at offset (0, 0):</p>
+<table>
+<tr><th>tiling</th><th>rotation</th><th>mean distance</th><th>unassigned core</th><th>noncontiguous</th><th>seconds</th></tr>
+<tr><td>square</td><td>0</td><td>0.530</td><td>0</td><td>0</td><td>0.52</td></tr>
+<tr><td>square</td><td>15</td><td>0.668</td><td>3</td><td>0</td><td>0.43</td></tr>
+<tr><td>square</td><td>30</td><td>0.622</td><td>0</td><td>0</td><td>0.31</td></tr>
+<tr><td>square</td><td>45</td><td>0.725</td><td>0</td><td>0</td><td>0.38</td></tr>
+<tr><td>hexagon</td><td>0</td><td>0.799</td><td>24</td><td>0</td><td>0.57</td></tr>
+<tr><td>hexagon</td><td>15</td><td>0.858</td><td>7</td><td>0</td><td>0.48</td></tr>
+<tr><td>hexagon</td><td>30</td><td>0.765</td><td>24</td><td>0</td><td>0.57</td></tr>
+<tr><td>hexagon</td><td>45</td><td>0.949</td><td>1</td><td>0</td><td>0.36</td></tr>
+</table>
+<ul><li>The number of unassigned core tiles is not a smooth function of the offset. With squares it takes values between 0 and 28 over the scan: 0 at the default, 1 at (0.6, 0.2) and (0.8, 0.4), 28 at (0.8, 0.8). With hexagons it takes values between 0 and 27: 24 at the default, 0 at (0.4, 0.2), 1 at (0.2, 0.4) and (0.6, 0.8), 2 at (0.8, 0.6), and 7 along the whole lines u = 0 and v = 0. The offset is a lever on this effect for the hexagon grid (24 to 0), as the issue proposed, but an offset that works has to be found by trying several; no single default offset is better than (0, 0) for both tilings.</li><li>The offsets that remove the unassigned tiles cost something in the other metrics of this input: the hexagon mean distance is 0.80 at the default (24 unassigned) and 0.98 at (0.4, 0.2) (0 unassigned); the largest distance goes from 2.6 to 3.7.</li><li>Rotation changes the count as well: hexagon 24, 7, 24, 1 and square 0, 3, 0, 0 at 0, 15, 30 and 45 degrees.</li><li>Non-contiguous regions: 0 everywhere except two offsets of the square scan, (0.4, 0.6) and (0.8, 0.6), with 1.</li><li>Wall time of one layout: 0.3 to 0.9 s on this input, not systematically different between offsets.</li></ul>
+<h2>Notes for step 4 and open points</h2>
+<ul><li>The placement helpers of <code>layouts/grid/_placement.py</code> still accept a dense matrix as well as a sparse one (<code>_canonical</code> converts both); the layouts pass the sparse matrices of <code>TilingResult</code>. The migration page of step 4 can state that the public result fields are sparse and that these private helpers take either. Nothing was changed here.</li><li><code>Tiling.rotated</code> and <code>Tiling.with_offset</code> are defined on the base class and raise <code>NotImplementedError</code> in a subclass that does not implement them; all tilings of the package do.</li><li>Deviation from the design page: the offset is defined in multiples of the two lattice translation vectors, not as a fraction of the tile size along x and y, because a fraction of the tile size is not periodic for the hexagon and the triangle. The design also says that the frame is translated before <code>fill_region</code>; <code>fill_region</code> replaces the position of the frame, so the shift is applied to the frame that <code>fill_region</code> returns and the region is covered again (see above). Nothing is missing in isotile: <code>with_frame</code> and <code>cover</code> suffice.</li><li>The default <code>(0, 0)</code> anchors the lattice at the region center, which gives 24 unassigned core tiles for hexagons on the symmetric grid (issue #192). This PR provides the lever; it does not choose an offset automatically.</li></ul>
+<div class="figure">
+<img src="fig_offsets_states.png" alt="Rows: grid hexagon, mosaic hexagon, grid square, mosaic square. Columns: offset (0, 0), (0.25, 0.25), (0.5, 0.5).">
+<p class="caption">Rows: grid hexagon, mosaic hexagon, grid square, mosaic square. Columns: offset (0, 0), (0.25, 0.25), (0.5, 0.5).</p>
+</div><div class="figure">
+<img src="fig_rotation_hexagon.png" alt="Grid layout, hexagon tiling, 49 states. Top row: main (rotation about the origin); bottom row: this PR. Columns: centered rotation 0, centered rotation 30, data 8e6 m east with rotation 30 (the axes cover tiles and states; the states are the small outline in the main panel). Light gray: the lattice; colored: assigned tiles; black: state outlines.">
+<p class="caption">Grid layout, hexagon tiling, 49 states. Top row: main (rotation about the origin); bottom row: this PR. Columns: centered rotation 0, centered rotation 30, data 8e6 m east with rotation 30 (the axes cover tiles and states; the states are the small outline in the main panel). Light gray: the lattice; colored: assigned tiles; black: state outlines.</p>
+</div><div class="figure">
+<img src="fig_rotation_square.png" alt="The same for the square tiling.">
+<p class="caption">The same for the square tiling.</p>
+</div><div class="figure">
+<img src="fig_symmetric_scan.png" alt="Unassigned core tiles over the offset scan, square and hexagon tilings. u runs along the horizontal axis and v along the vertical axis.">
+<p class="caption">Unassigned core tiles over the offset scan, square and hexagon tilings. u runs along the horizontal axis and v along the vertical axis.</p>
+</div><div class="figure">
+<img src="fig_symmetric_tiles.png" alt="Mosaic layout of the 10 x 10 grid. Top: square tiling at the default offset (0 unassigned, the minimum of the scan; the middle panel repeats it) and at (0.8, 0.8) (28, the maximum). Bottom: hexagon tiling at the default (24), at (0.4, 0.2) (0) and at (0.6, 0.4) (27). Red hatch: unassigned core tiles.">
+<p class="caption">Mosaic layout of the 10 x 10 grid. Top: square tiling at the default offset (0 unassigned, the minimum of the scan; the middle panel repeats it) and at (0.8, 0.8) (28, the maximum). Bottom: hexagon tiling at the default (24), at (0.4, 0.2) (0) and at (0.6, 0.4) (27). Red hatch: unassigned core tiles.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
