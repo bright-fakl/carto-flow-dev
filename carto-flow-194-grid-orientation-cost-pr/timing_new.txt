@@ -1,0 +1,9 @@
+[branch] states grid hexagon: best 0.25s of 3, 49 items
+[branch] states grid square: best 0.24s of 3, 49 items
+[branch] states grid triangle: best 0.24s of 3, 49 items
+[branch] states grid quadrilateral: best 0.23s of 3, 49 items
+[branch] states grid scalloped_hexagon: best 0.26s of 3, 49 items
+[branch] states grid hexagon tile_count: best 0.28s of 3, 154 items
+[branch] states grid square tile_count: best 0.29s of 3, 154 items
+[branch] districts grid hexagon: best 1.94s of 3, 432 items
+[branch] districts grid square: best 2.07s of 3, 432 items

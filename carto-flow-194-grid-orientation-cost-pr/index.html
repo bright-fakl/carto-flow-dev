@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #196: &quot;perf: vectorize the cost loops of the grid layout assignment&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #196: &quot;perf: vectorize the cost loops of the grid layout assignment&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/196">https://github.com/bright-fakl/carto-flow/pull/196</a></dd>
+<dt>Issue</dt><dd><a href="https://github.com/bright-fakl/carto-flow/issues/194">#194</a></dd>
+<dt>Branch</dt><dd>perf-grid-orientation-cost</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-28 14:30</dd>
+<dt>Before</dt><dd>main at f6b0a0c (step 3)</dd>
+<dt>After</dt><dd>perf-grid-orientation-cost @ 295414f (2,072 passed, 2 skipped, 4 xfailed locally)</dd>
+<dt>Inputs</dt><dd>carto-flow f6b0a0c against 295414f; Python 3.10.18, bundled census data (49 states, 432 districts); 16-core WSL2 machine. Old and new ran one after the other, each case best of 3.</dd>
+</dl>
+<p class="desc">The orientation cost, the neighbor penalty, the reverse neighbor penalty and the hop distances of assign_to_grid_hungarian run as array operations. The assignments of 9 grid cases equal those of main exactly; GridBasedLayout on the 432 districts with square or hexagon tiles takes 2 s instead of 126 to 137 s.</p>
+<p>Fixes <a href="https://github.com/bright-fakl/carto-flow/issues/194">#194</a>. The change does not alter results, so the page has no figures; the evidence is the exact comparison of the assignments, the timings and the profile.</p>
+<h2>What changed</h2>
+<p>All in <code>layouts/grid/_placement.py</code>, <code>assign_to_grid_hungarian</code>, refinement loop:</p>
+<ul><li>Orientation cost: the loop over every pair (i, j) and every tile k with scalar <code>norm</code>, <code>arctan2</code> and angular error became a loop over j only. For each j, the rows i that have j as a neighbor are updated at once (<code>orientation_cost[rows, :] += (angle_err / pi) * w</code>). Per element the operations are the same as before and each row still accumulates its neighbors j in ascending order, so the sums are bit-identical. The same-cell test uses <code>sqrt(dx*dx + dy*dy) &lt; 1e-12</code> instead of <code>np.linalg.norm</code>.</li><li>Original angles (<code>orig_angles</code>, n x n): one <code>arctan2</code> over all pairs instead of a double Python loop; pairs that are not adjacent or share a source geometry are set to nan.</li><li>Neighbor penalty: same loop over j, <code>neighbor_cost[rows, :] += penalty * w</code> for all rows at once (per element the same product and sum).</li><li>Reverse neighbor penalty: counts of tile neighbors occupied by each region (<code>occupied</code>, n x m) times the matrix of non-adjacent region pairs. All entries are small integers in float64, so the matrix product is exact.</li><li><code>_bfs_distance_matrix</code> uses <code>scipy.sparse.csgraph.shortest_path</code> (unweighted); unreachable pairs keep the value m. It took 1.46 s of the 3.7 s that remained after the cost loops. The existing test for it passes unchanged.</li></ul>
+<h2>Identity</h2>
+<p><a href="identity_check.py">identity_check.py</a> (copy of the script of isotile-adoption-step-3-pr) with the sources of main on <code>PYTHONPATH</code> and with this branch; <code>assignments</code>, <code>source_indices</code> and the lattice size compared with <code>np.array_equal</code>. Cases: all 9 grid cases of the script (states: hexagon, square, triangle, quadrilateral, <code>scalloped_hexagon</code>, hexagon and square with a tile count column; districts: hexagon, square). The mosaic cases do not use this function. <a href="identity_and_timing.txt">identity_and_timing.txt</a>: all 9 identical, no tie had to be examined.</p>
+<h2>Wall time</h2>
+<p>Best of 3 (<a href="timing_old.txt">timing_old.txt</a>, <a href="timing_new.txt">timing_new.txt</a>); all old runs first, then all new runs.</p>
+<table>
+<tr><th>case</th><th>items</th><th>lattice tiles</th><th>identical</th><th>old (s)</th><th>new (s)</th><th>new / old</th></tr>
+<tr><td>states grid hexagon</td><td>49</td><td>149</td><td>yes</td><td>1.66</td><td>0.25</td><td>0.15</td></tr>
+<tr><td>states grid square</td><td>49</td><td>160</td><td>yes</td><td>1.78</td><td>0.24</td><td>0.14</td></tr>
+<tr><td>states grid triangle</td><td>49</td><td>168</td><td>yes</td><td>1.94</td><td>0.24</td><td>0.13</td></tr>
+<tr><td>states grid quadrilateral</td><td>49</td><td>180</td><td>yes</td><td>0.77</td><td>0.23</td><td>0.30</td></tr>
+<tr><td>states grid scalloped_hexagon</td><td>49</td><td>179</td><td>yes</td><td>1.95</td><td>0.26</td><td>0.14</td></tr>
+<tr><td>states grid hexagon tile_count</td><td>154</td><td>427</td><td>yes</td><td>4.75</td><td>0.28</td><td>0.06</td></tr>
+<tr><td>states grid square tile_count</td><td>154</td><td>468</td><td>yes</td><td>5.20</td><td>0.29</td><td>0.06</td></tr>
+<tr><td>districts grid hexagon</td><td>432</td><td>1,159</td><td>yes</td><td>137.22</td><td>1.94</td><td>0.01</td></tr>
+<tr><td>districts grid square</td><td>432</td><td>1,320</td><td>yes</td><td>125.70</td><td>2.07</td><td>0.02</td></tr>
+</table>
+<h2>Profile (districts, square tiling)</h2>
+<p><a href="profile_districts.py">profile_districts.py</a>; <a href="profile_before.txt">profile_before.txt</a>, <a href="profile_after.txt">profile_after.txt</a>.</p>
+<table>
+<tr><th></th><th>before</th><th>after</th></tr>
+<tr><td>total under cProfile</td><td>182.9 s</td><td>2.17 s</td></tr>
+<tr><td><code>assign_to_grid_hungarian</code> (cumulative)</td><td>181.9 s</td><td>1.11 s</td></tr>
+<tr><td>scalar <code>np.linalg.norm</code> calls</td><td>29.9 million, 77.5 s</td><td>none</td></tr>
+<tr><td><code>_bfs_distance_matrix</code></td><td>about 1.5 s</td><td>0.19 s</td></tr>
+</table>
+<p>What remains in <code>assign_to_grid_hungarian</code> (0.8 s of its own time) is the per-j loop (432 iterations per pass) and the n x n arrays; the 11 Hungarian solves take 0.09 s in total. The rest of the layout is shapely: <code>union_all</code> 0.32 s, 2,266 <code>intersection</code> calls 0.33 s. No Python loop dominates any more.</p>
+<h2>Test</h2>
+<p><code>tests/test_grid_placement_cost.py</code> (new): on random instances (30 regions with random weighted adjacency and source indices, 7 x 7 square grid, three seeds) the cost matrix passed to <code>linear_sum_assignment</code> in the first refinement pass is compared with <code>np.testing.assert_array_equal</code> to a reference that computes it with the former scalar loops (norm, arctan2, angular error per pair and tile, reverse penalty per tile and tile neighbor). Exact equality holds. Full suite: 2,072 passed, 2 skipped, 4 xfailed. <code>ruff check</code> and <code>ruff format</code> pass.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

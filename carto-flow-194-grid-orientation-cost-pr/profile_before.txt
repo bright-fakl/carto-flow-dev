@@ -1,0 +1,12 @@
+cProfile of GridBasedLayout(tiling="square") on the 432 districts, sources of main at f6b0a0c (profile_districts.py square).
+Top of the listing by tottime; 182.9 s under the profiler, 303,008,319 function calls.
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1   93.567   93.567  181.895  181.895 _placement.py:665(assign_to_grid_hungarian)
+ 29911291   47.416    0.000   77.464    0.000 numpy/linalg/_linalg.py:2575(norm)
+ 29911200   15.825    0.000   15.825    0.000 {method 'dot' of 'numpy.ndarray' objects}
+ 29891752    4.745    0.000    4.745    0.000 {built-in method builtins.min}
+ 29911233    4.504    0.000    4.504    0.000 {method 'ravel' of 'numpy.ndarray' objects}
+ 29911218    4.295    0.000    5.792    0.000 numpy/linalg/_linalg.py:128(isComplexType)
+ 59822583    3.311    0.000    3.311    0.000 {built-in method builtins.issubclass}
+ 29911291    2.527    0.000    2.527    0.000 numpy/linalg/_linalg.py:2571(_norm_dispatcher)

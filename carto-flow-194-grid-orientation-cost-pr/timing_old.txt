@@ -1,0 +1,14 @@
+Using CPython 3.10.18
+Creating virtual environment at: .venv
+   Building carto-flow @ file:///home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96
+      Built carto-flow @ file:///home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96
+Installed 204 packages in 1.25s
+[main] states grid hexagon: best 1.66s of 3, 49 items
+[main] states grid square: best 1.78s of 3, 49 items
+[main] states grid triangle: best 1.94s of 3, 49 items
+[main] states grid quadrilateral: best 0.77s of 3, 49 items
+[main] states grid scalloped_hexagon: best 1.95s of 3, 49 items
+[main] states grid hexagon tile_count: best 4.75s of 3, 154 items
+[main] states grid square tile_count: best 5.20s of 3, 154 items
+[main] districts grid hexagon: best 137.22s of 3, 432 items
+[main] districts grid square: best 125.70s of 3, 432 items

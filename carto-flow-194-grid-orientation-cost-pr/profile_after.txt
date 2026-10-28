@@ -1,0 +1,20 @@
+         453453 function calls (444619 primitive calls) in 2.210 seconds
+
+   Ordered by: internal time
+   List reduced from 802 to 12 due to restriction <12>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.862    0.862    1.187    1.187 /home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96/src/carto_flow/symbol_cartogram/layouts/grid/_placement.py:650(assign_to_grid_hungarian)
+     2266    0.328    0.000    0.328    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96/.venv/lib/python3.10/site-packages/shapely/set_operations.py:112(intersection)
+        1    0.294    0.294    0.294    0.294 /home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96/.venv/lib/python3.10/site-packages/shapely/set_operations.py:463(union_all)
+        1    0.189    0.189    0.201    0.201 /home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96/src/carto_flow/symbol_cartogram/layouts/grid/_placement.py:553(_bfs_distance_matrix)
+       11    0.092    0.008    0.092    0.008 {built-in method scipy.optimize._lsap.linear_sum_assignment}
+      432    0.067    0.000    0.069    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96/.venv/lib/python3.10/site-packages/shapely/constructive.py:136(buffer)
+      432    0.038    0.000    0.038    0.000 {method 'query' of 'shapely.lib.STRtree' objects}
+        1    0.033    0.033    0.036    0.036 /home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96/src/carto_flow/symbol_cartogram/layouts/grid/_placement.py:307(_fix_island_assignments)
+13376/13375    0.024    0.000    0.758    0.000 /home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96/.venv/lib/python3.10/site-packages/shapely/decorators.py:73(wrapped)
+        1    0.016    0.016    0.332    0.332 /home/fakl/carto-flow/.claude/worktrees/agent-a219aadbfda18ff96/src/carto_flow/symbol_cartogram/layouts/grid/_placement.py:31(fill_internal_holes)
+      813    0.013    0.000    0.013    0.000 {built-in method builtins.compile}
+     4364    0.012    0.000    0.012    0.000 {method 'astype' of 'numpy.ndarray' objects}
+
+
