@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR bright-fakl/isotile#9: &quot;isotile: outline=\&quot;curved\&quot; for cover and fill_region&quot;</title>
+<title>PR bright-fakl/isotile#9: &quot;isotile: outline option of cover and fill_region (curved by default for curved tilings)&quot;</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -74,7 +74,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR bright-fakl/isotile#9: &quot;isotile: outline=\&quot;curved\&quot; for cover and fill_region&quot;</h1>
+<h1>PR bright-fakl/isotile#9: &quot;isotile: outline option of cover and fill_region (curved by default for curved tilings)&quot;</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Project</dt><dd>isotile</dd>
@@ -87,10 +87,10 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-28 13:30</dd>
 <dt>Before</dt><dd>bright-fakl/isotile main at 392484c</dd>
-<dt>After</dt><dd>cover-curved-outline @ 0ed7857</dd>
+<dt>After</dt><dd>cover-curved-outline @ 9040ac7 (4,837 passed, 204 skipped locally on Python 3.10)</dd>
 <dt>Inputs</dt><dd>Python 3.10, numpy, scipy, shapely; the 9 curved presets, random valid curved tilings of the 81 types; single runs</dd>
 </dl>
-<p class="desc">cover and fill_region select tiles by the straight outline, so at margin 0 a curved tiling leaves slivers along the region boundary (15 to 82 percent of the cases, up to 4.4e-2 of the region area). The new option outline=&quot;curved&quot; selects tiles by the curved polygon and covers the region completely; it costs 5 to 9 times the straight test (0.5 to 1.0 s for 10,000 tiles), so the default stays &quot;straight&quot;. At the default margin 0.1 no sliver lies in the region.</p>
+<p class="desc">cover and fill_region select tiles by the straight outline, so at margin 0 a curved tiling leaves slivers along the region boundary (15 to 82 percent of the cases, up to 4.4e-2 of the region area). The new option outline selects the polygon; the default None means curved for a tiling with an edge curve and straight otherwise, so curved tilings cover the region completely. Behavior change at the default: 4 of the 9 curved presets return more tiles (puzzle_piece 126 instead of 112 at margin 0.1), and the selection takes 0.5 to 1 s instead of 0.1 s for 10,000 tiles; outline=&quot;straight&quot; restores the former result.</p>
 <p>Isotile issue 6, the open question of section 4.5 and the step 1 report of <a href="../proposal-isotile-adoption/index.html">the adoption proposal</a>: tiles whose curves reach into the region but whose straight outline does not.</p>
 <h2>Measurement before the change</h2>
 <p>Exact, with shapely: the uncovered area is region minus the union of the curved polygons of the returned tiles. A tile is missing when its curved polygon overlaps the region with area above 1e-9 of the tile area and it is not returned. Random regions (lower-left in [-5, 5]^2, width and height in [3, 12], <code>n_tiles</code> 20 to 400), 40 cases per preset and 60 over 144 random curved tilings (2 per type, random curves, amplitude up to 0.25).</p>
@@ -110,8 +110,22 @@
 <p>At margin 0.1: 0 of 420 cases affected, uncovered fraction at most 2.5e-12 (rounding). The slivers lie in the margin band, outside the region proper. The fixed case (region (0, 0, 10, 6), <code>n_tiles=100</code>, margin 0): wavy_triangle leaves 9.7e-3 of the area uncovered (18 tiles missing), puzzle_piece 9.1e-4 (14), arrow_quad 8.5e-5 (12), flowers 1.9e-4 (2); scalloped_hexagon, wavy_square, scalloped_quad and tree 0.</p>
 <h2>Design</h2>
 <p><code>cover(bounds, *, outline=&quot;straight&quot;)</code> and <code>fill_region(..., outline=&quot;straight&quot;)</code>; <code>&quot;curved&quot;</code> selects every tile whose sampled curved polygon (<code>TileSet.outlines()</code> at the default sampling) overlaps the region with area above 1e-9 of the tile area. Steps: the candidate cell range comes from the curved prototile; the bounding box of the convex hull of the curved outline (a few vertices per tile, exact bounding box of the curves) is the prefilter; tiles whose hull is inside the region are kept without clipping; the rest are clipped exactly (the existing vectorized Sutherland-Hodgman, in chunks that bound the memory). Without curves the straight path runs and nothing changes.</p>
-<p>Default stays <code>&quot;straight&quot;</code>: at the default margin 0.1 the straight test leaves nothing uncovered in the region (0 of 420 cases), and the curved test returns 8 to 14 more tiles per 100 only to fill the margin band (puzzle_piece 126 against 112). It is a new keyword-only argument of <code>cover</code> and the last keyword argument of <code>fill_region</code>; the diff in <code>fill_region</code> is the parameter, one docstring entry and the argument passed to <code>cover</code>.</p>
-<p>Cost (<code>fill_region((0, 0, 100, 100), n_tiles=10000)</code>, best of 3, one machine):</p>
+<p>Default: <code>outline=None</code>, which means <code>&quot;curved&quot;</code> if the tiling has an edge curve (any entry of <code>edge_curves</code>; <code>with_edge_curves(None)</code> or no curves gives the straight path) and <code>&quot;straight&quot;</code> otherwise. Explicit <code>&quot;straight&quot;</code> runs the former code and gives the former tiles; an invalid value raises <code>ValueError</code>. It is a new keyword-only argument of <code>cover</code> and the last keyword argument of <code>fill_region</code>; the diff in <code>fill_region</code> is the parameter, one docstring entry and the argument passed to <code>cover</code>.</p>
+<p>Behavior change at the default, tile counts of <code>fill_region((0, 0, 10, 6), n_tiles=100, margin=0.1)</code> before (<code>&quot;straight&quot;</code>) and after (default):</p>
+<table>
+<tr><th>preset</th><th>before</th><th>after</th></tr>
+<tr><td>scalloped_hexagon</td><td>127</td><td>127</td></tr>
+<tr><td>wavy_square</td><td>112</td><td>112</td></tr>
+<tr><td>puzzle_piece</td><td>112</td><td>126</td></tr>
+<tr><td>arrow_quad</td><td>112</td><td>124</td></tr>
+<tr><td>wavy_triangle</td><td>114</td><td>132</td></tr>
+<tr><td>interlocking_hexagon</td><td>127</td><td>127</td></tr>
+<tr><td>flowers</td><td>121</td><td>123</td></tr>
+<tr><td>scalloped_quad</td><td>145</td><td>145</td></tr>
+<tr><td>tree</td><td>130</td><td>130</td></tr>
+</table>
+<p>At margin 0.1 the extra tiles lie in the margin band only; at margin 0 they fill the slivers inside the region. Tilings without curves are unchanged. No existing test and no documentation figure changed (<code>make_doc_figures.py --check</code>: up to date; <code>cover</code> and <code>fill_region</code> are called only by the docs figures script, the logo script and the benchmark, on tilings without curves or with the figures unchanged).</p>
+<p>Cost (<code>fill_region((0, 0, 100, 100), n_tiles=10000)</code>, best of 3, one machine; &quot;straight&quot; is the cost of the former default, &quot;curved&quot; the cost of the new default for a curved tiling):</p>
 <table>
 <tr><th>preset</th><th>outline points</th><th>straight</th><th>curved</th><th>tiles (curved)</th></tr>
 <tr><td>wavy_square</td><td>396</td><td>88 ms</td><td>738 ms</td><td>10,400</td></tr>
@@ -122,14 +136,14 @@
 </table>
 <p>The time is the clipping of about 600 boundary tiles (the interior tiles are not clipped); it grows with the perimeter and with the number of outline points, not with the tile count. An earlier version that clipped all candidates ran out of memory at 10,000 tiles.</p>
 <h2>Tests</h2>
-<ul><li><code>test_curved_outline_covers_the_region_at_margin_zero</code>: uncovered fraction below 1e-9 for 6 curved presets at 6 random regions each.</li><li><code>test_straight_outline_leaves_slivers_that_curved_covers</code>: wavy_triangle, straight above 1e-3, curved below 1e-9, the straight tiles are a subset.</li><li><code>test_curved_outline_equals_shapely_overlap_of_the_curved_polygons</code>: random valid curved tilings of all 81 types, tile set equal to the shapely overlap of the curved polygons of a padded cover.</li><li><code>test_outline_modes_agree_without_curves</code> (81 types, <code>cover</code> and <code>fill_region</code>), <code>test_default_outline_is_straight</code>, <code>test_invalid_outline</code>.</li></ul>
+<ul><li><code>test_curved_outline_covers_the_region_at_margin_zero</code> (default): uncovered fraction below 1e-9 for 6 curved presets at 6 random regions each.</li><li><code>test_straight_outline_leaves_slivers_that_curved_covers</code>: wavy_triangle, straight above 1e-3, curved below 1e-9, the straight tiles are a subset.</li><li><code>test_curved_outline_equals_shapely_overlap_of_the_curved_polygons</code>: random valid curved tilings of all 81 types, tile set equal to the shapely overlap of the curved polygons of a padded cover.</li><li><code>test_outline_modes_agree_without_curves</code> (81 types, <code>cover</code> and <code>fill_region</code>), <code>test_default_outline_is_curved_with_curves_and_straight_without</code> (81 types), <code>test_default_on_a_curved_preset_covers_at_margin_zero_and_straight_is_the_former_result</code> (126 and 112 tiles), <code>test_invalid_outline</code>.</li></ul>
 <p>Local checks: ruff check, ruff format, mypy, <code>scripts/make_doc_figures.py --check</code> (up to date), strict docs build; the full suite and CI are reported in the PR.</p>
 <h2>Deviations and open questions</h2>
-<ul><li>The curved test is the exact overlap of the sampled polygon, not of the true Bezier curves; the sampling is the one of <code>outlines()</code>, so the tiles that the user draws are the tiles that are tested.</li><li>The region of the issue&#x27;s test idea (&quot;sampled points&quot;) is checked exactly instead.</li><li>Should carto-flow pass <code>outline=&quot;curved&quot;</code> at <code>margin=0</code> (the old class returned these tiles)? It costs 0.5 to 1 s for 10,000 tiles; at margin 0.1 it only adds tiles in the margin band.</li></ul>
+<ul><li>The curved test is the exact overlap of the sampled polygon, not of the true Bezier curves; the sampling is the one of <code>outlines()</code>, so the tiles that the user draws are the tiles that are tested.</li><li>The region of the issue&#x27;s test idea (&quot;sampled points&quot;) is checked exactly instead.</li><li>carto-flow needs no argument for the curved tilings, and passes <code>outline=&quot;straight&quot;</code> only if it wants the former tile set (it costs 0.5 to 1 s less for 10,000 tiles).</li></ul>
 <p>Regenerate the figure from an isotile checkout of the branch: <code>uv run --with matplotlib python &lt;this directory&gt;/make_figures.py</code>.</p>
 <div class="figure">
-<img src="fig_slivers.png" alt="Region (0, 0, 10, 6), margin 0, `n_tiles=100`; left `outline=&quot;straight&quot;`, right `&quot;curved&quot;`. Red: uncovered part of the region, from shapely. Top: wavy_triangle, whole region (9.7e-3 uncovered before, 0 after). Middle: puzzle_piece, zoom on the bottom edge. Bottom: arrow_quad, zoom on the top-left corner (the sliver is 8.5e-5 of the area and is too thin to see; the extra tiles at the top on the right are the tiles that fill it).">
-<p class="caption">Region (0, 0, 10, 6), margin 0, <code>n_tiles=100</code>; left <code>outline=&quot;straight&quot;</code>, right <code>&quot;curved&quot;</code>. Red: uncovered part of the region, from shapely. Top: wavy_triangle, whole region (9.7e-3 uncovered before, 0 after). Middle: puzzle_piece, zoom on the bottom edge. Bottom: arrow_quad, zoom on the top-left corner (the sliver is 8.5e-5 of the area and is too thin to see; the extra tiles at the top on the right are the tiles that fill it).</p>
+<img src="fig_slivers.png" alt="Region (0, 0, 10, 6), margin 0, `n_tiles=100`; left `outline=&quot;straight&quot;`, right `&quot;curved&quot;`. Red: uncovered part of the region, from shapely; left is `outline=&quot;straight&quot;` (the former default), right the new default for a curved tiling. Top: wavy_triangle, whole region (9.7e-3 uncovered before, 0 after). Middle: puzzle_piece, zoom on the bottom edge. Bottom: arrow_quad, zoom on the top-left corner (the sliver is 8.5e-5 of the area and is too thin to see; the extra tiles at the top on the right are the tiles that fill it).">
+<p class="caption">Region (0, 0, 10, 6), margin 0, <code>n_tiles=100</code>; left <code>outline=&quot;straight&quot;</code>, right <code>&quot;curved&quot;</code>. Red: uncovered part of the region, from shapely; left is <code>outline=&quot;straight&quot;</code> (the former default), right the new default for a curved tiling. Top: wavy_triangle, whole region (9.7e-3 uncovered before, 0 after). Middle: puzzle_piece, zoom on the bottom edge. Bottom: arrow_quad, zoom on the top-left corner (the sliver is 8.5e-5 of the area and is too thin to see; the extra tiles at the top on the right are the tiles that fill it).</p>
 </div>
 <a class="back" href="../index.html">&larr; back to index</a>
 
