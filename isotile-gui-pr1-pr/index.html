@@ -86,10 +86,10 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-28 20:00</dd>
 <dt>Before</dt><dd>bright-fakl/isohedral-tiling-ui main at eb7b79e (no tests, no CI except the Space sync)</dd>
-<dt>After</dt><dd>ci-golden-fixtures (316 tests pass locally and on Python 3.10 to 3.13 in CI)</dd>
+<dt>After</dt><dd>ci-golden-fixtures (231 tests pass locally and on Python 3.10 to 3.13 in CI)</dd>
 <dt>Inputs</dt><dd>Python 3.12, carto-flow 2.0.0, tactile 0.1.0, numpy 2.5.4, shapely 2.2.0, matplotlib 3.11.2, panel 1.10.0, ruff 0.17.3, mypy 2.4.1; fixtures written once in a scratch venv</dd>
 </dl>
-<p class="desc">GitHub Actions workflow (ruff and format against the recorded baseline, advisory mypy, pytest on Python 3.10 to 3.13) and golden fixtures of the current GUI (96 preview cases, 15 strips, 45 SVG and GeoJSON exports, snippets and JSON exports, 41 loaded design files). PR 1 of the isotile GUI port. Nothing to compare visually; the page gives the written evidence.</p>
+<p class="desc">GitHub Actions workflow (ruff and format against the recorded baseline, advisory mypy, pytest on Python 3.10 to 3.13) and golden fixtures of the current GUI (96 preview cases, 45 SVG and GeoJSON exports, snippets and JSON exports of 15 presets and 11 types, 41 loaded design files). PR 1 of the isotile GUI port. Nothing to compare visually; the page gives the written evidence.</p>
 <p>PR 1 of the port plan of <a href="../proposal-isotile-gui/">proposal-isotile-gui</a>, section 8. It adds a safety net on the current code; the app is not ported.</p>
 <h2>CI</h2>
 <p><code>.github/workflows/ci.yml</code> (push to <code>main</code>, pull requests):</p>
@@ -101,16 +101,17 @@
 </table>
 <p><code>ci/constraints.txt</code> pins carto-flow 2.0.0, tactile 0.1.0 and ruff 0.17.3 for the CI install only. <code>pyproject.toml</code>, the Dockerfile and the Space sync workflow are unchanged.</p>
 <h2>Fixtures</h2>
-<p><code>tests/make_golden.py</code> ran once against the current GUI and writes <code>tests/data</code> (1.1 MB):</p>
+<p><code>tests/make_golden.py</code> ran once against the current GUI and writes <code>tests/data</code> (1.0 MB; the fixtures are a migration tool, see below):</p>
 <table>
 <tr><th>File</th><th>Content</th></tr>
-<tr><td><code>golden_preview.npz</code></td><td>for the 81 types at their defaults and the 15 presets (96 cases), the result of the preview call <code>generate(bounds=(-1, -0.3, 1, 0.3), n_tiles=100, margin=0.25)</code>: centroids, areas, rotations, flips of all tiles and three polygons; the strip image of the 15 presets in the uniform color mode</td></tr>
-<tr><td><code>golden_exports.npz</code>, <code>golden_text.json</code></td><td>SVG and GeoJSON exports of the 15 presets at 50, 100 and 200 tiles, as summaries (header, polygon count, colors, styles, vertex counts, centroids, GeoJSON properties); PNG export sizes; the Python snippet and the export-dialog JSON of the 96 cases</td></tr>
+<tr><td><code>golden_preview.npz</code></td><td>for the 81 types at their defaults and the 15 presets (96 cases), the result of the preview call <code>generate(bounds=(-1, -0.3, 1, 0.3), n_tiles=100, margin=0.25)</code>: centroids, areas, rotations, flips of all tiles and three polygons</td></tr>
+<tr><td><code>golden_exports.npz</code>, <code>golden_text.json</code></td><td>SVG and GeoJSON exports of the 15 presets at 50, 100 and 200 tiles, as summaries (header, polygon count, colors, styles, vertex counts, centroids, GeoJSON properties); PNG export sizes; the Python snippet and the export-dialog JSON of the 15 presets and 11 types (every eighth type)</td></tr>
 <tr><td><code>designs/*.json</code>, <code>golden_text.json</code></td><td>41 design files: the Save Design and the export-dialog form of each preset (30) and 11 edge cases (no parameters, wrong and too many parameters, mode without curve, curve on an I edge, invalid outline, version 1.1, unknown and missing type, not JSON); for each the notification, the state after <code>LoadSavePanel._on_file_content</code>, and the preview</td></tr>
 </table>
 <h2>Tests</h2>
-<p><code>tests/test_golden.py</code> (311 cases) reproduces each fixture from the current code: tile arrays within 1e-9, the strip image with at most 2 percent differing pixels, exports within 1e-6, text exactly, loaded designs by state. It also checks that the fixture has the 96 cases and that the installed carto-flow and tactile match the versions that wrote it. <code>tests/test_state_smoke.py</code> (5 tests) covers <code>TilingState</code>: type change, parameter change and reset, preset load, undo and redo.</p>
+<p><code>tests/test_golden.py</code> (226 cases) reproduces each fixture from the current code: tile arrays within 1e-9, exports within 1e-6, text exactly, loaded designs by state. It also checks that the fixture has the 96 cases and that the installed carto-flow and tactile match the versions that wrote it. <code>tests/test_state_smoke.py</code> (5 tests) covers <code>TilingState</code>: type change, parameter change and reset, preset load, undo and redo.</p>
 <p>Recorded behavior of the current loader that PR 2 has to decide on: a parameter list of the wrong length and a list that is too long are refused with a message (the pasted state does not change); a curve on an I edge is dropped silently; a mode on a straight edge is kept; an invalid outline loads.</p>
+<p>The fixtures are temporary. PR 2 compares isotile against them, records the intended differences in the tests, replaces them by a smaller set regenerated from the ported code and deletes <code>make_golden.py</code>. The strip images were dropped: they are pixel-based and PR 2 changes the aspect colors on purpose.</p>
 <h2>Not in this PR</h2>
 <ul><li>The staging Space and the Space sync (PR 4; the Space is not touched).</li><li>Ruff and format fixes (11 errors, 2 files): the baseline gate holds them at the current count.</li><li>The golden test for the port (isotile against these fixtures) is PR 2.</li><li>The Playwright and headless Panel layers (PR 3 and later).</li></ul>
 
