@@ -92,18 +92,18 @@ Finding for the flowers preset (IH21 with its three curves), every parameter swe
 
 Across the 55 types with parameters (128 parameters, all others at their defaults, no curves; `range_all.py`, `range_all.json`):
 
-| Valid values around the default | Parameters |
+| Valid values around the default (a limit beyond 100 in absolute value counts as none) | Parameters |
 |---|---|
-| a minimum and no maximum (the tiling stays valid as the parameter grows, only the shape degenerates) | 56 |
-| a minimum and a maximum | 38 |
-| no limit on either side within -1e4 to 1e4 | 31 |
+| a minimum and no maximum (the tiling stays valid as the parameter grows, only the shape degenerates) | 58 |
+| no limit on either side | 57 |
+| a minimum and a maximum | 10 |
 | a maximum and no minimum | 3 |
-| valid values on both sides of an invalid stretch (islands) | 32 parameters in 20 types |
+| the same counted strictly, a limit anywhere within -1e4 to 1e4 (56 / 31 / 38 / 3): 28 of the finite upper and 26 of the finite lower limits are far-out boundaries of an island (2894 to 8377) |  |
 | valid interval entirely inside 0 to 1 | 8 |
 | a limit inside 0 to 1 that the old window cut | 28 |
 | valid values above 1 / below 0 | 116 / 101 |
 
-The finite lower limits lie between -0.15 and 0.52 for all but a few islands (median -0.02); the finite upper limits cluster at 0.48 to 1.1 for the bounded ones. So the old window 0 to 1 hid valid values for 120 of 128 parameters, and a limit (a length that must stay positive, a vertex that must not cross an edge) was invisible when it lay outside 0 to 1.
+Of the 94 finite lower limits, 68 lie between -0.2 and 0.6 (median -0.02); of the 41 finite upper limits only 13 lie between 0.4 and 1.3, the others are far-out island boundaries. So the old window 0 to 1 hid valid values for 120 of 128 parameters, and a limit (a length that must stay positive, a vertex that must not cross an edge) was invisible when it lay outside 0 to 1; 58 parameters are valid from a minimum to infinity.
 
 figure: range_fig.png - Valid (green) and invalid (red) values of six parameters on an asinh axis from -10 to 10; blue: the old slider window, orange: the window now, line: the current value. IH21 P1 at the defaults is valid everywhere; IH1 P1 has narrow invalid stretches at 0.1 and 0.9, so the slider (which stops at the first invalid value) cannot cross them while the numeric field can jump.
 
