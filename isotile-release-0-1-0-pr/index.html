@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR bright-fakl/isotile#13: &quot;isotile: release 0.1.0&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR bright-fakl/isotile#13: &quot;isotile: release 0.1.0&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>isotile</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../isotile-release-readiness/index.html">&quot;isotile 0.1.0: release readiness audit&quot;</a> <span class="meta">(exploration)</span><br><a href="../isotile-release-infra-pr/index.html">&quot;isotile: release infrastructure for 0.1.0&quot;</a> <span class="meta">(pr)</span><br><a href="../isotile-release-docs-pr/index.html">&quot;isotile: catalog, migration notes, benchmark and README for 0.1.0&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isotile/pull/13">https://github.com/bright-fakl/isotile/pull/13</a></dd>
+<dt>Branch</dt><dd>release-0.1.0</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-29 21:00</dd>
+<dt>Before</dt><dd>bright-fakl/isotile main at 3392394; version 0.1.0.dev0; changelog heading &quot;0.1.0 - Unreleased&quot;</dd>
+<dt>After</dt><dd>release-0.1.0 (CI results below)</dd>
+<dt>Inputs</dt><dd>uv 0.8.17, Python 3.13.7 locally; TestPyPI dry run of 0.1.0.dev0 passed on main at 3392394 (build, publish-testpypi); pypi.org returned 404 for isotile on 2026-10-29</dd>
+</dl>
+<p class="desc">Version 0.1.0 in pyproject.toml and uv.lock and the dated 0.1.0 changelog heading; merging does not publish, the release is created afterwards with gh release create.</p>
+<h2>Change</h2>
+<table>
+<tr><th>File</th><th>Change</th></tr>
+<tr><td><code>pyproject.toml</code></td><td><code>version = &quot;0.1.0.dev0&quot;</code> becomes <code>&quot;0.1.0&quot;</code></td></tr>
+<tr><td><code>uv.lock</code></td><td>the project entry becomes <code>0.1.0</code> (<code>uv lock</code>)</td></tr>
+<tr><td><code>CHANGELOG.md</code></td><td>heading <code>## [0.1.0] - Unreleased</code> becomes <code>## [0.1.0] - 2026-10-29</code></td></tr>
+</table>
+<h2>Checked locally</h2>
+<ul><li><code>uv lock --check</code> passes.</li><li><code>uv build</code> builds the sdist and the wheel; <code>scripts/check_dist.py dist --version 0.1.0</code> finds the licenses, <code>py.typed</code> and the data files in the wheel, the sdist and the wheel built from the sdist; <code>twine check --strict</code> passes for both files.</li><li>The changelog entry was read against the merged changes and lists the APIs of the merged pull requests.</li></ul>
+<h2>After the merge</h2>
+<p>Merging does not publish. The release is created with <code>gh release create v0.1.0 --target &lt;merge sha&gt;</code> (command in <code>RELEASING.md</code>), after <code>main.yml</code> and <code>deploy-docs.yml</code> pass on the merge commit. The <code>pypi</code> environment requires approval and accepts tags <code>v*</code> only.</p>
+<h2>Not verified</h2>
+<p>The publish workflow has run once, as the manual TestPyPI dry run; the <code>release: published</code> event and the upload to PyPI have not run.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
