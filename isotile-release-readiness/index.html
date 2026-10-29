@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>&quot;isotile 0.1.0: release readiness audit&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>&quot;isotile 0.1.0: release readiness audit&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>exploration</dd>
+<dt>Project</dt><dd>isotile</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../isotile-release-infra-pr/index.html">&quot;isotile: release infrastructure for 0.1.0&quot;</a> <span class="meta">(pr)</span><br><a href="../isotile-release-docs-pr/index.html">&quot;isotile: catalog, migration notes, benchmark and README for 0.1.0&quot;</a> <span class="meta">(pr)</span><br><a href="../proposal-isohedral-tiling-library/index.html">Design of the standalone isohedral tiling library (replacing tactile)</a> <span class="meta">(proposal)</span></dd>
+<dt>Branch</dt><dd>release-infra, release-docs</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-29 19:00</dd>
+<dt>Before</dt><dd>bright-fakl/isotile main at c1535fc (version 0.1.0.dev0, no publish workflow, no RELEASING.md)</dd>
+<dt>After</dt><dd>audit only; the fixes are in the two PRs linked under related</dd>
+<dt>Inputs</dt><dd>uv 0.8.17, Python 3.10 and 3.13 venvs locally, twine check (uvx), mkdocs build -s, curl against pypi.org and test.pypi.org (read only); nothing was uploaded, tagged or released</dd>
+</dl>
+<p class="desc">Checklist of what the first PyPI release of isotile needs, with evidence of the state of main at c1535fc and what the two release PRs change.</p>
+<p>Phase 5 of the plan in <a href="../proposal-isohedral-tiling-library/index.html">proposal-isohedral-tiling-library</a>, sections 8.4 and 8.5. Status: OK (ready on main), FIX (changed by a release PR), GAP (missing on main, added by a release PR), MANUAL (only the maintainer can do it).</p>
+<h2>Checklist</h2>
+<table>
+<tr><th>Item</th><th>State on main</th><th>Evidence</th><th>Action</th></tr>
+<tr><td>Name free on PyPI</td><td>OK</td><td><code>pypi.org/pypi/isotile/json</code>, <code>pypi.org/simple/isotile/</code> and <code>test.pypi.org/pypi/isotile/json</code> return 404 on 2026-10-29 (<code>pypi.org/project/isotile/</code> returns 200 with the site&#x27;s own page; the JSON and simple APIs are the authority). Recheck right before the first upload.</td><td>MANUAL</td></tr>
+<tr><td><code>name</code>, <code>description</code>, <code>readme</code>, <code>authors</code>, <code>requires-python</code></td><td>OK</td><td><code>pyproject.toml</code>: <code>isotile</code>, one-line description, <code>README.md</code>, <code>FKloosterman</code>, <code>&gt;=3.10,&lt;4.0</code>; <code>twine check --strict</code> passes for sdist and wheel</td><td>none</td></tr>
+<tr><td><code>version</code></td><td>FIX</td><td><code>0.1.0.dev0</code> in <code>pyproject.toml</code>, <code>uv.lock</code> holds it too; single source: <code>isotile.__version__</code> reads the installed metadata (verified in a clean venv: <code>0.1.0.dev0</code>)</td><td>PR 11 documents the bump (release PR: <code>pyproject.toml</code>, <code>uv lock</code>, changelog date); the publish workflow refuses a tag that differs from the version. A dev version on main can never reach PyPI (it routes to TestPyPI)</td></tr>
+<tr><td>License expression and files</td><td>OK</td><td><code>license = &quot;MIT&quot;</code>, <code>license-files = [LICENSE, NOTICE, src/isotile/data/LICENSE-tactile]</code>; METADATA has <code>License-Expression: MIT</code> and the three <code>License-File</code> entries</td><td>none</td></tr>
+<tr><td>LICENSE and NOTICE with Kaplan&#x27;s BSD 3-Clause</td><td>OK</td><td>wheel: <code>dist-info/licenses/LICENSE</code>, <code>NOTICE</code>, <code>.../src/isotile/data/LICENSE-tactile</code>, and <code>isotile/data/LICENSE-tactile</code>; sdist: <code>LICENSE</code>, <code>NOTICE</code>, <code>src/isotile/data/LICENSE-tactile</code>; <code>tests/test_packaging.py</code> checks that NOTICE contains the license text</td><td><code>scripts/check_dist.py</code> now checks it in CI and in the publish workflow</td></tr>
+<tr><td>Classifiers</td><td>FIX</td><td>Python 3.10 to 3.13, <code>Typing :: Typed</code>, Intended Audience, Topic present; missing Development Status, Operating System, <code>Python :: 3 :: Only</code></td><td>added (PR 11)</td></tr>
+<tr><td>Project URLs</td><td>FIX</td><td>only <code>Repository</code></td><td>added Homepage, Documentation, Issues, Changelog (PR 11)</td></tr>
+<tr><td>Keywords</td><td>OK / FIX</td><td>four keywords</td><td>three added</td></tr>
+<tr><td>Dependency floors</td><td>OK</td><td><code>numpy&gt;=1.26</code>, <code>scipy&gt;=1.11</code>, <code>shapely&gt;=2.0</code>, <code>matplotlib&gt;=3.7</code>; the <code>minimum-versions</code> job installs <code>--resolution lowest-direct</code> on Python 3.10 and runs the tests</td><td>none</td></tr>
+<tr><td><code>py.typed</code></td><td>OK</td><td>in the wheel (<code>isotile/py.typed</code>); <code>mypy --strict</code> clean on <code>src</code></td><td>checked by <code>check_dist.py</code></td></tr>
+<tr><td>sdist and wheel contents</td><td>OK</td><td>wheel: 15 files of the package, <code>types.npz</code> (390 KB), no tests; sdist: <code>src/</code>, <code>tests/</code>, <code>benchmarks/</code>, LICENSE, NOTICE, README, CHANGELOG, pyproject. A wheel built from the sdist has the same data files. <code>twine check --strict</code>: PASSED for both. The tests that need <code>docs/</code> skip in an sdist</td><td>none</td></tr>
+<tr><td>Clean-venv install and smoke test</td><td>OK</td><td>wheel installed into a Python 3.10 venv, run from <code>/tmp</code>: version, 81 types, <code>fill_region</code> and adjacency for every type; the existing <code>wheel-smoke-test</code> job did the same inline</td><td>moved into <code>scripts/smoke_test.py</code>, used by CI and the publish workflow (also checks the version)</td></tr>
+<tr><td><code>uv publish --dry-run</code></td><td>not used</td><td><code>uv publish --dry-run</code> still contacts the index and needs credentials for the check; <code>twine check --strict</code> plus the build in the workflow replace it. Nothing was uploaded</td><td>none</td></tr>
+<tr><td>CHANGELOG</td><td>FIX</td><td><code>CHANGELOG.md</code> had an <code>Unreleased</code> section with duplicate Documentation headings and fixes relative to development states; <code>docs/changelog.md</code> includes it by snippet</td><td>rewritten as one <code>0.1.0</code> entry (PR 11); <code>RELEASING.md</code> says how the date is set. Its Documentation bullet names the pages of PR 12</td></tr>
+<tr><td>README</td><td>FIX</td><td>had install, quickstart, concepts, logo, license; no PyPI, Python and CI badges, no extras line for <code>plot</code>, no documentation links, no citation</td><td>badges, extras, links, citation of Tactile and Grünbaum and Shephard (PR 12). <code>pip install isotile</code> was there. The logo uses absolute raw URLs, so it renders on PyPI</td></tr>
+<tr><td>Docs: quickstart, concepts, edge curves, adjacency, API reference, development, branding, changelog</td><td>OK</td><td><code>mkdocs build -s</code> passes; tests run the Python blocks and check that every name of <code>__all__</code> is in <code>docs/api/</code></td><td>none</td></tr>
+<tr><td>Docs: catalog of the 81 types</td><td>GAP</td><td>no page</td><td>PR 12: generated at build time by <code>docs/hooks.py</code></td></tr>
+<tr><td>Docs: adjacency page with the benchmark</td><td>GAP</td><td>page exists, no timings</td><td>PR 12: Benchmark page, link from the adjacency page</td></tr>
+<tr><td>Docs: migration notes from tactile</td><td>GAP</td><td>no page</td><td>PR 12</td></tr>
+<tr><td>API reference completeness</td><td>OK / FIX</td><td>all 21 names of <code>__all__</code> are documented (<code>tests/test_docs_examples.py</code>); the new APIs <code>neighbor_lists</code>, <code>offset</code>, <code>outline</code>, <code>with_parameters</code>, <code>InvalidPrototileError</code>, <code>repr</code>, <code>to_geojson</code>, <code>save_geojson</code> appear in the pages and the class reference; <code>InvalidPrototileError</code> was missing from the overview table of <code>api/index.md</code></td><td>table row added (PR 12)</td></tr>
+<tr><td>Strict docs build and link check</td><td>OK / FIX</td><td>strict build in <code>check-docs</code> and <code>deploy-docs.yml</code> (internal links and references are errors); external links: 19 of 19 existing URLs return 200; the three new pages return 404 until the docs deploy</td><td>none; external link check added in PR 12 (<code>check-links.yml</code>, weekly and manual; PRs check changed files without failing)</td></tr>
+<tr><td>Benchmark</td><td>GAP</td><td><code>benchmarks/bench.py</code> timed three types with lattice and geometric adjacency only; the old comparison with carto-flow is in the plan page</td><td>PR 12: operations at 1,000 to 100,000 tiles, <code>check_prototile</code>, optional tactile comparison, <code>--markdown</code>; not in default CI; a tiny-size test keeps it running</td></tr>
+<tr><td>CI matrix</td><td>OK</td><td><code>main.yml</code>: lint, mypy, tests on Python 3.10 to 3.13 (Linux) and 3.12 (macOS, Windows), tactile equivalence, data check, minimum versions, wheel smoke test, docs build. <code>deploy-docs.yml</code>: build on PR, deploy on push to main</td><td>PR 11 adds <code>twine check --strict</code> to the smoke job</td></tr>
+<tr><td>Release workflow</td><td>GAP</td><td>none</td><td>PR 11: <code>pypi-publish.yml</code></td></tr>
+<tr><td>RELEASING.md</td><td>GAP</td><td>none</td><td>PR 11</td></tr>
+<tr><td>Trusted publisher (PyPI), environments (GitHub)</td><td>OK (set up by the maintainer)</td><td>pending publishers on pypi.org and test.pypi.org; <code>pypi</code> (required reviewer, tags <code>v*</code>) and <code>testpypi</code> environments</td><td>recorded in <code>RELEASING.md</code></td></tr>
+</table>
+<h2>Findings that matter for the release</h2>
+<ul><li>The only packaging blockers were the missing release workflow and the dev version; the artifacts themselves were already correct (data files, licenses, <code>py.typed</code> in wheel and sdist).</li><li>At default parameters and straight edges many types look alike (IH1 to IH20 are all hexagons). The catalog therefore draws each type at example parameters with example curves, by a stated rule (see isotile-release-docs-pr).</li><li><code>scripts/make_doc_figures.py --check</code> reports the committed figures as stale in a local environment with newer matplotlib than the lock file resolves for CI; it is not run in CI.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR bright-fakl/isotile#12: &quot;isotile: catalog, migration notes, benchmark and README for 0.1.0&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR bright-fakl/isotile#12: &quot;isotile: catalog, migration notes, benchmark and README for 0.1.0&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>isotile</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../isotile-release-readiness/index.html">&quot;isotile 0.1.0: release readiness audit&quot;</a> <span class="meta">(exploration)</span><br><a href="../isotile-release-infra-pr/index.html">&quot;isotile: release infrastructure for 0.1.0&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isotile/pull/12">https://github.com/bright-fakl/isotile/pull/12</a></dd>
+<dt>Branch</dt><dd>release-docs</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-29 19:20</dd>
+<dt>Before</dt><dd>bright-fakl/isotile main at c1535fc; docs without catalog, migration or benchmark pages</dd>
+<dt>After</dt><dd>release-docs (figures from make_figures.py in this directory; CI results below)</dd>
+<dt>Inputs</dt><dd>uv 0.8.17, Python 3.13 (docs group) locally, AMD Ryzen 7 5825U under WSL2; tactile 0.1.x for the comparison</dd>
+</dl>
+<p class="desc">A catalog of the 81 types generated at build time, migration notes from tactile, a benchmark script and page (with an optional tactile comparison) and README badges and citation; strict docs build green.</p>
+<p>Phase 5 of the isotile plan, part 2, see <a href="../isotile-release-readiness/index.html">isotile-release-readiness</a>. The docs site was not viewed in a browser (the browser extension was not connected); figure 1 is the catalog drawn by the same function as the page, figure 2 the benchmark.</p>
+<h2>Changes</h2>
+<ul><li>Catalog page: <code>docs/hooks.py</code> is an mkdocs hook that adds <code>catalog.md</code> and 162 SVG files (light and dark, 81 types) to the build from the type data, with the drawing helpers of <code>scripts/make_doc_figures.py</code>. Nothing is written to <code>docs/</code>; the build takes about 13 s with the curved figures (6 s with straight ones). Tables by number of vertices with aspects, parameters, edge shapes, edge shape ids and reflections. A test checks that all 81 types are listed. The figures use example parameters and curves (see the design decision below).</li><li>External link check: <code>scripts/check_links.py</code> (standard library; 2xx after redirects and 429 pass, 3 retries with growing wait, ignore list <code>scripts/link_ignore.txt</code>) and the workflow <code>check-links.yml</code>: weekly (Monday) and manual runs build the site and check the site, README, RELEASING.md and CHANGELOG.md and are the gate; a pull request run checks only the changed Markdown files, skips the docs site (its pages exist only after the deploy) and has <code>continue-on-error</code>, so it never fails the PR. Ignored until they exist: the PyPI project, the PyPI badges, the releases URL and the three new docs pages. Documented in <code>docs/development.md</code>; two offline tests.</li><li>Migration page: the mapping of every tactile attribute and the fill to isotile, with the isotile code run by the page tests (tactile code is fenced <code>py</code>, not run).</li><li>Benchmark: <code>benchmarks/bench.py</code> and the Benchmark page. Operations <code>fill_region</code>, <code>vertices</code>, <code>adjacency</code>, <code>neighbor_lists</code>, <code>geometric_adjacency</code> at about 1,000, 10,000 and 100,000 tiles for IH7, IH46, IH84 and the preset <code>puzzle_piece</code>; <code>check_prototile</code>; with <code>--tactile</code> the scanline fill against tactile up to 10,000 tiles. The lattice and geometric adjacency are compared inside the script. Total run time 26 s with tactile. Not in default CI; <code>tests/test_bench.py</code> runs it at 60 tiles.</li><li>README: PyPI, Python, CI, license and docs badges, the <code>plot</code> extra, documentation links, background and citation of Tactile (Kaplan) and Grünbaum and Shephard. <code>api/index.md</code> lists <code>InvalidPrototileError</code>; the adjacency page links the benchmark; <code>deploy-docs.yml</code> builds when <code>scripts/make_doc_figures.py</code> changes.</li></ul>
+<h2>Catalog design decision</h2>
+<p>First version: every type at its default parameters with straight edges. Result: IH1 to IH20 are all regular hexagons and many square and triangle types are indistinguishable (figure 1 of the previous revision of this page), so the figures carried no information about the type.</p>
+<p>Options considered: (a) group the types with the same default shape into one figure with a list of types; (b) draw each type at example parameters with example curves. Chosen: (b). Reasons: the types of one default shape differ in which edges are related by symmetry and in how many parameters they have, and that is visible only when the parameters are moved and the edges are curved; grouping would hide exactly that, would leave 26 types without parameters in groups of identical figures, and breaks the one-row-per-type table. The rule is stated on the catalog page: each parameter moves 40 percent from its default to the nearer finite end of its safe range (0.15 if both ends are infinite); each edge of shape J, U or S gets a fixed curve of its shape (an asymmetric wave, a bump, an S), different edge shape ids get different curves; edges of shape I stay straight; an invalid prototile halves the step and the curve heights up to four times, then falls back to the default value or a straight edge. The choice is deterministic.</p>
+<p>Checks (run locally against <code>example()</code> of <code>docs/hooks.py</code>; the check code is not kept):</p>
+<ul><li>All 81 types build a valid prototile; none fell back to the default value or to a straight edge (the check compares against the types that have parameters or curvable edges).</li><li>9 types stay straight because all their edges have shape I (IH20, 32, 37, 40, 72, 76, 77, 82, 93); for them only the parameters can differ.</li><li>Visible difference: the mean absolute pixel difference of the 48 by 48 grayscale renderings (light theme) between any two types is at least 1.5 on a 0 to 255 scale for all 3,240 pairs (median 34.6); at default parameters and straight edges 388 pairs differ by less than 1 (the minimum is 0.0, median 30.2). The closest pairs are IH55 and IH71 (1.5), IH33 and IH34 (2.2) and IH42 and IH58 (3.6): they have the same prototile geometry at these parameters and differ in which edges share a curve and in the number of aspects, which the table shows.</li></ul>
+<h2>Figures</h2>
+<h2>Benchmark results (best of 3, tiles near 10,000)</h2>
+<table>
+<tr><th>Case</th><th>fill_region</th><th>adjacency (lattice)</th><th>geometric_adjacency</th><th>tactile fill</th><th>isotile fill</th></tr>
+<tr><td>IH7</td><td>119 ms</td><td>2.5 ms</td><td>31.8 ms</td><td>27.3 ms</td><td>1.4 ms</td></tr>
+<tr><td>IH46</td><td>67.5 ms</td><td>1.7 ms</td><td>23.5 ms</td><td>28.0 ms</td><td>1.9 ms</td></tr>
+<tr><td>IH84</td><td>50.8 ms</td><td>1.4 ms</td><td>21.5 ms</td><td>25.1 ms</td><td>1.9 ms</td></tr>
+<tr><td>puzzle_piece</td><td>610 ms</td><td>1.4 ms</td><td>23.2 ms</td><td></td><td></td></tr>
+</table>
+<p><code>fill</code> is the raw scanline fill in native coordinates (the same tiles and order as tactile, 13 to 20 times faster at 10,000 tiles; 7 to 9 times at 1,000). <code>fill_region</code> does more: frame, overlap test and boundary tiles. The full tables are on the Benchmark page.</p>
+<h2>Verified</h2>
+<ul><li><code>mkdocs build -s</code> passes (5.5 s with the catalog); the built site has 85 table rows on the catalog page (81 types and 4 headers) and 162 catalog SVG files; internal links and references are checked by strict mode.</li><li>External links of README, docs and the built site: <code>scripts/check_links.py</code> with the ignore list reports 0 broken of 34; without the ignore entries it reports exactly the three new pages (404 until deployed) and the theme&#x27;s <code>fonts.gstatic.com</code> preconnect hint. A deliberately broken link and a 404 page are reported (exit 1). lychee was not used (not installed; downloading a binary was not done). The workflow <code>check-links.yml</code> has not run on GitHub yet.</li><li>Tests: 4136 passed, 197 skipped without the tactile and slow markers; the migration page&#x27;s isotile blocks run; <code>tests/test_bench.py</code> passes.</li><li>ruff, ruff format and mypy are clean.</li></ul>
+<h2>Not verified</h2>
+<ul><li>The rendered pages in a browser, in either color scheme; the dark catalog figures were not looked at (the light ones were), and whether the amber middle tile is distinguishable in the busiest figures (IH1, IH9, IH15) at the 120 px width of the page.</li><li>The badges: the PyPI and Python badges show &quot;not found&quot; until the package is on PyPI.</li><li><code>scripts/make_doc_figures.py --check</code> in this environment reports all committed figures as stale (newer matplotlib than the lock file resolves in CI); the script is unchanged by this PR and CI does not run the check.</li><li>The benchmark on macOS or Windows, and with other NumPy or SciPy versions.</li></ul>
+<div class="figure">
+<img src="benchmark_chart.png" alt="Figure 2. Time of one run against the number of tiles for four cases, from `benchmarks/bench.py` (one run per point, so noisier than the best-of-three tables on the page). Growth is about linear; the lattice adjacency is the cheapest operation and `fill_region` of the curved preset the most expensive.">
+<p class="caption">Figure 2. Time of one run against the number of tiles for four cases, from <code>benchmarks/bench.py</code> (one run per point, so noisier than the best-of-three tables on the page). Growth is about linear; the lattice adjacency is the cheapest operation and <code>fill_region</code> of the curved preset the most expensive.</p>
+</div><div class="figure">
+<img src="catalog_sheet.png" alt="Figure 1. All 81 types as the catalog page draws them now (example parameters and curves, light theme). Compare with the straight, default-parameter version in which IH1 to IH20 were identical hexagons.">
+<p class="caption">Figure 1. All 81 types as the catalog page draws them now (example parameters and curves, light theme). Compare with the straight, default-parameter version in which IH1 to IH20 were identical hexagons.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR bright-fakl/isotile#11: &quot;isotile: release infrastructure for 0.1.0&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR bright-fakl/isotile#11: &quot;isotile: release infrastructure for 0.1.0&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>isotile</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../isotile-release-readiness/index.html">&quot;isotile 0.1.0: release readiness audit&quot;</a> <span class="meta">(exploration)</span><br><a href="../isotile-release-docs-pr/index.html">&quot;isotile: catalog, migration notes, benchmark and README for 0.1.0&quot;</a> <span class="meta">(pr)</span><br><a href="../isotile-gui-deployment-pr/index.html">&quot;isohedral-tiling-ui: deployment pipeline&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isotile/pull/11">https://github.com/bright-fakl/isotile/pull/11</a></dd>
+<dt>Branch</dt><dd>release-infra</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-29 19:20</dd>
+<dt>Before</dt><dd>bright-fakl/isotile main at c1535fc; no publish workflow, no RELEASING.md, version 0.1.0.dev0</dd>
+<dt>After</dt><dd>release-infra (CI results below)</dd>
+<dt>Inputs</dt><dd>uv 0.8.17, Python 3.10 and 3.12 locally, GitHub Actions ubuntu-latest; the publish workflow itself has not run</dd>
+</dl>
+<p class="desc">Trusted-publishing workflow (tag or release to PyPI, manual run to TestPyPI), RELEASING.md, distribution checks shared with the CI smoke test, the 0.1.0 changelog entry and metadata; nothing is uploaded or tagged.</p>
+<p>Phase 5 of the isotile plan, part 1, see <a href="../isotile-release-readiness/index.html">isotile-release-readiness</a>. No figures: the change is workflow, scripts and text.</p>
+<h2>Workflow <code>pypi-publish.yml</code></h2>
+<table>
+<tr><th>Trigger</th><th>Target</th><th>Notes</th></tr>
+<tr><td>tag <code>v*</code> pushed or release published, final version</td><td>PyPI, environment <code>pypi</code></td><td>tag must equal <code>v</code> plus the version of <code>pyproject.toml</code> (PEP 440 normalized)</td></tr>
+<tr><td>tag or release, pre-release or dev version</td><td>TestPyPI, environment <code>testpypi</code></td><td>a real PyPI upload can never be replaced, so these never go to PyPI</td></tr>
+<tr><td>manual run</td><td>TestPyPI</td><td>never PyPI</td></tr>
+</table>
+<p>Jobs: <code>build</code> (tests without tactile, <code>uv build</code>, <code>scripts/check_dist.py</code>, <code>twine check --strict</code>, install of the wheel into a clean Python 3.10 venv and <code>scripts/smoke_test.py --version</code>, upload of <code>dist</code> as an artifact) and <code>publish-pypi</code> or <code>publish-testpypi</code> (<code>id-token: write</code> only there, <code>pypa/gh-action-pypi-publish@release/v1</code>, download of the artifact). The upload is skipped when the version is already on the target index; creating a release together with its tag fires both events, the runs are serialized by a concurrency group and the second one uploads nothing. <code>scripts/release_plan.py</code> holds the decision logic and has seven tests.</p>
+<h2>Other changes</h2>
+<ul><li><code>RELEASING.md</code>: what each workflow does, the one-time setup (PyPI pending publisher with owner, repository, workflow file and environment name; TestPyPI; GitHub environments), the checklist (release PR with version, <code>uv lock</code> and changelog date; CI; optional TestPyPI dry run before the bump; <code>gh release create</code> or tag; verification in a clean venv; next dev version; consumers switch to <code>isotile&gt;=0.1.0</code>).</li><li>Version: main stays <code>0.1.0.dev0</code>. The release PR sets <code>0.1.0</code> and runs <code>uv lock</code> (checked: without it <code>uv lock --check</code> fails); the workflow refuses a tag that differs.</li><li><code>main.yml</code> <code>wheel-smoke-test</code> uses the two scripts and adds <code>twine check --strict</code>; the inline checks are gone.</li><li><code>pyproject.toml</code>: Development Status, Operating System and <code>Python 3 :: Only</code> classifiers, four project URLs, three keywords.</li><li><code>CHANGELOG.md</code>: one <code>## [0.1.0] - Unreleased</code> entry written as a first-release summary. Its Documentation bullet names the catalog, migration notes and benchmark that <a href="../isotile-release-docs-pr/index.html">isotile-release-docs-pr</a> adds; merge both before the release.</li></ul>
+<h2>Verified</h2>
+<ul><li>Locally: <code>uv build</code>; <code>scripts/check_dist.py dist</code> passes and fails with <code>--version 0.1.0</code> against the dev build; <code>twine check --strict</code> passes; wheel installed in a Python 3.10 venv and <code>scripts/smoke_test.py</code> run from <code>/tmp</code> (81 types); <code>release_plan.py</code> for dispatch, tag equal to the version, tag differing, dev tag and branch ref (it reads test.pypi.org read-only); <code>uv lock</code> after setting <code>0.1.0</code> changes only the project version; the test suite on main passed (4277 passed, 199 skipped) before the new tests were added, the new tests pass; ruff and mypy clean.</li><li>The workflow parses as YAML.</li><li>CI on the PR: see the Check runs below. The first run failed on Python 3.10 because <code>release_plan.py</code> imported <code>tomllib</code>; fixed by reading the version with a regular expression.</li></ul>
+<h2>Environments and refs</h2>
+<p>Settings made by the maintainer: environment <code>pypi</code> with the maintainer as required reviewer and deployments restricted to the tags <code>v*</code>; environment <code>testpypi</code> without restriction; pending publishers on pypi.org and test.pypi.org. <code>RELEASING.md</code> records them and the following, which follows from the workflow and <code>scripts/release_plan.py</code> (tests cover the target rules):</p>
+<ul><li><code>publish-pypi</code> runs only for a tag event with a final version equal to the tag; any other ref makes <code>release_plan.py</code> exit with an error before the job exists, so <code>pypi</code> is never used on a branch ref. A manual run always targets <code>testpypi</code>, also from a tag.</li><li><code>release: published</code> runs on <code>refs/tags/vX.Y.Z</code>, which the pattern <code>v*</code> admits, as it admits a pushed tag.</li><li><code>gh release create v0.1.0 --target &lt;sha&gt;</code> creates the tag at that commit and publishes the release; the run checks out <code>&lt;sha&gt;</code>, whose <code>pyproject.toml</code> must say <code>0.1.0</code>. The tag push and the release event both start a run; the second waits in the concurrency queue and uploads nothing, so there is one approval. A draft release creates the tag on publication.</li></ul>
+<p>The behavior of the environment protection with the release event was derived from the GitHub documentation and the workflow, not observed.</p>
+<h2>Not verified</h2>
+<ul><li>The workflow has never run: trusted publishing, the environments, the <code>release</code> event, the concurrency behavior on a release created with its tag and the artifact hand-off between jobs can only be tested by a real run. A dry run on TestPyPI (manual run, needs the TestPyPI publisher) is the safe test and is in <code>RELEASING.md</code>.</li><li>actionlint is not installed; the workflow was read, not linted.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
