@@ -27,6 +27,7 @@ PR 0 of the GUI port ([proposal-isotile-gui](../proposal-isotile-gui/index.html)
 | G-4 | `repr(tiling)` | `IsohedralTiling(41, parameters=[...], edge_curves={...}, edge_curve_modes={...}, frame=[[...]])`; the last three only when set; `eval` rebuilds an equal tiling |
 | G-5 | `InvalidPrototileError(ValueError)`, attribute `report` | raised by the constructor, `with_parameters`, `with_edge_curves` and the setter when the prototile or its outline is invalid; malformed arguments stay plain `ValueError`; messages unchanged |
 | G-6 | `TileSet.to_geojson(properties=None, *, curved=True, n_points=None)` | `FeatureCollection` dict, one `Polygon` per tile with `cell`, `aspect`, `color` and the entries of `properties`; closed counterclockwise rings; no shapely |
+| G-6 | `TileSet.save_geojson(path, properties=None, *, curved=True, n_points=None)` | writes `to_geojson` as a UTF-8 JSON file; `str` or `Path`; no collection metadata |
 
 ## G-3: same results, less time
 
@@ -41,6 +42,6 @@ Bit-identity: for all 15 presets, rotated by 17 degrees and scaled by 1.3, `fill
 
 ## Tests
 
-`tests/test_editor_api.py`: `with_parameters` returns a new tiling, equals the constructor and rejects what the setter rejects, including a curved outline that is invalid at valid straight parameters; `InvalidPrototileError` carries the report of `check_prototile` from every entry point and is a `ValueError`; `repr` round-trips for all types and presets, also with a frame; `to_geojson` parses with `json`, matches `outlines()`, orients reflected tiles counterclockwise, takes extra properties, and handles zero tiles.
+`tests/test_editor_api.py`: `with_parameters` returns a new tiling, equals the constructor and rejects what the setter rejects, including a curved outline that is invalid at valid straight parameters; `InvalidPrototileError` carries the report of `check_prototile` from every entry point and is a `ValueError`; `repr` round-trips for all types and presets, also with a frame; `to_geojson` parses with `json`, matches `outlines()`, orients reflected tiles counterclockwise, takes extra properties, handles zero tiles, and `save_geojson` read back with `json.load` equals `to_geojson`.
 
 ruff, mypy, the full suite and `scripts/make_doc_figures.py --check` pass.
