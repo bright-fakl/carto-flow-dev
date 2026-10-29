@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR bright-fakl/isohedral-tiling-ui#3: &quot;isohedral-tiling-ui: port to isotile&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR bright-fakl/isohedral-tiling-ui#3: &quot;isohedral-tiling-ui: port to isotile&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>isotile</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../proposal-isotile-gui/index.html">isohedral tiling GUI on isotile (phase 4 design)</a> <span class="meta">(proposal)</span><br><a href="../isotile-gui-pr1-pr/index.html">&quot;isohedral-tiling-ui: CI and golden fixtures&quot;</a> <span class="meta">(pr)</span><br><a href="../isotile-gui-pr0-pr/index.html">&quot;isotile: editor API additions (G-1 to G-6)&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isohedral-tiling-ui/pull/3">https://github.com/bright-fakl/isohedral-tiling-ui/pull/3</a></dd>
+<dt>Branch</dt><dd>port-to-isotile</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-28 22:55</dd>
+<dt>Before</dt><dd>bright-fakl/isohedral-tiling-ui main at 4444513 (carto-flow 2.0.0 and tactile 0.1.0)</dd>
+<dt>After</dt><dd>port-to-isotile @ 851e304 (254 tests pass locally on Python 3.10, 3.12 and 3.13 and in CI on 3.10 to 3.13)</dd>
+<dt>Inputs</dt><dd>Python 3.12, isotile c1535fc (archive URL), numpy 2.5.4, scipy 1.18.1, matplotlib 3.11.2, panel 1.10.0, bokeh 3.10.1, pandas 3.1.0, ruff 0.17.3, mypy 2.4.1; old side: carto-flow 2.0.0 checkout (a126c0d), tactile 0.1.0; no browser, no Docker</dd>
+</dl>
+<p class="desc">The GUI drops carto-flow, tactile and shapely for isotile. The design is an immutable Draft with a model and a thin state adapter; an invalid edit is refused with a message. The preview selects tiles with the straight outline, both save buttons write isotile 1.1, the loader repairs old files. The page shows the old and the new renders (preview strips, color modes, the tree gap, a linear preset, SVG) and lists every intended difference with the test that asserts it. PR 2 of the isotile GUI port.</p>
+<p>PR 2 of the port plan of <a href="../proposal-isotile-gui/index.html">proposal-isotile-gui</a>, section 8. The app now imports only isotile, numpy, panel, bokeh, matplotlib, svgwrite and pandas. The JavaScript handlers are unchanged and were not run (no browser).</p>
+<p>Files in this directory: <a href="render_old.py">render_old.py</a> renders the preview strips, exports and tile polygons of the old GUI (run in an environment with carto-flow 2.0.0, tactile and the old GUI at 4444513); <a href="render_new.py">render_new.py</a> renders the same with the ported code; <a href="make_figures.py">make_figures.py</a> composes the figures from the two directories and prints the pixel statistics.</p>
+<pre><code>python render_old.py OLD   # old environment
+python render_new.py NEW   # ported GUI installed
+python make_figures.py OLD NEW</code></pre>
+<h2>What changed, by module</h2>
+<table>
+<tr><th>Module</th><th>Change</th></tr>
+<tr><td><code>editor_model.py</code> (new, no Panel)</td><td>frozen <code>Draft</code> (type, parameters, curves, modes) with <code>report()</code> and <code>tiling()</code> derived and cached; <code>EditorModel</code> with history, coalescing, baseline and Reset; node rules <code>move_node</code>, <code>add_node</code>, <code>remove_node</code> (S and U nodes in pairs), <code>editable</code>; <code>load_design</code> with the loader repairs; cached <code>type_info</code>, exact <code>parameter_info</code> (derivative from <code>vertex_coeffs</code>), <code>parameter_groups</code></td></tr>
+<tr><td><code>state.py</code></td><td><code>TilingState</code> is a thin adapter: one parameter <code>draft</code>, derived <code>tiling_type</code>, <code>parameters</code>, <code>edge_curve_modes</code>, <code>history_rev</code>, <code>source_label</code>, <code>active_curve_id</code>; <code>ViewSettings</code> for the preview settings; notifications through an injected callable; a refused edit notifies and redraws the views from the current draft; replaces 25 fields, the <code>_batching</code> flag and 26 watchers</td></tr>
+<tr><td><code>exports.py</code> (new, no Panel, no shapely)</td><td><code>strip_tiles</code> (<code>fill_region(outline=&quot;straight&quot;, margin=0.25)</code>), <code>export_tiles</code> (curved outline, <code>margin=0.1</code>), <code>face_colors</code> (<code>uniform</code>, <code>aspect</code>, <code>coloring</code>), strip and export PNG on <code>Figure</code> (no pyplot), SVG, GeoJSON (<code>TileSet.to_geojson</code>), design JSON (<code>to_dict</code> plus description and metadata), Python snippet (<code>repr(tiling)</code>)</td></tr>
+<tr><td><code>components/prototile_editor.py</code></td><td><code>tiling.vertices</code>, <code>edge_outlines()</code>, cached <code>parameter_groups</code> with the exact Jacobian; the duplicated block of <code>_update_figure</code> and <code>_solve_param_delta</code> removed; slider and vertex drag go through <code>set_parameter(s)</code></td></tr>
+<tr><td><code>components/curve_editor.py</code></td><td><code>isotile.enforce_symmetry</code> and <code>interpolate</code>; every edit is a <code>TilingState</code> operation (<code>set_curve</code>, <code>move_node</code>, <code>add_node</code>, <code>remove_node</code>, <code>set_mode</code>, <code>copy_curve</code>); dead code removed (<code>_add_point</code>, <code>_remove_point</code>, <code>_remove_point_at</code>, <code>_on_right_click</code>, <code>_build_curve_mode_widget</code>)</td></tr>
+<tr><td><code>components/preview_strip.py</code>, <code>load_save.py</code>, <code>gallery.py</code>, <code>type_selector.py</code>, <code>history_toolbar.py</code></td><td>isotile API (<code>list_presets</code>, <code>find_types</code>, <code>get_type</code>, <code>prototile(normalized=True)</code>); exports and Save write through <code>exports.py</code>; the loader is <code>TilingState.load_data</code></td></tr>
+<tr><td><code>utils/</code></td><td><code>spline_cache.py</code> and the GUI&#x27;s symmetry rule deleted; <code>curve_presets.py</code> keeps the 17 presets; <code>icons.py</code> has the prototile SVG</td></tr>
+<tr><td><code>pyproject.toml</code>, <code>ci/</code></td><td>isotile as the archive URL of c1535fc with <code>allow-direct-references</code>; numpy and pandas declared; shapely and carto-flow dropped; <code>ci/constraints.txt</code> keeps only ruff; lint baseline 11 errors and 2 files to 3 and 0 (the 3 left are the <code>subprocess</code> call and two imports in <code>app.py</code>); mypy 495 errors to 296, still advisory; README and <code>Repository</code> point to isotile and this repository</td></tr>
+</table>
+<h2>Evidence</h2>
+<h3>The preview strip</h3>
+<p>Pixel comparison of the 15 strips (232 by 69 pixels in both, share of pixels that differ by more than 0.05 in intensity):</p>
+<table>
+<tr><th>Color mode, old against new</th><th>Median</th><th>Largest</th></tr>
+<tr><td>uniform</td><td>0.00 percent</td><td>5.8 percent (<code>tree</code>); <code>arrow_quad</code> 5.6 percent; the other 13 are identical</td></tr>
+<tr><td>aspect</td><td>33.9 percent</td><td>54.2 percent (<code>tree</code>)</td></tr>
+<tr><td><code>index</code> against <code>coloring</code></td><td>61.4 percent</td><td>68.1 percent</td></tr>
+</table>
+<p>The median render of the strip (imports excluded, 5 calls per preset, the machine was loaded) is 188 ms in the old code (largest 342 ms) and 25 ms in the new (largest 37 ms).</p>
+<h3>Migration test</h3>
+<p>The first commit of the PR runs the isotile implementation against the carto-flow fixtures of PR 1 (<code>tests/test_golden.py</code> at d3866e1: 258 cases pass). For every case the tiles of the window (preview) or of the export square are compared by centroid:</p>
+<ul><li>Every tile that overlaps the window is in the fixture, and the fixture has no tile that reaches into the window, in 95 of 96 cases (15 presets and 81 types); <code>arrow_quad</code> is compared with its curves forced to the spline mode (difference 7). The exception is <code>tree</code> (difference 5).</li><li>Areas agree to 1e-12. Centroids and the three stored polygons per case agree to 1e-9 except <code>puzzle_piece</code> (11 control points, 110 against 100 samples): centroids 2.4e-7, polygons 3.3e-5.</li><li>The 45 SVG and GeoJSON exports (15 presets, 3 sizes), the 26 snippets and JSON exports, and the 41 loaded design files are compared as described below.</li></ul>
+<p>The second commit replaces the fixtures by a smaller set from the ported code: 26 preview cases, 4 exports, 26 snippets and design JSONs, 17 design files (about 0.3 MB against 1.0 MB), and deletes <code>make_golden.py</code> and the old fixtures. The final <code>tests/test_golden.py</code> has no differences left; they live in the first commit.</p>
+<h3>Intended differences</h3>
+<p>Each is asserted in the migration test (name in the last column) so that a change in either direction fails.</p>
+<table>
+<tr><th>#</th><th>Difference</th><th>Reason</th><th>Test constant</th></tr>
+<tr><td>1</td><td>Face colors in the <code>aspect</code> mode follow the aspect index (one color per aspect, <code>tab10</code> order), not rotation / 360</td><td>the aspect index is isotile&#x27;s classification of the tiles of a type (decision 4); the rotation of a tile can be derived from its transform but is not what the type defines. Types with one aspect keep their color</td><td><code>DIFF_ASPECT_COLORS</code></td></tr>
+<tr><td>2</td><td>The <code>index</code> color mode is removed; <code>coloring</code> (2 or 3 colors, adjacent tiles differ) is added</td><td>the tile order of tactile is not reproduced</td><td><code>DIFF_NO_INDEX_MODE</code></td></tr>
+<tr><td>3</td><td>Tiles come in another order; the fixtures are matched by centroid</td><td>isotile orders by cell and aspect</td><td><code>DIFF_TILE_ORDER</code></td></tr>
+<tr><td>4</td><td>The fixtures contain tiles far outside the region and lack others at the other side (<code>square</code> at 50 tiles: tile centroids from -3.1 to 3.7 in the fixture, -2.4 to 2.3 in the port)</td><td>tactile fills a larger parallelogram; only tiles that overlap the window or the export square are compared</td><td><code>DIFF_TILE_SELECTION</code></td></tr>
+<tr><td>5</td><td>The <code>tree</code> preview lacks 9 window tiles in the fixture; the <code>tree</code> export at 50 tiles lacks 5 tiles of the export square</td><td><code>generate</code> leaves gaps (fig_tree.png); <code>fill_region</code> covers the region (checked on a grid of points)</td><td><code>DIFF_TREE</code></td></tr>
+<tr><td>6</td><td>Curves with m control points are sampled with max(100, 10 m) points: <code>puzzle_piece</code> 110 instead of 100</td><td>isotile&#x27;s spline sampling</td><td><code>DIFF_SAMPLING</code></td></tr>
+<tr><td>7</td><td><code>linear</code> curves of a loaded preset are drawn as lines (<code>arrow_quad</code>: 0 of 208 tiles match the fixture as drawn; with the spline mode forced they match to 1e-9)</td><td>bug of the old code: <code>state._tiling</code> was rebuilt without the modes</td><td><code>DIFF_LINEAR_MODE</code></td></tr>
+<tr><td>8</td><td>SVG polygons have one point less (the first point is not repeated)</td><td>an SVG polygon closes itself; <code>outlines()</code> has no repeated point</td><td><code>DIFF_SVG_RING</code></td></tr>
+<tr><td>9</td><td>GeoJSON properties <code>tile_index</code>, <code>rotation</code>, <code>flipped</code>, <code>center_x</code>, <code>center_y</code>, <code>color</code> become <code>tile_index</code>, <code>aspect</code>, <code>cell_u</code>, <code>cell_v</code>, <code>color_index</code>, <code>color</code>, <code>center_x</code>, <code>center_y</code>; the center is the centroid of the tile; rings are counterclockwise</td><td>decision 13 of the plan; <code>TileSet.to_geojson</code> orients the rings counterclockwise</td><td><code>DIFF_GEOJSON_PROPERTIES</code></td></tr>
+<tr><td>10</td><td>Save Design and the JSON export write isotile format 1.1 (<code>version</code>, <code>edge_curve_modes</code> for every curve, <code>description</code>); <code>edge_curves</code> is absent for a tiling without curves; the export dialog JSON used to lose the modes</td><td>one writer for both buttons (decision 6)</td><td><code>DIFF_JSON_FORMAT</code></td></tr>
+<tr><td>11</td><td>The <code>tree</code> preset lists the mode of its 5th curve (the fixture listed 4 of 5; all are splines)</td><td>carto-flow&#x27;s preset omitted one mode</td><td><code>DIFF_JSON_FORMAT</code></td></tr>
+<tr><td>12</td><td>The Python snippet builds an <code>IsohedralTiling</code> (<code>repr(tiling)</code>) and calls <code>fill_region(..., margin=0.1)</code>; it runs without shapely</td><td>the tiling and its <code>repr</code> come from isotile</td><td><code>DIFF_PYTHON_SNIPPET</code></td></tr>
+<tr><td>13</td><td>A parameter list of the wrong length is replaced by the defaults with a warning (2 files: too few and too many parameters)</td><td>the fixture refused both (&quot;The length of the passed parameters was ...&quot;)</td><td><code>DIFF_LOADER</code></td></tr>
+<tr><td>14</td><td>A curve on a straight (I) edge is dropped with a warning</td><td>the fixture accepted it silently and ignored it; isotile raises</td><td><code>DIFF_LOADER</code></td></tr>
+<tr><td>15</td><td>A mode for a shape id without a curve is kept with a warning that it applies when a curve is added</td><td>same state as the fixture, now announced</td><td><code>DIFF_LOADER</code></td></tr>
+<tr><td>16</td><td>A design with an invalid outline is refused with an error and the state is unchanged</td><td>the fixture accepted it and repaired the tiles with <code>make_valid</code></td><td><code>DIFF_LOADER</code></td></tr>
+<tr><td>17</td><td>The messages of the three other refusals (not JSON, no type, unknown type) differ; their level is the same</td><td>messages come from the new code</td><td><code>DIFF_LOADER</code></td></tr>
+</table>
+<p>Differences that the fixtures do not cover and tests of the new code assert (<code>tests/test_editor_model.py</code>, <code>tests/test_state.py</code>):</p>
+<ul><li>A node added to or removed from an S or U curve takes its partner with it (the old rule dropped the middle node of a U curve: <code>[(0,0), (0.2,0.1), (0.5,0.15), (0.8,0.1), (1,0)]</code> plus a node at (0.35, 0.2) gives 7 points now).</li><li>Reset restores the modes as well; the selected curve is not part of an undo step; a typed table value moves the U middle node&#x27;s x to 0.5.</li><li>The vertex drag uses the exact Jacobian (<code>vertex_coeffs</code>), not the derivative rounded to 4 decimals.</li><li>Undo followed by an edit with the same coalescing key no longer overwrites the entry that Undo moved to (found in the proof of concept of the plan; test <code>test_an_edit_after_undo_does_not_overwrite_the_undone_entry</code>).</li></ul>
+<h2>Checks</h2>
+<table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td>tests</td><td>254 pass locally (Python 3.10, 3.12, 3.13) and in CI (3.10 to 3.13): 103 state model (<code>Draft</code>, history, node rules, loader, parameter groups), 45 exports, 31 headless Panel (state, components driven the way Bokeh calls them, files), 75 golden</td></tr>
+<tr><td>lint</td><td><code>ruff check</code> 3 errors (baseline 11), <code>ruff format --check</code> clean (baseline 2 files); CI lint job passes</td></tr>
+<tr><td>`grep -rn &quot;_ih\</td><td>tactile\</td><td>carto_flow\</td><td>_unit_tile&quot; src`</td><td>nothing (asserted by <code>test_package_has_no_reference_to_the_previous_libraries</code>)</td></tr>
+<tr><td>import without the old libraries</td><td><code>import isohedral_tiling_ui.app</code> in a fresh process loads none of carto_flow, tactile, shapely, geopandas, numba (test)</td></tr>
+<tr><td>app served</td><td><code>panel serve app.py</code> answered the page request with 200 and ran the app script without an error (two <code>W-1005</code> Bokeh warnings about the sizing of a <code>GridBox</code> appeared; the gallery and the type selector build their <code>GridBox</code> as before)</td></tr>
+<tr><td><code>pip install .</code> as in the Dockerfile</td><td>in a fresh Python 3.12 venv with pip and no git: succeeded, isotile built from the archive URL by hatchling, 44 packages; the installed <code>app.py</code> and <code>assets/favicon.svg</code> are found as <code>entrypoint.sh</code> expects</td></tr>
+<tr><td>installed size</td><td>537 MB in <code>site-packages</code> (scipy 139 MB with its libraries, pandas 81, panel 75, numpy 70, matplotlib 34, bokeh 33); the plan measured 418 MB and set at most 450 MB as the acceptance; pandas 3.1 and panel 1.10 are larger than the versions measured there. The old GUI was 920 MB</td></tr>
+</table>
+<h2>Not verified</h2>
+<ul><li>No browser: the <code>CustomJS</code> handlers (live polyline, Jacobian prediction, modifier keys), the Bokeh tools, the layout and the notification toasts were not run. A refused edit is a Python-side redraw (<code>param.trigger</code>), tested headless, not seen in a browser.</li><li>No Docker build and no Hugging Face build; the Dockerfile and <code>entrypoint.sh</code> are unchanged and the staging Space does not exist (PR 4). Only <code>pip install .</code> was run, in a venv.</li><li>Panel below 1.10 and Bokeh below 3.10 (<code>pyproject</code> still says <code>panel&gt;=1.4</code>, <code>bokeh&gt;=3.4</code>); pandas below 3.</li><li>Timings are single runs on a shared machine.</li><li>The ported <code>PreviewStrip</code> render thread (<code>pn.state.execute</code>) is unchanged and was not run outside a server.</li></ul>
+<h2>Not in this PR</h2>
+<p>Live validity feedback (probe channel, red edges, slider limits) is PR 3, the Docker job, staging Space, sync <code>needs:</code> and the weekly job are PR 4. The Space sync workflow is unchanged.</p>
+<div class="figure">
+<img src="fig_linear.png" alt="`arrow_quad` has `linear` curves. The old GUI drew them as splines after a preset load (the tiling of the preview was rebuilt without the modes); the port draws lines through the control points, as the editor shows.">
+<p class="caption"><code>arrow_quad</code> has <code>linear</code> curves. The old GUI drew them as splines after a preset load (the tiling of the preview was rebuilt without the modes); the port draws lines through the control points, as the editor shows.</p>
+</div><div class="figure">
+<img src="fig_modes.png" alt="The color modes on the Medium export of `wavy_triangle` (2 aspects): old uniform, aspect (by rotation), `index` (by tile order); new uniform, aspect (by aspect index), `coloring` (`TileSet.colors()`, adjacent tiles differ). The `index` mode is gone.">
+<p class="caption">The color modes on the Medium export of <code>wavy_triangle</code> (2 aspects): old uniform, aspect (by rotation), <code>index</code> (by tile order); new uniform, aspect (by aspect index), <code>coloring</code> (<code>TileSet.colors()</code>, adjacent tiles differ). The <code>index</code> mode is gone.</p>
+</div><div class="figure">
+<img src="fig_strips.png" alt="The preview strip of the 15 presets, old (carto-flow `generate`, color by rotation) against new (isotile `fill_region(outline=&quot;straight&quot;)`, color by aspect index). Left pair: uniform mode, right pair: aspect mode. Uniform strips are pixel-identical except `arrow_quad` (linear curves, see below) and `tree` (the gap at the bottom).">
+<p class="caption">The preview strip of the 15 presets, old (carto-flow <code>generate</code>, color by rotation) against new (isotile <code>fill_region(outline=&quot;straight&quot;)</code>, color by aspect index). Left pair: uniform mode, right pair: aspect mode. Uniform strips are pixel-identical except <code>arrow_quad</code> (linear curves, see below) and <code>tree</code> (the gap at the bottom).</p>
+</div><div class="figure">
+<img src="fig_svg.png" alt="The SVG export of `puzzle_piece` at the Medium grid, old and new, drawn from the SVG files. The old file has more polygons because tactile fills a larger parallelogram around the region (156 against 140 here; `square` 156 against 100, `tree` 198 against 136); the export square is covered in both.">
+<p class="caption">The SVG export of <code>puzzle_piece</code> at the Medium grid, old and new, drawn from the SVG files. The old file has more polygons because tactile fills a larger parallelogram around the region (156 against 140 here; <code>square</code> 156 against 100, <code>tree</code> 198 against 136); the export square is covered in both.</p>
+</div><div class="figure">
+<img src="fig_tree.png" alt="The `tree` preview window (-1, -0.3, 1, 0.3) with the margin 0.25; the uncovered area is red. The old call leaves a gap at the bottom edge (9 tiles missing); `fill_region` covers the window.">
+<p class="caption">The <code>tree</code> preview window (-1, -0.3, 1, 0.3) with the margin 0.25; the uncovered area is red. The old call leaves a gap at the bottom edge (9 tiles missing); <code>fill_region</code> covers the window.</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
