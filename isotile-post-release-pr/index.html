@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR bright-fakl/isotile#14: &quot;isotile: start 0.1.1.dev0 after the 0.1.0 release&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR bright-fakl/isotile#14: &quot;isotile: start 0.1.1.dev0 after the 0.1.0 release&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>isotile</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../isotile-release-0-1-0-pr/index.html">&quot;isotile: release 0.1.0&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isotile/pull/14">https://github.com/bright-fakl/isotile/pull/14</a></dd>
+<dt>Branch</dt><dd>post-release-0.1.0</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-29 22:00</dd>
+<dt>Before</dt><dd>bright-fakl/isotile main at d43e2c3 (tag v0.1.0); version 0.1.0</dd>
+<dt>After</dt><dd>post-release-0.1.0 (all CI checks pass)</dd>
+<dt>Inputs</dt><dd>uv 0.8.17, Python 3.13.7 locally; isotile 0.1.0 on PyPI</dd>
+</dl>
+<p class="desc">Development version 0.1.1.dev0 in pyproject.toml and uv.lock, an empty Unreleased changelog section, and the first-release link ignores removed.</p>
+<h2>Change</h2>
+<table>
+<tr><th>File</th><th>Change</th></tr>
+<tr><td><code>pyproject.toml</code>, <code>uv.lock</code></td><td>version <code>0.1.0</code> becomes <code>0.1.1.dev0</code> (patch-level development version; <code>uv lock --check</code> passes)</td></tr>
+<tr><td><code>CHANGELOG.md</code></td><td>empty <code>## [Unreleased]</code> section above <code>## [0.1.0]</code></td></tr>
+<tr><td><code>scripts/link_ignore.txt</code></td><td>removed the PyPI project, TestPyPI, PyPI badge, releases/compare and new docs page patterns; the fonts.gstatic.com preconnect hint stays because it is not a page</td></tr>
+<tr><td><code>docs/development.md</code></td><td>the description of the ignore file no longer mentions the first release</td></tr>
+<tr><td><code>RELEASING.md</code></td><td>the example development version is <code>0.1.1.dev0</code>; the one-time setup is marked done for 0.1.0</td></tr>
+</table>
+<h2>Checked locally</h2>
+<ul><li><code>mkdocs build -s</code> passes. <code>scripts/check_links.py site README.md RELEASING.md CHANGELOG.md --ignore-file scripts/link_ignore.txt</code>: 44 links checked, 2 skipped, 0 broken.</li><li>The README and the documentation already say <code>pip install isotile</code>; no text about an unpublished package remained.</li></ul>
+<h2>Not changed</h2>
+<p>Switching carto-flow and isohedral-tiling-ui to <code>isotile&gt;=0.1.0</code> (step 8 of the release checklist) is separate work.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
