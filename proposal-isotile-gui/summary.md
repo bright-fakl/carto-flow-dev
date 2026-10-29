@@ -6,13 +6,44 @@ description: Design of phase 4 of the isotile plan, in which the Panel/Bokeh GUI
 kind: proposal
 topic: symbol
 status: open
-related: proposal-isohedral-tiling-library, proposal-isotile-adoption, isotile-step-0-pr, isotile-offset-pr, isotile-curved-cover-pr
+related: proposal-isohedral-tiling-library, proposal-isotile-adoption, isotile-step-0-pr, isotile-offset-pr, isotile-curved-cover-pr, isotile-gui-pr0-pr, isotile-gui-pr1-pr, isotile-gui-port-pr, isotile-gui-validity-pr
 date: 2026-10-28 17:10
-updated: 2026-10-28 17:10
+updated: 2026-10-29 13:14
 inputs: isohedral-tiling-ui main at eb7b79e (read only, git archive; remote git@github.com:bright-fakl/isohedral-tiling-ui.git, public); isotile origin/main at a4625b7 (git archive; includes fill_region offset, curved cover default, neighbor_lists); carto-flow checkout at a126c0d (version 2.0.0, tactile-based tilings) as the current implementation; tactile 0.1.0; Python 3.12.3, numpy 2.5.4, scipy 1.18.1, shapely 2.2.0, matplotlib 3.11.2, panel 1.10.0, bokeh 3.10.1, param 2.4.2, ruff 0.17.3, mypy 2.4.1, uv 0.8.17 in a scratch venv; 16-core WSL2 machine with other jobs (load about 1), timings are means of 5 calls, best of 2 batches, single runs, seeds fixed; no browser and no Docker were used.
 ---
 
 Phase 4 of the plan in [proposal-isohedral-tiling-library](../proposal-isohedral-tiling-library/index.html) (section 8.3) and sections 2.3 and 2.4 of [proposal-isotile-adoption](../proposal-isotile-adoption/index.html) say that the GUI `isohedral-tiling-ui` moves from carto-flow's tactile-based tilings to isotile. This page does not implement it. It fixes what is replaced, what the state of the editor looks like, how the editor behaves when the curves become invalid, what isotile still lacks, how the result is tested and deployed, and in which PRs it lands. The GUI repository, the isotile source and the carto-flow checkout were not modified. Every number marked as measured was produced by a script in this directory.
+
+## Outcome (2026-10-29)
+
+Four of the five PRs of section 8.1 are merged; the deployment PR (plan PR 4) is open. The proposal stays open until it is merged. Dates are the merge times in UTC from GitHub. The plan numbered the GUI PRs 1 to 4 after isotile PR 0; on GitHub the GUI repository's numbers differ and include one unplanned fix (PR 2).
+
+| Plan | PR | Repository | Content | Merged | Merge commit |
+|---|---|---|---|---|---|
+| 0 | [10](https://github.com/bright-fakl/isotile/pull/10) | isotile | G-1 to G-6 and `TileSet.save_geojson`; G-7 not done ([isotile-gui-pr0-pr](../isotile-gui-pr0-pr/index.html)) | 2026-10-29 | c1535fc |
+| 1 | [1](https://github.com/bright-fakl/isohedral-tiling-ui/pull/1) | isohedral-tiling-ui | CI workflow and golden fixtures of the current implementation ([isotile-gui-pr1-pr](../isotile-gui-pr1-pr/index.html)) | 2026-10-29 | a1a706f |
+| (none) | [2](https://github.com/bright-fakl/isohedral-tiling-ui/pull/2) | isohedral-tiling-ui | fix: the Space sync pushes a snapshot without `tests/` and `ci/` | 2026-10-29 | 4444513 |
+| 2 | [3](https://github.com/bright-fakl/isohedral-tiling-ui/pull/3) | isohedral-tiling-ui | the port to isotile, with the decisions of section 8.5 as taken; the 17 intended differences from the previous implementation are listed on [isotile-gui-port-pr](../isotile-gui-port-pr/index.html) | 2026-10-29 | 9b95078 |
+| 3 | [5](https://github.com/bright-fakl/isohedral-tiling-ui/pull/5) | isohedral-tiling-ui | validity feedback: probe channel, red curved edges in both editors, live outline, slider limits, numeric field, zoom ([isotile-gui-validity-pr](../isotile-gui-validity-pr/index.html)) | 2026-10-29 | 5138488 |
+| 4 | [7](https://github.com/bright-fakl/isohedral-tiling-ui/pull/7) | isohedral-tiling-ui | open: docker smoke test, staging Space sync, gated live sync, weekly job against isotile `main` | not merged | not merged |
+
+Deviations from the plan:
+
+- The fixtures of PR 1 hold 1.0 MB (96 preview cases, exports, 41 design files) instead of the planned 0.3 MB, without strip images (they are pixel-based and the port changes the aspect colors on purpose). They were a migration tool: PR 3 compared isotile against them, asserted each intended difference, then replaced them by a smaller set regenerated from the ported code (`tests/make_fixtures.py`) and deleted `make_golden.py`.
+- Found in the browser and fixed in PR 3 (the plan had no browser run): Panel 1.10 `ButtonIcon` sets `disabled` and `value` itself and shows a check mark after a click, so all icon buttons are plain `pn.widgets.Button`; `on_edit` of the curve table fires outside the document lock, so the edit runs as a scheduled callback; the availability of curve presets is computed from the draft and shown as muted buttons with the reason, and the S and U preset rule changed (decision 11 below); the selection model of nodes (click, shift-click, drag of several nodes); node drag fixes; the dragged vertex handle stays on the predicted outline corner.
+- Found in the browser and fixed in PR 5: curved edges in the prototile editor are drawn red when invalid, and the parameter ranges beyond 0 to 1 (decision 10 below).
+- The dependency floors are `panel>=1.9`, `bokeh>=3.9`, `numpy>=2.2`, `pandas>=2.3` (the lowest versions tested). Panel 1.10 requires Python 3.12, so Python 3.10 resolves panel 1.9.4 and bokeh 3.9.2.
+- The installed size is 537 MB, above the acceptance limit of 450 MB (the plan measured 418 MB; pandas 3.1 and panel 1.10 are larger than the measured versions). The previous GUI was 920 MB.
+- isotile PR 10 contains all of G-1 to G-6, not only the recommended G-1 to G-3, and `save_geojson`. The pin is the archive URL of c1535fc.
+
+Open issues:
+
+| Issue | Title |
+|---|---|
+| [isohedral-tiling-ui#4](https://github.com/bright-fakl/isohedral-tiling-ui/issues/4) | Edge curve presets: per-curve-type presets and other improvements |
+| [isohedral-tiling-ui#6](https://github.com/bright-fakl/isohedral-tiling-ui/issues/6) | Parameter range: expanding range while dragging, nonlinear scale |
+
+Not verified: browsers other than headless Chromium, Panel 1.9 with the browser tests (the browser tests were run with Panel 1.10; the headless tests run in CI on Python 3.10 to 3.13, where 3.10 resolves panel 1.9.4), the probe latency on the Hugging Face Space, and a Docker or Space build (the open deployment PR covers these).
 
 Files in this directory:
 
@@ -455,8 +486,8 @@ Recommendation first in each line.
 7. **Pin form.** Archive URL of a commit with `allow-direct-references`; the PyPI version after 0.1.0. The alternative `git+https` needs git in the image.
 8. **Dependencies.** Drop shapely, keep svgwrite, declare pandas and numpy.
 9. **Typing.** mypy gates the new logic modules only; ruff and ruff format gate everything after PR 1.
-10. **Slider limits.** Computed from the current state, window 0 to 1 (section 3.4), not from `safe_ranges`.
-11. **Add and remove on S and U curves.** Insert and remove nodes in pairs (fixes the behavior of section 2.2).
+10. **Slider limits.** Computed from the current state, window 0 to 1 (section 3.4), not from `safe_ranges`. Changed in PR 5: the window is 0 to 1 extended to the valid interval around the current value (rounded outward to 0.05), a numeric field beside each slider takes any valid value, and Zoom out x2 and Zoom reset widen the search. Reason: of 128 parameters of 55 types, 120 have valid values outside 0 to 1 or a limit inside it that the window cut. A nonlinear scale and a range that expands while dragging are not done (isohedral-tiling-ui#6).
+11. **Add and remove on S and U curves.** Insert and remove nodes in pairs (fixes the behavior of section 2.2). Changed in PR 3 for the curve presets: on an S edge a preset that has the symmetry is unchanged and any other is compressed into the first half (x halved), giving 2n-1 nodes for n; on a U edge the first half by index, or the symmetric part if the first half is straight. Reason: the first-half rule made `ramp_up`, `arrow`, `arrow_down` and `hook_right` straight on S edges (isohedral-tiling-ui#4).
 12. **History.** The selected curve is not part of an undo step; a type change, a preset and a load start a new history, as today.
 13. **GeoJSON properties.** `tile_index`, `aspect`, `cell_u`, `cell_v`, `color_index`, `center_x`, `center_y`; `rotation` and `flipped` only if the user asks.
-14. **Staging Space.** Create `devfakl/isohedral-tiling-ui-staging` before PR 2 merges (needs the user's Hugging Face account).
+14. **Staging Space.** Create `devfakl/isohedral-tiling-ui-staging` before PR 2 merges (needs the user's Hugging Face account). Not met: PR 3 merged without a staging Space; it is part of the open deployment PR (isohedral-tiling-ui#7).

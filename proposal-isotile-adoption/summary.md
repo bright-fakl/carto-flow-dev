@@ -6,13 +6,50 @@ description: Design of phase 3 of the isotile plan, in which carto-flow drops ta
 kind: proposal
 topic: symbol
 status: open
-related: proposal-isohedral-tiling-library, isotile-phase-1-pr, isotile-phase-2-pr
+related: proposal-isohedral-tiling-library, isotile-phase-1-pr, isotile-phase-2-pr, isotile-step-0-pr, isotile-adoption-step-1-pr, isotile-adoption-step-2-pr, isotile-adoption-step-3-pr, carto-flow-194-grid-orientation-cost-pr, isotile-offset-pr, isotile-curved-cover-pr, isotile-adoption-pin-bump-pr, proposal-isotile-gui
 date: 2026-10-27 18:30
-updated: 2026-10-27 17:10
+updated: 2026-10-29 13:14
 inputs: carto-flow main at a126c0d; isotile origin/main at a66ed7a (phases 1, 1.5, 2 and the notify workflow; the local clone /home/fakl/isotile is on the branch docs-skeleton, so a git archive of origin/main was used); isohedral-tiling-ui main at eb7b79e (read only); tactile 0.1.0; Python 3.12.3, numpy 2.5.4, scipy 1.18.1, shapely 2.2.0 (GEOS 3.14.1), uv 0.8.17 in a scratch venv (carto-flow installed editable from the checkout, isotile from the archive); 16-core WSL2 machine with other jobs running, timings are single runs (best of 3 where stated), seeds fixed. The timings of the profile of `generate`, of the isotile speedups, of `perf_wrapper` and of the layouts in section 5.4 were taken while an energy-saving setting made the machine about 2 times slower, so their absolute seconds are about 2 times too high; the ratios between current code and isotile hold. The mosaic timing was repeated after disabling the setting (`mosaic_time_rerun.txt`, section 6). The prototype wrappers were written into a copy of the carto-flow sources, never into the checkout.
 ---
 
 Phase 3 of the plan in [proposal-isohedral-tiling-library](../proposal-isohedral-tiling-library/index.html) (section 8.2 and the review of section 11) makes carto-flow use isotile. This page does not implement it. It fixes what is replaced, what stays, how the wrappers look, which behaviors change, how the result is checked and in which PRs it lands. Every number marked as measured was produced by a script in this directory.
+
+## Outcome (2026-10-29)
+
+Steps 0 to 3 of section 8.1 are merged; step 4 is not started. The proposal stays open until step 4 lands. Dates are the merge times in UTC from GitHub.
+
+| PR | Repository | Content | Merged | Merge commit |
+|---|---|---|---|---|
+| [5](https://github.com/bright-fakl/isotile/pull/5) | isotile | step 0: preset amplitude, `neighbor_lists`, `cover` precision ([isotile-step-0-pr](../isotile-step-0-pr/index.html)) | 2026-10-27 | 392484c |
+| [190](https://github.com/bright-fakl/carto-flow/pull/190) | carto-flow | step 1: tilings over isotile, tactile and the grid generator removed ([isotile-adoption-step-1-pr](../isotile-adoption-step-1-pr/index.html)) | 2026-10-28 | 4140204 |
+| [193](https://github.com/bright-fakl/carto-flow/pull/193) | carto-flow | step 2: sparse tile adjacency in `TilingResult` ([isotile-adoption-step-2-pr](../isotile-adoption-step-2-pr/index.html)) | 2026-10-28 | 0365919 |
+| [195](https://github.com/bright-fakl/carto-flow/pull/195) | carto-flow | step 3: rotation and offset of the tile lattice ([isotile-adoption-step-3-pr](../isotile-adoption-step-3-pr/index.html)) | 2026-10-28 | f6b0a0c |
+
+Follow-ups that the proposal did not list:
+
+| PR | Repository | Content | Merged | Merge commit |
+|---|---|---|---|---|
+| [196](https://github.com/bright-fakl/carto-flow/pull/196) | carto-flow | the cost loops of the grid layout assignment as array operations: `GridBasedLayout` on the 432 districts with square or hexagon tiles takes about 2 s instead of 126 to 137 s; the assignments of 9 grid cases are bit-identical ([carto-flow-194-grid-orientation-cost-pr](../carto-flow-194-grid-orientation-cost-pr/index.html)) | 2026-10-28 | 0ef643c |
+| [8](https://github.com/bright-fakl/isotile/pull/8) | isotile | `fill_region` takes an `offset` (lattice phase in one pass) ([isotile-offset-pr](../isotile-offset-pr/index.html)) | 2026-10-28 | 3f9edbb |
+| [9](https://github.com/bright-fakl/isotile/pull/9) | isotile | `cover` and `fill_region` take `outline`; the default `None` selects tiles by the curved polygon if the tiling has edge curves ([isotile-curved-cover-pr](../isotile-curved-cover-pr/index.html)) | 2026-10-28 | a4625b7 |
+| [197](https://github.com/bright-fakl/carto-flow/pull/197) | carto-flow | pin moves to isotile a4625b7; `Tiling.with_offset` uses the `fill_region` offset; curved tilings use the curved outline ([isotile-adoption-pin-bump-pr](../isotile-adoption-pin-bump-pr/index.html)) | 2026-10-28 | f746bc1 |
+
+What was built, against the proposal:
+
+- Rotation and offset are layout options of the grid and mosaic layouts (decision 12). The offset is defined in multiples of the two lattice translation vectors, not as a fraction of the tile size along x and y (decision 12 below).
+- The breaking changes of decisions 1, 8 and 11 were taken: `generate_grid`, `compute_grid_symbol_size` and `TileAdjacencyType` are removed, `tactile` is replaced by an `isotile` dependency pinned to a commit, and `TilingResult.adjacency` and `vertex_adjacency` are sparse.
+- The open question on `cover` with curved tilings (section 4.5) was settled in isotile (PR 9); carto-flow accepted the new default (PR 197), which adds boundary tiles for some presets without changing any region's tile on the states.
+- The mosaic repair cost (decision 10) was measured on the step 1 page: districts with hexagons, 3.49 s on the previous lattice and 7.21 s on the new one, 1 split group at the end; the repair is not slower on the four other inputs. It was not fixed in step 1.
+
+Open issues:
+
+| Issue | Title |
+|---|---|
+| [carto-flow#191](https://github.com/bright-fakl/carto-flow/issues/191) | `repair_contiguity`: slow and incomplete on some lattice positions (districts by state, hexagon) |
+| [carto-flow#192](https://github.com/bright-fakl/carto-flow/issues/192) | Mosaic calibration leaves core tiles unassigned on symmetric regions |
+| [carto-flow#198](https://github.com/bright-fakl/carto-flow/issues/198) | `GridBasedLayout`: unused margin tiles change the assignment (refinement does not converge, island fix moves many regions) |
+
+Step 4 (documentation, `CHANGELOG`, `docs/migrating-to-3.0.md`, the PyPI dependency `isotile>=0.1.0`) waits for the isotile 0.1.0 release (section 8.3). Until then the dependency is the git pin.
 
 Files in this directory:
 
@@ -674,10 +711,10 @@ All twelve decisions are settled. Breaking changes are acceptable; the goal is a
 3. **The `IsohedralTiling` delegates stay** (`type_info`, `describe`, `find_types`, `available_types`, `from_preset`, `list_presets`, `to_dict`, `from_dict`, `save`, `load`, `plot_prototile`) as one-line delegates documented as isotile's, because docs and users call them; revisit in the next major release.
 4. **Lattice anchored at the region center,** not the current anchors (which need per-class code and keep the origin dependence of the triangle and quadrilateral tilings).
 5. **Grid rotation about the region center** (section 4.10), with `TilingResult.rotate` kept.
-6. **The isotile changes I-1, I-2 and I-3 are approved.** Step 0 is started (page [isotile-step-0-pr](../isotile-step-0-pr/index.html)).
+6. **The isotile changes I-1, I-2 and I-3 are approved.** Step 0 is merged as isotile PR 5 (page [isotile-step-0-pr](../isotile-step-0-pr/index.html)).
 7. **Tile index order is not a contract.** The golden tests do not compare indices; the adapter does not sort tiles spatially.
 8. **`generate_grid` and `compute_grid_symbol_size` are deleted in step 1,** with `_generate_square_grid`, `_generate_hexagon_grid`, their exports in `symbol_cartogram/__init__.py`, the 57 tests of `tests/test_grid.py` and the docs mentions. Nothing in `src` calls them, and the `fsquare` and `hexagon` tilings with `fill_region` replace them.
 9. **`TilingResult.tile_set`** is a new optional public field (aspect coloring, access to cells and aspects).
-10. **Mosaic repair cost:** investigate during step 1 on three more inputs and report on the step 1 page. The measurement so far (3.7 s against 8.4 s on the districts) places the extra time in the repair loop.
+10. **Mosaic repair cost:** investigate during step 1 on three more inputs and report on the step 1 page. The measurement so far (3.7 s against 8.4 s on the districts) places the extra time in the repair loop. Outcome: the step 1 page measured five inputs with two tilings each; the districts with hexagons are the case with a slow repair (3.49 s to 7.21 s, `_chain_swap_repair` 0.12 s to 3.64 s); the states with hexagons are slower in the calibration (1.08 s to 1.88 s), the other cases are not slower in the repair. The fix was not made in step 1; it is carto-flow#191.
 11. **`TileAdjacencyType` is removed.** `generate` and the layouts take isotile's `AdjacencyKind` strings (`"edge"`, `"vertex"`, `"vertex-only"`); the enum values were already `"edge"` and `"vertex"`, and `"vertex-only"` becomes available (section 4.13).
-12. **Layout options `rotation` and `offset`** are shared by the grid and mosaic layouts (section 4.10): `rotation` in degrees about the region center, `offset` the lattice phase as a fraction of the tile size, `(0..1, 0..1)`, default `(0, 0)`. Today the grid layout has only `rotation`, about the origin (a defect), and the mosaic layout has neither. Implemented in step 3 with `Tiling.rotated` and a frame offset before `fill_region`. A helper that scans phases and rotations and reports the best by the layout's score is not in scope; it is a possible follow-up.
+12. **Layout options `rotation` and `offset`** are shared by the grid and mosaic layouts (section 4.10): `rotation` in degrees about the region center, `offset` the lattice phase as a fraction of the tile size, `(0..1, 0..1)`, default `(0, 0)`. Today the grid layout has only `rotation`, about the origin (a defect), and the mosaic layout has neither. Implemented in step 3 with `Tiling.rotated` and `Tiling.with_offset`. Changed in step 3: `offset` is a multiple of the two lattice translation vectors (a fraction of the tile size is not periodic for the hexagon and the triangle), and the shift is applied to the frame that `fill_region` returns, not before it; since isotile PR 8, `with_offset` passes the offset to `fill_region`. A helper that scans phases and rotations and reports the best by the layout's score is not in scope; it is a possible follow-up.
