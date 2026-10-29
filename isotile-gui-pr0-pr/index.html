@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR bright-fakl/isotile#10: &quot;isotile: editor API additions (G-1 to G-6)&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR bright-fakl/isotile#10: &quot;isotile: editor API additions (G-1 to G-6)&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>isotile</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../proposal-isotile-gui/index.html">isohedral tiling GUI on isotile (phase 4 design)</a> <span class="meta">(proposal)</span><br><a href="../isotile-offset-pr/index.html">&quot;isotile: fill_region offset&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/isotile/pull/10">https://github.com/bright-fakl/isotile/pull/10</a></dd>
+<dt>Branch</dt><dd>gui-pr0-additions</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-28 16:00</dd>
+<dt>Before</dt><dd>bright-fakl/isotile main at a4625b7</dd>
+<dt>After</dt><dd>gui-pr0-additions (5086 passed, 206 skipped locally)</dd>
+<dt>Inputs</dt><dd>Python 3.12, numpy, shapely (tests); best of 15 runs for the timing</dd>
+</dl>
+<p class="desc">with_parameters, InvalidPrototileError with the report, repr as the constructor call, TileSet.to_geojson, no re-validation in with_frame (fill_region of curved presets 3.4 times faster, bit-identical), and the margin default fixed in docs/curves.md. PR 0 of the isotile GUI port. Nothing to compare visually; the page gives the written evidence.</p>
+<p>PR 0 of the GUI port (<a href="../proposal-isotile-gui/index.html">proposal-isotile-gui</a>, section 4): items G-1 to G-6; G-7 is not included.</p>
+<h2>Changes</h2>
+<table>
+<tr><th>Item</th><th>API</th><th>Behavior</th></tr>
+<tr><td>G-1</td><td><code>docs/curves.md</code></td><td>the default <code>margin</code> of <code>fill_region</code> is 0.0 (the page said 0.1)</td></tr>
+<tr><td>G-2</td><td><code>IsohedralTiling.with_parameters(parameters)</code></td><td>a new tiling with the same type, curves, modes and frame; the checks of the <code>parameters</code> setter; <code>self</code> unchanged</td></tr>
+<tr><td>G-3</td><td><code>with_frame</code>, <code>rotated</code>, <code>scaled</code>, <code>fill_region</code></td><td>the validated curves are copied and <code>check_prototile</code> and <code>check_curves</code> do not run again</td></tr>
+<tr><td>G-4</td><td><code>repr(tiling)</code></td><td><code>IsohedralTiling(41, parameters=[...], edge_curves={...}, edge_curve_modes={...}, frame=[[...]])</code>; the last three only when set; <code>eval</code> rebuilds an equal tiling</td></tr>
+<tr><td>G-5</td><td><code>InvalidPrototileError(ValueError)</code>, attribute <code>report</code></td><td>raised by the constructor, <code>with_parameters</code>, <code>with_edge_curves</code> and the setter when the prototile or its outline is invalid; malformed arguments stay plain <code>ValueError</code>; messages unchanged</td></tr>
+<tr><td>G-6</td><td><code>TileSet.to_geojson(properties=None, *, curved=True, n_points=None)</code></td><td><code>FeatureCollection</code> dict, one <code>Polygon</code> per tile with <code>cell</code>, <code>aspect</code>, <code>color</code> and the entries of <code>properties</code>; closed counterclockwise rings; no shapely</td></tr>
+</table>
+<h2>G-3: same results, less time</h2>
+<p><code>fill_region((-2, -2, 2, 2), n_tiles=100, margin=0.1, outline=&quot;straight&quot;)</code>, nine presets with edge curves, best of 15 per preset, median over the presets:</p>
+<table>
+<tr><th></th><th>ms</th></tr>
+<tr><td>before (a4625b7)</td><td>7.0</td></tr>
+<tr><td>after</td><td>2.1</td></tr>
+</table>
+<p>Bit-identity: for all 15 presets, rotated by 17 degrees and scaled by 1.3, <code>fill_region(..., offset=(0.3, 0.2))</code> with <code>outline=&quot;straight&quot;</code> and the default gave the same cells, aspects, transforms, vertices, prototile outline, edge transforms, aspects and translations before and after (30 of 30 <code>numpy.array_equal</code>). The tests compare <code>with_frame</code> with the constructor for all 81 types and all presets, compare the tiling of <code>fill_region</code> with the constructor path, and assert that no check runs in <code>with_frame</code>, <code>rotated</code>, <code>scaled</code> and <code>fill_region</code>.</p>
+<h2>Tests</h2>
+<p><code>tests/test_editor_api.py</code>: <code>with_parameters</code> returns a new tiling, equals the constructor and rejects what the setter rejects, including a curved outline that is invalid at valid straight parameters; <code>InvalidPrototileError</code> carries the report of <code>check_prototile</code> from every entry point and is a <code>ValueError</code>; <code>repr</code> round-trips for all types and presets, also with a frame; <code>to_geojson</code> parses with <code>json</code>, matches <code>outlines()</code>, orients reflected tiles counterclockwise, takes extra properties, and handles zero tiles.</p>
+<p>ruff, mypy, the full suite and <code>scripts/make_doc_figures.py --check</code> pass.</p>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
