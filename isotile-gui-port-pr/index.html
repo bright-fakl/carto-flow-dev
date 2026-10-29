@@ -86,7 +86,7 @@
 <dt>Base</dt><dd>main</dd>
 <dt>Created</dt><dd>2026-10-28 22:55</dd>
 <dt>Before</dt><dd>bright-fakl/isohedral-tiling-ui main at 4444513 (carto-flow 2.0.0 and tactile 0.1.0)</dd>
-<dt>After</dt><dd>port-to-isotile @ 55c85d3 (254 tests pass locally on Python 3.10, 3.12 and 3.13 and in CI on 3.10 to 3.13)</dd>
+<dt>After</dt><dd>port-to-isotile @ 8bf92c6 (320 tests pass locally on Python 3.10, 3.12 and 3.13 and in CI on 3.10 to 3.13)</dd>
 <dt>Inputs</dt><dd>Python 3.12, isotile c1535fc (archive URL), numpy 2.5.4, scipy 1.18.1, matplotlib 3.11.2, panel 1.10.0, bokeh 3.10.1, pandas 3.1.0, ruff 0.17.3, mypy 2.4.1; old side: carto-flow 2.0.0 checkout (a126c0d), tactile 0.1.0; no browser, no Docker</dd>
 </dl>
 <p class="desc">The GUI drops carto-flow, tactile and shapely for isotile. The design is an immutable Draft with a model and a thin state adapter; an invalid edit is refused with a message. The preview selects tiles with the straight outline, both save buttons write isotile 1.1, the loader repairs old files. The page shows the old and the new renders (preview strips, color modes, the tree gap, a linear preset, SVG) and lists every intended difference with the test that asserts it. PR 2 of the isotile GUI port.</p>

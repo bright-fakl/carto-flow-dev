@@ -11,7 +11,7 @@ base: main
 related: proposal-isotile-gui, isotile-gui-pr1-pr, isotile-gui-pr0-pr
 date: 2026-10-28 22:55
 before: bright-fakl/isohedral-tiling-ui main at 4444513 (carto-flow 2.0.0 and tactile 0.1.0)
-after: port-to-isotile @ 55c85d3 (254 tests pass locally on Python 3.10, 3.12 and 3.13 and in CI on 3.10 to 3.13)
+after: port-to-isotile @ 8bf92c6 (320 tests pass locally on Python 3.10, 3.12 and 3.13 and in CI on 3.10 to 3.13)
 inputs: Python 3.12, isotile c1535fc (archive URL), numpy 2.5.4, scipy 1.18.1, matplotlib 3.11.2, panel 1.10.0, bokeh 3.10.1, pandas 3.1.0, ruff 0.17.3, mypy 2.4.1; old side: carto-flow 2.0.0 checkout (a126c0d), tactile 0.1.0; no browser, no Docker
 ---
 
