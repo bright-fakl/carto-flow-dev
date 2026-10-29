@@ -11,7 +11,7 @@ base: main
 related: proposal-isotile-gui, isotile-gui-pr1-pr, isotile-gui-pr0-pr
 date: 2026-10-28 22:55
 before: bright-fakl/isohedral-tiling-ui main at 4444513 (carto-flow 2.0.0 and tactile 0.1.0)
-after: port-to-isotile @ ab70a6e (254 tests pass locally on Python 3.10, 3.12 and 3.13 and in CI on 3.10 to 3.13)
+after: port-to-isotile @ 55c85d3 (254 tests pass locally on Python 3.10, 3.12 and 3.13 and in CI on 3.10 to 3.13)
 inputs: Python 3.12, isotile c1535fc (archive URL), numpy 2.5.4, scipy 1.18.1, matplotlib 3.11.2, panel 1.10.0, bokeh 3.10.1, pandas 3.1.0, ruff 0.17.3, mypy 2.4.1; old side: carto-flow 2.0.0 checkout (a126c0d), tactile 0.1.0; no browser, no Docker
 ---
 
@@ -103,6 +103,16 @@ Differences that the fixtures do not cover and tests of the new code assert (`te
 - The vertex drag uses the exact Jacobian (`vertex_coeffs`), not the derivative rounded to 4 decimals.
 - Undo followed by an edit with the same coalescing key no longer overwrites the entry that Undo moved to (found in the proof of concept of the plan; test `test_an_edit_after_undo_does_not_overwrite_the_undone_entry`).
 
+## Found in the browser and fixed
+
+| Observation | Cause | Fix |
+|---|---|---|
+| Typing a value in the curve table did not update the curve | Panel 1.10 fires `on_edit` from the cell patch outside the document lock; the edit changed the figures' Bokeh models there and raised `_pending_writes should be non-None`, after the model had committed, so the views stayed stale | the edit runs as a scheduled callback; test `test_table_edit_is_applied_through_a_scheduled_callback` |
+| Curve presets seemed unpredictable | a preset that makes the prototile invalid is refused (the old app applied it); the refusal was a toast only, and a click on the preset that is already the current curve does nothing. The failed table edit above also left the state inconsistent for the clicks that followed | the preset buttons are disabled with the reason in the tooltip when the preset gives an invalid prototile in the current draft (other curves, parameters, mode) or is already the current curve; tests of the availability and of repeated clicks through the widget's `clicks` |
+| A check mark replaced the number and icon of a clicked type and stayed | `ButtonIcon` of Panel 1.10 shows its `active_icon` (a check mark) after a click and keeps it; the old lock file has Panel 1.8.9 | the buttons use their own icon as the active icon; the current type is highlighted with a border, exactly one type at a time for a click, a preset, a file, undo, redo, reset and a filter change (a hidden current type is kept in the grid); test of the selection across paths |
+
+Across the 2,873 combinations of the 17 presets with every curvable shape id of the 81 types at the defaults and in the 15 presets, 39 (1.4 percent) are invalid: J 17 of 1,547, S 22 of 1,224, U none of 102. `s_curve_alt` (10), `scalloped_deep_down` (8), `dent` (5), `scalloped_deep` and `s_curve` (4 each) fail most; the old app applied all of them. The preset data is unchanged.
+
 ## Checks
 
 | Check | Result |
@@ -117,7 +127,7 @@ Differences that the fixtures do not cover and tests of the new code assert (`te
 
 ## Not verified
 
-- No browser: the `CustomJS` handlers (live polyline, Jacobian prediction, modifier keys), the Bokeh tools, the layout and the notification toasts were not run. A refused edit is a Python-side redraw (`param.trigger`), tested headless, not seen in a browser.
+- The `CustomJS` handlers (live polyline, Jacobian prediction, modifier keys) and the drag of nodes and vertices with the mouse were not run. The rest was run in headless Chromium (Playwright) against `panel serve`: gallery and type buttons, table edits, the 17 curve presets in sequence, repeated and refused presets, the mode radio, double-click add and remove, a slider. The headless browser was driven from a scratch script that is not part of the PR; no browser test is in CI.
 - No Docker build and no Hugging Face build; the Dockerfile and `entrypoint.sh` are unchanged and the staging Space does not exist (PR 4). Only `pip install .` was run, in a venv.
 - Versions below those tested. The floors in `pyproject.toml` are the lowest versions tested (`panel>=1.9`, `bokeh>=3.9`, `numpy>=2.2`, `pandas>=2.3`). Panel 1.10 requires Python 3.12, so Python 3.10 resolves older versions:
 
