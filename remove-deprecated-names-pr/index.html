@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #200: &quot;Remove the deprecated names (#122)&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #200: &quot;Remove the deprecated names (#122)&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>flow</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../isotile-adoption-pypi-pin-pr/index.html">&quot;isotile from PyPI (&gt;=0.1.0) instead of the git commit pin&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/200">https://github.com/bright-fakl/carto-flow/pull/200</a></dd>
+<dt>Branch</dt><dd>remove-deprecated-latest</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-30 00:10</dd>
+<dt>Before</dt><dd>main at 4699a3b with five deprecated names and <code>.. deprecated:: 2.1</code> notes</dd>
+<dt>After</dt><dd>remove-deprecated-latest (CI results on the PR)</dd>
+<dt>Inputs</dt><dd>Python 3.13.7, uv 0.8.17; the tests of history, grid spec, stall detection, validity and resolution were run locally.</dd>
+</dl>
+<p class="desc">morph_gdf, multiresolution_morph, Cartogram.latest, CartogramWorkflow.latest and History.latest() are removed in the 3.0.0 line; the deprecation notes that named a placeholder version go with them.</p>
+<h2>Change</h2>
+<table>
+<tr><th>Removed</th><th>Replacement</th></tr>
+<tr><td><code>morph_gdf</code></td><td><code>create_flow_cartogram</code></td></tr>
+<tr><td><code>multiresolution_morph</code></td><td><code>create_flow_cartogram</code> with <code>MorphOptions(grid=LadderSpec(...))</code>; per-level option lists through <code>CartogramWorkflow.morph_multiresolution</code></td></tr>
+<tr><td><code>Cartogram.latest</code></td><td><code>Cartogram.best</code> (returned state) or <code>Cartogram.last</code> (last stored snapshot)</td></tr>
+<tr><td><code>CartogramWorkflow.latest</code></td><td><code>CartogramWorkflow.last</code></td></tr>
+<tr><td><code>History.latest()</code></td><td><code>History.last()</code>, or <code>History.best()</code> for the result of the run</td></tr>
+</table>
+<p>The tests of the deprecation warnings are removed and the tests of <code>best</code> and <code>last</code> stay. The benchmark that read <code>workflow.latest</code> reads <code>workflow.last</code>. The Unreleased changelog has a breaking-changes entry.</p>
+<h2>Checked</h2>
+<ul><li>Local: 207 tests passed and 1 skipped (history, grid spec, stall detection, validity, resolution); ruff and mypy are clean.</li><li>Not run locally: the full suite and the docs build; both run in CI.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
