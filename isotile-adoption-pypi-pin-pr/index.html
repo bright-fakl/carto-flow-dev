@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #199: &quot;isotile from PyPI (&gt;=0.1.0) instead of the git commit pin&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #199: &quot;isotile from PyPI (&gt;=0.1.0) instead of the git commit pin&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../isotile-adoption-pin-bump-pr/index.html">&quot;isotile pin a4625b7: offset in one pass, curved outline for curved tilings&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/199">https://github.com/bright-fakl/carto-flow/pull/199</a></dd>
+<dt>Branch</dt><dd>isotile-from-pypi</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-29 23:30</dd>
+<dt>Before</dt><dd>main at f746bc1 with isotile a4625b7 (git pin)</dd>
+<dt>After</dt><dd>isotile-from-pypi with isotile 0.1.0 from PyPI (2,092 passed, 2 skipped, 4 xfailed locally)</dd>
+<dt>Inputs</dt><dd>Python 3.13.7, uv 0.8.17; isotile 0.1.0 sdist and wheel from the PyPI JSON of the release.</dd>
+</dl>
+<p class="desc">carto-flow depends on isotile&gt;=0.1.0 from PyPI; the [tool.uv.sources] git pin, its hand-edited uv.lock entry and the rev lookup of the wheel-smoke-test job are replaced by the registry entry. The full suite gives the same result as with the pin (2,092 passed, 2 skipped, 4 xfailed).</p>
+<p>Follows <a href="../isotile-adoption-pin-bump-pr/index.html">isotile-adoption-pin-bump-pr</a>. isotile 0.1.0 includes isotile PR 10 (<code>with_frame</code> no longer re-validates, repr, <code>InvalidPrototileError</code> subclasses <code>ValueError</code>).</p>
+<h2>What changed</h2>
+<ul><li><code>pyproject.toml</code>: <code>isotile&gt;=0.1.0</code>; the <code>[tool.uv.sources]</code> table is removed. There was no <code>allow-direct-references</code>.</li><li><code>uv.lock</code>: the git entry of isotile is replaced by the registry entry (version 0.1.0, sdist and wheel URL, hash and size) by hand; 11 lines change. <code>uv lock --upgrade-package isotile</code> with uv 0.8.17 rewrites about 4,400 lines, so it was not used. <code>uv lock --check</code>, <code>uv lock --locked</code> and <code>uv sync --frozen</code> pass and the environment imports isotile 0.1.0.</li><li><code>.github/workflows/main.yml</code>: the wheel-smoke-test job installs the wheel alone; the lookup of the pinned rev and the extra <code>isotile @ git+...</code> requirement are removed. No other workflow, docs requirement, README or CONTRIBUTING mentions the pin.</li><li>CHANGELOG: no entry. The Unreleased notes already name isotile as the dependency and nothing user-visible changes.</li></ul>
+<h2>Checks</h2>
+<ul><li>Full test suite: 2,092 passed, 2 skipped, 4 xfailed, the same as with the a4625b7 pin (the golden tiling tests and the layout tests are part of it).</li><li><code>ruff check</code>, <code>ruff format --check</code> and <code>mypy</code> are clean.</li><li>carto-flow does not reference <code>InvalidPrototileError</code> or an isotile repr. <code>symbol_cartogram/tiling.py</code> catches <code>ValueError</code>, which <code>InvalidPrototileError</code> now subclasses.</li><li>Not checked: the footprint and layout comparison of the pin-bump page was not rerun against 0.1.0; only the test suite covers it.</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
