@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #201: &quot;Runtime benchmarks for Voronoi and proportional cartograms, and a Performance docs section&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #201: &quot;Runtime benchmarks for Voronoi and proportional cartograms, and a Performance docs section&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>infra</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../remove-deprecated-names-pr/index.html">&quot;Remove the deprecated names (#122)&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/201">https://github.com/bright-fakl/carto-flow/pull/201</a></dd>
+<dt>Branch</dt><dd>benchmarks-voronoi-proportional</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-10-31 12:30</dd>
+<dt>Before</dt><dd>main at a126c0d; only the flow cartogram has benchmarks, and its page is explanations/performance.ipynb</dd>
+<dt>After</dt><dd>benchmarks-voronoi-proportional (CI results on the PR)</dd>
+<dt>Inputs</dt><dd>Python 3.12, US states (49 regions) and congressional districts (432 regions, simplified at 1 km); 5 rounds after 1 warm-up round, local workstation.</dd>
+</dl>
+<p class="desc">Two basic benchmark suites for the Voronoi cartogram and the proportional partitioning, and a top-level Performance section in the docs with one page per cartogram type.</p>
+<h2>Change</h2>
+<p>Part B, step 1 of the comparison and benchmark plan (carto-flow #75, #80, #113).</p>
+<ul><li><code>benchmarks/test_voronoi_cartogram.py</code>: <code>create_voronoi_cartogram</code> with the default backend, weighted by population.</li><li><code>benchmarks/test_proportional_cartogram.py</code>: <code>partition_geometries</code> with <code>shrink</code> and <code>split</code>.</li><li>Docs: new top-level Performance section (<code>docs/performance/</code>) with an overview, the flow cartogram page (moved from <code>explanations/performance.ipynb</code>) and a new page for the Voronoi and proportional cartograms. <code>benchmark_results.json</code> moved to <code>docs/performance/</code>; <code>benchmarks.yml</code>, <code>.pre-commit-config.yaml</code> and <code>RELEASING.md</code> follow.</li></ul>
+<h2>Local results</h2>
+<table>
+<tr><th>Case</th><th>US states</th><th>Congressional districts</th></tr>
+<tr><td>Voronoi</td><td>0.82 s</td><td>6.20 s</td></tr>
+<tr><td><code>split</code></td><td>0.19 s</td><td>0.74 s</td></tr>
+<tr><td><code>shrink</code></td><td>4.84 s</td><td>4.09 s</td></tr>
+</table>
+<p>Voronoi grows roughly with the number of regions. <code>shrink</code> does not: the states take longer than the districts, which have fewer vertices per region (about 700 against 210).</p>
+<h2>Checked</h2>
+<ul><li>Local: the six cases pass; the new notebook was executed and the docs were built and served locally (about 5 minutes, no errors or warnings).</li><li>The committed <code>benchmark_results.json</code> has no Voronoi or proportional entries; those subsections show a short note until the manual <code>benchmarks.yml</code> run at the next release.</li><li>Not changed: the benchmark workflow stays manual (<code>workflow_dispatch</code>).</li></ul>
+
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
