@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #204: &quot;Mosaic layout: optional search over lattice phases when calibration misses the tile budget&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #204: &quot;Mosaic layout: optional search over lattice phases when calibration misses the tile budget&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../external-flow-comparison-pr/index.html">&quot;Reproducible comparison of carto-flow with other flow cartogram tools&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/204">https://github.com/bright-fakl/carto-flow/pull/204</a></dd>
+<dt>Branch</dt><dd>fix-mosaic-calibration-offsets-192</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-11-01 09:00</dd>
+<dt>Before</dt><dd>main; calibration can end above the tile budget on symmetric regions and nothing retries</dd>
+<dt>After</dt><dd>fix-mosaic-calibration-offsets-192</dd>
+<dt>Inputs</dt><dd>10 x 10 grid of cells with a constant number of tiles per cell (k), US states (49 regions) and congressional districts (432 regions), morph=False, squares and hexagons; 3 runs, median.</dd>
+</dl>
+<p class="desc">New option search_lattice_phase for the mosaic layout; when calibration ends more than one core tile above the budget, it tries seven more lattice phases and keeps the one with the smallest excess.</p>
+<h2>Change</h2>
+<p>Part of #192.</p>
+<ul><li><code>MosaicLayoutOptions.search_lattice_phase</code> (default <code>False</code>): if calibration ends with more than one core tile above the budget, the calibration is repeated with seven additional lattice phases added to the offset; the first phase with an excess of at most one is kept, else the one with the smallest excess.</li><li><code>calibrate_lattice_phase</code> in <code>_calibration.py</code>; two tests; changelog entry.</li><li>Default off, so existing layouts and the golden fixtures are unchanged.</li></ul>
+<h2>What the unassigned core tiles are</h2>
+<p>No run has an enclosed hole. Every unassigned core tile is a boundary tile with low overlap with the study area: about 0.1 on the grids (a frame of sliver tiles; the 80 tiles at k = 7 on squares total an overlap of 8.9) and 0.1 to 0.5 on states and districts. The count of unassigned core tiles therefore overstates the problem. On states and districts calibration ends within 1 to 5 tiles of the budget (states, hexagons: 153 core tiles against 154), so the step-jump cause from the issue does not apply there; the assignment prefers ring tiles closer to the demand of the regions.</p>
+<h2>Results with <code>search_lattice_phase=True</code></h2>
+<table>
+<tr><th>Input</th><th>Unassigned core</th><th>Non-contiguous</th><th>Mean distance</th><th>Total time (s)</th><th>Calibration time (s)</th><th>Calibrations</th></tr>
+<tr><td>Grid squares, k = 3</td><td>20 -&gt; 0</td><td>4 -&gt; 0</td><td>0.53 -&gt; 0.51</td><td>0.75 -&gt; 1.74</td><td>0.34 -&gt; 1.40</td><td>1 -&gt; 4</td></tr>
+<tr><td>Grid squares, k = 7</td><td>80 -&gt; 11</td><td>0 -&gt; 0</td><td>0.33 -&gt; 0.60</td><td>1.5 -&gt; 3.3</td><td>0.69 -&gt; 1.49</td><td>1 -&gt; 2</td></tr>
+<tr><td>Grid squares, k = 8</td><td>96 -&gt; 0</td><td>0 -&gt; 0</td><td>0.33 -&gt; 0.61</td><td>1.7 -&gt; 4.8</td><td>0.83 -&gt; 3.3</td><td>1 -&gt; 4</td></tr>
+<tr><td>Grid hexagons, k = 3</td><td>13 -&gt; 0</td><td>0 -&gt; 0</td><td>0.66 -&gt; 1.06</td><td>0.82 -&gt; 1.25</td><td>0.44 -&gt; 0.85</td><td>1 -&gt; 2</td></tr>
+<tr><td>Grid hexagons, k = 6</td><td>35 -&gt; 1</td><td>0 -&gt; 0</td><td>0.56 -&gt; 0.72</td><td>1.6 -&gt; 2.4</td><td>0.78 -&gt; 1.58</td><td>1 -&gt; 2</td></tr>
+<tr><td>Grid hexagons, k = 8</td><td>21 -&gt; 0</td><td>0 -&gt; 0</td><td>0.86 -&gt; 0.50</td><td>2.7 -&gt; 2.9</td><td>0.99 -&gt; 1.73</td><td>1 -&gt; 2</td></tr>
+<tr><td>States, squares</td><td>1 -&gt; 1</td><td>0 -&gt; 0</td><td>2.55 -&gt; 2.55</td><td>1.2 -&gt; 1.3</td><td>0.33 -&gt; 0.42</td><td>1 -&gt; 1</td></tr>
+<tr><td>States, hexagons</td><td>10 -&gt; 5</td><td>0 -&gt; 0</td><td>3.37 -&gt; 3.38</td><td>2.2 -&gt; 2.6</td><td>1.35 -&gt; 1.72</td><td>1 -&gt; 2</td></tr>
+<tr><td>Districts, squares</td><td>6 -&gt; 3</td><td>0 -&gt; 0</td><td>4.67 -&gt; 4.73</td><td>6.3 -&gt; 9.8</td><td>3.0 -&gt; 6.0</td><td>1 -&gt; 2</td></tr>
+<tr><td>Districts, hexagons</td><td>13 -&gt; 13</td><td>0 -&gt; 0</td><td>6.91 -&gt; 6.91</td><td>7.7 -&gt; 8.1</td><td>0.87 -&gt; 0.86</td><td>1 -&gt; 1</td></tr>
+</table>
+<ul><li>The search adds no hole and no non-contiguous region.</li><li>It triggers on the grids, states with hexagons and districts with squares; it does not trigger on states with squares and districts with hexagons.</li><li>When it triggers, calibration takes about twice as long, up to four times on the grid.</li><li>Mean distance is worse on four of the six grid cases (squares k = 7 and 8, hexagons k = 3 and 6): the sliver tiles at the boundary are replaced by tiles at a different phase, and the outline is less straight.</li></ul>
+<p>Figures (before and after, unassigned core tiles in red): <code>grid-squares-k7.png</code>, <code>grid-hexagons-k3.png</code>, <code>districts-squares.png</code>.</p>
+<p>!<a href="grid-squares-k7.png">Grid squares k=7</a> !<a href="grid-hexagons-k3.png">Grid hexagons k=3</a> !<a href="districts-squares.png">Districts squares</a></p>
+<h2>Other options tested (single runs, morph=False)</h2>
+<ul><li><code>min_overlap_frac</code> of 0.2, 0.3 and 0.5 lowers the unassigned count on hexagons (states 10 -&gt; 1, 2, 2; districts 13 -&gt; 7, 3, 2) and raises the mean distance (states 3.37 -&gt; 4.9, 4.3, 4.9; districts 6.91 -&gt; 7.5, 8.1, 8.7). On squares at 0.5 states gets 4 unassigned tiles and 3 split regions.</li><li><code>ring_swapback_max_hops</code> of 64 changes the count by at most 2.</li><li>Trimming or adding tiles to the exact budget makes some inputs worse than today (grid hexagons at k = 10: 0 -&gt; 8 unassigned; states with hexagons: mean distance 3.37 -&gt; 4.40).</li><li>Rotation closes the squares k = 7 case (30 or 45 degrees, 0 unassigned, mean distance 0.33 at 30) but not hexagons k = 6.</li></ul>
+<div class="figure">
+<img src="districts-squares.png" alt="districts-squares.png">
+<p class="caption">districts-squares.png</p>
+</div><div class="figure">
+<img src="grid-hexagons-k3.png" alt="grid-hexagons-k3.png">
+<p class="caption">grid-hexagons-k3.png</p>
+</div><div class="figure">
+<img src="grid-squares-k7.png" alt="grid-squares-k7.png">
+<p class="caption">grid-squares-k7.png</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
