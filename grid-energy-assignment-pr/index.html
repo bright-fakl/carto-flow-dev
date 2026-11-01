@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #207: &quot;GridBasedLayout assigns tiles by minimizing one energy&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #207: &quot;GridBasedLayout assigns tiles by minimizing one energy&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../grid-island-fix-pr/index.html">&quot;Grid layout: move a separated block of regions to the main group in one step&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/207">https://github.com/bright-fakl/carto-flow/pull/207</a></dd>
+<dt>Branch</dt><dd>grid-objective-rework</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-11-01 17:00</dd>
+<dt>Before</dt><dd>main; refinement alternates between two assignments, island fix and hole fill repair what the objective ignores</dd>
+<dt>After</dt><dd>grid-objective-rework (draft, built on the branch of PR 206)</dd>
+<dt>Inputs</dt><dd>US states (49 regions), GridBasedLayout, 15 presets x 6 offsets, each with and without 17 unused margin tiles (curved and straight outline), 180 runs; congressional districts (432 regions), hexagon and square.</dd>
+</dl>
+<p class="desc">Draft. The grid layout replaces the oscillating refinement, the island fix and the hole fill by a descent on one energy (distance, contacts, connectivity) from a damped Hungarian start.</p>
+<h2>Change</h2>
+<p>Draft, part of #198. Built on the branch of PR 206; the diff against main includes it.</p>
+<ul><li>New option <code>assignment=&quot;energy&quot;</code> (default); the previous pipeline stays available as <code>&quot;refine&quot;</code>. Code in <code>symbol_cartogram/layouts/grid/_energy.py</code>.</li><li>Energy, in tile steps: <code>origin_weight</code> x sum of distances (linear) + <code>neighbor_weight</code> x contact penalty + <code>connectivity_weight</code> x K. The contact penalty is the hop penalty of neighbors plus 1 per pair of non-neighbors on touching tiles. K counts the extra pieces of a group of connected regions, groups merged into one piece, and enclosed holes beyond the geographic holes.</li><li>Optimizer: start from the Hungarian assignment with the neighbor term damped by 0.5 (its origin cost is divided by the squared centroid extent instead of the maximum over all tiles, so margin tiles do not change it), then a strict descent: relocations and swaps (top 3 each) with the exact change of the energy, and while K &gt; 0 the cheapest move that removes a defect (a repair tile, a shift chain that fills a hole, or moving a detached piece). A move is applied only if the energy drops, so the descent is monotone and deterministic.</li><li>Weights: <code>origin_weight</code> and <code>neighbor_weight</code> keep 0.5 each (one tile step costs one contact); <code>connectivity_weight</code> is 50 (one defect costs 100 contacts).</li><li>Removed from the default path: the undamped refinement, the island fix, the hole fill; the candidate radius of the review was not merged.</li></ul>
+<h2>Weight scan (180 states runs)</h2>
+<ul><li>Distance per contact 0.5 / 1 / 2: mean distance 0.798 / 0.793 / 0.768, touching pairs 71.77 / 71.77 / 71.33, maximum gap between curved and straight outline 14 / 14 / 20 %. A weight of 1 is the knee; lower weights buy no contacts.</li><li>Defect weight 10 / 30 / 100 / 300 contacts: states are identical from 30 up; districts keep defects at 10 (2 pieces, 1 to 2 holes) and have none from 30 up.</li></ul>
+<h2>Results</h2>
+<table>
+<tr><th></th><th>main</th><th>PR 206</th><th>energy</th></tr>
+<tr><td>Mean distance (180 runs)</td><td>0.898</td><td>0.893</td><td>0.793</td></tr>
+<tr><td>Touching pairs (of 109)</td><td>68.43</td><td>68.36</td><td>71.77</td></tr>
+<tr><td>Disconnected tile sets / runs with holes</td><td>0 / 0 after the repairs</td><td>0 / 2 after the repairs</td><td>0 / 0, no repairs</td></tr>
+<tr><td>Cases more than 25 % apart, curved against straight</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>Largest gap</td><td>52 %</td><td>9.5 %</td><td>14.2 % (tree at (0, 0))</td></tr>
+<tr><td>tree (0.9, 0.1), 175 / 158 tiles</td><td>1.676 / 1.100</td><td>1.204 / 1.100</td><td>0.968 / 0.950</td></tr>
+<tr><td>States time, mean (serial)</td><td>0.30 s</td><td>not timed</td><td>0.45 s (1.48x; worst run 2.1x)</td></tr>
+<tr><td>Districts, hexagon: distance / touching / time</td><td>4.457 / 679 / 4.0 s</td><td>4.457 / 679</td><td>3.991 / 716 / 5.2 s</td></tr>
+<tr><td>Districts, square: distance / touching / holes / time</td><td>2.655 / 418 / 2 / 4.3 s</td><td>2.651 / 468 / 1</td><td>2.365 / 523 / 0 / 5.1 s</td></tr>
+</table>
+<p>Against PR 206, run by run: the mean distance is worse in 14 of 180 runs (at most +0.039); the touching pairs are fewer in 32 of 180 (at most -7; for example the hexagon presets at offset (0.75, 0.75) get 90 instead of 97 pairs at a mean distance of 0.80 instead of 0.94); both are worse in 2 runs. Two runs take more than twice the time of main. Results are identical between runs.</p>
+<h2>Distance scale</h2>
+<p>Dividing by the maximum squared distance ties the price of distance to the extent of the lattice, margin tiles included; for the states one tile step costs about 0.002. In tile units the exponent barely changes the trade-off between distance and contacts; the energy uses linear distance so that every tile step has a constant price equal to one contact. For the mosaic layout this suggests that the maximum, not the square, is the problem; changing to linear over the maximum also changes the effective weight, which may explain the clash with <code>interior_bonus</code> in the earlier evaluation. The mosaic layout was not changed or tested.</p>
+<p>Figures (main, PR 206, energy):</p>
+<p>!<a href="tree_curved_before_after.png">tree curved</a> !<a href="tree_straight_before_after.png">tree straight</a> !<a href="largest_gap_tree00.png">largest gap, tree at (0, 0)</a> !<a href="worst_touch_regression.png">worst touching regression</a> !<a href="districts_hexagon.png">districts hexagon</a> !<a href="districts_square.png">districts square</a></p>
+<h2>Risks and open points</h2>
+<ul><li>Every default grid layout changes.</li><li><code>topology_weight</code> and compactness only shape the starting assignment now.</li><li>Defects are removed only if one of the compound moves reaches them; wide gaps are not guaranteed to close.</li><li>Not established: mosaic, world and island inputs (multi-group K is tested only on toy cases), grouped (<code>source_indices</code>) inputs, and whether the balance of distance and contacts suits users.</li></ul>
+<div class="figure">
+<img src="districts_hexagon.png" alt="districts_hexagon.png">
+<p class="caption">districts_hexagon.png</p>
+</div><div class="figure">
+<img src="districts_square.png" alt="districts_square.png">
+<p class="caption">districts_square.png</p>
+</div><div class="figure">
+<img src="largest_gap_tree00.png" alt="largest_gap_tree00.png">
+<p class="caption">largest_gap_tree00.png</p>
+</div><div class="figure">
+<img src="tree_curved_before_after.png" alt="tree_curved_before_after.png">
+<p class="caption">tree_curved_before_after.png</p>
+</div><div class="figure">
+<img src="tree_straight_before_after.png" alt="tree_straight_before_after.png">
+<p class="caption">tree_straight_before_after.png</p>
+</div><div class="figure">
+<img src="worst_touch_regression.png" alt="worst_touch_regression.png">
+<p class="caption">worst_touch_regression.png</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
