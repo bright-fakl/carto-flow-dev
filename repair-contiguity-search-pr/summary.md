@@ -1,7 +1,7 @@
 ---
 pr: 205
-title: "repair_contiguity: distance-pruned chain search"
-description: The chain search of repair_contiguity enumerates paths with a heap keyed by length plus the distance to the main body, so prefixes that cannot finish within the maximum length are never expanded. Chains and their order are unchanged.
+title: "repair_contiguity: distance-pruned chain search and satellite repair fixes"
+description: The chain search of repair_contiguity enumerates paths only while they can still reach the main body, forbids the tiles of the other satellites correctly, and refuses chains that split another group further.
 kind: pr
 topic: symbol
 project: carto-flow
@@ -9,34 +9,52 @@ url: https://github.com/bright-fakl/carto-flow/pull/205
 branch: fix-repair-contiguity-191
 base: main
 related: mosaic-lattice-phase-search-pr
-date: 2026-11-01 11:00
-before: main; chain repair on districts by state with hexagons takes 3.8 s of a 7.8 s layout
+date: 2026-11-01 15:00
+before: main; chain repair on districts by state with hexagons takes 3.8 s of a 7.8 s layout and leaves one split group
 after: fix-repair-contiguity-191
-inputs: 432 congressional districts grouped by state, hexagon tiling, mosaic layout, morph=False; states, districts by division and Texas with squares and hexagons.
+inputs: 432 congressional districts grouped by state and by division, US states, Texas; mosaic layout, hexagon and square tilings, morph=False unless noted.
 ---
 ## Change
 
-Part of #191. Results do not change, so there are no before and after figures.
+Part of #191.
 
-- `_enumerate_paths` in `geo_utils/contiguity.py`: a backward breadth-first search gives every tile its distance to the main body; the heap is keyed by path length plus that distance, and prefixes that cannot finish within `max_len` are not pushed. The chains and their order are identical to before.
-- `tests/test_geo_utils_contiguity_search.py` replaces the precheck test: pruned against plain enumeration on 11 hand-built cases and 60 random graphs, and a linear-cost check.
+- Speedup (`_enumerate_paths` in `geo_utils/contiguity.py`): a backward breadth-first search gives every tile its distance to the main body; the heap is keyed by path length plus that distance, and prefixes that cannot finish within `max_len` are not pushed. Chains and their order are unchanged.
+- Satellite bug: the tiles forbidden to a satellite repair were built from `comps[2:]`, but satellites are processed in distance order, so a satellite other than `comps[1]` forbade its own tiles, `comps[1]` was not forbidden, and the satellite found no path. The set is now built from `comps[1:]` minus the current satellite's tiles.
+- Guard: a chain is refused if it increases the number of pieces of any other group, including groups that are already split. Before, only contiguous groups were protected; with the satellite fix a repair could re-split another split group and the next pass undid it (on states with 350 regions and squares, two groups alternated from the second pass on).
+- Tests: `tests/test_geo_utils_contiguity_search.py` (pruned against plain enumeration, a satellite that is not the second largest component, states with 350 regions and squares); changelog entries.
 
-## Timings
+## Split groups and non-contiguous regions, main -> branch
 
-| Input (mosaic) | Chain repair before -> after (s) | Wall time before -> after (s) | Split groups, split geometries |
-|---|---|---|---|
-| Districts by state, hexagon | 3.79 -> 0.02 | 7.8 -> 4.0 | (1,0), unchanged |
-| Districts by state, square | 0.36 -> 0.02 | 5.9 -> 5.9 | (2,0), unchanged |
-| Districts by division, hexagon | 0.00 | 3.7 -> 1.6 | (0,0), unchanged |
+| Input (mosaic) | Split groups / non-contiguous regions |
+|---|---|
+| Districts by state, hexagon | 1 / 0 -> 0 / 0 |
+| Districts by state, square | 2 / 0 -> 2 / 0 (other groups: PA and NY -> NY and CT) |
+| Districts by division, hexagon | 0 / 0 -> 0 / 0 |
+| Districts by division, square | 1 / 0 -> 0 / 0 |
+| States with 150, 300 (morph) and 350 regions, hexagon | 0 / 0 -> 0 / 0 |
+| States with 350 regions, square | 0 / 1 -> 0 / 0 |
+| Texas, hexagon and square | 0 / 0 -> 0 / 0 |
 
-Other inputs (states, states by division, Texas, both tilings) are unchanged. Wall times vary with numba compilation.
+With the satellite fix alone, states with 350 regions and squares got worse (2) and districts by division with squares stayed at 1; the guard fixes both. `TestRingSwapbackReach::test_us_states_needs_more_than_8_hops[False-350]` passes at the default 60 candidate paths (the last satellites of one group were blocked on all 60 candidates before; the old code solved it only by path-dependent luck).
 
-## Where the remaining time goes (districts by state, hexagon, about 4 s)
+## Timings, main -> branch (runs not isolated, noisy)
 
-Layout setup, not the repair: intersections of tile polygons with the region unions about 45 %, tile and geometry adjacency about 26 %, the Hungarian assignment about 35 %, tile size calibration about 19 % (shares overlap). Not done: intersecting only tiles whose bounds touch the union boundary, and computing the tile adjacency once.
+| Input (mosaic) | Wall time (s) |
+|---|---|
+| Districts by state, hexagon | 12.7 -> 4.1 |
+| Districts by state, square | 10.1 -> 5.6 |
+| Districts by division, hexagon | 6.9 -> 3.9 |
 
-## Not in this PR
+Chain repair alone on districts by state with hexagons: 3.79 s -> 0.02 s. `pytest -k "contiguity or mosaic or voronoi or symbol"`: 575 passed.
 
-The set of tiles that a satellite repair must avoid is built from `comps[2:]`, but satellites are processed in distance order, so a satellite other than `comps[1]` forbids its own tiles and `comps[1]` is not forbidden. Building the set from `comps[1:]` minus the current satellite lets the three unreachable satellites of districts by state with hexagons connect: split groups 1 -> 0 with hexagons, 2 -> 1 with squares on districts by state, and 1 -> 0 on districts by division with squares. It breaks `TestRingSwapbackReach::test_us_states_needs_more_than_8_hops[False-350]`: one state ends non-contiguous, and more passes or candidate paths do not help. It is left out until that is understood.
+Figures (split groups outlined in red):
 
-The remaining satellite on districts by state with squares lies 11 tiles from its main body, beyond `max_len` 10; raising `max_len` changes the result non-monotonically.
+![before, hexagon](before_hexagon.png)
+![after, hexagon](after_hexagon.png)
+![before, square](before_square.png)
+![after, square](after_square.png)
+
+## Open
+
+- Districts by state with squares keeps two split groups. The remaining satellites of groups 29 and 5 are blocked by the contiguous groups 27 and 35 and by each other; 1000 candidate chains give the same result. It needs a move of several groups at once.
+- Layout setup time (about 4 s on districts by state with hexagons): tile intersections with the study union about 45 %, tile and geometry adjacency about 26 %. Intersecting only boundary tiles and computing the adjacency once were not tried, because the change is not small.

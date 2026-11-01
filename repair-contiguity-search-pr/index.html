@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #205: &quot;repair_contiguity: distance-pruned chain search&quot;</title>
+<title>PR #205: &quot;repair_contiguity: distance-pruned chain search and satellite repair fixes&quot;</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -74,7 +74,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #205: &quot;repair_contiguity: distance-pruned chain search&quot;</h1>
+<h1>PR #205: &quot;repair_contiguity: distance-pruned chain search and satellite repair fixes&quot;</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Project</dt><dd>carto-flow</dd>
@@ -84,29 +84,52 @@
 <dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/205">https://github.com/bright-fakl/carto-flow/pull/205</a></dd>
 <dt>Branch</dt><dd>fix-repair-contiguity-191</dd>
 <dt>Base</dt><dd>main</dd>
-<dt>Created</dt><dd>2026-11-01 11:00</dd>
-<dt>Before</dt><dd>main; chain repair on districts by state with hexagons takes 3.8 s of a 7.8 s layout</dd>
+<dt>Created</dt><dd>2026-11-01 15:00</dd>
+<dt>Before</dt><dd>main; chain repair on districts by state with hexagons takes 3.8 s of a 7.8 s layout and leaves one split group</dd>
 <dt>After</dt><dd>fix-repair-contiguity-191</dd>
-<dt>Inputs</dt><dd>432 congressional districts grouped by state, hexagon tiling, mosaic layout, morph=False; states, districts by division and Texas with squares and hexagons.</dd>
+<dt>Inputs</dt><dd>432 congressional districts grouped by state and by division, US states, Texas; mosaic layout, hexagon and square tilings, morph=False unless noted.</dd>
 </dl>
-<p class="desc">The chain search of repair_contiguity enumerates paths with a heap keyed by length plus the distance to the main body, so prefixes that cannot finish within the maximum length are never expanded. Chains and their order are unchanged.</p>
+<p class="desc">The chain search of repair_contiguity enumerates paths only while they can still reach the main body, forbids the tiles of the other satellites correctly, and refuses chains that split another group further.</p>
 <h2>Change</h2>
-<p>Part of #191. Results do not change, so there are no before and after figures.</p>
-<ul><li><code>_enumerate_paths</code> in <code>geo_utils/contiguity.py</code>: a backward breadth-first search gives every tile its distance to the main body; the heap is keyed by path length plus that distance, and prefixes that cannot finish within <code>max_len</code> are not pushed. The chains and their order are identical to before.</li><li><code>tests/test_geo_utils_contiguity_search.py</code> replaces the precheck test: pruned against plain enumeration on 11 hand-built cases and 60 random graphs, and a linear-cost check.</li></ul>
-<h2>Timings</h2>
+<p>Part of #191.</p>
+<ul><li>Speedup (<code>_enumerate_paths</code> in <code>geo_utils/contiguity.py</code>): a backward breadth-first search gives every tile its distance to the main body; the heap is keyed by path length plus that distance, and prefixes that cannot finish within <code>max_len</code> are not pushed. Chains and their order are unchanged.</li><li>Satellite bug: the tiles forbidden to a satellite repair were built from <code>comps[2:]</code>, but satellites are processed in distance order, so a satellite other than <code>comps[1]</code> forbade its own tiles, <code>comps[1]</code> was not forbidden, and the satellite found no path. The set is now built from <code>comps[1:]</code> minus the current satellite&#x27;s tiles.</li><li>Guard: a chain is refused if it increases the number of pieces of any other group, including groups that are already split. Before, only contiguous groups were protected; with the satellite fix a repair could re-split another split group and the next pass undid it (on states with 350 regions and squares, two groups alternated from the second pass on).</li><li>Tests: <code>tests/test_geo_utils_contiguity_search.py</code> (pruned against plain enumeration, a satellite that is not the second largest component, states with 350 regions and squares); changelog entries.</li></ul>
+<h2>Split groups and non-contiguous regions, main -&gt; branch</h2>
 <table>
-<tr><th>Input (mosaic)</th><th>Chain repair before -&gt; after (s)</th><th>Wall time before -&gt; after (s)</th><th>Split groups, split geometries</th></tr>
-<tr><td>Districts by state, hexagon</td><td>3.79 -&gt; 0.02</td><td>7.8 -&gt; 4.0</td><td>(1,0), unchanged</td></tr>
-<tr><td>Districts by state, square</td><td>0.36 -&gt; 0.02</td><td>5.9 -&gt; 5.9</td><td>(2,0), unchanged</td></tr>
-<tr><td>Districts by division, hexagon</td><td>0.00</td><td>3.7 -&gt; 1.6</td><td>(0,0), unchanged</td></tr>
+<tr><th>Input (mosaic)</th><th>Split groups / non-contiguous regions</th></tr>
+<tr><td>Districts by state, hexagon</td><td>1 / 0 -&gt; 0 / 0</td></tr>
+<tr><td>Districts by state, square</td><td>2 / 0 -&gt; 2 / 0 (other groups: PA and NY -&gt; NY and CT)</td></tr>
+<tr><td>Districts by division, hexagon</td><td>0 / 0 -&gt; 0 / 0</td></tr>
+<tr><td>Districts by division, square</td><td>1 / 0 -&gt; 0 / 0</td></tr>
+<tr><td>States with 150, 300 (morph) and 350 regions, hexagon</td><td>0 / 0 -&gt; 0 / 0</td></tr>
+<tr><td>States with 350 regions, square</td><td>0 / 1 -&gt; 0 / 0</td></tr>
+<tr><td>Texas, hexagon and square</td><td>0 / 0 -&gt; 0 / 0</td></tr>
 </table>
-<p>Other inputs (states, states by division, Texas, both tilings) are unchanged. Wall times vary with numba compilation.</p>
-<h2>Where the remaining time goes (districts by state, hexagon, about 4 s)</h2>
-<p>Layout setup, not the repair: intersections of tile polygons with the region unions about 45 %, tile and geometry adjacency about 26 %, the Hungarian assignment about 35 %, tile size calibration about 19 % (shares overlap). Not done: intersecting only tiles whose bounds touch the union boundary, and computing the tile adjacency once.</p>
-<h2>Not in this PR</h2>
-<p>The set of tiles that a satellite repair must avoid is built from <code>comps[2:]</code>, but satellites are processed in distance order, so a satellite other than <code>comps[1]</code> forbids its own tiles and <code>comps[1]</code> is not forbidden. Building the set from <code>comps[1:]</code> minus the current satellite lets the three unreachable satellites of districts by state with hexagons connect: split groups 1 -&gt; 0 with hexagons, 2 -&gt; 1 with squares on districts by state, and 1 -&gt; 0 on districts by division with squares. It breaks <code>TestRingSwapbackReach::test_us_states_needs_more_than_8_hops[False-350]</code>: one state ends non-contiguous, and more passes or candidate paths do not help. It is left out until that is understood.</p>
-<p>The remaining satellite on districts by state with squares lies 11 tiles from its main body, beyond <code>max_len</code> 10; raising <code>max_len</code> changes the result non-monotonically.</p>
-
+<p>With the satellite fix alone, states with 350 regions and squares got worse (2) and districts by division with squares stayed at 1; the guard fixes both. <code>TestRingSwapbackReach::test_us_states_needs_more_than_8_hops[False-350]</code> passes at the default 60 candidate paths (the last satellites of one group were blocked on all 60 candidates before; the old code solved it only by path-dependent luck).</p>
+<h2>Timings, main -&gt; branch (runs not isolated, noisy)</h2>
+<table>
+<tr><th>Input (mosaic)</th><th>Wall time (s)</th></tr>
+<tr><td>Districts by state, hexagon</td><td>12.7 -&gt; 4.1</td></tr>
+<tr><td>Districts by state, square</td><td>10.1 -&gt; 5.6</td></tr>
+<tr><td>Districts by division, hexagon</td><td>6.9 -&gt; 3.9</td></tr>
+</table>
+<p>Chain repair alone on districts by state with hexagons: 3.79 s -&gt; 0.02 s. <code>pytest -k &quot;contiguity or mosaic or voronoi or symbol&quot;</code>: 575 passed.</p>
+<p>Figures (split groups outlined in red):</p>
+<p>!<a href="before_hexagon.png">before, hexagon</a> !<a href="after_hexagon.png">after, hexagon</a> !<a href="before_square.png">before, square</a> !<a href="after_square.png">after, square</a></p>
+<h2>Open</h2>
+<ul><li>Districts by state with squares keeps two split groups. The remaining satellites of groups 29 and 5 are blocked by the contiguous groups 27 and 35 and by each other; 1000 candidate chains give the same result. It needs a move of several groups at once.</li><li>Layout setup time (about 4 s on districts by state with hexagons): tile intersections with the study union about 45 %, tile and geometry adjacency about 26 %. Intersecting only boundary tiles and computing the adjacency once were not tried, because the change is not small.</li></ul>
+<div class="figure">
+<img src="after_hexagon.png" alt="after_hexagon.png">
+<p class="caption">after_hexagon.png</p>
+</div><div class="figure">
+<img src="after_square.png" alt="after_square.png">
+<p class="caption">after_square.png</p>
+</div><div class="figure">
+<img src="before_hexagon.png" alt="before_hexagon.png">
+<p class="caption">before_hexagon.png</p>
+</div><div class="figure">
+<img src="before_square.png" alt="before_square.png">
+<p class="caption">before_square.png</p>
+</div>
 <a class="back" href="../index.html">&larr; back to index</a>
 
 </body>
