@@ -113,9 +113,45 @@
 <p>Dividing by the maximum squared distance ties the price of distance to the extent of the lattice, margin tiles included; for the states one tile step costs about 0.002. In tile units the exponent barely changes the trade-off between distance and contacts; the energy uses linear distance so that every tile step has a constant price equal to one contact. For the mosaic layout this suggests that the maximum, not the square, is the problem; changing to linear over the maximum also changes the effective weight, which may explain the clash with <code>interior_bonus</code> in the earlier evaluation. The mosaic layout was not changed or tested.</p>
 <p>Figures (main, PR 206, energy):</p>
 <p>!<a href="tree_curved_before_after.png">tree curved</a> !<a href="tree_straight_before_after.png">tree straight</a> !<a href="largest_gap_tree00.png">largest gap, tree at (0, 0)</a> !<a href="worst_touch_regression.png">worst touching regression</a> !<a href="districts_hexagon.png">districts hexagon</a> !<a href="districts_square.png">districts square</a></p>
+<h2>Compactness (added after review)</h2>
+<p><code>compactness</code> (0 to 1 with <code>assignment=&quot;energy&quot;</code>) restricts the tiles the assignment may use. A packed set of n + round((1 - c)(m - n)) of the m lattice tiles is grown from the tile nearest the mean centroid, each step adding the free tile with the most chosen neighbors; the whole lattice is allowed at 0 and exactly n tiles (a solid block, no pockets) at 1. A pocket term with weight 10 x c x <code>neighbor_weight</code> is added, because the restriction alone barely reduces pockets below c of about 0.9 (the factor was set from a few cases). The Hungarian start no longer uses <code>compactness</code>. Default 0.25 (was 0.1). A pocket is an empty tile with more than half of its neighbors occupied.</p>
+<p>States, 180 runs (all connected, no holes):</p>
+<table>
+<tr><th></th><th>mean distance</th><th>touching pairs</th><th>pockets</th><th>empty share of convex hull</th></tr>
+<tr><td>main</td><td>0.898</td><td>68.43</td><td>4.58</td><td>0.142</td></tr>
+<tr><td>energy, previous commit</td><td>0.793</td><td>71.77</td><td>4.26</td><td>0.134</td></tr>
+<tr><td>c = 0</td><td>0.747</td><td>70.39</td><td>5.26</td><td>0.157</td></tr>
+<tr><td>c = 0.1</td><td>0.755</td><td>70.96</td><td>3.14</td><td>0.156</td></tr>
+<tr><td>c = 0.25 (default)</td><td>0.759</td><td>70.79</td><td>2.13</td><td>0.156</td></tr>
+<tr><td>c = 0.5</td><td>0.770</td><td>70.63</td><td>1.34</td><td>0.131</td></tr>
+<tr><td>c = 0.75</td><td>0.813</td><td>70.01</td><td>1.03</td><td>0.092</td></tr>
+<tr><td>c = 1</td><td>1.339</td><td>67.50</td><td>0.00</td><td>0.007</td></tr>
+</table>
+<p>Districts (mean distance / touching pairs of 1132 / pockets):</p>
+<table>
+<tr><th></th><th>hexagon</th><th>square</th></tr>
+<tr><td>main</td><td>4.457 / 679 / 35</td><td>2.655 / 418 / 17</td></tr>
+<tr><td>energy, previous commit</td><td>3.991 / 716 / 32</td><td>2.365 / 523 / 14</td></tr>
+<tr><td>c = 0</td><td>2.811 / 722 / 46</td><td>1.726 / 513 / 22</td></tr>
+<tr><td>c = 0.25</td><td>2.757 / 732 / 20</td><td>1.726 / 511 / 12</td></tr>
+<tr><td>c = 0.5</td><td>2.799 / 702 / 13</td><td>1.765 / 509 / 8</td></tr>
+<tr><td>c = 1</td><td>6.032 / 687 / 0</td><td>4.030 / 482 / 0</td></tr>
+</table>
+<p>Layouts at c = 0, 0.5 and 1 (pockets in red):</p>
+<p>!<a href="compactness_states_hexagon.png">states hexagon</a> !<a href="compactness_states_square.png">states square</a> !<a href="compactness_districts_hexagon.png">districts hexagon</a></p>
+<p>The default results change against the previous commit: on states the mean distance falls from 0.793 to 0.759 and touching pairs from 71.77 to 70.79; on districts the distance falls (hexagon 3.99 to 2.76) because the former start term pulled districts toward the center. At c = 1 the block is centered on the mean centroid, so distances are large. With grouped inputs only the anchor tiles are restricted. The 2x surplus lattice is unchanged; at c = 1 the extra tiles are not used. Timings were taken on a loaded machine (load average up to 40).</p>
 <h2>Risks and open points</h2>
-<ul><li>Every default grid layout changes.</li><li><code>topology_weight</code> and compactness only shape the starting assignment now.</li><li>Defects are removed only if one of the compound moves reaches them; wide gaps are not guaranteed to close.</li><li>Not established: mosaic, world and island inputs (multi-group K is tested only on toy cases), grouped (<code>source_indices</code>) inputs, and whether the balance of distance and contacts suits users.</li></ul>
+<ul><li>Every default grid layout changes.</li><li><code>topology_weight</code> only shapes the starting assignment now.</li><li><code>compactness</code> has two meanings: 0 to 1 with <code>assignment=&quot;energy&quot;</code> (larger values raise an error), the old cost weight with <code>&quot;refine&quot;</code>.</li><li>Defects are removed only if one of the compound moves reaches them; wide gaps are not guaranteed to close.</li><li>Not established: mosaic, world and island inputs (multi-group K is tested only on toy cases), grouped (<code>source_indices</code>) inputs, and whether the balance of distance and contacts suits users.</li></ul>
 <div class="figure">
+<img src="compactness_districts_hexagon.png" alt="compactness_districts_hexagon.png">
+<p class="caption">compactness_districts_hexagon.png</p>
+</div><div class="figure">
+<img src="compactness_states_hexagon.png" alt="compactness_states_hexagon.png">
+<p class="caption">compactness_states_hexagon.png</p>
+</div><div class="figure">
+<img src="compactness_states_square.png" alt="compactness_states_square.png">
+<p class="caption">compactness_states_square.png</p>
+</div><div class="figure">
 <img src="districts_hexagon.png" alt="districts_hexagon.png">
 <p class="caption">districts_hexagon.png</p>
 </div><div class="figure">

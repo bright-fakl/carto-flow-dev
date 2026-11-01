@@ -58,9 +58,46 @@ Figures (main, PR 206, energy):
 ![districts hexagon](districts_hexagon.png)
 ![districts square](districts_square.png)
 
+## Compactness (added after review)
+
+`compactness` (0 to 1 with `assignment="energy"`) restricts the tiles the assignment may use. A packed set of n + round((1 - c)(m - n)) of the m lattice tiles is grown from the tile nearest the mean centroid, each step adding the free tile with the most chosen neighbors; the whole lattice is allowed at 0 and exactly n tiles (a solid block, no pockets) at 1. A pocket term with weight 10 x c x `neighbor_weight` is added, because the restriction alone barely reduces pockets below c of about 0.9 (the factor was set from a few cases). The Hungarian start no longer uses `compactness`. Default 0.25 (was 0.1). A pocket is an empty tile with more than half of its neighbors occupied.
+
+States, 180 runs (all connected, no holes):
+
+| | mean distance | touching pairs | pockets | empty share of convex hull |
+|---|---|---|---|---|
+| main | 0.898 | 68.43 | 4.58 | 0.142 |
+| energy, previous commit | 0.793 | 71.77 | 4.26 | 0.134 |
+| c = 0 | 0.747 | 70.39 | 5.26 | 0.157 |
+| c = 0.1 | 0.755 | 70.96 | 3.14 | 0.156 |
+| c = 0.25 (default) | 0.759 | 70.79 | 2.13 | 0.156 |
+| c = 0.5 | 0.770 | 70.63 | 1.34 | 0.131 |
+| c = 0.75 | 0.813 | 70.01 | 1.03 | 0.092 |
+| c = 1 | 1.339 | 67.50 | 0.00 | 0.007 |
+
+Districts (mean distance / touching pairs of 1132 / pockets):
+
+| | hexagon | square |
+|---|---|---|
+| main | 4.457 / 679 / 35 | 2.655 / 418 / 17 |
+| energy, previous commit | 3.991 / 716 / 32 | 2.365 / 523 / 14 |
+| c = 0 | 2.811 / 722 / 46 | 1.726 / 513 / 22 |
+| c = 0.25 | 2.757 / 732 / 20 | 1.726 / 511 / 12 |
+| c = 0.5 | 2.799 / 702 / 13 | 1.765 / 509 / 8 |
+| c = 1 | 6.032 / 687 / 0 | 4.030 / 482 / 0 |
+
+Layouts at c = 0, 0.5 and 1 (pockets in red):
+
+![states hexagon](compactness_states_hexagon.png)
+![states square](compactness_states_square.png)
+![districts hexagon](compactness_districts_hexagon.png)
+
+The default results change against the previous commit: on states the mean distance falls from 0.793 to 0.759 and touching pairs from 71.77 to 70.79; on districts the distance falls (hexagon 3.99 to 2.76) because the former start term pulled districts toward the center. At c = 1 the block is centered on the mean centroid, so distances are large. With grouped inputs only the anchor tiles are restricted. The 2x surplus lattice is unchanged; at c = 1 the extra tiles are not used. Timings were taken on a loaded machine (load average up to 40).
+
 ## Risks and open points
 
 - Every default grid layout changes.
-- `topology_weight` and compactness only shape the starting assignment now.
+- `topology_weight` only shapes the starting assignment now.
+- `compactness` has two meanings: 0 to 1 with `assignment="energy"` (larger values raise an error), the old cost weight with `"refine"`.
 - Defects are removed only if one of the compound moves reaches them; wide gaps are not guaranteed to close.
 - Not established: mosaic, world and island inputs (multi-group K is tested only on toy cases), grouped (`source_indices`) inputs, and whether the balance of distance and contacts suits users.
