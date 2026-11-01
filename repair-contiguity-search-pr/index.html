@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PR #205: &quot;repair_contiguity: distance-pruned chain search and satellite repair fixes&quot;</title>
+<title>PR #205: &quot;repair_contiguity: distance-pruned chain search, satellite repair fixes and retries&quot;</title>
 <style>
 
   :root { color-scheme: light dark; }
@@ -74,7 +74,7 @@
 </head>
 <body>
 <a class="back" href="../index.html">&larr; back to index</a>
-<h1>PR #205: &quot;repair_contiguity: distance-pruned chain search and satellite repair fixes&quot;</h1>
+<h1>PR #205: &quot;repair_contiguity: distance-pruned chain search, satellite repair fixes and retries&quot;</h1>
 <dl class="meta-list">
 <dt>Kind</dt><dd>pr</dd>
 <dt>Project</dt><dd>carto-flow</dd>
@@ -89,15 +89,15 @@
 <dt>After</dt><dd>fix-repair-contiguity-191</dd>
 <dt>Inputs</dt><dd>432 congressional districts grouped by state and by division, US states, Texas; mosaic layout, hexagon and square tilings, morph=False unless noted.</dd>
 </dl>
-<p class="desc">The chain search of repair_contiguity enumerates paths only while they can still reach the main body, forbids the tiles of the other satellites correctly, and refuses chains that split another group further.</p>
+<p class="desc">The chain search of repair_contiguity enumerates paths only while they can still reach the main body, forbids the tiles of the other satellites correctly, and refuses chains that split another group further, and retries when split groups block each other.</p>
 <h2>Change</h2>
-<p>Part of #191.</p>
-<ul><li>Speedup (<code>_enumerate_paths</code> in <code>geo_utils/contiguity.py</code>): a backward breadth-first search gives every tile its distance to the main body; the heap is keyed by path length plus that distance, and prefixes that cannot finish within <code>max_len</code> are not pushed. Chains and their order are unchanged.</li><li>Satellite bug: the tiles forbidden to a satellite repair were built from <code>comps[2:]</code>, but satellites are processed in distance order, so a satellite other than <code>comps[1]</code> forbade its own tiles, <code>comps[1]</code> was not forbidden, and the satellite found no path. The set is now built from <code>comps[1:]</code> minus the current satellite&#x27;s tiles.</li><li>Guard: a chain is refused if it increases the number of pieces of any other group, including groups that are already split. Before, only contiguous groups were protected; with the satellite fix a repair could re-split another split group and the next pass undid it (on states with 350 regions and squares, two groups alternated from the second pass on).</li><li>Tests: <code>tests/test_geo_utils_contiguity_search.py</code> (pruned against plain enumeration, a satellite that is not the second largest component, states with 350 regions and squares); changelog entries.</li></ul>
+<p>Fixes #191.</p>
+<ul><li>Speedup (<code>_enumerate_paths</code> in <code>geo_utils/contiguity.py</code>): a backward breadth-first search gives every tile its distance to the main body; the heap is keyed by path length plus that distance, and prefixes that cannot finish within <code>max_len</code> are not pushed. Chains and their order are unchanged.</li><li>Satellite bug: the tiles forbidden to a satellite repair were built from <code>comps[2:]</code>, but satellites are processed in distance order, so a satellite other than <code>comps[1]</code> forbade its own tiles, <code>comps[1]</code> was not forbidden, and the satellite found no path. The set is now built from <code>comps[1:]</code> minus the current satellite&#x27;s tiles.</li><li>Guard: a chain is refused if it increases the number of pieces of any other group, including groups that are already split. Before, only contiguous groups were protected; with the satellite fix a repair could re-split another split group and the next pass undid it (on states with 350 regions and squares, two groups alternated from the second pass on).</li><li>Retries: <code>repair_contiguity</code> has an opt-in <code>retries</code> parameter (default 0; the mosaic layout passes 8). If split groups remain after the normal repair, it repeats the repair from the best state so far with a fixed portfolio: the first retry lets a satellite join any other piece of its group, the later ones run a lookahead pass in several group and satellite orders. A retry is kept only if the total number of extra pieces drops and no group gets more pieces; retries use at least 20 passes.</li><li>Tests: <code>tests/test_geo_utils_contiguity_search.py</code> (pruned against plain enumeration, a satellite that is not the second largest component, states with 350 regions and squares); changelog entries.</li></ul>
 <h2>Split groups and non-contiguous regions, main -&gt; branch</h2>
 <table>
 <tr><th>Input (mosaic)</th><th>Split groups / non-contiguous regions</th></tr>
 <tr><td>Districts by state, hexagon</td><td>1 / 0 -&gt; 0 / 0</td></tr>
-<tr><td>Districts by state, square</td><td>2 / 0 -&gt; 2 / 0 (other groups: PA and NY -&gt; NY and CT)</td></tr>
+<tr><td>Districts by state, square</td><td>2 / 0 -&gt; 0 / 0 (without retries: 2 / 0, groups NY and CT)</td></tr>
 <tr><td>Districts by division, hexagon</td><td>0 / 0 -&gt; 0 / 0</td></tr>
 <tr><td>Districts by division, square</td><td>1 / 0 -&gt; 0 / 0</td></tr>
 <tr><td>States with 150, 300 (morph) and 350 regions, hexagon</td><td>0 / 0 -&gt; 0 / 0</td></tr>
@@ -112,11 +112,11 @@
 <tr><td>Districts by state, square</td><td>10.1 -&gt; 5.6</td></tr>
 <tr><td>Districts by division, hexagon</td><td>6.9 -&gt; 3.9</td></tr>
 </table>
-<p>Chain repair alone on districts by state with hexagons: 3.79 s -&gt; 0.02 s. <code>pytest -k &quot;contiguity or mosaic or voronoi or symbol&quot;</code>: 575 passed.</p>
+<p>Chain repair alone on districts by state with hexagons: 3.79 s -&gt; 0.02 s. Districts by state with squares: mean tile distance +0.24 % (660,409 -&gt; 662,005), time 4.9 s; all other inputs have identical split groups, non-contiguous count and mean distance, and the retries do not run on them. <code>pytest -k &quot;contiguity or mosaic or voronoi or symbol&quot;</code>: 577 passed. The 8-hop probe in <code>TestRingSwapbackReach</code> now asserts that 16 hops strand fewer core tiles than 8 hops and no longer depends on the repair failing.</p>
 <p>Figures (split groups outlined in red):</p>
 <p>!<a href="before_hexagon.png">before, hexagon</a> !<a href="after_hexagon.png">after, hexagon</a> !<a href="before_square.png">before, square</a> !<a href="after_square.png">after, square</a></p>
 <h2>Open</h2>
-<ul><li>Districts by state with squares keeps two split groups. The remaining satellites of groups 29 and 5 are blocked by the contiguous groups 27 and 35 and by each other; 1000 candidate chains give the same result. It needs a move of several groups at once.</li><li>Layout setup time (about 4 s on districts by state with hexagons): tile intersections with the study union about 45 %, tile and geometry adjacency about 26 %. Intersecting only boundary tiles and computing the adjacency once were not tried, because the change is not small.</li></ul>
+<ul><li>Only one real input (districts by state with squares) exercises the retries, and the portfolio order was tuned on it (the third entry closes it); robustness on other inputs is unknown. An exact repartition (mixed-integer program) was too slow as a default.</li><li>Layout setup time (about 4 s on districts by state with hexagons): tile intersections with the study union about 45 %, tile and geometry adjacency about 26 %. Not tried, because the change is not small.</li></ul>
 <div class="figure">
 <img src="after_hexagon.png" alt="after_hexagon.png">
 <p class="caption">after_hexagon.png</p>
