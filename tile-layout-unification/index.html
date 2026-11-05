@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>One tile layout algorithm for single-tile and grouped regions (design)</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>One tile layout algorithm for single-tile and grouped regions (design)</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>proposal</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">open</span></dd>
+<dt>Related</dt><dd><a href="../grid-energy-assignment-pr/index.html">&quot;GridBasedLayout assigns tiles by minimizing one energy&quot;</a> <span class="meta">(pr)</span></dd>
+<dt>Created</dt><dd>2026-11-05 12:00</dd>
+<dt>Before</dt><dd>GridBasedLayout (one tile per region, energy descent) and MosaicLayout (tile_count and group_by, morph then Hungarian and repair) are separate algorithms</dd>
+<dt>After</dt><dd>prototype only (scratch scripts, nothing committed)</dd>
+<dt>Inputs</dt><dd>US states (49), 432 congressional districts grouped by state, Europe, Africa; hexagon lattice (square for checks); compactness c in {0.25, 1}, 11 values for the linearity test; pre-morph on and off.</dd>
+</dl>
+<p class="desc">Design of a shared algorithm for the grid and mosaic layouts: allocation (which tiles are usable) followed by assignment by capacitated optimal transport with a reserve sink, a contiguity-guarded swap search and an optional pre-morph. Prototype results on US states, districts by state, Europe and Africa, the Texas tip, and a nonlinearity of the compactness parameter.</p>
+<h2>Goal</h2>
+<p>Grid and mosaic differ mainly in interface, not in algorithm: grid is built for one tile per region and no grouping, mosaic for <code>tile_count</code> and <code>group_by</code>. The generic layout interface offers both for every layout. The aim is one layout that covers both cases, with the guarantees below. Work on PR 207 waits for this decision.</p>
+<p>Requirements (from the design notes):</p>
+<ul><li>Grouping and <code>tile_count</code> are guarantees on the output: a group never splits, a region receives exactly its tile count.</li><li>Size variable and normalization concern symbol size, not tile size.</li><li>The layout resembles the overall shape, keeps stand-out features recognizable (a tile at the south-east tip is not assigned to a state other than Florida), and resembles location and neighbor relations.</li><li>Islands lie at their geometry or compactly near others, with optional forced spacing. A multi-part geometry with one tile places the tile near the main part.</li><li>Pre-morphing is optional; the algorithm works without it.</li><li>Exact tile count gives shape control but hard assignment; surplus tiles give flexibility but allow holes.</li></ul>
+<h2>Pipeline</h2>
+<p>Two stages that are evaluated and inspectable separately.</p>
+<ol><li><strong>Allocation.</strong> Choose the usable tile set. Compactness <code>c</code> in 0..1 sets its size to <code>n + round((1 - c)(m - n))</code> (n tiles needed, m lattice tiles in the window); <code>c = 1</code> is exactly n tiles. The set is built from the silhouette of each land part (already in PR 207).</li><li><strong>Assignment.</strong> Capacitated optimal transport on the allocated set: group g has capacity N_g (1 for ungrouped regions), cost is the squared distance from the tile center to the group&#x27;s geometry plus 0.1 times the squared distance to its centroid. A reserve sink takes the m - n surplus tiles; its per-tile cost is <code>beta</code> times the distance to the convex hull boundary of the allowed set (<code>hull</code>, beta 1; with 3 neighbor iterations for groups, beta 1 to 2). Solved exactly with the Hungarian algorithm on replicated rows.</li><li><strong>Repair.</strong> A swap local search accepts only moves that do not increase the number of extra components (lexicographic: components, then cost), plus chain moves over up to 3 groups.</li><li><strong>Pre-morph (optional).</strong> A flow cartogram to equal area before assignment.</li><li><strong>Contact descent (open).</strong> The grid energy&#x27;s contact term reduces false contacts; the OT result has more of them (27 against 16 on states, c 0.25 and 0.5).</li></ol>
+<p>The sink is what removes the interior holes that Hungarian assignment and the grid energy leave below c = 1: surplus tiles are paid for at the allowed set&#x27;s boundary, so they end up there.</p>
+<h2>Results</h2>
+<p>hexagon lattice; disp is displacement in tile steps (mean/max/p95); touch is the share of truly adjacent pairs that touch; false is the number of touching pairs that are not adjacent; split/stray counts groups split and stray tiles; grid is the main-branch layout (districts: the tile_count path of the same layout); off/on is pre-morph. All pre-morphs converged. Runtime excludes the pre-morph (about 1 s Europe, 1.3 s Africa).</p>
+<table>
+<tr><th>data</th><th>c</th><th>variant</th><th>s</th><th>disp</th><th>pockets</th><th>touch</th><th>false</th><th>split/stray</th></tr>
+<tr><td>States</td><td>.25</td><td>grid</td><td>.69</td><td>.63/1.6/1.5</td><td>3</td><td>.77</td><td>21</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>off</td><td>.04</td><td>.63/1.3/1.2</td><td>1</td><td>.71</td><td>35</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>on</td><td>.05</td><td>.86/1.7/1.4</td><td>0</td><td>.76</td><td>31</td><td>0/0</td></tr>
+<tr><td></td><td>1</td><td>grid</td><td>.60</td><td>1.48/3.6/2.3</td><td>0</td><td>.74</td><td>32</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>off</td><td>.02</td><td>1.49/2.8/2.3</td><td>0</td><td>.72</td><td>34</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>on</td><td>.02</td><td>.91/2.2/1.7</td><td>0</td><td>.74</td><td>35</td><td>0/0</td></tr>
+<tr><td>Districts</td><td>.25</td><td>grid</td><td>1.16</td><td>3.5/10.7/8.2</td><td>3</td><td>.83</td><td>114</td><td>35/94</td></tr>
+<tr><td></td><td></td><td>off</td><td>.50</td><td>1.56/3.8/2.4</td><td>3</td><td>.80</td><td>21</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>on</td><td>.53</td><td>2.46/4.5/3.9</td><td>4</td><td>.86</td><td>22</td><td>0/0</td></tr>
+<tr><td></td><td>1</td><td>grid</td><td>.61</td><td>6.7/12.4/10.3</td><td>0</td><td>.86</td><td>124</td><td>41/117</td></tr>
+<tr><td></td><td></td><td>off</td><td>.34</td><td>4.25/7.5/6.8</td><td>0</td><td>.82</td><td>31</td><td>1/5</td></tr>
+<tr><td></td><td></td><td>on</td><td>.17</td><td>2.54/4.6/4.1</td><td>0</td><td>.84</td><td>24</td><td>0/0</td></tr>
+<tr><td>Europe</td><td>.25</td><td>grid</td><td>.20</td><td>.76/2.0/1.3</td><td>2</td><td>.78</td><td>10</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>off</td><td>.02</td><td>.92/2.0/1.7</td><td>3</td><td>.66</td><td>31</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>on</td><td>.02</td><td>1.03/1.8/1.7</td><td>3</td><td>.63</td><td>35</td><td>0/0</td></tr>
+<tr><td></td><td>1</td><td>grid</td><td>.11</td><td>1.19/7.8/2.1</td><td>0</td><td>.67</td><td>27</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>off</td><td>.004</td><td>.84/1.6/1.5</td><td>0</td><td>.52</td><td>38</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>on</td><td>.004</td><td>.83/2.0/1.6</td><td>0</td><td>.60</td><td>37</td><td>0/0</td></tr>
+<tr><td>Africa</td><td>.25</td><td>grid</td><td>.18</td><td>.70/1.9/1.5</td><td>3</td><td>.76</td><td>18</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>off</td><td>.01</td><td>.58/1.3/1.1</td><td>0</td><td>.66</td><td>45</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>on</td><td>.01</td><td>.71/1.6/1.4</td><td>0</td><td>.69</td><td>43</td><td>0/0</td></tr>
+<tr><td></td><td>1</td><td>grid</td><td>.07</td><td>.85/2.4/1.6</td><td>0</td><td>.73</td><td>40</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>off</td><td>.005</td><td>.83/2.1/1.6</td><td>0</td><td>.64</td><td>50</td><td>0/0</td></tr>
+<tr><td></td><td></td><td>on</td><td>.005</td><td>.73/2.0/1.7</td><td>0</td><td>.65</td><td>48</td><td>0/0</td></tr>
+</table>
+<p>Findings:</p>
+<ul><li><strong>Grouped input:</strong> the main-branch layout splits 35 to 41 of 49 groups; the pipeline splits 0 to 1 and halves or better the displacement (district c = 1: 6.7 to 4.25, 2.54 with pre-morph).</li><li><strong>Ungrouped input</strong> (states, Europe, Africa): displacement is similar to the grid layout; touching is lower (Europe c = 1: .52 to .60 against .67; Africa .64 to .65 against .73) and false contacts are higher. The grid layout&#x27;s contact term is worth keeping as a descent layer.</li><li><strong>Pre-morph</strong> helps the hard cases (states and districts at c = 1: displacement .91 and 2.54 against 1.49 and 4.25) and is neutral or slightly worse for Europe, Africa and for c = .25. It should be an option, not a default.</li><li><strong>Runtime:</strong> OT is 0.005 to 1 s here (exact solver, dense); counties scale is untested (the dense assignment grows as (n + reserve)^2).</li></ul>
+<p>Figures:</p>
+<ul><li>!<a href="pipe_states.png">States</a></li><li>!<a href="pipe_districts.png">Districts by state</a></li><li>!<a href="pipe_europe.png">Europe</a></li><li>!<a href="pipe_africa.png">Africa</a></li></ul>
+<p>Visible defects: districts c = 1 without pre-morph: Louisiana is pushed into a thin tendril, Florida stretched along the Gulf, western states crowded. Africa: the Maghreb and the west coast shift east (Morocco above Mauritania), Madagascar sits next to Mozambique. Europe: Nordic tiles form a vertical strip at c = 1.</p>
+<h2>Compactness is not linear</h2>
+<p>The allowed-set size is linear in c by construction; the metrics are not (hexagon, no pre-morph, c = 0 to 1 in steps of 0.1):</p>
+<ul><li>States: mean displacement .62 to .71 for c = 0 to .8, then 1.12 at .9 and 1.49 at 1.</li><li>Districts: 1.52 to 1.73 for c = 0 to .7, then 2.12, 2.76, 4.25 at .8, .9, 1.</li><li>States with pre-morph: no knee (.75 to .85, then .91 at 1).</li><li>The knee is where the allowed set shrinks below about 1.2 to 1.4 times n; the displacement rises steeply as the ratio n_allowed/n approaches 1.</li><li>At c in [0, .1] the result is identical on states (the hull sink makes the lowest range redundant); pockets are noisy with no trend.</li></ul>
+<p>!<a href="c_linearity.png">Compactness</a></p>
+<p>Suggested parametrization: spread the useful range with a geometric scale, <code>n_allowed = n (m/n)^(1 - c)</code>. On states c&#x27; = .8 gives ratio 1.24, where linear c = .9 does. Simpler: keep linear c and document c above .8 as the range where shape fidelity trades against displacement.</p>
+<h2>Texas tip and feature preservation</h2>
+<ul><li>A tile exists at the Texas tip (nearest allowed tile 0.87 steps on states, 1.13 on districts); plain OT gives it to Louisiana because capacities trade tiles globally. The earlier extreme-direction test was ill-posed (the extreme tile in that direction belongs to Florida or Georgia); a nearest-tip test replaces it.</li><li>Pre-morph is the most effective single change (states c = 1: displacement 1.48 to .91; districts: 2 split groups to 0, displacement 4.25 to 2.54).</li><li>Extremes pinning (fixing the tiles at the extreme points of the outline to their regions) is nearly free on hexagon, costs more on square (1.72 against 1.44) and fails Maine and Washington there. Keep it optional; user-supplied landmark lists work the same way.</li><li>Boundary alignment (matching boundary regions to boundary tiles in cyclic order) drops touching from .72 to .51 and splits 14 of 49 groups; dropped. The growth variant (grow regions from OT seeds) leaves 2 to 12 groups split and worse touching; dropped.</li></ul>
+<p>!<a href="part_texas_diag.png">Texas</a> !<a href="part_sink_states.png">Sink forms</a> !<a href="part_landmarks_districts.png">Landmarks</a></p>
+<h2>Contiguity</h2>
+<p>Groups split (stray tiles) on districts by state:</p>
+<table>
+<tr><th>variant</th><th>hex c = 1</th><th>hex c = .5</th><th>square c = 1</th><th>square c = .5</th></tr>
+<tr><td>OT raw</td><td>5 / 9</td><td>2 / 2</td><td>10 / 22</td><td>6 / 7</td></tr>
+<tr><td>+ local search</td><td>2 / 6</td><td>0 / 0</td><td>2 / 12</td><td>0 / 0</td></tr>
+<tr><td>+ chain moves</td><td>1 / 5</td><td>0 / 0</td><td>2 / 12</td><td>0 / 0</td></tr>
+</table>
+<p>Contiguity is not guaranteed at exactly n tiles (c = 1): Florida, and Florida with Georgia on squares, remain split. With any slack the search repairs all groups.</p>
+<h2>Acceptance tests for a unified layout</h2>
+<ol><li>Zero split groups for <code>group_by</code> at c below 1, and at most 1 at c = 1 (documented).</li><li>Every region receives exactly its tile count.</li><li>On ungrouped input, mean displacement and touching no worse than the grid layout by more than 0.05 steps and .05 respectively (currently: touching lower on Europe and Africa).</li><li>Tip tiles (nearest tile to the outline extremes) belong to the owning region on states and districts.</li><li>Isolated parts (Alaska, Hawaii, Madagascar, Iceland) keep their tiles together and near their geometry in the modes separate, connected and spaced.</li></ol>
+<h2>Open items</h2>
+<ul><li>Contact descent on top of OT (to recover grid-level false contacts).</li><li>Multi-part geometries: capacity split by part area (France with French Guiana fails now).</li><li>Counties scale: sparse min-cost flow instead of dense Hungarian.</li><li>Exactness at c = 1 (final repair or slack).</li><li>Parametrization of c.</li><li>Fate of PR 207 (silhouette allocation and inspection tool carry over; its energy assignment would be replaced).</li><li>Separate topic: nested group cartogram (groups sized by their total, sub-regions laid out inside, groups separated like explode).</li></ul>
+<h2>What was not verified</h2>
+<ul><li>Michigan notch feature test; only 6 lattice offsets; square lattice shows the same picture with touching .45 to .55 on ungrouped data.</li><li>Pre-morph left 2 invalid output regions on Europe (not repaired).</li><li>Labels in the new figures are 3-letter truncations and ambiguous for small tiles.</li><li>No test with multi-part groups or with counties.</li></ul>
+<div class="figure">
+<img src="c_linearity.png" alt="c_linearity.png">
+<p class="caption">c_linearity.png</p>
+</div><div class="figure">
+<img src="part_landmarks_districts.png" alt="part_landmarks_districts.png">
+<p class="caption">part_landmarks_districts.png</p>
+</div><div class="figure">
+<img src="part_sink_states.png" alt="part_sink_states.png">
+<p class="caption">part_sink_states.png</p>
+</div><div class="figure">
+<img src="part_texas_diag.png" alt="part_texas_diag.png">
+<p class="caption">part_texas_diag.png</p>
+</div><div class="figure">
+<img src="pipe_africa.png" alt="pipe_africa.png">
+<p class="caption">pipe_africa.png</p>
+</div><div class="figure">
+<img src="pipe_districts.png" alt="pipe_districts.png">
+<p class="caption">pipe_districts.png</p>
+</div><div class="figure">
+<img src="pipe_europe.png" alt="pipe_europe.png">
+<p class="caption">pipe_europe.png</p>
+</div><div class="figure">
+<img src="pipe_states.png" alt="pipe_states.png">
+<p class="caption">pipe_states.png</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
