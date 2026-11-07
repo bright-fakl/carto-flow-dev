@@ -6,10 +6,10 @@ topic: symbol
 project: carto-flow
 status: open
 related: grid-energy-assignment-pr
-date: 2026-11-05 12:00
+date: 2026-11-06 12:00
 before: GridBasedLayout (one tile per region, energy descent) and MosaicLayout (tile_count and group_by, morph then Hungarian and repair) are separate algorithms
 after: prototype only (scratch scripts, nothing committed)
-inputs: US states (49), 432 congressional districts grouped by state, Europe, Africa; hexagon lattice (square for checks); compactness c in {0.25, 1}, 11 values for the linearity test; pre-morph on and off.
+inputs: US states (49), 432 congressional districts grouped by state, Europe without Russia (38 regions), Africa, South America, Asia; hexagon lattice (square for checks); compactness c in {0.25, 1}, 11 values for the linearity test; pre-morph on and off; later experiments at geometric compactness c' in {0.5, 1}.
 ---
 ## Goal
 
@@ -116,18 +116,111 @@ Groups split (stray tiles) on districts by state:
 
 Contiguity is not guaranteed at exactly n tiles (c = 1): Florida, and Florida with Georgia on squares, remain split. With any slack the search repairs all groups.
 
+## Land parts, multi-part regions and the allowed set (Europe)
+
+Europe without Russia has four land parts: the mainland (32 regions), Scandinavia (NOR, SWE, FIN), UK with Ireland, and Iceland. Findings:
+- Parts must come from the original geometries. A pre-morph merges Scandinavia with the mainland in the morphed geometries.
+- Part membership was not enforced in assignment or repair at first; the separate mode alone gave no gap. Enforcing membership (a region may only use tiles of its own part) is needed. With the spaced allocation it is the only separation approach that held up (see the next section).
+- Multi-part regions: a main-part anchor plus capacity split by part area gives France 11 tiles plus 2 for French Guiana. Svalbard and similar parts need the same treatment.
+- Compactness on a geometric scale, `n_allowed = round(n (m/n)^(1 - c))`, spreads the useful range (see above).
+
+![Europe, morph first](morph_first_europe.png)
+
+## Separating land parts: approaches tested
+
+All on Europe first, then checked on the other datasets. None except enforced membership with spaced allocation survived.
+
+| approach | outcome |
+|---|---|
+| water geometries (connected pieces, part pairs, region pairs, visible cross-part pairs) | number and placement of water pieces is ambiguous; Sweden-Denmark conflict; no gap in the south |
+| fixed buffer around land | a bug moved Iceland; defined in tile space instead of original space |
+| transferred buffer zone (pieces carried through the pre-morph) | works only with the pre-morph on |
+| penalty for cross-part contact (weights 5 and 1.25) | helps Europe only; hurts South America and Asia; Portugal detaches, Norway and Sweden flip |
+| exposure and direction labels (water side per region, hard and soft rule, four labelings) | hard rule hurts all datasets; soft rule trades false contacts for touching and pockets |
+| landmarks and pins | work (Italy pin); "south of each part" pins Greece and Crete; stays an optional user input |
+
+![Water rule](water_rule4_europe.png)
+![Exposure](exposure_europe.png)
+![Buffer and zone](europe_buffer_zone.png)
+
+## Algorithm quality: upper bound and independent review
+
+- **Annealing probe.** Simulated annealing on one fixed energy (0.5 times mean squared centroid displacement, 0.5 times mean squared hop gap of true neighbor pairs, 0.5 times share of non-adjacent touching pairs) improves the energy by 0 to 14 percent over Hungarian plus descent, with no visible gain. At c = 1 Hungarian plus descent is close to the optimum; at c' below 1 annealing is somewhat better.
+- **Morph first.** Pre-morphing before assignment fixes outliers (Luxembourg, Texas tip) and adds 0.03 to 0.06 weighted touching on US states. It does not change touching on Europe or Africa.
+- **Ceiling.** The degree bound sum_i min(deg_i, 6) / (2 P) is .95 on Europe and .97 on US states and says little. A review (Opus, read-only, no figures) estimates the real ceiling for one tile per region on hex tiles at 0.80 to 0.85 weighted touching, about 0.80 unweighted. Not proven; an exact ILP would settle it.
+- **Review recommendation.** Mean touching is the wrong target. Use per-region acceptance tests (below).
+
+![Annealing, Europe](sa_europe.png)
+
+## Force-based layout of the target positions
+
+Idea: replace the pre-morph by a force relaxation of region positions, then assign. Model: one node per region; vector springs on land-adjacent pairs toward the original offset (stiffness 1, scaled to tile units); finite-range pushes on water pairs (visible, non-adjacent, within 3 tiles; rest length 2 tiles; zero beyond 2; no pull); hard minimum spacing 0.92 tile; cap of 6 edges per region; edges crossing a third region weakened to 0.25; optional per-region anchor to the original centroid with stiffness ka. Weights were fixed once on states and Europe.
+
+Findings:
+- The first version barely moved the nodes (mean move 0.36 tile, 36 overlapping pairs). Spacing and a hard projection fixed that.
+- The cap removed almost nothing. Weighting stiffness by shared border length (A-w) and per-region normalization (A-n) changed results in both directions; A-n does not converge (asymmetric forces drift 7 to 19 tiles between 4000 and 12000 iterations).
+- A term described as a global alignment was in fact a per-region anchor (ka). Without it (A-k0) the layout does not rotate, mirror or fold (best rotation within -5 to +2.4 degrees). The anchor trades adjacency for displacement.
+- With bare Hungarian assignment the interior holes below c = 1 return; the hull sink in the OT pipeline removes most of them (Europe 4 to 1 or 2, Africa 2 to 4 to 0).
+- Land adjacency by a distance tolerance classed Sweden and Denmark (Oresund gap 0.024 tile) as land neighbors; the force model pulled them together and the touching metric rewarded the contact. Adjacency by shared border length (above 0.05 tile within a 0.01 tile buffer) fixes this and reclassifies, for example, SWE-DNK and HRV-ITA in Europe and NY-RI, ME-MA, CT-NJ, NJ-MD in the states. It also drops real borders lost to digitization mismatch (Chad-Niger is the clearest case); the threshold needs a tolerance study.
+- Binary water gaps with no width threshold produce the expected gap between Great Britain and the mainland (BEL, NLD, FRA at hop 2). Sweden stays separated from Denmark for A and A-k03, not for A-k0 at c' = 0.5.
+
+Weighted touching at c' = 0.5, OT pipeline with hull sink and the current descent (distance-tolerance adjacency; M uses its own pre-morph geometries):
+
+| data | M | A (ka .3) | A-k03 | A-k0 |
+|---|---|---|---|---|
+| States | .854 | .857 | .792 | .788 |
+| Europe | .779 | .748 | .819 | .794 |
+| Africa | .724 | .765 | .777 | .777 |
+| South America | .790 | .750 | .750 | .750 |
+| Asia | .735 | .740 | .786 | .726 |
+
+No force variant beats the morph everywhere; max displacement is mostly higher than the morph's (Europe 1.35 to 1.93 against 1.61). The Europe defects remain: Italy at 2 rows above its south tile, Nordic row, Scandinavia 1 to 2 hops from the mainland.
+
+![Europe graph (A-k0)](force_graph8_europe.png)
+
+## The contact descent loses contacts
+
+Diagnostic on Europe: after the OT stage Spain touched France (cost 0.03). The descent moved Spain to a farther tile because that removed a false contact (energy change -1.00, displacement +0.16 to +0.35, true contacts 0). Denmark moved one tile to fill a hole and lost Germany. Across 267 accepted moves that lose at least one true contact, the most negative term was false contacts in 115, the true-contact term in 107, displacement in 75, pockets in 17. The descent still gains more contacts than it loses (gains 12 to 27, loses 4 to 22 per run).
+
+Protected descent (a move is rejected if the net true-contact count of the moved regions decreases; one setting, no tuning) restores Spain-France and Denmark-Germany:
+
+| Europe c' = 0.5 | current plain / weighted | protected plain / weighted |
+|---|---|---|
+| A | .704 / .730 | .746 / .818 |
+| A-k03 | .775 / .802 | .789 / .825 |
+| A-k0 | .746 / .819 | .789 / .854 |
+
+Cost: false contacts rise (15 to 17 become 18 to 22) and max displacement rises about 0.7 to 1 tile (to 2.0 to 2.2). Holes are unchanged. The protected descent also helps the morph baseline: weighted touching Europe .788 to .813, South America .739 to .783, Asia .720 to .747, Africa .697 to .706; it lowers states (.813 to .785). Tripling the true-contact term (W) is weaker and gives more false contacts.
+
+![Descent variants, Europe](force9_europe.png)
+![Descent variants, states](force9_states.png)
+
+## Recommendation for 3.0.0
+
+1. One tile per region: Hungarian assignment on centroids, then the contact descent. Decide whether to ship the protected-contact variant (higher touching on Europe, South America and Asia, higher false contacts and displacement).
+2. Allocation: silhouette allocation with compactness on the geometric scale and enforced part membership; main-part anchors and capacity split for multi-part regions.
+3. `tile_count` and `group_by`: capacitated OT with the hull reserve sink, contiguity-guarded swaps and chain moves. This unifies grid and mosaic.
+4. Pre-morph: optional, off by default; recommended when region sizes vary a lot (US states).
+5. Land adjacency for contact terms and metrics: shared border length, not a distance tolerance.
+6. Not recommended: a force stage, water or buffer geometries, exposure or direction labels, a cross-part penalty, annealing.
+7. Document the limits: Italy's boot, the Nordic row and Iberia's shape are not reproduced generally; about 75 to 85 percent of true neighbor pairs touch; a small region in a dense cluster can be one hop from its neighbors. Landmarks or pins are the supported fix and can follow after 3.0.
+
 ## Acceptance tests for a unified layout
+
+Per-region tests replace mean touching as the target.
 
 1. Zero split groups for `group_by` at c below 1, and at most 1 at c = 1 (documented).
 2. Every region receives exactly its tile count.
-3. On ungrouped input, mean displacement and touching no worse than the grid layout by more than 0.05 steps and .05 respectively (currently: touching lower on Europe and Africa).
-4. Tip tiles (nearest tile to the outline extremes) belong to the owning region on states and districts.
-5. Isolated parts (Alaska, Hawaii, Madagascar, Iceland) keep their tiles together and near their geometry in the modes separate, connected and spaced.
+3. On ungrouped input, mean displacement and touching no worse than the grid layout by more than 0.05 steps and .05 respectively (currently: touching lower on Europe and Africa without the contact descent).
+4. Weighted touching at least 0.75; no region more than one hop from all of its true neighbors; maximum displacement about 1.5 steps or less.
+5. Tip tiles (nearest tile to the outline extremes) belong to the owning region on states and districts.
+6. Isolated parts (Alaska, Hawaii, Madagascar, Iceland) keep their tiles together and near their geometry in the modes separate, connected and spaced; separate land parts stay separate.
 
 ## Open items
 
-- Contact descent on top of OT (to recover grid-level false contacts).
-- Multi-part geometries: capacity split by part area (France with French Guiana fails now).
+- Contact descent on top of OT: prototyped (see above); open choice between the current and the protected-contact variant, and a tolerance study for the border-length adjacency.
+- Descent on the force energy (vector springs, water pushes, border weights evaluated on tile centers) instead of the hand-built contact term: not tried.
+- Multi-part geometries: capacity split by part area works for France; integrated splitting in the OT pipeline is open.
 - Counties scale: sparse min-cost flow instead of dense Hungarian.
 - Exactness at c = 1 (final repair or slack).
 - Parametrization of c.
@@ -139,4 +232,8 @@ Contiguity is not guaranteed at exactly n tiles (c = 1): Florida, and Florida wi
 - Michigan notch feature test; only 6 lattice offsets; square lattice shows the same picture with touching .45 to .55 on ungrouped data.
 - Pre-morph left 2 invalid output regions on Europe (not repaired).
 - Labels in the new figures are 3-letter truncations and ambiguous for small tiles.
-- No test with multi-part groups or with counties.
+- No test with multi-part groups or with counties; districts were not run in the force, water and descent experiments (the scratch pipeline there assumes one tile per region).
+- The ceiling estimate (0.80 to 0.85) is a reviewer's estimate; the review read logs, not figures.
+- Force experiments: the morph baseline uses its own pre-morph geometries; force variants move the original geometries to the relaxed positions; the tables mix distance-tolerance adjacency (earlier) and border-length adjacency (later); a timer glitch gives negative runtimes in two cells; the force weights were fixed on states and Europe only.
+- Figures were checked by eye for Europe and states only; Africa, South America and Asia panels were produced but not inspected in detail.
+- Several defects in the force and OT results (holes on states and Africa, misplaced tiles in Asia) were reported by the reader and not traced to a cause.
