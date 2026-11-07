@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PR #210: &quot;Tiles layout: shared allocation and optimal transport assignment&quot;</title>
+<style>
+
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+  h3, h4 { font-size: 1.05rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th[data-col] { cursor: pointer; user-select: none; }
+  th[data-col]:hover { background: #eef; }
+  tr.todo { background: #fffbe6; }
+  tr.todo td:first-child { border-left: 3px solid #d98c00; }
+  tr.parked { background: #f2f2f5; }
+  tr.parked td:first-child { border-left: 3px solid #8a8a99; }
+  .status { font-size: 0.8rem; white-space: nowrap; }
+  .status.todo { color: #8a5a00; font-weight: 600; }
+  .status.parked { color: #5a5a6a; font-style: italic; }
+  .status.done { color: #4a7a4a; }
+  th { background: rgba(0,0,0,0.05); }
+  code { background: rgba(0,0,0,0.06); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+  ul, ol { padding-left: 1.4rem; }
+  pre { background: rgba(0,0,0,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  dl.meta-list { margin: 1rem 0; }
+  dl.meta-list dt { font-weight: 600; float: left; clear: left; width: 8rem; color: #555; }
+  dl.meta-list dd { margin-left: 8rem; margin-bottom: 0.35rem; }
+  .figure { margin: 1.5rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .caption { font-size: 0.85rem; color: #555; margin: 0.5rem 0 0; }
+  img { display: block; margin: 0 auto; max-width: 100%; }
+  .toc-item { margin: 1rem 0; padding: 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+  .toc-item h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+  .meta { font-size: 0.8rem; color: #777; }
+  .desc { color: #333; }
+  .back { display: inline-block; margin: 1rem 0; font-size: 0.9rem; }
+  a { color: #0645ad; }
+  table { overflow-x: auto; display: block; }
+
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #eee; }
+    table, th, td { border-color: #444 !important; }
+    th[data-col]:hover { background: #26304a !important; }
+    tr.todo { background: #2a2618 !important; }
+    tr.parked { background: #222 !important; }
+    .status.parked { color: #9a9aaa !important; }
+    .status.todo { color: #e0b050 !important; }
+    .status.done { color: #8fbf8f !important; }
+    th { background: rgba(255,255,255,0.08); }
+    code { background: rgba(255,255,255,0.1); }
+    .figure, .toc-item { background: #242424; border-color: #333; }
+    .meta { color: #999; }
+    .desc { color: #ddd; }
+    dl.meta-list dt { color: #aaa; }
+    a { color: #7fb3ff; }
+  }
+
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">&larr; back to index</a>
+<h1>PR #210: &quot;Tiles layout: shared allocation and optimal transport assignment&quot;</h1>
+<dl class="meta-list">
+<dt>Kind</dt><dd>pr</dd>
+<dt>Project</dt><dd>carto-flow</dd>
+<dt>Topic</dt><dd>symbol</dd>
+<dt>Status</dt><dd><span class="status todo">needs review</span></dd>
+<dt>Related</dt><dd><a href="../tile-layout-unification/index.html">One tile layout algorithm for single-tile and grouped regions (design)</a> <span class="meta">(proposal)</span></dd>
+<dt>URL</dt><dd><a href="https://github.com/bright-fakl/carto-flow/pull/210">https://github.com/bright-fakl/carto-flow/pull/210</a></dd>
+<dt>Branch</dt><dd>feat/tiles-layout</dd>
+<dt>Base</dt><dd>main</dd>
+<dt>Created</dt><dd>2026-11-07 12:00</dd>
+<dt>Before</dt><dd>main; grid (one tile per region, energy-based) and mosaic (tile_count and group_by, morph then Hungarian and repair) are separate algorithms</dd>
+<dt>After</dt><dd>feat/tiles-layout (draft); &quot;tiles&quot; is a third layout, grid and mosaic unchanged</dd>
+<dt>Inputs</dt><dd>US states (49), 432 congressional districts grouped by state, Europe without Russia (38 regions), Africa; hexagon lattice; tiles at compactness 0.25 and 1, with and without pre-morph; grid and mosaic at their defaults.</dd>
+</dl>
+<p class="desc">Draft. A new symbol cartogram layout &quot;tiles&quot; for one tile per region, tile_count and group_by, compared with the grid and mosaic layouts on US states, districts by state, Europe and Africa.</p>
+<h2>Change</h2>
+<p>A new layout <code>&quot;tiles&quot;</code> (<code>TileLayout</code>) next to <code>&quot;grid&quot;</code> and <code>&quot;mosaic&quot;</code>. It covers one tile per region, <code>tile_count</code> and <code>group_by</code> with one allocation and one assignment:</p>
+<ul><li>Allocation: silhouette per land part, compactness on a geometric scale, components <code>separate | connected | spaced</code>, part membership enforced from the original geometries.</li><li>Assignment: capacitated optimal transport with a hull reserve sink (capacity 1 for one tile per region), contiguity-guarded swaps and chain moves for groups, contact descent for single tiles, optional <code>protect_contacts</code>, optional pre-morph (off by default).</li><li>Neighbors by shared border length: <code>geo_utils.find_bordering_pairs</code>.</li><li>Results do not depend on input row order.</li></ul>
+<h2>Comparison</h2>
+<p>Mean/max displacement in tile steps; touching of truly adjacent pairs (plain/border-weighted); false contacts. Districts: groups split / stray tiles are given where nonzero. Truth for all layouts is <code>find_bordering_pairs</code> on the same geometries.</p>
+<table>
+<tr><th>case</th><th>grid</th><th>mosaic</th><th>tiles c=.25</th><th>tiles c=1</th><th>tiles c=1 pre-morph</th></tr>
+<tr><td>States</td><td>.73/1.8, .83/.88, 14</td><td>.86/1.8, .65/.74, 45</td><td>.62/1.6, .78/.86, 30</td><td>1.48/3.2, .73/.79, 37</td><td>.93/2.2, .80/.85, 32</td></tr>
+<tr><td>Districts by state</td><td>3.90/9.7, .72/.73, 122, split 37/77</td><td>2.54/5.0, .83/.87, 25, 0/0</td><td>1.56/3.8, .81/.88, 21, 0/0</td><td>4.23/7.5, .81/.87, 33, split 1/5</td><td>2.55/4.6, .83/.90, 25, 0/0</td></tr>
+<tr><td>Europe</td><td>1.80/3.1, .79/.77, 9</td><td>.91/1.9, .63/.73, 38</td><td>.84/2.7, .72/.76, 22</td><td>1.03/2.3, .69/.72, 29</td><td>.94/2.6, .76/.83, 31</td></tr>
+<tr><td>Africa</td><td>.59/1.8, .72/.74, 29</td><td>.82/2.2, .51/.54, 63</td><td>.62/1.6, .71/.73, 32</td><td>.85/1.9, .67/.69, 50</td><td>.78/2.0, .69/.69, 47</td></tr>
+</table>
+<p>Runtime: 0.2 to 1.2 s for tiles on ungrouped input, 1.8 to 2.8 s on districts; mosaic on districts 6.8 s.</p>
+<p>Figures (one per use case, one panel per layout and variant, fixed colors per region):</p>
+<ul><li>!<a href="fig_states.png">States</a></li><li>!<a href="fig_districts.png">Districts by state</a></li><li>!<a href="fig_europe.png">Europe</a></li><li>!<a href="fig_africa.png">Africa</a></li></ul>
+<h2>Findings</h2>
+<ul><li>On grouped input tiles beats grid (grid splits 37 of 49 states; tiles splits 0, or 1 at c = 1) and matches mosaic at c = .25 and with pre-morph at c = 1 (2.55 against 2.54 mean displacement).</li><li>On ungrouped input tiles beats mosaic on touching and false contacts.</li><li>Tiles is worse than grid on ungrouped touching and false contacts (states .78 against .83 with 30 against 14 false contacts; Europe .72 against .79 with 22 against 9; Africa .71 against .72 with 32 against 29). Raising the false-contact penalty to .75 or 1.0 did not pass the criteria on all datasets (displacement or touching worsened), so it stays at .5.</li><li>At c = 1 mosaic is better on districts without pre-morph (2.54 against 4.23).</li><li>Pre-morph helps at c = 1 on states and districts and adds under 0.3 s.</li><li>Europe at c = .25: the UK and Ireland land part is allocated before the largest part; max displacement 3.5 became 2.7 (4.4 became 2.2 with pre-morph) at a cost of 4 false contacts.</li><li><code>protect_contacts</code> has a small, mixed effect (Europe c = 1: 49 to 50 true contacts, states identical).</li></ul>
+<h2>Review</h2>
+<p>A separate critic agent reviewed the first version: full suite, adversarial checks and a rerun of the states comparison. No blockers. Should-fix items addressed afterwards: row-order invariance, repeated repair rounds with a warning when groups remain split, <code>protect_contacts</code> result check, allocation order for small parts, size guard, docs scope. The critic could not run the docs build.</p>
+<h2>Checks</h2>
+<p>Full suite 2124 passed, 2 skipped, 4 xfailed; ruff check, ruff format and mypy clean; 34 new tests. Scaling on synthetic grids (before the last fixes): 100 regions 0.5 s, 289 regions 1.0 s, 576 regions 2.8 s, 1024 regions 8.1 s at 450 MB.</p>
+<h2>What was not verified</h2>
+<ul><li>Docs build (the gallery plugin fails on this machine&#x27;s clock; nav and links checked by reading).</li><li>Counties and other sizes above about 1000 regions; contiguity at c = 1 is not guaranteed (0 to 2 split groups on some lattice offsets).</li><li>Africa figure was not inspected by the developer; the author did not inspect the figures before the PR was opened.</li><li>Layouts build their own lattice (mosaic calibrates tile size to its tile budget; grid and tiles use the area of one needed tile), so tile steps and pockets differ slightly across layouts. In the districts case grid runs on the 49 states with <code>tile_count</code>, mosaic and tiles on the 432 districts with <code>group_by</code>; all three are scored per state.</li><li>Pre-morph and numba kernels give small run-to-run differences (critic: some rows differ in the third decimal on rerun).</li><li>Italy&#x27;s boot, the Nordic row and Iberia&#x27;s shape are not reproduced in general; the unified layout is untested on South America and Asia.</li></ul>
+<div class="figure">
+<img src="fig_africa.png" alt="fig_africa.png">
+<p class="caption">fig_africa.png</p>
+</div><div class="figure">
+<img src="fig_districts.png" alt="fig_districts.png">
+<p class="caption">fig_districts.png</p>
+</div><div class="figure">
+<img src="fig_europe.png" alt="fig_europe.png">
+<p class="caption">fig_europe.png</p>
+</div><div class="figure">
+<img src="fig_states.png" alt="fig_states.png">
+<p class="caption">fig_states.png</p>
+</div>
+<a class="back" href="../index.html">&larr; back to index</a>
+
+</body>
+</html>
